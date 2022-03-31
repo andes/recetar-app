@@ -8,6 +8,7 @@ import { IsSignedInGuard } from '@auth/guards/is-signed-in.guard';
 import { DialogComponent } from '@auth/components/dialog/dialog.component';
 import { ForgotComponent } from '@auth/components/forgot/forgot.component';
 import { RecoveryComponent } from '@auth/components/recovery-password/recovery-password.component';
+import { NewUserComponent } from './components/new-user/new-user.component';
 
 
 const routes: Routes = [
@@ -31,6 +32,10 @@ const routes: Routes = [
       {
         path: 'recovery-password/:token',
         component: RecoveryComponent
+      },
+      {
+        path: 'new-user',
+        component: NewUserComponent
       }
     ]
   }

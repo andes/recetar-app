@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { AuthRoutingModule, routingComponents  } from '@auth/auth-routing.module';
+import { AuthRoutingModule, routingComponents } from '@auth/auth-routing.module';
 import { httpInterceptorProvider } from '@auth/httpInterceptorProvider';
 // services
 import { AuthService } from '@auth/services/auth.service';
@@ -16,12 +16,15 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DialogComponent } from './components/dialog/dialog.component';
+import { NewUserComponent } from './components/new-user/new-user.component';
+import { MatSelectModule } from '@angular/material/select';
 
 
 
 @NgModule({
   declarations: [
     routingComponents,
+    NewUserComponent,
   ],
   imports: [
     CommonModule,
@@ -35,7 +38,8 @@ import { DialogComponent } from './components/dialog/dialog.component';
     MatIconModule,
     MatButtonModule,
     MatCardModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatSelectModule
   ],
   providers: [
     AuthService,

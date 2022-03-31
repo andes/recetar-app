@@ -32,17 +32,17 @@ export class AuthService {
 
 
 
-  async load(): Promise<void>{
-    if(this.tokensExists()){
+  async load(): Promise<void> {
+    if (this.tokensExists()) {
       const resp = await this.http.get<any>(`${this.apiEndPoint}/auth/jwt-login`).pipe(
-       tap(tokens => this.doLoginUser(tokens)),
-       mapTo(true),
-       catchError(async (error) => {
-         const success = await this.logout().toPromise();
-        if(success) this.router.navigate(['/auth/login']);
-         return of(false);
-       })
-       ).toPromise();
+        tap(tokens => this.doLoginUser(tokens)),
+        mapTo(true),
+        catchError(async (error) => {
+          const success = await this.logout().toPromise();
+          if (success) this.router.navigate(['/auth/login']);
+          return of(false);
+        })
+      ).toPromise();
     }
   }
 
@@ -66,12 +66,16 @@ export class AuthService {
     );
   }
 
-  resetPassword(passwords: {oldPassword: string, newPassword: string}){
+  resetPassword(passwords: { oldPassword: string, newPassword: string }) {
     return this.http.post<any>(`${this.apiEndPoint}/auth/reset-password`, passwords);
   }
 
-  recoverPassword(data){
+  recoverPassword(data) {
     return this.http.post<any>(`${this.apiEndPoint}/auth/recovery-password`, data);
+  }
+
+  register(data) {
+    return this.http.post<any>(`${this.apiEndPoint}/auth/register`, data);
   }
 
   get isLoggedIn() {
@@ -96,48 +100,48 @@ export class AuthService {
     return localStorage.getItem(this.JWT_TOKEN);
   }
 
-  getLoggedUsername(): string{
+  getLoggedUsername(): string {
     const payLoadJwt: any = this.getDecodeJwt();
     return payLoadJwt.usrn;
   }
 
-  getLoggedUserId(): string{
+  getLoggedUserId(): string {
     const payLoadJwt: any = this.getDecodeJwt();
     return payLoadJwt.sub;
   }
 
-  getLoggedBusinessName(): string{
+  getLoggedBusinessName(): string {
     const payLoadJwt: any = this.getDecodeJwt();
     return payLoadJwt.bsname;
   }
 
   isPharmacistsRole(): boolean {
     const roles: string[] = this.getLoggedRole();
-    return roles.some( (role: string) => role === 'pharmacist');
+    return roles.some((role: string) => role === 'pharmacist');
     // return this.getLoggedRole() === 'pharmacist';
   }
 
   isProfessionalRole(): boolean {
     const roles: string[] = this.getLoggedRole();
-    return roles.some( (role: string) => role === 'professional');
+    return roles.some((role: string) => role === 'professional');
   }
 
   isAdminRole(): boolean {
     const roles: string[] = this.getLoggedRole();
-    return roles.some( (role: string) => role === 'admin');
+    return roles.some((role: string) => role === 'admin');
   }
-  getLoggedRole(): string[]{
+  getLoggedRole(): string[] {
     const payLoadJwt: any = this.getDecodeJwt();
     return payLoadJwt.rl;
   }
-  
+
   // Metodo que invoca a la api para realizar el recovering de la password
   setValidationTokenAndNotify(usuario: Number): Observable<any> {
-    return this.http.post<any>(`${this.apiEndPoint}/auth/setValidationTokenAndNotify`, usuario );
+    return this.http.post<any>(`${this.apiEndPoint}/auth/setValidationTokenAndNotify`, usuario);
   }
 
-  private getDecodeJwt(){
-    if(!!this.getJwtToken()){
+  private getDecodeJwt() {
+    if (!!this.getJwtToken()) {
       const token = this.getJwtToken();
       const tokenPayload = decode(token);
       return tokenPayload;

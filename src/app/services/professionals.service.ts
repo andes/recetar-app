@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, tap, map, first } from 'rxjs/operators';
 import { Observable, of, throwError } from 'rxjs';
 import { Professionals, ProfessionalsAdapter } from "../interfaces/professionals";
@@ -16,14 +16,10 @@ export class ProfessionalsService {
   //   return this.http.get(`${environment.API_END_POINT}/professionals`);
   // }
 
-  // getProfessionalByDni(dni: string): Observable<Professionals> {
-  //   const url =  `${environment.ANDES_API}/core/tm/profesionales/guia?documento=${dni}&codigoProfesion=1`
-  //   return this.http.get(url).pipe(
-  //     tap(_ => console.log(`fetched professional dni=${dni}`)),
-  //     map((data: any) => data.map(item => this.adapter.adapt(item))),
-  //     catchError(this.handleError<Professionals>(`getProfessionalByDni dni=${dni}`))
-  //   );
-  // }
+  getProfessionalByDni(dni: string): Observable<any> {
+    const url = `${environment.ANDES_API}/core/tm/profesionales/guia?documento=${dni}`
+    return this.http.get(url);
+  }
 
   // getProfessionalByEnrollment(enrollment: string): Observable<Professionals> {
   //   const url = `${environment.ANDES_API}/core/tm/profesionales/guia?formacionGrado=%5Bobject%20Object%5D&numeroMatricula=${enrollment}&codigoProfesion=1`

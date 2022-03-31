@@ -1,0 +1,68 @@
+<!-- Logo -->
+<div fxLayout="column" fxLayoutAlign="space-evenly center" class="logo">
+  <img src="assets/img/LogoRecetar.png" class="icon-login">
+  <h1 class="title-login">RecetAR</h1>
+</div>
+<div fxLayout="row" fxLayoutAlign="space-evenly start" fxLayoutGap="20px" class="cards-container" fxFill>
+  <div class="form-panel">
+    <mat-card fxLayout="column" fxLayoutAlign="space-between">
+      <mat-card-title>
+        <h2 class="text-center">
+          <mat-icon>account_circle</mat-icon> <span>Registrar nuevo usuario</span>
+        </h2>
+      </mat-card-title>
+      <div>
+        <mat-card-content>
+          <form [formGroup]="newUserForm" #newUserNgForm="ngForm" (ngSubmit)="onSubmitEvent(newUserForm,newUserNgForm)"
+                class="form-container">
+            <mat-error *ngIf="error">
+              {{ error }}
+            </mat-error>
+            <div fxLayout="column">
+              <mat-form-field appearance="fill">
+                <mat-label>Rol</mat-label>
+                <mat-select formControlName="roleType" [(value)]="roleSelected" required>
+                  <mat-option value="professional">Professional</mat-option>
+                  <mat-option value="pharmacist">Pharmacist</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="fill">
+                <mat-label>Nombre</mat-label>
+                <input matInput formControlName="businessName" required>
+              </mat-form-field>
+              <mat-form-field *ngIf="roleSelected==='professional'" appearance="fill">
+                <mat-label>DNI</mat-label>
+                <input matInput formControlName="dni" required>
+              </mat-form-field>
+              <mat-form-field appearance="fill">
+                <mat-label>Password</mat-label>
+                <input matInput formControlName="password" type="password" [pattern]="regexPassword" required>
+              </mat-form-field>
+              <mat-form-field appearance="fill">
+                <mat-label>CUIL</mat-label>
+                <input matInput type="text" formControlName="cuil">
+              </mat-form-field>
+              <mat-form-field *ngIf="roleSelected==='professional'" appearance="fill">
+                <mat-label>Matricula número</mat-label>
+                <input matInput formControlName="enrollment" required>
+              </mat-form-field>
+              <mat-form-field appearance="fill">
+                <mat-label>Email</mat-label>
+                <input matInput formControlName="email" [pattern]="regexEmail" required>
+              </mat-form-field>
+
+            </div>
+            <div fxLayout="row" fxLayoutAlign="center">
+              <div fxLayout="row" fxLayoutAlign="center" fxLayoutGap="20px" fxFlex="100%">
+                <button mat-raised-button color="primary" type="submit" fxFlex="100%">Crear</button>
+                <button mat-raised-button color="primary" (click)="cancelar()" fxFlex="100%">
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </form>
+        </mat-card-content>
+      </div>
+    </mat-card>
+  </div>
+</div>

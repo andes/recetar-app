@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, FormGroupDirective } from '@angular/forms';
 import { AuthService } from '@auth/services/auth.service';
 import { Router } from '@angular/router';
-import {ThemePalette} from '@angular/material/core';
+import { ThemePalette } from '@angular/material/core';
 import { DialogComponent } from '@auth/components/dialog/dialog.component';
 // Material
 import { MatDialog } from '@angular/material/dialog';
@@ -22,8 +22,8 @@ export class LoginComponent implements OnInit {
   showSubmit: boolean = false;
 
   constructor(
-    private fBuilder: FormBuilder, 
-    private authService: AuthService, 
+    private fBuilder: FormBuilder,
+    private authService: AuthService,
     private router: Router,
     public dialog: MatDialog
   ) { }
@@ -32,7 +32,7 @@ export class LoginComponent implements OnInit {
     this.initLoginForm();
   }
 
-  initLoginForm(): void{
+  initLoginForm(): void {
     this.loginForm = this.fBuilder.group({
       identifier: ['', [
         Validators.required
@@ -43,15 +43,15 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  onSubmitEvent(loginForm: FormGroup, loginNgForm: FormGroupDirective): void{
-    if(this.loginForm.valid){
+  onSubmitEvent(loginForm: FormGroup, loginNgForm: FormGroupDirective): void {
+    if (this.loginForm.valid) {
 
       this.showSubmit = true;
       this.authService.login(this.loginForm.value).subscribe(
         res => {
-          if(this.authService.isPharmacistsRole()){
+          if (this.authService.isPharmacistsRole()) {
             this.router.navigate(['/farmacias/recetas/dispensar']);
-          } else if(this.authService.isProfessionalRole()){
+          } else if (this.authService.isProfessionalRole()) {
             this.router.navigate(['/profesionales/recetas/nueva']);
           }
           this.showSubmit = false;
@@ -61,7 +61,7 @@ export class LoginComponent implements OnInit {
           loginForm.reset();
           this.error = err;
           this.showSubmit = false;
-      });
+        });
     }
   }
 
@@ -76,19 +76,23 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  showInformation(): void{
+  showInformation(): void {
     this.openDialog();
   }
 
-  get identifier(): AbstractControl{
+  get identifier(): AbstractControl {
     return this.loginForm.get('identifier');
   }
 
-  get password(): AbstractControl{
+  get password(): AbstractControl {
     return this.loginForm.get('password');
   }
 
   forgot() {
     this.router.navigate(['/auth/forgot-password']);
+  }
+
+  newUser() {
+    this.router.navigate(['/auth/new-user']);
   }
 }

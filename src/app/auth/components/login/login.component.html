@@ -1,106 +1,113 @@
+<!-- Logo -->
+<div fxLayout="column" fxLayoutAlign="space-evenly center" class="logo">
+  <img src="assets/img/LogoRecetar.png" class="icon-login">
+  <h1 class="title-login">RecetAR</h1>
+</div>
 
-  <!-- Logo -->
-  <div fxLayout="column" fxLayoutAlign="space-evenly center" class="logo">
-    <img src="assets/img/LogoRecetar.png" class="icon-login">
-    <h1 class="title-login">RecetAR</h1>
+<div fxLayout="row" fxLayoutAlign="space-evenly start" fxLayoutGap="20px" class="cards-container" fxFill>
+  <!-- panel "Bienvenida" -->
+  <div class="welcome-panel">
+    <mat-card fxLayout="column" fxLayoutAlign="space-between">
+      <mat-card-title>
+        <h2 class="text-center">Bienvenido a RecetAR</h2>
+      </mat-card-title>
+      <mat-card-content>
+        En el marco de la emergencia sanitaria que atraviesa el país por
+        la pandemia provocada por el Coronavirus COVID-19, y atento al Decreto
+        del poder ejecutivo nacional N.o 297/20, medida de aislamiento social,
+        preventivo y obligatorio, han sido afectadas las formas habituales de
+        interrelación entre los pacientes, médicos y establecimientos
+        farmacéuticos, haciendo necesaria la utilización de herramientas
+        tecnológicas para asegurar la continuidad de los tratamientos crónicos y
+        agudos de los pacientes.
+      </mat-card-content>
+      <mat-card-actions fxLayout="row" fxLayoutGap="10px">
+        <a mat-raised-button href="https://drive.google.com/open?id=1J1qu0vo0fzhB985_iYEBVMXMPJuiQQgH" target="_blank"
+           fxFlex="50%" class="btn-link">
+          <mat-icon>remove_red_eye</mat-icon> Ver resolución
+        </a>
+        <a mat-raised-button (click)="showInformation()" target="_blank" fxFlex="50%" class="btn-link">
+          <mat-icon>info</mat-icon> Leer importante
+        </a>
+      </mat-card-actions>
+    </mat-card>
   </div>
 
-  <div fxLayout="row" fxLayoutAlign="space-evenly start" fxLayoutGap="20px" class="cards-container" fxFill>
-    <!-- panel "Bienvenida" -->
-    <div class="welcome-panel">
-      <mat-card fxLayout="column" fxLayoutAlign="space-between">
-        <mat-card-title>
-          <h2 class="text-center">Bienvenido a RecetAR</h2>
-        </mat-card-title>
-        <mat-card-content>
-          En el marco de la emergencia sanitaria que atraviesa el país por
-          la pandemia provocada por el Coronavirus COVID-19, y atento al Decreto
-          del poder ejecutivo nacional N.o 297/20, medida de aislamiento social,
-          preventivo y obligatorio, han sido afectadas las formas habituales de
-          interrelación entre los pacientes, médicos y establecimientos
-          farmacéuticos, haciendo necesaria la utilización de herramientas
-          tecnológicas para asegurar la continuidad de los tratamientos crónicos y
-          agudos de los pacientes.
-        </mat-card-content>
-        <mat-card-actions fxLayout="row" fxLayoutGap="10px">
-          <a mat-raised-button href="https://drive.google.com/open?id=1J1qu0vo0fzhB985_iYEBVMXMPJuiQQgH" target="_blank" fxFlex="50%" class="btn-link">
-            <mat-icon>remove_red_eye</mat-icon> Ver resolución
-          </a>
-          <a mat-raised-button (click)="showInformation()" target="_blank" fxFlex="50%" class="btn-link">
-            <mat-icon>info</mat-icon> Leer importante
-          </a>
-        </mat-card-actions>
-      </mat-card>
-    </div>
+  <!-- panel "Login form" -->
+  <div class="form-panel">
+    <mat-card fxLayout="column" fxLayoutAlign="space-between">
+      <mat-card-title>
+        <h2 class="text-center">Login</h2>
+      </mat-card-title>
 
-    <!-- panel "Login form" -->
-    <div  class="form-panel">
-      <mat-card fxLayout="column" fxLayoutAlign="space-between">
-        <mat-card-title><h2 class="text-center">Login</h2></mat-card-title>
+      <mat-card-content>
+        <form [formGroup]="loginForm" #loginNgForm="ngForm" class="form-container"
+              (ngSubmit)="onSubmitEvent(loginForm, loginNgForm)">
+          <div fxLayout fxLayout="column" fxLayoutAlign="center" class="container" fxLayoutGap="20px">
+            <mat-form-field>
+              <input matInput placeholder="Usuario" formControlName="identifier" autocomplete="off">
+              <mat-error *ngIf="identifier.errors?.required ">
+                Usuario es requerido
+              </mat-error>
+            </mat-form-field>
 
-        <mat-card-content>
-          <form [formGroup]="loginForm"  #loginNgForm="ngForm" class="form-container" (ngSubmit)="onSubmitEvent(loginForm, loginNgForm)">
-            <div fxLayout fxLayout="column" fxLayoutAlign="center" class="container" fxLayoutGap="20px">
-              <mat-form-field>
-                <input matInput placeholder="Usuario" formControlName="identifier" autocomplete="off">
-                <mat-error *ngIf="identifier.errors?.required ">
-                  Usuario es requerido
-                </mat-error>
-              </mat-form-field>
-
-              <mat-form-field>
-                <mat-label>Contraseña</mat-label>
-                <input  matInput formControlName="password" [type]="hide ? 'password' : 'text'" autocomplete="off">
-                <button type="button" mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
-                  <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
-                </button>
-                <mat-error *ngIf="password.errors?.required">
-                  Contraseña es requerida
-                </mat-error>
-              </mat-form-field>
-              <div>
-                <a class="hover" justify="end" (click)="forgot()">
-                    (olvidé mi contraseña)
-                </a>
-              </div>
-            </div>
-            <mat-error *ngIf="error" class="text-center login-error">
-              {{ error }}
-            </mat-error>
-
-
-            <div fxLayout="row" fxLayoutAlign="center" class="login-action">
-              <button mat-raised-button color="primary" type="submit" *ngIf="!showSubmit" fxFlex="100%">
-                Iniciar sesión
+            <mat-form-field>
+              <mat-label>Contraseña</mat-label>
+              <input matInput formControlName="password" [type]="hide ? 'password' : 'text'" autocomplete="off">
+              <button type="button" mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'"
+                      [attr.aria-pressed]="hide">
+                <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
               </button>
-
-              <mat-spinner [color]="spinnerColor" [diameter]="spinnerDiameter" *ngIf="showSubmit"></mat-spinner>
+              <mat-error *ngIf="password.errors?.required">
+                Contraseña es requerida
+              </mat-error>
+            </mat-form-field>
+            <div>
+              <a class="hover" justify="end" (click)="forgot()">
+                (olvidé mi contraseña)
+              </a>
             </div>
-          </form>
-        </mat-card-content>
-      </mat-card>
-    </div>
-
-    <!-- panel "Tutoriales" -->
-    <div class="tutorials-panel">
-      <mat-card fxLayout="column" fxLayoutAlign="space-between">
-        <mat-card-title>
-          <h2 class="text-center">Primeros pasos</h2>
-        </mat-card-title>
-        <mat-card-content>
-          Le recomendamos cambiar la contraseña con la que fue habilitado su usuario. Recuerde que la misma constituye una clave de validación signataria, es decir, que Ud debe proteger la seguridad de la misma y no compartirla con ninguna persona, ya que mediante su uso se valida el origen de la prescripción.
-          Ante cualquier duda, no dude en comunicarse con la mesa de soporte, enviando un correo electrónico a:
-          <a href="mailto:recetarsalud@neuquen.gov.ar"> recetarsalud@neuquen.gov.ar </a> <br>
-          A continuación encontrará videos explicativos de cómo interactuar con la aplicación.
-        </mat-card-content>
-        <mat-card-actions fxLayout="row" fxLayoutGap="10px">
-            <a mat-raised-button href="https://youtu.be/2HdbJTn7kkM" target="_blank" fxFlex="50%" class="btn-link">
-              <mat-icon>play_circle_outline</mat-icon> Médico
-            </a>
-            <a mat-raised-button href="https://youtu.be/_GPze_5QlEo" target="_blank" fxFlex="50%" class="btn-link">
-              <mat-icon>play_circle_outline</mat-icon> Farmacéutico
-            </a>
-        </mat-card-actions>
-      </mat-card>
-    </div>
+          </div>
+          <mat-error *ngIf="error" class="text-center login-error">
+            {{ error }}
+          </mat-error>
+          <div fxLayout="row" fxLayoutAlign="center" class="login-action">
+            <button mat-raised-button color="primary" type="submit" *ngIf="!showSubmit" fxFlex="100%">
+              Iniciar sesión
+            </button>
+            <button mat-raised-button color="accent" fxFlex="100%" (click)="newUser()" *ngIf="!showSubmit">
+              Registrarse
+            </button>
+            <mat-spinner [color]="spinnerColor" [diameter]="spinnerDiameter" *ngIf="showSubmit">
+            </mat-spinner>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
   </div>
+
+  <!-- panel "Tutoriales" -->
+  <div class="tutorials-panel">
+    <mat-card fxLayout="column" fxLayoutAlign="space-between">
+      <mat-card-title>
+        <h2 class="text-center">Primeros pasos</h2>
+      </mat-card-title>
+      <mat-card-content>
+        Le recomendamos cambiar la contraseña con la que fue habilitado su usuario. Recuerde que la misma
+        constituye una clave de validación signataria, es decir, que Ud debe proteger la seguridad de la misma y
+        no compartirla con ninguna persona, ya que mediante su uso se valida el origen de la prescripción.
+        Ante cualquier duda, no dude en comunicarse con la mesa de soporte, enviando un correo electrónico a:
+        <a href="mailto:recetarsalud@neuquen.gov.ar"> recetarsalud@neuquen.gov.ar </a> <br>
+        A continuación encontrará videos explicativos de cómo interactuar con la aplicación.
+      </mat-card-content>
+      <mat-card-actions fxLayout="row" fxLayoutGap="10px">
+        <a mat-raised-button href="https://youtu.be/2HdbJTn7kkM" target="_blank" fxFlex="50%" class="btn-link">
+          <mat-icon>play_circle_outline</mat-icon> Médico
+        </a>
+        <a mat-raised-button href="https://youtu.be/_GPze_5QlEo" target="_blank" fxFlex="50%" class="btn-link">
+          <mat-icon>play_circle_outline</mat-icon> Farmacéutico
+        </a>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

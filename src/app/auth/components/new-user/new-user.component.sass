@@ -1,0 +1,54 @@
+@import 'styles/_variables'
+
+$panels-height: 294px
+$panels-height-xl: 325px
+
+.logo
+    margin-bottom: 2em
+    @media (min-width: $x-small-devices) and (max-width: $small-devices)
+        margin-bottom: 1em
+    .icon-login
+        width: 100px
+        height: 100px
+    .title-login
+        color: white
+        font-family: roboto
+
+.cards-container
+    margin-bottom:4em
+  
+
+    .form-panel
+        width: calc(100% / 3)
+        mat-card
+            box-sizing: content-box!important
+            @media (min-width: $x-small-devices) and (max-width: $larger-devices)
+                height: auto
+            mat-card-title, mat-card-content
+                margin: 0!important
+                .login-action
+                    margin-top: 20px
+                    @media (min-width: $larger-devices) and (max-width: $x-larger-devices)
+                        margin-top: 40px
+
+                @media (min-width: $larger-devices) and (max-width: $xx-larger-devices)
+                    .login-error
+                        margin-bottom: -15px!important
+
+            mat-card-actions
+                padding: 0!important
+                margin: 0!important
+                @media (min-width: $x-small-devices) and (max-width: $larger-devices)
+                    flex-direction: column!important
+                    a.btn-link
+                        max-width: 100%!important
+                        margin: 10px 0!important
+
+        @media (min-width: $medium-devices) and (max-width: $larger-devices)
+            width: 310px
+        @media (min-width: $small-devices) and (max-width: $medium-devices)
+            width: 310px
+        @media (min-width: $x-small-devices) and (max-width: $small-devices)
+            width: 480px
+            max-width: calc(100% - 10px)
+            margin: 10px auto!important
