@@ -16,7 +16,7 @@ export class NewUserComponent implements OnInit {
     public newUserForm: FormGroup;
     public error: string;
     public roleSelected: 'professional';
-    public regexPassword = '^([a-zA-Z]{8,15})$';
+    public regexPassword = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
     public regexEmail = '^[a-z0-9._%+-]+@[a-z0-9.-]+[\.]{1}[a-z]{2,4}$';
 
     constructor(
@@ -40,38 +40,38 @@ export class NewUserComponent implements OnInit {
             email: ['', Validators.required],
             businessName: [''],
             password: ['', Validators.required],
-            roleType: ['', Validators.required]
+            roleType: ['professional', Validators.required]
         });
     }
 
     checkUser() {
-        this.newUserForm.controls.username.setValue(this.newUserForm.get('dni').value ? this.newUserForm.get('dni').value : this.newUserForm.get('email').value);
+        this.newUserForm.controls.username.setValue(this.newUserForm.get('dni').value);
     }
 
     onSubmitEvent(newUserForm: FormGroup, newUserNgForm: FormGroupDirective) {
         if (this.newUserForm.valid) {
             this.checkUser();
-            if (this.roleSelected === 'professional') {
-                this.professionalsService.getProfessionalByDni(newUserForm.get('dni').value).subscribe(res => {
-                    if (res.length) {
-                        const profesional = res[0];
-                        const { profesiones } = profesional;
-                        if (this.checkMatricula(profesiones)) {
-                            this.userRegister(newUserForm, newUserNgForm)
-                        } else {
-                            this._snackBar.open('La matricula no es correcta', 'cerrar', {
-                                duration: 5000
-                            });
-                        }
+            const params = {
+                documento: newUserForm.get('dni').value,
+                email: newUserForm.get('email').value
+            }
+            this.professionalsService.getProfessionalByDni(params).subscribe(res => {
+                if (res.length) {
+                    const profesional = res[0];
+                    const { profesiones } = profesional;
+                    if (this.checkMatricula(profesiones)) {
+                        this.userRegister(newUserForm, newUserNgForm)
                     } else {
-                        this._snackBar.open('Profesional no registrado, revise los datos ingresados', 'cerrar', {
+                        this._snackBar.open('La matricula no es correcta', 'cerrar', {
                             duration: 5000
                         });
                     }
-                })
-            } else {
-                this.userRegister(newUserForm, newUserNgForm);
-            }
+                } else {
+                    this._snackBar.open('Profesional no registrado, contactese con fiscalización para corroborar sus datos', 'cerrar', {
+                        duration: 5000
+                    });
+                }
+            })
         }
     }
 

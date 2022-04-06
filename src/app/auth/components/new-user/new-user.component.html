@@ -21,29 +21,31 @@
             <div fxLayout="column">
               <mat-form-field appearance="fill">
                 <mat-label>Rol</mat-label>
-                <mat-select formControlName="roleType" [(value)]="roleSelected" required>
-                  <mat-option value="professional">Professional</mat-option>
-                  <mat-option value="pharmacist">Pharmacist</mat-option>
+                <mat-select formControlName="roleType" required>
+                  <mat-option value="professional">Profesional</mat-option>
                 </mat-select>
               </mat-form-field>
               <mat-form-field appearance="fill">
                 <mat-label>Nombre</mat-label>
                 <input matInput formControlName="businessName" required>
               </mat-form-field>
-              <mat-form-field *ngIf="roleSelected==='professional'" appearance="fill">
+              <mat-form-field appearance="fill">
                 <mat-label>DNI</mat-label>
                 <input matInput formControlName="dni" required>
               </mat-form-field>
               <mat-form-field appearance="fill">
                 <mat-label>Password</mat-label>
                 <input matInput formControlName="password" type="password" [pattern]="regexPassword" required>
+                <mat-error *ngIf="newUserForm.get('password').errors">
+                  Password incorrecto debe contener una mayuscula, una minuscula y un número
+                </mat-error>
               </mat-form-field>
               <mat-form-field appearance="fill">
                 <mat-label>CUIL</mat-label>
                 <input matInput type="text" formControlName="cuil">
               </mat-form-field>
-              <mat-form-field *ngIf="roleSelected==='professional'" appearance="fill">
-                <mat-label>Matricula número</mat-label>
+              <mat-form-field appearance="fill">
+                <mat-label>Matricula provincial número</mat-label>
                 <input matInput formControlName="enrollment" required>
               </mat-form-field>
               <mat-form-field appearance="fill">

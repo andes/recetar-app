@@ -16,9 +16,15 @@ export class ProfessionalsService {
   //   return this.http.get(`${environment.API_END_POINT}/professionals`);
   // }
 
-  getProfessionalByDni(dni: string): Observable<any> {
-    const url = `${environment.ANDES_API}/core/tm/profesionales/guia?documento=${dni}`
-    return this.http.get(url);
+  //   getProfessionalByDni(dni: string, email: string): Observable<any> {
+  //     console.log(dni, email);
+  //     const url = `${environment.ANDES_API}/core/tm/profesionales/guia?documento=${dni}&email=${email}`
+  //     return this.http.get(url);
+  //   }
+
+  getProfessionalByDni(params): Observable<any> {
+    const url = `${environment.ANDES_API}/core/tm/profesionales/guia`
+    return this.http.get(url, { params });
   }
 
   // getProfessionalByEnrollment(enrollment: string): Observable<Professionals> {
