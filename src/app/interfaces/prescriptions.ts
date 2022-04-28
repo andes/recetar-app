@@ -16,7 +16,7 @@ export class Prescriptions {
     businessName: string,
   };
   dispensedAt?: Date;
-  supplies: Array<{supply: Supply, quantity: number}>;
+  supplies: Array<{ supply: Supply, quantity: number }>;
   status: string;
   date: Date;
 
@@ -24,4 +24,5 @@ export class Prescriptions {
   observation?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  triple?: boolean;
 }
