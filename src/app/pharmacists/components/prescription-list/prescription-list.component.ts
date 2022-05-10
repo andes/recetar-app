@@ -2,14 +2,15 @@ import { Component, OnInit, Input, AfterContentInit, ViewChild } from '@angular/
 import { Prescriptions } from '@interfaces/prescriptions';
 import { PrescriptionsService } from '@services/prescriptions.service';
 import { MatDialog } from '@angular/material/dialog';
-import {MatTableDataSource} from '@angular/material/table';
-import {MatPaginator} from '@angular/material/paginator';
-import {MatSort} from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
 import * as moment from 'moment';
 import { DialogComponent } from '@pharmacists/components/dialog/dialog.component';
 import { AuthService } from '@auth/services/auth.service';
 import { PrescriptionPrinterComponent } from '@pharmacists/components/prescription-printer/prescription-printer.component';
 import { detailExpand, arrowDirection } from '@animations/animations.template';
+import { DialogReportComponent } from '../dialog-report/dialog-report.component';
 
 @Component({
   selector: 'app-prescription-list',
@@ -32,15 +33,17 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
   lapseTime: number = 2; // lapse of time that a dispensed prescription can been undo action, and put it back as "pendiente"
   pharmacistId: string;
   isAdmin: boolean = false;
+  fechaDesde: Date;
+  fechaHasta: Date;
 
-  @ViewChild(MatPaginator, {static: true}) paginator: MatPaginator;
-  @ViewChild(MatSort, {static: true}) sort: MatSort;
+  @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
+  @ViewChild(MatSort, { static: true }) sort: MatSort;
 
   constructor(
     private authService: AuthService,
     private prescriptionService: PrescriptionsService,
     private prescriptionPrinter: PrescriptionPrinterComponent,
-    public dialog: MatDialog ) { };
+    public dialog: MatDialog) { };
 
   ngOnInit(): void {
     this.loadingPrescriptions = true;
@@ -48,7 +51,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
       this.dataSource = new MatTableDataSource<Prescriptions>(prescriptions);
       // sort after populate dataSource
       this.dataSource.sortingDataAccessor = (item, property) => {
-        switch(property) {
+        switch (property) {
           case 'patient': return item.patient.lastName + item.patient.firstName;
           case 'prescription_date': return new Date(item.date).getTime();
           default: return item[property];
@@ -62,15 +65,14 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
     this.isAdmin = this.authService.isAdminRole();
   }
 
-  ngAfterContentInit(){
+  ngAfterContentInit() {
     this.paginator._intl.itemsPerPageLabel = "Prescripciones por página";
     this.paginator._intl.firstPageLabel = "Primer página";
     this.paginator._intl.lastPageLabel = "Última página";
     this.paginator._intl.nextPageLabel = "Siguiente";
     this.paginator._intl.previousPageLabel = "Anterior";
     this.paginator._intl.getRangeLabel = (page: number, pageSize: number, length: number): string => {
-      if (length == 0 || pageSize == 0)
-      {
+      if (length == 0 || pageSize == 0) {
         return `0 de ${length}`;
       }
       length = Math.max(length, 0);
@@ -81,7 +83,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
   }
 
   applyFilter(filterValue: string) {
-    this.dataSource.filterPredicate = (data: Prescriptions, filter: string)  => {
+    this.dataSource.filterPredicate = (data: Prescriptions, filter: string) => {
       const accumulator = (currentTerm, key) => {
         // enable filter by lastName / firstName / date
         return currentTerm + data.status + moment(data.date, 'YYYY-MM-DD').format('DD/MM/YYY').toString()
@@ -99,10 +101,10 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
   }
 
   // Dispense prescription, but if was, update table with the correct status.
-  dispense(prescription: Prescriptions){
+  dispense(prescription: Prescriptions) {
     this.prescriptionService.dispense(prescription._id, this.pharmacistId).subscribe(
       success => {
-        if(success){
+        if (success) {
           this.openDialog("dispensed", prescription, prescription.professional.businessName);
         }
       }
@@ -110,10 +112,10 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
   }
 
   // Dispense prescription, but if was, update table with the correct status.
-  cancelDispense(e){
+  cancelDispense(e) {
     this.prescriptionService.cancelDispense(e, this.pharmacistId).subscribe(
       success => {
-        if(success){
+        if (success) {
           this.openDialog("cancel-dispensed");
         }
       }
@@ -125,7 +127,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
   openDialog(aDialogType: string, aPrescription?: Prescriptions, aText?: string): void {
     const dialogRef = this.dialog.open(DialogComponent, {
       width: '400px',
-      data: {dialogType: aDialogType, prescription: aPrescription, text: aText }
+      data: { dialogType: aDialogType, prescription: aPrescription, text: aText }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -134,36 +136,49 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
   }
 
   // Return true if was dispensed and is seeing who dispensed the prescription
-  canPrint(prescription: Prescriptions): boolean{
+  canPrint(prescription: Prescriptions): boolean {
     return (prescription.status === "Dispensada") && (prescription.dispensedBy?.userId === this.authService.getLoggedUserId());
   }
 
-  canDispense(prescription: Prescriptions): boolean{
+  canDispense(prescription: Prescriptions): boolean {
     return prescription.status === "Pendiente";
   }
 
-  printPrescription(prescription: Prescriptions){
+  printPrescription(prescription: Prescriptions) {
     this.prescriptionPrinter.print(prescription);
   }
 
-  isStatus(prescritpion: Prescriptions, status: string): boolean{
+  isStatus(prescritpion: Prescriptions, status: string): boolean {
     return prescritpion.status === status;
   }
 
   // Return boolean, accordding with dispensed time plus 2 hours is greater than now
-  canCounter(prescription: Prescriptions): boolean{
-    if(prescription.status === 'Dispensada' &&
-    typeof prescription.dispensedAt !== 'undefined' &&
-    prescription.dispensedBy?.userId === this.pharmacistId){
+  canCounter(prescription: Prescriptions): boolean {
+    if (prescription.status === 'Dispensada' &&
+      typeof prescription.dispensedAt !== 'undefined' &&
+      prescription.dispensedBy?.userId === this.pharmacistId) {
 
-        const dispensedAt = moment(prescription.dispensedAt);
-        const now = moment();
-        // dispensedAt.add(10, 'seconds');
-        dispensedAt.add(this.lapseTime, 'hours');
-        return dispensedAt.isAfter(now);
+      const dispensedAt = moment(prescription.dispensedAt);
+      const now = moment();
+      // dispensedAt.add(10, 'seconds');
+      dispensedAt.add(this.lapseTime, 'hours');
+      return dispensedAt.isAfter(now);
 
     }
     return false
+  }
+
+  generateReport() {
+    const dialogReport = this.dialog.open(DialogReportComponent, {
+      width: '400px',
+      data: { fechaDesde: this.fechaDesde, fechaHasta: this.fechaHasta, pharmacistId: this.pharmacistId }
+    })
+
+    dialogReport.afterClosed().subscribe(result => {
+      if (result) {
+        this.prescriptionService.getCsv(result).subscribe();
+      }
+    });
   }
 
 }
