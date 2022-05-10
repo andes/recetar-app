@@ -141,16 +141,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
   }
 
   canDispense(prescription: Prescriptions): boolean {
-    let enableDispense = false;
-    if (prescription.status === "Pendiente") {
-      enableDispense = true;
-      if (prescription.triple) {
-        const now = moment();
-        const prescriptionDate = moment(prescription.date);
-        enableDispense = now >= prescriptionDate;
-      }
-    }
-    return enableDispense;
+    return (prescription.status === "Pendiente" && moment() >= moment(prescription.date));
   }
 
   printPrescription(prescription: Prescriptions) {
