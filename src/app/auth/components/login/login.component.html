@@ -62,7 +62,7 @@
                 Contraseña es requerida
               </mat-error>
             </mat-form-field>
-            <div>
+            <div class="boton-olvidar-clave">
               <a class="hover" justify="end" (click)="forgot()">
                 (olvidé mi contraseña)
               </a>
@@ -71,11 +71,13 @@
           <mat-error *ngIf="error" class="text-center login-error">
             {{ error }}
           </mat-error>
-          <div fxLayout="row" fxLayoutAlign="center" class="login-action">
-            <button mat-raised-button color="primary" type="submit" *ngIf="!showSubmit" fxFlex="100%">
+          <div fxLayout="row" fxLayoutAlign="center" class="login-action" fxLayoutGap="0.5rem">
+            <button class="boton-iniciar-sesion" mat-raised-button type="submit" *ngIf="!showSubmit" fxFlex.lg="50%"
+                    fxFlex.sm="100%">
               Iniciar sesión
             </button>
-            <button mat-raised-button color="accent" fxFlex="100%" (click)="newUser()" *ngIf="!showSubmit">
+            <button mat-raised-button color="primary" (click)="newUser()" *ngIf="!showSubmit" fxFlex.lg="50%"
+                    fxFlex.sm="100%">
               Registrarse
             </button>
             <mat-spinner [color]="spinnerColor" [diameter]="spinnerDiameter" *ngIf="showSubmit">

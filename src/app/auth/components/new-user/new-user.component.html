@@ -1,70 +1,64 @@
-<!-- Logo -->
-<div fxLayout="column" fxLayoutAlign="space-evenly center" class="logo">
-  <img src="assets/img/LogoRecetar.png" class="icon-login">
-  <h1 class="title-login">RecetAR</h1>
-</div>
-<div fxLayout="row" fxLayoutAlign="space-evenly start" fxLayoutGap="20px" class="cards-container" fxFill>
-  <div class="form-panel">
-    <mat-card fxLayout="column" fxLayoutAlign="space-between">
+<mat-card fxLayout="column" fxLayoutAlign="center" fxLayoutGap="10px" fxLayoutGap.xs="0">
+  <mat-card-header fxLayout="column" fxLayoutAlign="center center" class="logo" fxFlex="50%">
+    <img src="assets/img/LogoRecetar.png" class="icon-login">
+    <h1 class="title-login">RecetAR</h1>
+  </mat-card-header>
+  <mat-card-content fxFlex>
+    <form [formGroup]="newUserForm" #newUserNgForm="ngForm" (ngSubmit)="onSubmitEvent(newUserForm,newUserNgForm)"
+          class="form-container">
+      <mat-error *ngIf="error">
+        {{ error }}
+      </mat-error>
       <mat-card-title>
-        <h2 class="text-center">
+        <h2 class="text-center" fxLayoutAlign="center center">
           <mat-icon>account_circle</mat-icon> <span>Registrar nuevo usuario</span>
         </h2>
       </mat-card-title>
-      <div>
-        <mat-card-content>
-          <form [formGroup]="newUserForm" #newUserNgForm="ngForm" (ngSubmit)="onSubmitEvent(newUserForm,newUserNgForm)"
-                class="form-container">
-            <mat-error *ngIf="error">
-              {{ error }}
-            </mat-error>
-            <div fxLayout="column">
-              <mat-form-field appearance="fill">
-                <mat-label>Rol</mat-label>
-                <mat-select formControlName="roleType" required>
-                  <mat-option value="professional">Profesional</mat-option>
-                </mat-select>
-              </mat-form-field>
-              <mat-form-field appearance="fill">
-                <mat-label>Nombre</mat-label>
-                <input matInput formControlName="businessName" required>
-              </mat-form-field>
-              <mat-form-field appearance="fill">
-                <mat-label>DNI</mat-label>
-                <input matInput formControlName="dni" required>
-              </mat-form-field>
-              <mat-form-field appearance="fill">
-                <mat-label>Password</mat-label>
-                <input matInput formControlName="password" type="password" [pattern]="regexPassword" required>
-                <mat-error *ngIf="newUserForm.get('password').errors">
-                  Password incorrecto debe contener una mayuscula, una minuscula y un número
-                </mat-error>
-              </mat-form-field>
-              <mat-form-field appearance="fill">
-                <mat-label>CUIL</mat-label>
-                <input matInput type="text" formControlName="cuil">
-              </mat-form-field>
-              <mat-form-field appearance="fill">
-                <mat-label>Matricula provincial número</mat-label>
-                <input matInput formControlName="enrollment" required>
-              </mat-form-field>
-              <mat-form-field appearance="fill">
-                <mat-label>Email</mat-label>
-                <input matInput formControlName="email" [pattern]="regexEmail" required>
-              </mat-form-field>
-
-            </div>
-            <div fxLayout="row" fxLayoutAlign="center">
-              <div fxLayout="row" fxLayoutAlign="center" fxLayoutGap="20px" fxFlex="100%">
-                <button mat-raised-button color="primary" type="submit" fxFlex="100%">Crear</button>
-                <button mat-raised-button color="primary" (click)="cancelar()" fxFlex="100%">
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          </form>
-        </mat-card-content>
+      <div fxLayout.lg="row" fxLayout.md="column" fxLayout.sm="column" fxLayout.xs="column" fxLayoutGap="0.5rem">
+        <mat-form-field appearance="fill" fxFlex>
+          <mat-label>Rol</mat-label>
+          <mat-select formControlName="roleType" required>
+            <mat-option value="professional">Profesional</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="fill" fxFlex>
+          <mat-label>Nombre</mat-label>
+          <input matInput formControlName="businessName" required>
+        </mat-form-field>
       </div>
-    </mat-card>
-  </div>
-</div>
+      <div fxLayout.lg="row" fxLayout.md="column" fxLayout.sm="column" fxLayout.xs="column" fxLayoutGap="0.5rem">
+        <mat-form-field appearance="fill" fxFlex>
+          <mat-label>DNI</mat-label>
+          <input matInput formControlName="dni" required>
+        </mat-form-field>
+        <mat-form-field appearance="fill" fxFlex>
+          <mat-label>CUIL</mat-label>
+          <input matInput type="text" formControlName="cuil">
+        </mat-form-field>
+        <mat-form-field appearance="fill" fxFlex>
+          <mat-label>N° Matricula provincial</mat-label>
+          <input matInput formControlName="enrollment" required>
+        </mat-form-field>
+      </div>
+      <div fxLayout.lg="row" fxLayout.md="column" fxLayout.sm="column" fxLayout.xs="column" fxLayoutGap="0.5rem">
+        <mat-form-field appearance="fill" fxFlex>
+          <mat-label>Contraseña</mat-label>
+          <input matInput formControlName="password" type="password" [pattern]="regexPassword" required>
+          <mat-error *ngIf="newUserForm.get('password').errors">
+            Contraseña incorrecta debe contener una mayúscula, una minúscula y un número
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="fill" fxFlex>
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" [pattern]="regexEmail" required>
+        </mat-form-field>
+      </div>
+      <div class="botones" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="0.5rem">
+        <button mat-raised-button color="primary" type="submit" fxFlex.lg="25%" fxFlex.sm="100%">Crear</button>
+        <button mat-raised-button color="warn" (click)="cancelar()" fxFlex.lg="25%" fxFlex.sm="100%">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

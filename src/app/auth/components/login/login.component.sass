@@ -10,7 +10,7 @@ $panels-height-xl: 325px
     height: 100%
 
 .cards-container
-    margin-bottom: 4em
+    margin-bottom: 1em
     @media (min-width: $x-small-devices) and (max-width: $small-devices)
         flex-direction: column!important
         .welcome-panel
@@ -25,18 +25,11 @@ $panels-height-xl: 325px
         mat-card
             box-sizing: content-box!important
             height: 18.21rem
-            // height: calc(#{$panels-height} - 32px)
-            // @media (min-width: $larger-devices) and (max-width: $x-larger-devices)
-            //     height: calc(#{$panels-height-xl} - 32px)
 
             @media (min-width: $x-small-devices) and (max-width: $larger-devices)
                 height: auto
             mat-card-title, mat-card-content
                 margin: 0!important
-                .login-action
-                    margin-top: 20px
-                    @media (min-width: $larger-devices) and (max-width: $x-larger-devices)
-                        margin-top: 40px
 
                 @media (min-width: $larger-devices) and (max-width: $xx-larger-devices)
                     .login-error
@@ -63,7 +56,6 @@ $panels-height-xl: 325px
 
 .logo
     margin-top: 0em
-    margin-bottom: 2em
     @media (min-width: $x-small-devices) and (max-width: $small-devices)
         margin-bottom: 1em
     .icon-login
@@ -76,3 +68,14 @@ $panels-height-xl: 325px
 .hover
     cursor: pointer
     float: right
+
+.boton-iniciar-sesion
+    background:#00da93
+    color:#ffffff
+
+.boton-olvidar-clave
+    padding-top: 0.2rem
+    padding-bottom:1rem
+
+mat-card-content
+    margin-bottom:0px!important
