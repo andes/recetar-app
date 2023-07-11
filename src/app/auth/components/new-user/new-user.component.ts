@@ -62,12 +62,12 @@ export class NewUserComponent implements OnInit {
                     if (this.checkMatricula(profesiones)) {
                         this.userRegister(newUserForm, newUserNgForm)
                     } else {
-                        this._snackBar.open('La matricula no es correcta', 'cerrar', {
+                        this._snackBar.open('El número de matricula no es correcto', 'cerrar', {
                             duration: 5000
                         });
                     }
                 } else {
-                    this._snackBar.open('Profesional no registrado, contactese con fiscalización para corroborar sus datos', 'cerrar', {
+                    this._snackBar.open('Profesional no se encuentra registrado, contactese con fiscalización para corroborar sus datos', 'cerrar', {
                         duration: 5000
                     });
                 }
@@ -79,14 +79,14 @@ export class NewUserComponent implements OnInit {
         this.authService.register(this.newUserForm.value).subscribe
             (() => {
                 this.cancelar();
-                this._snackBar.open('Usuario creado', 'cerrar', {
+                this._snackBar.open('La cuenta ha sido creada exitosamente', 'cerrar', {
                     duration: 5000
                 });
                 newUserNgForm.resetForm();
                 newUserForm.reset();
             },
                 err => {
-                    this._snackBar.open(`Eror: ${JSON.stringify(err.error)}'`, 'cerrar', {
+                    this._snackBar.open(`Ha ocurrido un error al intentar crear la cuenta: ${JSON.stringify(err.error)}'`, 'cerrar', {
                         duration: 5000
                     });
                 })
