@@ -59,10 +59,10 @@ export class NewUserComponent implements OnInit {
                 if (res.length) {
                     const profesional = res[0];
                     const { profesiones } = profesional;
-                    if (this.checkMatricula(profesiones)) {
+                    if (this.checkPersona(profesional) && this.checkMatricula(profesiones)) {
                         this.userRegister(newUserForm, newUserNgForm)
                     } else {
-                        this._snackBar.open('El número de matricula no es correcto', 'cerrar', {
+                        this._snackBar.open('El número de matricula o el número de cuil no es correcto', 'cerrar', {
                             duration: 5000
                         });
                     }
@@ -92,11 +92,22 @@ export class NewUserComponent implements OnInit {
                 })
     }
 
+
+    checkPersona(profesional) {
+        const cuil = this.newUserForm.get('cuil').value;
+        let salida = profesional.cuit == cuil ? true : false
+        return salida;
+    }
+
     checkMatricula(profesiones) {
-        const lastProfesion = profesiones[profesiones.length - 1];
+        const lastProfesion = profesiones.find(p => p.profesion.codigo == '1' || p.profesion.codigo == '23');
         const lastMatriculacion = lastProfesion.matriculacion[lastProfesion.matriculacion.length - 1];
-        const res = ((moment(lastMatriculacion.fin)) > moment() && (lastMatriculacion.matriculaNumero).toString() === this.newUserForm.get('enrollment').value);
-        return res;
+        if (lastMatriculacion) {
+            const res = ((moment(lastMatriculacion.fin)) > moment() && (lastMatriculacion.matriculaNumero).toString() === this.newUserForm.get('enrollment').value);
+            return res;
+        } else {
+            return false;
+        }
     }
 
     cancelar() {
