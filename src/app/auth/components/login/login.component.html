@@ -72,10 +72,16 @@
                     fxFlex.sm="100%">
               Iniciar sesión
             </button>
-            <button mat-raised-button color="primary" (click)="newUser()" *ngIf="!showSubmit" fxFlex.lg="50%"
-                    fxFlex.sm="100%">
-              Registrarse
-            </button>
+            <div fxLayout="column" fxLayoutAlingn="center" fxLayoutGap="0.5rem">
+              <button mat-raised-button color="primary" (click)="newUser()" *ngIf="!showSubmit" fxFlex.lg="50%"
+                      fxFlex.sm="100%">
+                Registrarse Profesional
+              </button>
+              <button mat-raised-button color="primary" (click)="newUserPharmacist()" *ngIf="!showSubmit" fxFlex.lg="50%"
+                      fxFlex.sm="100%">
+                Registrarse Farmacia
+              </button>
+            </div>
             <mat-spinner [color]="spinnerColor" [diameter]="spinnerDiameter" *ngIf="showSubmit">
             </mat-spinner>
           </div>
