@@ -16,7 +16,7 @@ export class NewUserComponent implements OnInit {
     public newUserForm: FormGroup;
     public error: string;
     public roleSelected: 'professional';
-    public regexPassword = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
+    public regexPassword = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,}$/;
     public regexEmail = '^[a-z0-9._%+-]+@[a-z0-9.-]+[\.]{1}[a-z]{2,4}$';
 
     constructor(

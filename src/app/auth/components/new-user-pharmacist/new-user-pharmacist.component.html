@@ -15,14 +15,6 @@
         </h2>
       </mat-card-title>
       <div fxLayout.lg="row" fxLayout.md="column" fxLayout.sm="column" fxLayout.xs="column" fxLayoutGap="0.5rem">
-        <!-- Rol 
-        <mat-form-field appearance="fill" fxFlex>
-          <mat-label>Rol</mat-label>
-          <mat-select formControlName="roleType" required>
-            <mat-option value="pharmacist">Farmacia</mat-option>
-          </mat-select>
-        </mat-form-field>
-        -->
         <!-- Nombre -->
         <mat-form-field appearance="fill" fxFlex>
           <mat-label>Nombre de la Farmacia</mat-label>
@@ -33,15 +25,8 @@
           <mat-label>CUIT</mat-label>
           <input matInput type="text" formControlName="cuil">
         </mat-form-field>
-        
       </div>
       <div fxLayout.lg="row" fxLayout.md="column" fxLayout.sm="column" fxLayout.xs="column" fxLayoutGap="0.5rem">
-        <!-- DNI 
-        <mat-form-field appearance="fill" fxFlex>
-          <mat-label>DNI</mat-label>
-          <input matInput formControlName="dni" required>
-        </mat-form-field>
-        -->
         <!-- N° de Disposición -->
         <mat-form-field appearance="fill" fxFlex>
           <mat-label>N° Disposición de habilitación</mat-label>
@@ -60,7 +45,7 @@
         <!-- Matricula DT Farmacia -->
         <mat-form-field appearance="fill" fxFlex>
           <mat-label>N° Matricula DT</mat-label>
-          <input matInput formControlName="matriculaDTResponsable" required>
+          <input matInput formControlName="enrollment" required>
         </mat-form-field>
       </div>
       <div fxLayout.lg="row" fxLayout.md="column" fxLayout.sm="column" fxLayout.xs="column" fxLayoutGap="0.5rem">

@@ -13,8 +13,7 @@ export class PharmacistsService {
   constructor(private http: HttpClient, private adapter: PharmacistsAdapter) { }
 
   getPharmacistByCuit(params): Observable<any> {
-    const url = `${environment.ANDES_API}/core/tm/farmacias`;
+    const url = `${environment.API_END_POINT}/auth/pharmacies-andes`;
     return this.http.get(url, { params });
-  }
-
+  };
 }

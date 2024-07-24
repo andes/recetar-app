@@ -37,7 +37,7 @@ export class NewUserPharmacistComponent implements OnInit {
             cuil: [''],
             username: [''],
             disposicionHabilitacion: [''],
-            matriculaDTResponsable: [''],
+            enrollment: [''], //matriculaDTResponsable
             vencimientoHabilitacion: [''],
             email: ['', Validators.required],
             businessName: [''],
@@ -47,25 +47,38 @@ export class NewUserPharmacistComponent implements OnInit {
     }
 
     checkUser() {
-        this.newUserForm.controls.username.setValue(this.newUserForm.get('cuit').value);
+        this.newUserForm.controls.username.setValue(this.newUserForm.get('cuil').value);
     }
 
     onSubmitEvent(newUserForm: FormGroup, newUserNgForm: FormGroupDirective) {
-        console.log(this.newUserForm.value)
+    
         if (this.newUserForm.valid) {
             this.checkUser();
             const params = {
-                documento: newUserForm.get('cuil').value
+                cuil: newUserForm.get('cuil').value
             }
             this.pharmacistsService.getPharmacistByCuit(params).subscribe(res => {
                 if (res.length) {
                     const pharmacist = res[0];
+                    console.log(pharmacist, this.newUserForm.value)
                     if (this.checkDisposicionFarmacia(pharmacist) && this.checkMatricula(pharmacist) && this.checkVencimientoHabilitacion(pharmacist)) {
                         this.userRegister(newUserForm, newUserNgForm)
                     } else {
-                        this._snackBar.open("El número de matricula o el número de disposicion de habilitación no es correcto", 'cerrar', {
-                            duration: 5000
-                        });
+                        if (!this.checkDisposicionFarmacia(pharmacist)) {
+                            this._snackBar.open("El número de disposicion no es correcto", 'cerrar', {
+                                duration: 5000
+                            });
+                        }
+                        if (!this.checkMatricula(pharmacist)) {
+                            this._snackBar.open("El número de matricula no es correcto", 'cerrar', {
+                                duration: 5000
+                            });
+                        }
+                        if (!this.checkVencimientoHabilitacion(pharmacist)) {
+                            this._snackBar.open("La fecha de vencimiento de habilitación no es correcta", 'cerrar', {
+                                duration: 5000
+                            });
+                        }
                     }
                 } else {
                     this._snackBar.open('La farmacia no se encuentra registrada, contáctese con fiscalización para corroborar sus datos', 'cerrar', {
@@ -95,19 +108,23 @@ export class NewUserPharmacistComponent implements OnInit {
 
     checkDisposicionFarmacia(pharmacist) {
         const disposicionHabilitacion = this.newUserForm.get('disposicionHabilitacion').value;
-        let salida = pharmacist.disposicionHabilitación === disposicionHabilitacion ? true : false;
+        let salida = pharmacist.disposicionHabilitacion === disposicionHabilitacion ? true : false;
         return salida;
     }
 
     checkMatricula(pharmacist) {
-        const matriculaDTResponsable = this.newUserForm.get('matriculaDTResponsable').value;
+        const matriculaDTResponsable = this.newUserForm.get('enrollment').value;
         let salida = pharmacist.matriculaDTResponsable === matriculaDTResponsable ? true : false;
         return salida;
     }
 
     checkVencimientoHabilitacion(pharmacist) {
-        const vencimientoHabilitacion = this.newUserForm.get('vencimientoHabilitacion').value.setHours(0,0,0,0);
-        let salida = pharmacist.vencimientoHabilitacion.setHours(0,0,0,0).getTime() === vencimientoHabilitacion.getTime() ? true : false;
+        const vencimientoHabilitacionForm = this.newUserForm.get('vencimientoHabilitacion').value;
+        const vencimientoHabilitacionAndes = moment(pharmacist.vencimientoHabilitacion);
+        console.log(vencimientoHabilitacionAndes);
+        console.log(vencimientoHabilitacionForm);
+        const diferencia = vencimientoHabilitacionForm.diff(vencimientoHabilitacionAndes, 'days');
+        let salida = diferencia === 0 ? true : false;
         return salida;
     }
 
