@@ -67,7 +67,7 @@ export class NewUserComponent implements OnInit {
                         });
                     }
                 } else {
-                    this._snackBar.open('Profesional no se encuentra registrado, contactese con fiscalización para corroborar sus datos', 'cerrar', {
+                    this._snackBar.open('Profesional no se encuentra registrado, contáctese con fiscalización para corroborar sus datos', 'cerrar', {
                         duration: 5000
                     });
                 }
