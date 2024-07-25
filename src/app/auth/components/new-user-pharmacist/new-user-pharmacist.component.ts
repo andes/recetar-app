@@ -60,7 +60,6 @@ export class NewUserPharmacistComponent implements OnInit {
             this.pharmacistsService.getPharmacistByCuit(params).subscribe(res => {
                 if (res.length) {
                     const pharmacist = res[0];
-                    console.log(pharmacist, this.newUserForm.value)
                     if (this.checkDisposicionFarmacia(pharmacist) && this.checkMatricula(pharmacist) && this.checkVencimientoHabilitacion(pharmacist)) {
                         this.userRegister(newUserForm, newUserNgForm)
                     } else {
@@ -121,8 +120,6 @@ export class NewUserPharmacistComponent implements OnInit {
     checkVencimientoHabilitacion(pharmacist) {
         const vencimientoHabilitacionForm = this.newUserForm.get('vencimientoHabilitacion').value;
         const vencimientoHabilitacionAndes = moment(pharmacist.vencimientoHabilitacion);
-        console.log(vencimientoHabilitacionAndes);
-        console.log(vencimientoHabilitacionForm);
         const diferencia = vencimientoHabilitacionForm.diff(vencimientoHabilitacionAndes, 'days');
         let salida = diferencia === 0 ? true : false;
         return salida;
