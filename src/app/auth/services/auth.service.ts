@@ -126,6 +126,11 @@ export class AuthService {
     return roles.some((role: string) => role === 'professional');
   }
 
+  isAuditRole(): boolean {
+    const roles: string[] = this.getLoggedRole();
+    return roles.some((role: string) => role === 'auditor');
+  }
+
   isAdminRole(): boolean {
     const roles: string[] = this.getLoggedRole();
     return roles.some((role: string) => role === 'admin');
