@@ -13,6 +13,7 @@
       "@pharmacists/*": ["app/pharmacists/*"],
       "@animations/*": ["app/animations/*"],
       "@root/*": ["./*"],
+      "@audit/*": ["app/audit/*"],
     },
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
