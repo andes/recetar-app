@@ -7,6 +7,7 @@ import { AuditFormComponent } from './components/audit-form/audit-form.component
 import { DialogComponent } from '@audit/components/dialog/dialog.component';
 import { RoleAuditGuard } from '@auth/guards/role-audit.guard';
 import { PrescriptionPrinterComponent } from '@audit/components/prescription-printer/prescription-printer.component';
+import { AuditUsersFormComponent } from './components/audit-users-form/audit-users-form.component';
 
 const routes: Routes = [
   {
@@ -17,6 +18,10 @@ const routes: Routes = [
       {
         path: 'recetas/auditar',
         component: AuditFormComponent
+      },
+      {
+        path: 'users',
+        component: AuditUsersFormComponent
       }
     ]
   }
@@ -31,6 +36,7 @@ export class AuditRoutingModule { }
 export const routingComponent = [
   AuditComponent,
   AuditFormComponent,
+  AuditUsersFormComponent,
   DialogComponent,
   PrescriptionPrinterComponent
 ]

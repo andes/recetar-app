@@ -12,9 +12,9 @@
             </h2>
           </mat-card-title>
           <mat-card-content>
-            <form [formGroup]="prescriptionForm" class="form-container">
+            <form [formGroup]="userForm" class="form-container">
               <div fxLayout fxLayout="column" fxLayoutAlign="center" class="container" fxLayoutGap="20px">
-                <!-- Cuit de la farmacia -->
+                <!-- Dni del paciente -->
                 <mat-form-field>
                   <mat-label>CUIT farmacia</mat-label>
                   <input type="text"
@@ -40,8 +40,8 @@
         </mat-card>
       </div>
     </div>
-    <div class="prescription-panel">
-      <app-prescription-list></app-prescription-list>
+    <div class="user-panel">
+      <app-users-list></app-users-list>
     </div>
   </div>
 </div>

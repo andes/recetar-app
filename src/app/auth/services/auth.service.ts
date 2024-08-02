@@ -19,6 +19,7 @@ export class AuthService {
   private readonly apiEndPoint = environment.API_END_POINT;
   private loggedIn: BehaviorSubject<boolean>;
   private businessName: BehaviorSubject<string>;
+  private isAudit: BehaviorSubject<boolean>;
 
 
   constructor(
@@ -28,6 +29,7 @@ export class AuthService {
 
     this.loggedIn = new BehaviorSubject<boolean>(this.tokensExists());
     this.businessName = new BehaviorSubject<string>(this.getLoggedBusinessName());
+    this.isAudit = new BehaviorSubject<boolean>(this.isAuditRole());
   }
 
 
@@ -86,6 +88,10 @@ export class AuthService {
     return this.businessName.asObservable();
   }
 
+  get getIsAudit() {
+    return this.isAudit.asObservable();
+  }
+
   refreshToken() {
     return this.http.post<any>(`${this.apiEndPoint}/auth/refresh`, {
       'refreshToken': this.getRefreshToken()
@@ -128,6 +134,9 @@ export class AuthService {
 
   isAuditRole(): boolean {
     const roles: string[] = this.getLoggedRole();
+    if (!roles?.length){
+      return false;
+    }
     return roles.some((role: string) => role === 'auditor');
   }
 
@@ -158,12 +167,14 @@ export class AuthService {
     this.storeTokens(tokens);
     this.businessName.next(this.getLoggedBusinessName());
     this.loggedIn.next(this.tokensExists());
+    this.isAudit.next(this.isAuditRole());
   }
 
   private doLogoutUser() {
     this.prescriptionsService.cleanPrescriptions();
     this.removeTokens();
     this.loggedIn.next(this.tokensExists());
+    this.isAudit.next(this.isAuditRole());
   }
 
   private getRefreshToken() {

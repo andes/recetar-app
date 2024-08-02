@@ -28,6 +28,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { UsersListComponent } from './components/user-list/users-list.component';
 import { PrescriptionListComponent } from './components/prescription-list/prescription-list.component';
 import { FormatTimePipe } from './pipes/format-time.pipe';
 import { DialogReportComponent } from './components/dialog-report/dialog-report.component';
@@ -35,9 +36,10 @@ import { DialogReportComponent } from './components/dialog-report/dialog-report.
 @NgModule({
   declarations: [
     routingComponent,
+    UsersListComponent,
     PrescriptionListComponent,
     FormatTimePipe,
-    DialogReportComponent
+    DialogReportComponent,
   ],
   imports: [
     BrowserModule,
