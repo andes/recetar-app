@@ -90,7 +90,6 @@ export class AuditUsersFormComponent implements OnInit {
     });
   }
 
-
   get pharmacy_cuit(): AbstractControl{
     return this.userForm.get('pharmacy_cuit');
   }

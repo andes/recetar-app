@@ -48,24 +48,23 @@ export class UsersListComponent implements OnInit, AfterContentInit {
     public dialog: MatDialog) { };
 
   ngOnInit(): void {
-    this.loadingUsers = true;
-    this
-    this.prescriptionService.prescriptions.subscribe((prescriptions: Prescriptions[]) => {
-      this.dataSource = new MatTableDataSource<Prescriptions>(prescriptions);
-      // sort after populate dataSource
-      this.dataSource.sortingDataAccessor = (item, property) => {
-        switch (property) {
-          case 'patient': return item.patient.lastName + item.patient.firstName;
-          case 'prescription_date': return new Date(item.date).getTime();
-          default: return item[property];
-        }
-      };
-      this.dataSource.sort = this.sort;
-      this.dataSource.paginator = this.paginator;
-      this.loadingUsers = false;
-    });
-    this.auditId = this.authService.getLoggedUserId();
-    this.isAdmin = this.authService.isAdminRole();
+    // this.loadingUsers = true;
+    // this.prescriptionService.prescriptions.subscribe((prescriptions: Prescriptions[]) => {
+    //   this.dataSource = new MatTableDataSource<Prescriptions>(prescriptions);
+    //   // sort after populate dataSource
+    //   this.dataSource.sortingDataAccessor = (item, property) => {
+    //     switch (property) {
+    //       case 'patient': return item.patient.lastName + item.patient.firstName;
+    //       case 'prescription_date': return new Date(item.date).getTime();
+    //       default: return item[property];
+    //     }
+    //   };
+    //   this.dataSource.sort = this.sort;
+    //   this.dataSource.paginator = this.paginator;
+    //   this.loadingUsers = false;
+    // });
+    // this.auditId = this.authService.getLoggedUserId();
+    // this.isAdmin = this.authService.isAdminRole();
   }
 
   ngAfterContentInit() {
@@ -85,23 +84,23 @@ export class UsersListComponent implements OnInit, AfterContentInit {
     }
   }
 
-  applyFilter(filterValue: string) {
-    this.dataSource.filterPredicate = (data: User, filter: string) => {
-      const accumulator = (currentTerm, key) => {
-        // enable filter by lastName / firstName / date
-        return currentTerm + data.status + moment(data.date, 'YYYY-MM-DD').format('DD/MM/YYY').toString()
-      };
+  // applyFilter(filterValue: string) {
+  //   this.dataSource.filterPredicate = (data: User, filter: string) => {
+  //     const accumulator = (currentTerm, key) => {
+  //       // enable filter by lastName / firstName / date
+  //       return currentTerm + data.status + moment(data.date, 'YYYY-MM-DD').format('DD/MM/YYY').toString()
+  //     };
 
-      const dataStr = Object.keys(data).reduce(accumulator, '').toLowerCase();
-      // Transform the filter by converting it to lowercase and removing whitespace.
-      const transformedFilter = filter.trim().toLowerCase();
-      return dataStr.indexOf(transformedFilter) !== -1;
-    };
-    this.dataSource.filter = filterValue.trim().toLowerCase();
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
-    }
-  }
+  //     const dataStr = Object.keys(data).reduce(accumulator, '').toLowerCase();
+  //     // Transform the filter by converting it to lowercase and removing whitespace.
+  //     const transformedFilter = filter.trim().toLowerCase();
+  //     return dataStr.indexOf(transformedFilter) !== -1;
+  //   };
+  //   this.dataSource.filter = filterValue.trim().toLowerCase();
+  //   if (this.dataSource.paginator) {
+  //     this.dataSource.paginator.firstPage();
+  //   }
+  // }
 
 
   // Show a dialog
@@ -130,17 +129,17 @@ export class UsersListComponent implements OnInit, AfterContentInit {
   }
 
 
-  generateReport() {
-    const dialogReport = this.dialog.open(DialogReportComponent, {
-      width: '400px',
-      data: { fechaDesde: this.fechaDesde, fechaHasta: this.fechaHasta, pharmacistId: this.dataSource.data[0].dispensedBy.userId }
-    })
+  // generateReport() {
+  //   const dialogReport = this.dialog.open(DialogReportComponent, {
+  //     width: '400px',
+  //     data: { fechaDesde: this.fechaDesde, fechaHasta: this.fechaHasta, pharmacistId: this.dataSource.data[0].dispensedBy.userId }
+  //   })
 
-    dialogReport.afterClosed().subscribe(result => {
-      if (result) {
-        this.prescriptionService.getCsv(result).subscribe();
-      }
-    });
-  }
+  //   dialogReport.afterClosed().subscribe(result => {
+  //     if (result) {
+  //       this.prescriptionService.getCsv(result).subscribe();
+  //     }
+  //   });
+  // }
 
 }
