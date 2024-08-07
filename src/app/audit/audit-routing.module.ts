@@ -8,6 +8,7 @@ import { DialogComponent } from '@audit/components/dialog/dialog.component';
 import { RoleAuditGuard } from '@auth/guards/role-audit.guard';
 import { PrescriptionPrinterComponent } from '@audit/components/prescription-printer/prescription-printer.component';
 import { AuditUsersFormComponent } from './components/audit-users-form/audit-users-form.component';
+import { UsersListComponent } from './components/user-list/users-list.component';
 
 const routes: Routes = [
   {
@@ -21,7 +22,7 @@ const routes: Routes = [
       },
       {
         path: 'users',
-        component: AuditUsersFormComponent
+        component: UsersListComponent
       }
     ]
   }

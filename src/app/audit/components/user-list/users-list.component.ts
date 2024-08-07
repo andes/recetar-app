@@ -12,6 +12,7 @@ import { PrescriptionPrinterComponent } from '@pharmacists/components/prescripti
 import { detailExpand, arrowDirection } from '@animations/animations.template';
 import { DialogReportComponent } from '../dialog-report/dialog-report.component';
 import { User } from '@interfaces/users';
+import { UserService } from '@services/users.service';
 
 @Component({
   selector: 'app-users-list',
@@ -25,50 +26,50 @@ import { User } from '@interfaces/users';
 })
 export class UsersListComponent implements OnInit, AfterContentInit {
 
-  @Input() users: User[];
 
-  displayedColumns: string[] = ['professional', 'date', 'status', 'supplies', 'action', 'arrow'];
+  // displayedColumns: string[] = ['businessName', 'date', 'status', 'supplies', 'action', 'arrow'];
+  displayedColumns: string[] = ['businessName', 'cuil', 'enrollment', 'isActive'];
   dataSource = new MatTableDataSource<User>([]);
   expandedElement: User | null;
   loadingUsers: boolean;
-  lapseTime: number = 2; // lapse of time that a dispensed prescription can been undo action, and put it back as "pendiente"
   auditId: string;
   pharmacistId: string;
   isAdmin: boolean = false;
   fechaDesde: Date;
   fechaHasta: Date;
+  users: User[];
 
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
-  @ViewChild(MatSort, { static: true }) sort: MatSort;
+  //@ViewChild(MatSort, { static: true }) sort: MatSort;
+  @ViewChild('tbSort') tbSort = new MatSort();
 
   constructor(
     private authService: AuthService,
-    private prescriptionService: PrescriptionsService,
-    private prescriptionPrinter: PrescriptionPrinterComponent,
+    private usersService: UserService,
     public dialog: MatDialog) { };
 
   ngOnInit(): void {
-    // this.loadingUsers = true;
-    // this.prescriptionService.prescriptions.subscribe((prescriptions: Prescriptions[]) => {
-    //   this.dataSource = new MatTableDataSource<Prescriptions>(prescriptions);
-    //   // sort after populate dataSource
-    //   this.dataSource.sortingDataAccessor = (item, property) => {
-    //     switch (property) {
-    //       case 'patient': return item.patient.lastName + item.patient.firstName;
-    //       case 'prescription_date': return new Date(item.date).getTime();
-    //       default: return item[property];
-    //     }
-    //   };
-    //   this.dataSource.sort = this.sort;
-    //   this.dataSource.paginator = this.paginator;
-    //   this.loadingUsers = false;
-    // });
-    // this.auditId = this.authService.getLoggedUserId();
-    // this.isAdmin = this.authService.isAdminRole();
+    this.loadingUsers = true;
+    this.usersService.getUsers().subscribe((users: User[]) => {
+      this.dataSource = new MatTableDataSource<User>(users);
+      console.log(users);
+      this.dataSource.sortingDataAccessor = (item, property) => {
+        switch (property) {
+          case 'businessName': return item.businessName;
+          case 'role': return item.roles[0].role;
+          default: return item[property];
+        }
+      };
+      this.dataSource.sort = this.tbSort;
+      this.dataSource.paginator = this.paginator;
+      this.loadingUsers = false;
+    })
+    this.auditId = this.authService.getLoggedUserId();
   }
 
   ngAfterContentInit() {
-    this.paginator._intl.itemsPerPageLabel = "Prescripciones por página";
+    this.dataSource.sort = this.tbSort;
+    this.paginator._intl.itemsPerPageLabel = "Usuarios por página";
     this.paginator._intl.firstPageLabel = "Primer página";
     this.paginator._intl.lastPageLabel = "Última página";
     this.paginator._intl.nextPageLabel = "Siguiente";
@@ -84,23 +85,23 @@ export class UsersListComponent implements OnInit, AfterContentInit {
     }
   }
 
-  // applyFilter(filterValue: string) {
-  //   this.dataSource.filterPredicate = (data: User, filter: string) => {
-  //     const accumulator = (currentTerm, key) => {
-  //       // enable filter by lastName / firstName / date
-  //       return currentTerm + data.status + moment(data.date, 'YYYY-MM-DD').format('DD/MM/YYY').toString()
-  //     };
+  applyFilter(filterValue: string) {
+    this.dataSource.filterPredicate = (data: User, filter: string) => {
+      const accumulator = (currentTerm, key) => {
+        // enable filter by lastName / firstName / date
+        return currentTerm + data.businessName + data.cuil + data.enrollment;
+      };
 
-  //     const dataStr = Object.keys(data).reduce(accumulator, '').toLowerCase();
-  //     // Transform the filter by converting it to lowercase and removing whitespace.
-  //     const transformedFilter = filter.trim().toLowerCase();
-  //     return dataStr.indexOf(transformedFilter) !== -1;
-  //   };
-  //   this.dataSource.filter = filterValue.trim().toLowerCase();
-  //   if (this.dataSource.paginator) {
-  //     this.dataSource.paginator.firstPage();
-  //   }
-  // }
+      const dataStr = Object.keys(data).reduce(accumulator, '').toLowerCase();
+      // Transform the filter by converting it to lowercase and removing whitespace.
+      const transformedFilter = filter.trim().toLowerCase();
+      return dataStr.indexOf(transformedFilter) !== -1;
+    };
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
+  }
 
 
   // Show a dialog
@@ -114,32 +115,4 @@ export class UsersListComponent implements OnInit, AfterContentInit {
       console.log('The dialog was closed');
     });
   }
-
-  // Return true if was dispensed and is seeing who dispensed the prescription
-  canPrint(prescription: Prescriptions): boolean {
-    return (prescription.status === "Dispensada") && (prescription.dispensedBy?.userId === this.authService.getLoggedUserId());
-  }
-
-  printPrescription(prescription: Prescriptions) {
-    this.prescriptionPrinter.print(prescription);
-  }
-
-  isStatus(prescritpion: Prescriptions, status: string): boolean {
-    return prescritpion.status === status;
-  }
-
-
-  // generateReport() {
-  //   const dialogReport = this.dialog.open(DialogReportComponent, {
-  //     width: '400px',
-  //     data: { fechaDesde: this.fechaDesde, fechaHasta: this.fechaHasta, pharmacistId: this.dataSource.data[0].dispensedBy.userId }
-  //   })
-
-  //   dialogReport.afterClosed().subscribe(result => {
-  //     if (result) {
-  //       this.prescriptionService.getCsv(result).subscribe();
-  //     }
-  //   });
-  // }
-
 }
