@@ -64,74 +64,15 @@
                   </td>
                  </ng-container>
 
-                <!--- Status isActive column -->
+                <!--- Status column -->
                  <ng-container matColumnDef="isActive">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
                   <td mat-cell *matCellDef="let element" class="m-card-sub-title" data-label="Estado">
-                    {{ element.isActive }}
+                    <button mat-button *ngIf="element.isActive === false" (click)="activateUser(element)">Activar</button>
+                    <button mat-button *ngIf="element.isActive === true" (click)="deactivateUser(element)">Desactivar</button>
                   </td>
                  </ng-container>
 
-                <!-- Date 
-                <ng-container matColumnDef="date">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header> Fecha </th>
-                  <td mat-cell *matCellDef="let element" class='m-card-sub-title' data-label='Fecha'>
-                    {{element.date | date : 'dd/MM/yyyy' }} </td>
-                </ng-container>
-      -->
-                <!-- Status 
-                <ng-container matColumnDef="status">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
-                  <td mat-cell *matCellDef="let element" class='has_label_on_mobile' data-label='Estado:'></td>
-                </ng-container>
-      -->
-                <!-- Insumos Column 
-                <ng-container matColumnDef="supplies">
-                  <th mat-header-cell *matHeaderCellDef> Insumos </th>
-                  <td mat-cell *matCellDef="let element" class='has_label_on_mobile' data-label='Insumos:'>
-                    {{element.supplies.length}} </td>
-                </ng-container>
-      -->
-                <!-- Accion Column 
-                <ng-container matColumnDef="action">
-                  <th mat-header-cell *matHeaderCellDef> Acción </th>
-                 
-                </ng-container>
-      
-                <ng-container matColumnDef="arrow">
-                  <th mat-header-cell *matHeaderCellDef> </th>
-                  <td mat-cell *matCellDef="let element">
-                    <button mat-menu-item type="button">
-                      <mat-icon [@arrowDirection]="element._id == expandedElement?._id ? 'up' : 'down'">
-                        expand_more</mat-icon>
-                    </button>
-                  </td>
-                </ng-container>
-      -->
-                <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns 
-                <ng-container matColumnDef="expandedDetail">
-                  <td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumns.length">
-                    <div class="element-detail"
-                         [@detailExpand]="element._id == expandedElement?._id ? 'expanded' : 'collapsed'">
-                      <div class="element-diagram">
-                        <div class="supplies-list">
-                          <div class="supply-description" *ngFor="let supp of element.supplies">
-                            <span>{{ supp.supply.name }}</span>
-                            <mat-chip>{{ supp.quantity }}</mat-chip>
-                          </div>
-                        </div>
-                        <div class="element-description" *ngIf="element.diagnostic"> <span class="description-title">
-                            Diagnóstico:</span> {{element.diagnostic}}
-                        </div>
-                        <div class="element-description" *ngIf="element.observation"> <span
-                                class="description-title">Observaciones:</span> {{element.observation}}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                </ng-container>
-                <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
-                -->
                 <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="element-row"
                 [class.expanded-row]="expandedElement === row"

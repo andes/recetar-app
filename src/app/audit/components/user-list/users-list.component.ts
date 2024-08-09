@@ -38,6 +38,7 @@ export class UsersListComponent implements OnInit, AfterContentInit {
   fechaDesde: Date;
   fechaHasta: Date;
   users: User[];
+  user: User;
 
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   //@ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -50,7 +51,7 @@ export class UsersListComponent implements OnInit, AfterContentInit {
 
   ngOnInit(): void {
     this.loadingUsers = true;
-    this.usersService.getUsers().subscribe((users: User[]) => {
+    this.usersService.getUsers().subscribe((users) => {
       this.dataSource = new MatTableDataSource<User>(users);
       console.log(users);
       this.dataSource.sortingDataAccessor = (item, property) => {
@@ -114,5 +115,31 @@ export class UsersListComponent implements OnInit, AfterContentInit {
     dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog was closed');
     });
+  }
+
+  activateUser(user: User){
+    this.loadingUsers = true;
+    this.usersService.updateIsActive(user._id, true).subscribe((updatedUser: User) => {
+      const data = this.dataSource.data.slice();
+      const index: number = data.findIndex((u: User) => u._id === updatedUser._id);
+      if (index !== -1) {
+        data[index] = updatedUser;
+        this.dataSource.data = data;
+      }
+    })
+    this.loadingUsers = false;
+  };
+
+  deactivateUser(user: User){
+    this.loadingUsers = true;
+    this.usersService.updateIsActive(user._id, false).subscribe((updatedUser: User) => {
+      const data = this.dataSource.data.slice();
+      const index: number = data.findIndex((u: User) => u._id === updatedUser._id);
+      if (index !== -1) {
+        data[index] = updatedUser;
+        this.dataSource.data = data;
+      }
+    })
+    this.loadingUsers = false;
   }
 }

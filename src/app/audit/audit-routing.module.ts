@@ -7,7 +7,6 @@ import { AuditFormComponent } from './components/audit-form/audit-form.component
 import { DialogComponent } from '@audit/components/dialog/dialog.component';
 import { RoleAuditGuard } from '@auth/guards/role-audit.guard';
 import { PrescriptionPrinterComponent } from '@audit/components/prescription-printer/prescription-printer.component';
-import { AuditUsersFormComponent } from './components/audit-users-form/audit-users-form.component';
 import { UsersListComponent } from './components/user-list/users-list.component';
 
 const routes: Routes = [
@@ -37,7 +36,7 @@ export class AuditRoutingModule { }
 export const routingComponent = [
   AuditComponent,
   AuditFormComponent,
-  AuditUsersFormComponent,
+  UsersListComponent,
   DialogComponent,
   PrescriptionPrinterComponent
 ]
