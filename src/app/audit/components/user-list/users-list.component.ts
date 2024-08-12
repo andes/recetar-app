@@ -28,7 +28,7 @@ export class UsersListComponent implements OnInit, AfterContentInit {
 
 
   // displayedColumns: string[] = ['businessName', 'date', 'status', 'supplies', 'action', 'arrow'];
-  displayedColumns: string[] = ['businessName', 'cuil', 'enrollment', 'isActive'];
+  displayedColumns: string[] = ['businessName', 'cuil', 'enrollment', 'lastLogin', 'isActive' ];
   dataSource = new MatTableDataSource<User>([]);
   expandedElement: User | null;
   loadingUsers: boolean;

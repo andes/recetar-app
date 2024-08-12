@@ -3,7 +3,7 @@
 
 
     <div class="user-panel">
-    
+
       <mat-card fxLayout="column" fxLayoutAlign="space-between">
         <mat-card-title>
           <h2 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
@@ -18,35 +18,28 @@
           </h2>
         </mat-card-title>
         <mat-card-content>
-      
-          
-          
+
+
+
           <mat-form-field>
             <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filtrar">
           </mat-form-field>
-      
+
           <div class="container mat-elevation-z8">
             <div class="table-container" *ngIf="!loadingUsers">
               <table mat-table [dataSource]="dataSource" matSort #tbSort="matSort" multiTemplateDataRows>
-      
+
                 <!-- Name Column -->
                 <ng-container matColumnDef="businessName">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header> Nombre </th>
-                  <td mat-cell *matCellDef="let element" class='title-cell' test data-label='Nombre'> 
-                    <mat-icon *ngIf="element.roles[0].role === 'professional'">medical_services</mat-icon>
-                    <mat-icon *ngIf="element.roles[0].role === 'pharmacist'">local_pharmacy</mat-icon>
-                    <mat-icon *ngIf="element.roles[0].role === 'auditor'">health_and_safety</mat-icon>
+                  <td mat-cell *matCellDef="let element" class='title-cell' test data-label='Nombre'>
+                    <mat-icon *ngIf="element.roles[0].role === 'professional'" matTooltip="Profesional">medical_services</mat-icon>
+                    <mat-icon *ngIf="element.roles[0].role === 'pharmacist'" matTooltip="Farmacia">local_pharmacy</mat-icon>
+                    <mat-icon *ngIf="element.roles[0].role === 'auditor'" matTooltip="Auditor">health_and_safety</mat-icon>
                     <span>{{element.businessName.toUpperCase() }}</span>
                   </td>
                 </ng-container>
 
-                <!-- Role column
-                <ng-container matColumnDef="role">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header> Rol </th>
-                  <td mat-cell *matCellDef="let element" class="m-card-sub-title" data-label="Rol">
-                    
-                  </td>
-                </ng-container> -->
 
                 <!-- Cuil column -->
                 <ng-container matColumnDef="cuil">
@@ -57,28 +50,40 @@
                 </ng-container>
 
                 <!-- Enrollment column -->
-                 <ng-container matColumnDef="enrollment">
+                <ng-container matColumnDef="enrollment">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header> Matricula </th>
                   <td mat-cell *matCellDef="let element" class="m-card-sub-title" data-label="Matricula">
                     {{ element.enrollment }}
                   </td>
-                 </ng-container>
+                </ng-container>
 
                 <!--- Status column -->
-                 <ng-container matColumnDef="isActive">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
-                  <td mat-cell *matCellDef="let element" class="m-card-sub-title" data-label="Estado">
-                    <button mat-button *ngIf="element.isActive === false" (click)="activateUser(element)">Activar</button>
-                    <button mat-button *ngIf="element.isActive === true" (click)="deactivateUser(element)">Desactivar</button>
+                <ng-container matColumnDef="isActive">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header></th>
+                  <td mat-cell *matCellDef="let element"  data-label="Estado">
+                    <button mat-raised-button color="primary" *ngIf="element.isActive === false"
+                      (click)="activateUser(element)">Activar</button>
+                    <button mat-raised-button color="warn" *ngIf="element.isActive === true"
+                      (click)="deactivateUser(element)">Desactivar</button>
                   </td>
-                 </ng-container>
+                </ng-container>
+
+                <!--- Last login column -->
+                <ng-container matColumnDef="lastLogin">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header> Ultimo inicio de sesión </th>
+                  <td mat-cell *matCellDef="let element" class="m-card-sub-title" data-label="Ultimo inicio de sesión">
+                    {{ element.lastLogin | date : 'dd/MM/yyyy' }}
+                  </td>
+                </ng-container>
 
                 <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="element-row"
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="element-row">
+                  <!-- 
                 [class.expanded-row]="expandedElement === row"
                 (click)="expandedElement = expandedElement === row ? null : row">
-              </tr>
-      
+                 -->
+                </tr>
+
               </table>
             </div>
             <div fxLayout="row" fxLayoutAlign="center" class="loading-users" *ngIf="loadingUsers">
@@ -86,11 +91,11 @@
             </div>
             <mat-paginator [pageSizeOptions]="[10, 20, 30]"></mat-paginator>
           </div>
-      
-      
-      
+
+
+
         </mat-card-content>
       </mat-card>
     </div>
-  </div>  
+  </div>
 </div>
