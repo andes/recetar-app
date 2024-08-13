@@ -24,7 +24,7 @@ $panels-height-xl: 325px
         width: calc(100% / 3)
         mat-card
             box-sizing: content-box!important
-            height: 18.21rem
+            height: 20.21rem
 
             @media (min-width: $x-small-devices) and (max-width: $larger-devices)
                 height: auto
@@ -38,6 +38,10 @@ $panels-height-xl: 325px
             mat-card-actions
                 padding: 0!important
                 margin: 0!important
+                a.btn-link
+                    margin: 10px 0!important
+                    min-height: 35px !important
+
                 @media (min-width: $x-small-devices) and (max-width: $larger-devices)
                     flex-direction: column!important
                     a.btn-link

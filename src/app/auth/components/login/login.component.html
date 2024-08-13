@@ -12,23 +12,19 @@
         <h2 class="text-center">Bienvenido a RecetAR</h2>
       </mat-card-title>
       <mat-card-content>
-        En el marco de la emergencia sanitaria que atraviesa el país por
-        la pandemia provocada por el Coronavirus COVID-19, y atento al Decreto
-        del poder ejecutivo nacional N.o 297/20, medida de aislamiento social,
-        preventivo y obligatorio, han sido afectadas las formas habituales de
-        interrelación entre los pacientes, médicos y establecimientos
-        farmacéuticos, haciendo necesaria la utilización de herramientas
-        tecnológicas para asegurar la continuidad de los tratamientos crónicos y
-        agudos de los pacientes.
+        <p>En el marco de la nueva Ley Nacional de Receta Electrónica, el Decreto 345/2024 establece un cambio fundamental: las prescripciones médicas dejarán de ser en papel para adoptarse a plataformas digitales. En este contexto, el Ministerio de Salud de la Provincia de Neuquén pone en funcionamiento el sistema RectAr, accesible para profesionales de la salud y farmacias, tanto públicas como privadas.</p>
+        <p>¡Acompañanos en este avance hacia una práctica más eficiente y moderna en el cuidado de la salud!</p>
       </mat-card-content>
-      <mat-card-actions fxLayout="row" fxLayoutGap="10px">
-        <a mat-raised-button href="https://drive.google.com/open?id=1J1qu0vo0fzhB985_iYEBVMXMPJuiQQgH" target="_blank"
+      <mat-card-actions fxLayout="column" fxLayoutGap="10px">
+        <a mat-raised-button href="https://www.boletinoficial.gob.ar/detalleAviso/primera/306098/20240422" target="_blank"
            fxFlex="50%" class="btn-link">
           <mat-icon>remove_red_eye</mat-icon> Ver resolución
         </a>
-        <a mat-raised-button (click)="showInformation()" target="_blank" fxFlex="50%" class="btn-link">
+        <!--  
+        <a mat-raised-button (click)="showInformation()" target="_blank" fxFlex="50%" class="btn-link hidden">
           <mat-icon>info</mat-icon> Leer importante
         </a>
+        -->
       </mat-card-actions>
     </mat-card>
   </div>
@@ -88,28 +84,5 @@
     </mat-card>
   </div>
 
-  <!-- panel "Tutoriales" -->
-  <div class="tutorials-panel">
-    <mat-card fxLayout="column" fxLayoutAlign="space-between">
-      <mat-card-title>
-        <h2 class="text-center">Primeros pasos</h2>
-      </mat-card-title>
-      <mat-card-content>
-        Le recomendamos cambiar la contraseña con la que fue habilitado su usuario. Recuerde que la misma
-        constituye una clave de validación signataria, es decir, que Ud debe proteger la seguridad de la misma y
-        no compartirla con ninguna persona, ya que mediante su uso se valida el origen de la prescripción.
-        Ante cualquier duda, no dude en comunicarse con la mesa de soporte, enviando un correo electrónico a:
-        <a href="mailto:recetarsalud@neuquen.gov.ar"> recetarsalud@neuquen.gov.ar </a> <br>
-        A continuación encontrará videos explicativos de cómo interactuar con la aplicación.
-      </mat-card-content>
-      <mat-card-actions fxLayout="row" fxLayoutGap="10px">
-        <a mat-raised-button href="https://youtu.be/2HdbJTn7kkM" target="_blank" fxFlex="50%" class="btn-link">
-          <mat-icon>play_circle_outline</mat-icon> Médico
-        </a>
-        <a mat-raised-button href="https://youtu.be/_GPze_5QlEo" target="_blank" fxFlex="50%" class="btn-link">
-          <mat-icon>play_circle_outline</mat-icon> Farmacéutico
-        </a>
-      </mat-card-actions>
-    </mat-card>
-  </div>
+  
 </div>
