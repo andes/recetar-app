@@ -6,10 +6,12 @@ import { PharmacistsService } from '../../../services/pharmacists.service';
 import * as moment from 'moment';
 import { Router } from '@angular/router';
 
+
+
 @Component({
     selector: 'app-new-user',
     templateUrl: './new-user-pharmacist.component.html',
-    styleUrls: ['./new-user-pharmacist.component.sass']
+    styleUrls: ['./new-user-pharmacist.component.sass'],
 })
 export class NewUserPharmacistComponent implements OnInit {
 
@@ -19,6 +21,8 @@ export class NewUserPharmacistComponent implements OnInit {
     public regexPassword = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,}$/;
     public regexEmail = '^[a-z0-9._%+-]+@[a-z0-9.-]+[\.]{1}[a-z]{2,4}$';
     public minDate = new Date();
+    public captchaToken: string | null = null;
+    public siteKey = '0x4AAAAAAAhL2mZAyxFj63Dw';
 
     constructor(
         private fBuilder: FormBuilder,
@@ -42,7 +46,8 @@ export class NewUserPharmacistComponent implements OnInit {
             email: ['', Validators.required],
             businessName: [''],
             password: ['', Validators.required],
-            roleType: ['pharmacist', Validators.required]
+            roleType: ['pharmacist', Validators.required],
+            captcha: ['', Validators.required],
         });
     }
 
@@ -52,11 +57,16 @@ export class NewUserPharmacistComponent implements OnInit {
 
     onSubmitEvent(newUserForm: FormGroup, newUserNgForm: FormGroupDirective) {
     
-        if (this.newUserForm.valid) {
+        if (this.newUserForm.valid && this.captchaToken) {
             this.checkUser();
             const params = {
                 cuil: newUserForm.get('cuil').value
             }
+            const fromValue = {
+                ...this.newUserForm.value,
+                captcha: this.captchaToken
+            }
+            console.log(fromValue);
             this.pharmacistsService.getPharmacistByCuit(params).subscribe(res => {
                 if (res.length) {
                     const pharmacist = res[0];
@@ -127,5 +137,9 @@ export class NewUserPharmacistComponent implements OnInit {
 
     cancelar() {
         this.router.navigate(['/auth/login']);
+    }
+
+    onCaptchaResolved(token: string): void {
+        this.captchaToken = token;
     }
 }
