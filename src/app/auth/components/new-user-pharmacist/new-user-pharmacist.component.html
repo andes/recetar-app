@@ -66,14 +66,12 @@
       <div fxLayout="row">
         <ngx-turnstile
           [siteKey]="siteKey"
-          (resolved)="onCaptchaResolved($event)"
           formControlName="captcha"
           theme="light"
           required
         >
         </ngx-turnstile>
       </div>
-
       <div class="botones" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="0.5rem">
         <button mat-raised-button color="primary" type="submit" fxFlex.lg="25%" fxFlex.sm="100%">Crear</button>
         <button mat-raised-button color="warn" (click)="cancelar()" fxFlex.lg="25%" fxFlex.sm="100%">

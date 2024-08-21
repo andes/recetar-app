@@ -18,6 +18,7 @@ export class NewUserComponent implements OnInit {
     public roleSelected: 'professional';
     public regexPassword = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,}$/;
     public regexEmail = '^[a-z0-9._%+-]+@[a-z0-9.-]+[\.]{1}[a-z]{2,4}$';
+    public siteKey = '0x4AAAAAAAhL2mZAyxFj63Dw';
 
     constructor(
         private fBuilder: FormBuilder,
@@ -40,7 +41,8 @@ export class NewUserComponent implements OnInit {
             email: ['', Validators.required],
             businessName: [''],
             password: ['', Validators.required],
-            roleType: ['professional', Validators.required]
+            roleType: ['professional', Validators.required],
+            captcha: ['', Validators.required],
         });
     }
 
@@ -72,6 +74,10 @@ export class NewUserComponent implements OnInit {
                     });
                 }
             })
+        } else {
+            this._snackBar.open('Los campos deben estar completos y ser validos', 'cerrar', {
+                duration: 5000
+            })
         }
     }
 
@@ -86,7 +92,7 @@ export class NewUserComponent implements OnInit {
                 newUserForm.reset();
             },
                 err => {
-                    this._snackBar.open(`Ha ocurrido un error al intentar crear la cuenta: ${JSON.stringify(err.error)}'`, 'cerrar', {
+                    this._snackBar.open(`Ha ocurrido un error al intentar crear la cuenta: ${JSON.stringify(err)}'`, 'cerrar', {
                         duration: 5000
                     });
                 })

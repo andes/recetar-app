@@ -6,8 +6,6 @@ import { PharmacistsService } from '../../../services/pharmacists.service';
 import * as moment from 'moment';
 import { Router } from '@angular/router';
 
-
-
 @Component({
     selector: 'app-new-user',
     templateUrl: './new-user-pharmacist.component.html',
@@ -21,7 +19,6 @@ export class NewUserPharmacistComponent implements OnInit {
     public regexPassword = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,}$/;
     public regexEmail = '^[a-z0-9._%+-]+@[a-z0-9.-]+[\.]{1}[a-z]{2,4}$';
     public minDate = new Date();
-    public captchaToken: string | null = null;
     public siteKey = '0x4AAAAAAAhL2mZAyxFj63Dw';
 
     constructor(
@@ -57,16 +54,12 @@ export class NewUserPharmacistComponent implements OnInit {
 
     onSubmitEvent(newUserForm: FormGroup, newUserNgForm: FormGroupDirective) {
     
-        if (this.newUserForm.valid && this.captchaToken) {
+        if (this.newUserForm.valid) {
             this.checkUser();
             const params = {
                 cuil: newUserForm.get('cuil').value
             }
-            const fromValue = {
-                ...this.newUserForm.value,
-                captcha: this.captchaToken
-            }
-            console.log(fromValue);
+            console.log(this.newUserForm.value);
             this.pharmacistsService.getPharmacistByCuit(params).subscribe(res => {
                 if (res.length) {
                     const pharmacist = res[0];
@@ -95,6 +88,10 @@ export class NewUserPharmacistComponent implements OnInit {
                     });
                 }
             })
+        } else {
+            this._snackBar.open('Los campos deben estar completos y ser validos', 'cerrar', {
+                duration: 5000
+            })
         }
     }
 
@@ -109,7 +106,7 @@ export class NewUserPharmacistComponent implements OnInit {
                 newUserForm.reset();
             },
                 err => {
-                    this._snackBar.open(`Ha ocurrido un error al intentar crear la cuenta: ${JSON.stringify(err.error)}'`, 'cerrar', {
+                    this._snackBar.open(`Ha ocurrido un error al intentar crear la cuenta: ${JSON.stringify(err)}'`, 'cerrar', {
                         duration: 5000
                     });
                 })
@@ -137,9 +134,5 @@ export class NewUserPharmacistComponent implements OnInit {
 
     cancelar() {
         this.router.navigate(['/auth/login']);
-    }
-
-    onCaptchaResolved(token: string): void {
-        this.captchaToken = token;
     }
 }
