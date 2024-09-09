@@ -51,7 +51,7 @@ export class NewUserPharmacistComponent implements OnInit {
     }
 
     onSubmitEvent(newUserForm: FormGroup, newUserNgForm: FormGroupDirective) {
-    
+
         if (this.newUserForm.valid) {
             this.checkUser();
             const params = {
@@ -99,7 +99,7 @@ export class NewUserPharmacistComponent implements OnInit {
                 newUserForm.reset();
             },
                 err => {
-                    this._snackBar.open(`Ha ocurrido un error al intentar crear la cuenta: ${JSON.stringify(err.error)}'`, 'cerrar', {
+                    this._snackBar.open(`Ha ocurrido un error al intentar crear la cuenta: ${JSON.stringify(err)}'`, 'cerrar', {
                         duration: 5000
                     });
                 })

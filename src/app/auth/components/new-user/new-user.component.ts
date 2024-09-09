@@ -86,7 +86,7 @@ export class NewUserComponent implements OnInit {
                 newUserForm.reset();
             },
                 err => {
-                    this._snackBar.open(`Ha ocurrido un error al intentar crear la cuenta: ${JSON.stringify(err.error)}'`, 'cerrar', {
+                    this._snackBar.open(`Ha ocurrido un error al intentar crear la cuenta: ${JSON.stringify(err)}'`, 'cerrar', {
                         duration: 5000
                     });
                 })
