@@ -17,7 +17,10 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DialogComponent } from './components/dialog/dialog.component';
 import { NewUserComponent } from './components/new-user/new-user.component';
+import { NewUserPharmacistComponent } from './components/new-user-pharmacist/new-user-pharmacist.component';
 import { MatSelectModule } from '@angular/material/select';
+import {MatDatepickerModule} from '@angular/material/datepicker';
+
 
 
 
@@ -25,6 +28,7 @@ import { MatSelectModule } from '@angular/material/select';
   declarations: [
     routingComponents,
     NewUserComponent,
+    NewUserPharmacistComponent,
   ],
   imports: [
     CommonModule,
@@ -39,7 +43,8 @@ import { MatSelectModule } from '@angular/material/select';
     MatButtonModule,
     MatCardModule,
     MatProgressSpinnerModule,
-    MatSelectModule
+    MatSelectModule,
+    MatDatepickerModule
   ],
   providers: [
     AuthService,
