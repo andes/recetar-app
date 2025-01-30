@@ -35,6 +35,7 @@ export class ProfessionalFormComponent implements OnInit {
   storedSupplies: Supplies[] = [];
   patientSearch: Patient[];
   sex_options: string[] = ["Femenino", "Masculino", "Otro"];
+  genero_options: string[] = ['']
   today = new Date((new Date()));
   professionalData: any;
   readonly maxQSupplies: number = 2;
@@ -196,7 +197,7 @@ export class ProfessionalFormComponent implements OnInit {
       this.dniShowSpinner = false;
     }
   }
-  completePatientInputs(patient: Patient): void {
+  completePatientInputs(patient: Patient): void {// TODO: REC-38
     this.patientLastName.setValue(patient.lastName);
     this.patientFirstName.setValue(patient.firstName);
     this.patientSex.setValue(patient.sex);
