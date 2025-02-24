@@ -1,74 +1,84 @@
 <mat-card fxLayout="column" fxLayoutAlign="center" fxLayoutGap="10px" fxLayoutGap.xs="0">
-  <mat-card-header fxLayout="column" fxLayoutAlign="center center" class="logo" fxFlex="50%">
-    <img src="assets/img/LogoRecetar.png" class="icon-login">
-    <h1 class="title-login">RecetAR</h1>
-  </mat-card-header>
-  <mat-card-content fxFlex>
-    <form [formGroup]="newUserForm" #newUserNgForm="ngForm" (ngSubmit)="onSubmitEvent(newUserForm,newUserNgForm)"
-          class="form-container">
-      <mat-error *ngIf="error">
-        {{ error }}
-      </mat-error>
-      <mat-card-title>
-        <h2 class="text-center" fxLayoutAlign="center center">
-          <mat-icon>account_circle</mat-icon> <span>Registrar nueva farmacia</span>
-        </h2>
-      </mat-card-title>
-      <div fxLayout.lg="row" fxLayout.md="column" fxLayout.sm="column" fxLayout.xs="column" fxLayoutGap="0.5rem">
-        <!-- Nombre -->
-        <mat-form-field appearance="fill" fxFlex>
-          <mat-label>Nombre de la Farmacia</mat-label>
-          <input matInput formControlName="businessName" required>
-        </mat-form-field>
-        <!-- CUIT -->
-        <mat-form-field appearance="fill" fxFlex>
-          <mat-label>CUIT</mat-label>
-          <input matInput type="text" formControlName="cuil">
-        </mat-form-field>
-      </div>
-      <div fxLayout.lg="row" fxLayout.md="column" fxLayout.sm="column" fxLayout.xs="column" fxLayoutGap="0.5rem">
-        <!-- N° de Disposición -->
-        <mat-form-field appearance="fill" fxFlex>
-          <mat-label>N° Disposición de habilitación</mat-label>
-          <input matInput formControlName="disposicionHabilitacion" required>
-        </mat-form-field>
-        <!-- Fecha de vencimiento -->
-        <mat-form-field appearance="fill" fxFlex>
-          <mat-label>Fecha vencimiento de habilitación</mat-label>
-          <input matInput [min]="minDate" formControlName="vencimientoHabilitacion" [matDatepicker]="vencimientoHabilitacionPicker" readonly required>
-          <mat-datepicker-toggle matSuffix [for]="vencimientoHabilitacionPicker"></mat-datepicker-toggle>
-          <mat-datepicker #vencimientoHabilitacionPicker></mat-datepicker>
-          <mat-error *ngIf="newUserForm.get('vencimientoHabilitacion').errors">
-            Fecha incorrecta debe ser una fecha de vencimiento válida
-          </mat-error>
-        </mat-form-field>
-        <!-- Matricula DT Farmacia -->
-        <mat-form-field appearance="fill" fxFlex>
-          <mat-label>N° Matricula DT</mat-label>
-          <input matInput formControlName="enrollment" required>
-        </mat-form-field>
-      </div>
-      <div fxLayout.lg="row" fxLayout.md="column" fxLayout.sm="column" fxLayout.xs="column" fxLayoutGap="0.5rem">
-        <!-- Contraseña -->
-        <mat-form-field appearance="fill" fxFlex>
-          <mat-label>Contraseña</mat-label>
-          <input matInput formControlName="password" type="password" [pattern]="regexPassword" required>
-          <mat-error *ngIf="newUserForm.get('password').errors">
-            Contraseña incorrecta debe contener una mayúscula, una minúscula y un número
-          </mat-error>
-        </mat-form-field>
-        <!-- Email -->
-        <mat-form-field appearance="fill" fxFlex>
-          <mat-label>Email</mat-label>
-          <input matInput formControlName="email" [pattern]="regexEmail" required>
-        </mat-form-field>
-      </div>
-      <div class="botones" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="0.5rem">
-        <button mat-raised-button color="primary" type="submit" fxFlex.lg="25%" fxFlex.sm="100%">Crear</button>
-        <button mat-raised-button color="warn" (click)="cancelar()" fxFlex.lg="25%" fxFlex.sm="100%">
-          Cancelar
-        </button>
-      </div>
-    </form>
-  </mat-card-content>
+    <mat-card-header fxLayout="column" fxLayoutAlign="center center" class="logo" fxFlex="50%">
+        <img src="assets/img/LogoRecetar.png" class="icon-login">
+        <h1 class="title-login">RecetAR</h1>
+    </mat-card-header>
+    <mat-card-content fxFlex>
+        <form [formGroup]="newUserForm" #newUserNgForm="ngForm" (ngSubmit)="onSubmitEvent(newUserForm,newUserNgForm)"
+              class="form-container">
+            <mat-error *ngIf="error">
+                {{ error }}
+            </mat-error>
+            <mat-card-title>
+                <h2 class="text-center" fxLayoutAlign="center center">
+                    <mat-icon>account_circle</mat-icon> <span>Registrar nueva farmacia</span>
+                </h2>
+            </mat-card-title>
+            <div fxLayout.lg="row" fxLayout.md="column" fxLayout.sm="column" fxLayout.xs="column" fxLayoutGap="0.5rem">
+                <!-- Nombre -->
+                <mat-form-field appearance="fill" fxFlex>
+                    <mat-label>Nombre de la Farmacia</mat-label>
+                    <input matInput formControlName="businessName" required>
+                </mat-form-field>
+                <!-- CUIT -->
+                <mat-form-field appearance="fill" fxFlex>
+                    <mat-label>CUIT</mat-label>
+                    <input matInput type="text" formControlName="cuil" [pattern]="regexCuil" required>
+                    <mat-error *ngIf="newUserForm.get('cuil').errors">
+                        Formato incorrecto. Debe ingresar números xx-xxxxxxx-x
+                    </mat-error>
+                </mat-form-field>
+            </div>
+            <div fxLayout.lg="row" fxLayout.md="column" fxLayout.sm="column" fxLayout.xs="column" fxLayoutGap="0.5rem">
+                <!-- N° de Disposición -->
+                <mat-form-field appearance="fill" fxFlex>
+                    <mat-label>N° Disposición de habilitación</mat-label>
+                    <input matInput formControlName="disposicionHabilitacion" [pattern]="regexDispo" required>
+                    <mat-error *ngIf="newUserForm.get('disposicionHabilitacion').errors">
+                        Formato incorrecto. Debe ingresar números en formato xxxx/xx
+                    </mat-error>
+                </mat-form-field>
+                <!-- Fecha de vencimiento -->
+                <mat-form-field appearance="fill" fxFlex>
+                    <mat-label>Fecha vencimiento de habilitación</mat-label>
+                    <input matInput [min]="minDate" formControlName="vencimientoHabilitacion"
+                           [matDatepicker]="vencimientoHabilitacionPicker" readonly required>
+                    <mat-error *ngIf="newUserForm.get('vencimientoHabilitacion').errors">
+                        Fecha incorrecta debe ser una fecha de vencimiento válida
+                    </mat-error>
+                    <mat-datepicker-toggle matSuffix [for]="vencimientoHabilitacionPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #vencimientoHabilitacionPicker></mat-datepicker>
+                </mat-form-field>
+                <!-- Matricula DT Farmacia -->
+                <mat-form-field appearance="fill" fxFlex>
+                    <mat-label>N° Matricula Director Técnico</mat-label>
+                    <input matInput formControlName="enrollment" required>
+                </mat-form-field>
+            </div>
+            <div fxLayout.lg="row" fxLayout.md="column" fxLayout.sm="column" fxLayout.xs="column" fxLayoutGap="0.5rem">
+                <!-- Contraseña -->
+                <mat-form-field appearance="fill" fxFlex>
+                    <mat-label>Contraseña</mat-label>
+                    <input matInput formControlName="password" type="password" [pattern]="regexPassword" required>
+                    <mat-error *ngIf="newUserForm.get('password').errors">
+                        Contraseña incorrecta debe contener una mayúscula, una minúscula y un número
+                    </mat-error>
+                </mat-form-field>
+                <!-- Email -->
+                <mat-form-field appearance="fill" fxFlex>
+                    <mat-label>Email</mat-label>
+                    <input matInput formControlName="email" [pattern]="regexEmail" required>
+                    <mat-error *ngIf="newUserForm.get('email').errors">
+                        Formato incorrecto
+                    </mat-error>
+                </mat-form-field>
+            </div>
+            <div class="botones" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="0.5rem">
+                <button mat-raised-button color="primary" type="submit" fxFlex.lg="25%" fxFlex.sm="100%">Crear</button>
+                <button mat-raised-button color="warn" (click)="cancelar()" fxFlex.lg="25%" fxFlex.sm="100%">
+                    Cancelar
+                </button>
+            </div>
+        </form>
+    </mat-card-content>
 </mat-card>

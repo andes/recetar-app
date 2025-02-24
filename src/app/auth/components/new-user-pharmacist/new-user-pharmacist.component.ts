@@ -18,6 +18,8 @@ export class NewUserPharmacistComponent implements OnInit {
     public roleSelected: 'pharmacist';
     public regexPassword = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,}$/;
     public regexEmail = '^[a-z0-9._%+-]+@[a-z0-9.-]+[\.]{1}[a-z]{2,4}$';
+    public regexCuil = /^\d{2}-\d{8}-\d$/;
+    public regexDispo = /^\d+\/\d+$/;
     public minDate = new Date();
 
     constructor(
@@ -36,7 +38,7 @@ export class NewUserPharmacistComponent implements OnInit {
         this.newUserForm = this.fBuilder.group({
             cuil: [''],
             username: [''],
-            disposicionHabilitacion: [''],
+            disposicionHabilitacion: ['', Validators.required],
             enrollment: [''], //matriculaDTResponsable
             vencimientoHabilitacion: [''],
             email: ['', Validators.required],
@@ -47,7 +49,7 @@ export class NewUserPharmacistComponent implements OnInit {
     }
 
     checkUser() {
-        this.newUserForm.controls.username.setValue(this.newUserForm.get('cuil').value);
+        this.newUserForm.controls.username.setValue(this.newUserForm.get('email').value);
     }
 
     onSubmitEvent(newUserForm: FormGroup, newUserNgForm: FormGroupDirective) {
@@ -55,7 +57,8 @@ export class NewUserPharmacistComponent implements OnInit {
         if (this.newUserForm.valid) {
             this.checkUser();
             const params = {
-                cuil: newUserForm.get('cuil').value
+                cuil: newUserForm.get('cuil').value,
+                disposicionHabilitacion: newUserForm.get('disposicionHabilitacion').value
             }
             this.pharmacistsService.getPharmacistByCuit(params).subscribe(res => {
                 if (res.length) {
