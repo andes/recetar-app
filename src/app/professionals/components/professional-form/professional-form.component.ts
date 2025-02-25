@@ -321,8 +321,9 @@ export class ProfessionalFormComponent implements OnInit {
     this.supplySpinner.push({ show: false });
   }
 
-  deleteSupply(i) {
-    this.suppliesForm.removeAt(i);
+  deleteSupply(index: number) {
+    this.suppliesForm.removeAt(index);
+    this.supplySpinner.splice(index, 1);
   }
 
   // set form with prescriptions values and disabled npt editable fields

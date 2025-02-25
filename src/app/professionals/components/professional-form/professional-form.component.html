@@ -129,7 +129,7 @@
 
                   <div *ngFor="let control of suppliesForm.controls; let i=index" [formGroupName]="i">
                     <div fxLayout="row" fxLayoutGap="10px">
-                      <mat-form-field appearance="fill" fxFlex="80%">
+                      <mat-form-field appearance="fill" fxFlex="70%">
                         <mat-label>Medicamento</mat-label>
                         <input type="text" [tabIndex]="4 + i" placeholder="Medicamento" matInput formControlName="supply" required [matAutocomplete]="supplyref">
                         <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20" *ngIf="supplySpinner[i].show"></mat-spinner>
@@ -156,6 +156,12 @@
                           Debe ingresar un mínimo de {{control.get('quantity').errors?.min.min}}
                         </mat-error>
                       </mat-form-field>
+
+                      <button *ngIf="i>0" mat-icon-button color="warn" (click)="deleteSupply(i)" fxFlex="10%">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                      <div *ngIf="i===0" fxFlex="10%">
+                      </div>
                     </div>
                   </div>
                 </div>
