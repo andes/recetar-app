@@ -316,8 +316,9 @@ export class ProfessionalFormComponent implements OnInit {
         Validators.required,
         Validators.min(1)
       ]]
-    })
+    });
     this.suppliesForm.push(supplies);
+    this.supplySpinner.push({ show: false });
   }
 
   deleteSupply(i) {
