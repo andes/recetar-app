@@ -95,4 +95,8 @@ export class LoginComponent implements OnInit {
   newUser() {
     this.router.navigate(['/auth/new-user']);
   }
+
+  newUserPharmacist() {
+    this.router.navigate(['/auth/new-user-pharmacist'])
+  }
 }

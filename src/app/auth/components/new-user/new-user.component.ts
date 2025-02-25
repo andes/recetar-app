@@ -16,7 +16,7 @@ export class NewUserComponent implements OnInit {
     public newUserForm: FormGroup;
     public error: string;
     public roleSelected: 'professional';
-    public regexPassword = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
+    public regexPassword = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,}$/;
     public regexEmail = '^[a-z0-9._%+-]+@[a-z0-9.-]+[\.]{1}[a-z]{2,4}$';
 
     constructor(
@@ -67,7 +67,7 @@ export class NewUserComponent implements OnInit {
                         });
                     }
                 } else {
-                    this._snackBar.open('Profesional no se encuentra registrado, contactese con fiscalización para corroborar sus datos', 'cerrar', {
+                    this._snackBar.open('Profesional no se encuentra registrado, contáctese con fiscalización para corroborar sus datos', 'cerrar', {
                         duration: 5000
                     });
                 }
@@ -86,7 +86,7 @@ export class NewUserComponent implements OnInit {
                 newUserForm.reset();
             },
                 err => {
-                    this._snackBar.open(`Ha ocurrido un error al intentar crear la cuenta: ${JSON.stringify(err.error)}'`, 'cerrar', {
+                    this._snackBar.open(`Ha ocurrido un error al intentar crear la cuenta: ${JSON.stringify(err)}'`, 'cerrar', {
                         duration: 5000
                     });
                 })
