@@ -38,7 +38,7 @@ export class ProfessionalFormComponent implements OnInit {
   genero_options: string[] = ['']
   today = new Date((new Date()));
   professionalData: any;
-  readonly maxQSupplies: number = 2;
+  readonly maxQSupplies: number = 10;
   readonly spinnerColor: ThemePalette = 'primary';
   readonly spinnerDiameter: number = 30;
   isSubmit: boolean = false;
@@ -151,11 +151,7 @@ export class ProfessionalFormComponent implements OnInit {
             Validators.required,
             Validators.min(1)
           ]]
-        }),
-        this.fBuilder.group({
-          supply: [''],
-          quantity: ['']
-        }),
+        })
       ])
     });
     this.dni.nativeElement.focus();
@@ -314,13 +310,14 @@ export class ProfessionalFormComponent implements OnInit {
   }
 
   addSupply() {
-    if (this.suppliesForm.length < 2) {
-      const supplies = this.fBuilder.group({
-        supply: [''],
-        quantity: ['']
-      });
-      this.suppliesForm.push(supplies);
-    }
+    const supplies = this.fBuilder.group({
+      supply: ['', Validators.required],
+      quantity: ['', [
+        Validators.required,
+        Validators.min(1)
+      ]]
+    })
+    this.suppliesForm.push(supplies);
   }
 
   deleteSupply(i) {
