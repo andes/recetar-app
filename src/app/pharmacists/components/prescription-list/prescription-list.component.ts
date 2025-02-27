@@ -1,6 +1,8 @@
 import { Component, OnInit, Input, AfterContentInit, ViewChild } from '@angular/core';
 import { Prescriptions } from '@interfaces/prescriptions';
+import AndesPrescriptions from '@interfaces/andesPrescriptions';
 import { PrescriptionsService } from '@services/prescriptions.service';
+import { AndesPrescriptionsService } from '@services/andesPrescription.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
@@ -25,10 +27,11 @@ import { DialogReportComponent } from '../dialog-report/dialog-report.component'
 export class PrescriptionListComponent implements OnInit, AfterContentInit {
 
   @Input() prescriptions: Prescriptions[];
+  @Input() andesPrescriptions: AndesPrescriptions[];
 
   displayedColumns: string[] = ['professional', 'date', 'status', 'supplies', 'action', 'arrow'];
-  dataSource = new MatTableDataSource<Prescriptions>([]);
-  expandedElement: Prescriptions | null;
+  dataSource = new MatTableDataSource<any>([]);
+  expandedElement: Prescriptions | AndesPrescriptions | null;
   loadingPrescriptions: boolean;
   lapseTime: number = 2; // lapse of time that a dispensed prescription can been undo action, and put it back as "pendiente"
   pharmacistId: string;
@@ -42,11 +45,15 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
   constructor(
     private authService: AuthService,
     private prescriptionService: PrescriptionsService,
+    private andesPrescriptionService: AndesPrescriptionsService,
     private prescriptionPrinter: PrescriptionPrinterComponent,
     public dialog: MatDialog) { };
 
   ngOnInit(): void {
     this.loadingPrescriptions = true;
+    this.andesPrescriptionService.prescriptions.subscribe((prescriptions: AndesPrescriptions[]) => {
+      this.dataSource = new MatTableDataSource<AndesPrescriptions>(prescriptions);
+    });
     this.prescriptionService.prescriptions.subscribe((prescriptions: Prescriptions[]) => {
       this.dataSource = new MatTableDataSource<Prescriptions>(prescriptions);
       // sort after populate dataSource

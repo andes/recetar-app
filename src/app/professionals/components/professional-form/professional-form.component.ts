@@ -35,9 +35,10 @@ export class ProfessionalFormComponent implements OnInit {
   storedSupplies: Supplies[] = [];
   patientSearch: Patient[];
   sex_options: string[] = ["Femenino", "Masculino", "Otro"];
+  genero_options: string[] = ['']
   today = new Date((new Date()));
   professionalData: any;
-  readonly maxQSupplies: number = 2;
+  readonly maxQSupplies: number = 10;
   readonly spinnerColor: ThemePalette = 'primary';
   readonly spinnerDiameter: number = 30;
   isSubmit: boolean = false;
@@ -150,11 +151,7 @@ export class ProfessionalFormComponent implements OnInit {
             Validators.required,
             Validators.min(1)
           ]]
-        }),
-        this.fBuilder.group({
-          supply: [''],
-          quantity: ['']
-        }),
+        })
       ])
     });
     this.dni.nativeElement.focus();
@@ -196,7 +193,7 @@ export class ProfessionalFormComponent implements OnInit {
       this.dniShowSpinner = false;
     }
   }
-  completePatientInputs(patient: Patient): void {
+  completePatientInputs(patient: Patient): void {// TODO: REC-38
     this.patientLastName.setValue(patient.lastName);
     this.patientFirstName.setValue(patient.firstName);
     this.patientSex.setValue(patient.sex);
@@ -313,17 +310,20 @@ export class ProfessionalFormComponent implements OnInit {
   }
 
   addSupply() {
-    if (this.suppliesForm.length < 2) {
-      const supplies = this.fBuilder.group({
-        supply: [''],
-        quantity: ['']
-      });
-      this.suppliesForm.push(supplies);
-    }
+    const supplies = this.fBuilder.group({
+      supply: ['', Validators.required],
+      quantity: ['', [
+        Validators.required,
+        Validators.min(1)
+      ]]
+    });
+    this.suppliesForm.push(supplies);
+    this.supplySpinner.push({ show: false });
   }
 
-  deleteSupply(i) {
-    this.suppliesForm.removeAt(i);
+  deleteSupply(index: number) {
+    this.suppliesForm.removeAt(index);
+    this.supplySpinner.splice(index, 1);
   }
 
   // set form with prescriptions values and disabled npt editable fields
