@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 // Services
 import { PrescriptionsService } from '@services/prescriptions.service';
 import { InsurancesService } from '@services/insurance.service';
+import { AndesPrescriptionsService } from '@services/andesPrescription.service';
 
 // Interfaces
 import { Patient } from '@interfaces/patients';
@@ -44,6 +45,7 @@ export class PharmacistsFormComponent implements OnInit {
   constructor(
     private fBuilder: FormBuilder,
     private apiPrescriptions: PrescriptionsService,
+    private apiAndesPrescriptions: AndesPrescriptionsService,
     private apiInsurances: InsurancesService,
     public dialog: MatDialog,
   ){}
@@ -74,6 +76,14 @@ export class PharmacistsFormComponent implements OnInit {
             }
           );
 
+          this.apiAndesPrescriptions.getPrescriptionsFromAndes({patient_dni: values.patient_dni, patient_sex: values.patient_sexo}).subscribe(
+            success => {
+              if(!success){
+                this.openDialog("noPrescriptions");
+              }
+            }
+          );
+
           if(values.patient_dni !== this.lastDniConsult){
             this.lastDniConsult = values.patient_dni;
             this.apiInsurances.getInsuranceByPatientDni(values.patient_dni).subscribe(
@@ -93,6 +103,7 @@ export class PharmacistsFormComponent implements OnInit {
         Validators.required,
         Validators.minLength(7)
       ]],
+      patient_sexo: [''],
       dateFilter: ['', [
       ]],
     });
@@ -118,6 +129,10 @@ export class PharmacistsFormComponent implements OnInit {
 
   get patient_dni(): AbstractControl{
     return this.prescriptionForm.get('patient_dni');
+  }
+
+  get patient_sexo(): AbstractControl{
+    return this.prescriptionForm.get('patient_sexo');
   }
 
   get dateFilter(): AbstractControl{

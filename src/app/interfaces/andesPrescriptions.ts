@@ -1,8 +1,15 @@
 
+
+export class SnomedConcept {
+    conceptId: string;
+    term: string;
+    fsn: string;
+    semanticTag: string;
+}
 export class Dispensa {
     descripcion: string;
     cantidad: number;
-    medicamento: ISnomedConcept;
+    medicamento: SnomedConcept;
     presentacion: string;
     unidades: string;
     cantidadEnvases: number;
@@ -11,7 +18,7 @@ export class Dispensa {
         nombre: string;
     }
 }
-export default class PrescriptionAndes {
+export default class AndesPrescriptions {
     idAndes: string;
     organizacion: {
         id: string;
