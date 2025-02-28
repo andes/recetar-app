@@ -19,8 +19,11 @@ export class PrescriptionsService {
     this.myPrescriptions = new BehaviorSubject<Prescriptions[]>(this.prescriptionsArray);
   }
 
-  getPrescriptions(params): Observable<Prescriptions[]> {
-    return this.http.get<Prescriptions[]>(`${environment.API_END_POINT}/prescriptions`, {params});
+  getPrescriptions(params): Observable<boolean> {
+    return this.http.get(`${environment.API_END_POINT}/prescriptions`, {params}).pipe(
+      tap((prescriptions: Prescriptions[]) => this.setPrescriptions(prescriptions)),
+      map((prescriptions: Prescriptions[]) => prescriptions.length > 0)
+    );
   }
 
   getById(id: string): Observable<Prescriptions> {
@@ -43,8 +46,11 @@ export class PrescriptionsService {
     );
   }
 
-  getFromDniAndDate(params: { patient_dni: string, dateFilter: string }): Observable<Prescriptions[]> {
-    return this.http.get<Prescriptions[]>(`${environment.API_END_POINT}/prescriptions/find/${params.patient_dni}&${params.dateFilter}`);
+  getFromDniAndDate(params: { patient_dni: string, dateFilter: string }): Observable<boolean> {
+    return this.http.get<Prescriptions[]>(`${environment.API_END_POINT}/prescriptions/find/${params.patient_dni}&${params.dateFilter}`).pipe(
+      tap((prescriptions: Prescriptions[]) => this.setPrescriptions(prescriptions)),
+      map((prescriptions: Prescriptions[]) => prescriptions.length > 0)
+    );
   }
 
   getByUserId(userId: string): Observable<Boolean> {

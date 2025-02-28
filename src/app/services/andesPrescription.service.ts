@@ -19,8 +19,11 @@ export class AndesPrescriptionsService {
     this.myAndesPrescriptions = new BehaviorSubject<AndesPrescriptions[]>(this.andesPrescriptionsArray);
   }
 
-  getPrescriptionsFromAndes(params: { patient_dni: string, patient_sex: string }): Observable<AndesPrescriptions[]> {
-    return this.http.get<AndesPrescriptions[]>(`${environment.API_END_POINT}/andes-prescriptions/from-andes/?dni=${params.patient_dni}&sexo=${params.patient_sex}`);
+  getPrescriptionsFromAndes(params: { patient_dni: string, patient_sex: string }): Observable<boolean> {
+    return this.http.get(`${environment.API_END_POINT}/andes-prescriptions/from-andes/?dni=${params.patient_dni}&sexo=${params.patient_sex}`).pipe(
+      tap((prescriptions: AndesPrescriptions[]) => this.setPrescriptions(prescriptions)),
+      map((prescriptions: AndesPrescriptions[]) => prescriptions.length > 0)
+    );
   }
 
   getPrescriptions(params): Observable<boolean> {
@@ -115,7 +118,7 @@ export class AndesPrescriptionsService {
   }
 
   get prescriptions(): Observable<AndesPrescriptions[]> {
-    console.log('andesprecriptions')
+    console.log('andesprecription')
     return this.myAndesPrescriptions.asObservable();
   }
 }

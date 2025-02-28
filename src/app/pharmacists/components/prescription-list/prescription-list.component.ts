@@ -13,7 +13,7 @@ import { AuthService } from '@auth/services/auth.service';
 import { PrescriptionPrinterComponent } from '@pharmacists/components/prescription-printer/prescription-printer.component';
 import { detailExpand, arrowDirection } from '@animations/animations.template';
 import { DialogReportComponent } from '../dialog-report/dialog-report.component';
-import { forkJoin } from 'rxjs';
+import { combineLatest, forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-prescription-list',
@@ -26,10 +26,7 @@ import { forkJoin } from 'rxjs';
   providers: [PrescriptionPrinterComponent]
 })
 export class PrescriptionListComponent implements OnInit, AfterContentInit {
-
-  @Input() dni: string;
-  @Input() sexo: string;
-  @Input() date: string;
+  
 
   displayedColumns: string[] = ['professional', 'date', 'status', 'supplies', 'action'];
   dataSource = new MatTableDataSource<any>([]);
@@ -53,16 +50,15 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
 
   ngOnInit(): void {
     this.loadingPrescriptions = true;
-    console.log(this.andesPrescriptionService.prescriptions,
+    console.log('init',this.andesPrescriptionService.prescriptions,
       this.prescriptionService.prescriptions);
-
-
-    forkJoin([
-      this.prescriptionService.getFromDniAndDate({ patient_dni: this.dni, dateFilter: this.date }),
-      this.andesPrescriptionService.getPrescriptionsFromAndes({ patient_dni: this.dni, patient_sex: this.sexo })
+    combineLatest([
+      this.andesPrescriptionService.prescriptions,
+      this.prescriptionService.prescriptions
     ]).subscribe(([andesPrescriptions, prescriptions]) => {
-      console.log(andesPrescriptions, prescriptions);
-      this.dataSource.data = [...prescriptions, ...andesPrescriptions];
+      console.log('andes',andesPrescriptions);
+      console.log('recetar',prescriptions);
+      this.dataSource.data = [...andesPrescriptions, ...prescriptions];
       this.dataSource.sortingDataAccessor = (item, property) => {
         switch (property) {
           case 'patient': return item.patient.lastName + item.patient.firstName;
@@ -74,6 +70,9 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
       this.dataSource.paginator = this.paginator;
       this.loadingPrescriptions = false;
     });
+
+    this.pharmacistId = this.authService.getLoggedUserId();
+    this.isAdmin = this.authService.isAdminRole();
   }
 
   ngAfterContentInit() {

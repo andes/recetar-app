@@ -39,9 +39,9 @@ export class PharmacistsFormComponent implements OnInit {
   readonly spinnerColor: ThemePalette = 'primary';
   dniShowSpinner: boolean = false;
   dateShowSpinner: boolean = false;
-  lastDni: string;
-  lastSexo: string;
-  lastDate: string;
+  private lastDni: string;
+  private lastSexo: string;
+  private lastDate: string;
 
   constructor(
     private fBuilder: FormBuilder,
@@ -53,32 +53,39 @@ export class PharmacistsFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.initFilterPrescriptionForm();
-
-    
   }
 
   searchPrescriptions(): void {
     const values = this.prescriptionForm.value;
     const digestDate = typeof(values.dateFilter) !== 'undefined' && values.dateFilter != null && values.dateFilter !== '' ? values.dateFilter.format('YYYY-MM-DD') : '';
-    
-    this.lastDni = this.prescriptionForm.get('patient_dni').value;
-    this.lastSexo = this.prescriptionForm.get('patient_sexo').value;
-    this.lastDate = digestDate;
-    
 
-    // if (typeof(values.patient_dni) !== 'undefined' && values.patient_dni.length >= 7) {
-    //   this.dniShowSpinner = this.lastDni != values.patient_dni;
-    //   this.dateShowSpinner = this.lastDate != digestDate;
+    if (typeof(values.patient_dni) !== 'undefined' && values.patient_dni.length >= 7) {
+      this.dniShowSpinner = this.lastDni != values.patient_dni;
+      this.dateShowSpinner = this.lastDate != digestDate;
 
-    //   if (values.patient_dni !== this.lastDniConsult) {
-    //     this.lastDniConsult = values.patient_dni;
-    //     this.apiInsurances.getInsuranceByPatientDni(values.patient_dni).subscribe(
-    //       res => {
-    //         this.insurances = res;
-    //       }
-    //     );
-    //   }
-    // }
+      forkJoin([
+        this.apiPrescriptions.getFromDniAndDate({ patient_dni: values.patient_dni, dateFilter: digestDate }),
+        this.apiAndesPrescriptions.getPrescriptionsFromAndes({ patient_dni: values.patient_dni, patient_sex: values.patient_sexo })
+      ]).subscribe(([prescriptionsSuccess, andesPrescriptionsSuccess]) => {
+        this.lastDni = values.patient_dni;
+        this.lastDate = digestDate;
+        this.dniShowSpinner = false;
+        this.dateShowSpinner = false;
+        console.log(prescriptionsSuccess, andesPrescriptionsSuccess);
+        if (!prescriptionsSuccess && !andesPrescriptionsSuccess) {
+          this.openDialog("noPrescriptions");
+        }
+      });
+
+      if (values.patient_dni !== this.lastDniConsult) {
+        this.lastDniConsult = values.patient_dni;
+        this.apiInsurances.getInsuranceByPatientDni(values.patient_dni).subscribe(
+          res => {
+            this.insurances = res;
+          }
+        );
+      }
+    }
   }
 
   initFilterPrescriptionForm(){
