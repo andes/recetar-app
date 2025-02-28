@@ -13,6 +13,7 @@ import { AuthService } from '@auth/services/auth.service';
 import { PrescriptionPrinterComponent } from '@pharmacists/components/prescription-printer/prescription-printer.component';
 import { detailExpand, arrowDirection } from '@animations/animations.template';
 import { DialogReportComponent } from '../dialog-report/dialog-report.component';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-prescription-list',
@@ -26,10 +27,11 @@ import { DialogReportComponent } from '../dialog-report/dialog-report.component'
 })
 export class PrescriptionListComponent implements OnInit, AfterContentInit {
 
-  @Input() prescriptions: Prescriptions[];
-  @Input() andesPrescriptions: AndesPrescriptions[];
+  @Input() dni: string;
+  @Input() sexo: string;
+  @Input() date: string;
 
-  displayedColumns: string[] = ['professional', 'date', 'status', 'supplies', 'action', 'arrow'];
+  displayedColumns: string[] = ['professional', 'date', 'status', 'supplies', 'action'];
   dataSource = new MatTableDataSource<any>([]);
   expandedElement: Prescriptions | AndesPrescriptions | null;
   loadingPrescriptions: boolean;
@@ -51,12 +53,16 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
 
   ngOnInit(): void {
     this.loadingPrescriptions = true;
-    this.andesPrescriptionService.prescriptions.subscribe((prescriptions: AndesPrescriptions[]) => {
-      this.dataSource = new MatTableDataSource<AndesPrescriptions>(prescriptions);
-    });
-    this.prescriptionService.prescriptions.subscribe((prescriptions: Prescriptions[]) => {
-      this.dataSource = new MatTableDataSource<Prescriptions>(prescriptions);
-      // sort after populate dataSource
+    console.log(this.andesPrescriptionService.prescriptions,
+      this.prescriptionService.prescriptions);
+
+
+    forkJoin([
+      this.prescriptionService.getFromDniAndDate({ patient_dni: this.dni, dateFilter: this.date }),
+      this.andesPrescriptionService.getPrescriptionsFromAndes({ patient_dni: this.dni, patient_sex: this.sexo })
+    ]).subscribe(([andesPrescriptions, prescriptions]) => {
+      console.log(andesPrescriptions, prescriptions);
+      this.dataSource.data = [...prescriptions, ...andesPrescriptions];
       this.dataSource.sortingDataAccessor = (item, property) => {
         switch (property) {
           case 'patient': return item.patient.lastName + item.patient.firstName;
@@ -68,8 +74,6 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
       this.dataSource.paginator = this.paginator;
       this.loadingPrescriptions = false;
     });
-    this.pharmacistId = this.authService.getLoggedUserId();
-    this.isAdmin = this.authService.isAdminRole();
   }
 
   ngAfterContentInit() {
@@ -128,7 +132,6 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
       }
     );
   }
-
 
   // Show a dialog
   openDialog(aDialogType: string, aPrescription?: Prescriptions, aText?: string): void {
