@@ -53,6 +53,8 @@ export class LoginComponent implements OnInit {
             this.router.navigate(['/farmacias/recetas/dispensar']);
           } else if (this.authService.isProfessionalRole()) {
             this.router.navigate(['/profesionales/recetas/nueva']);
+          } else if (this.authService.isAuditRole()) {
+            this.router.navigate(['/audit/recetas/auditar']);
           }
           this.showSubmit = false;
         },
@@ -94,5 +96,9 @@ export class LoginComponent implements OnInit {
 
   newUser() {
     this.router.navigate(['/auth/new-user']);
+  }
+
+  newUserPharmacist() {
+    this.router.navigate(['/auth/new-user-pharmacist'])
   }
 }
