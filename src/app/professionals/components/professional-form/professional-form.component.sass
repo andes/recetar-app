@@ -52,9 +52,9 @@
 
   @media (min-width: $larger-devices) and (max-width: $xxx-larger-devices)
     .prescription-panel
-      width: 35%!important
+      width: 50%!important
     .my-prescriptions-panel
-      width: 65%!important
+      width: 50%!important
 
   @media (min-width: $small-devices) and (max-width: $larger-devices)
     flex-direction: column!important
@@ -64,6 +64,7 @@
       margin-bottom: 20px
       .first-block
         display: flex
+        flex-direction: column
         mat-form-field
           width: calc((100% - 10px) / 5)
           margin-right: 10px

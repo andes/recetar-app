@@ -37,7 +37,7 @@ export class AndesPrescriptionsService {
     return this.http.get<AndesPrescriptions>(`${environment.API_END_POINT}/prescriptions/${id}`);
   }
 
-  dispense(prescription: string, pharmacistId: string): Observable<boolean> {
+  dispense(prescription: AndesPrescriptions, pharmacistId: string): Observable<boolean> {
     const params = { 'prescription': prescription, 'pharmacistId': pharmacistId };
     return this.http.patch<AndesPrescriptions>(`${environment.API_END_POINT}/andes-prescriptions/dispense`, params).pipe(
       tap((updatedPrescription: AndesPrescriptions) => this.updatePrescription(updatedPrescription)),

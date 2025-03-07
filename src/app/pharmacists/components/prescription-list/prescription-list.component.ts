@@ -14,6 +14,7 @@ import { PrescriptionPrinterComponent } from '@pharmacists/components/prescripti
 import { detailExpand, arrowDirection } from '@animations/animations.template';
 import { DialogReportComponent } from '../dialog-report/dialog-report.component';
 import { combineLatest, forkJoin } from 'rxjs';
+import { TurnstileOptions } from '../../../shared/ngx-turnstile/interfaces/turnstile-options';
 
 @Component({
   selector: 'app-prescription-list',
@@ -28,9 +29,9 @@ import { combineLatest, forkJoin } from 'rxjs';
 export class PrescriptionListComponent implements OnInit, AfterContentInit {
   
 
-  displayedColumns: string[] = ['professional', 'date', 'status', 'supplies', 'action'];
+  displayedColumns: string[] = ['professional', 'date', 'status', 'supplies', 'action', 'arrow'];
   dataSource = new MatTableDataSource<any>([]);
-  expandedElement: Prescriptions | AndesPrescriptions | null;
+  expandedElement: Prescriptions | null;
   loadingPrescriptions: boolean;
   lapseTime: number = 2; // lapse of time that a dispensed prescription can been undo action, and put it back as "pendiente"
   pharmacistId: string;
@@ -111,14 +112,24 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
   }
 
   // Dispense prescription, but if was, update table with the correct status.
-  dispense(prescription: Prescriptions) {
-    this.prescriptionService.dispense(prescription._id, this.pharmacistId).subscribe(
-      success => {
-        if (success) {
-          this.openDialog("dispensed", prescription, prescription.professional.businessName);
+  dispense(prescription: Prescriptions | AndesPrescriptions) {
+    if (prescription instanceof Prescriptions) {
+      this.prescriptionService.dispense(prescription._id, this.pharmacistId).subscribe(
+        success => {
+          if (success) {
+            this.openDialog("dispensed", prescription, prescription.professional.businessName);
+          }
         }
-      }
-    );
+      );
+    } else if (prescription instanceof AndesPrescriptions) {
+      this.andesPrescriptionService.dispense(prescription, this.pharmacistId).subscribe(
+        success => {
+          if (success) {
+            //this.openDialog("dispensed", prescription, prescription.profesional.nombre);
+          }
+        }
+      );
+    }
   }
 
   // Dispense prescription, but if was, update table with the correct status.
@@ -149,16 +160,34 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
     return (prescription.status === "Dispensada") && (prescription.dispensedBy?.userId === this.authService.getLoggedUserId());
   }
 
-  canDispense(prescription: Prescriptions): boolean {
-    return (prescription.status === "Pendiente" && moment() >= moment(prescription.date));
+  canDispense(prescription: Prescriptions | AndesPrescriptions): boolean {
+    console.log('canDispense');
+    if (prescription instanceof Prescriptions) {
+      console.log('prescription');
+      return (prescription.status === "Pendiente" && moment() >= moment(prescription.date));
+    } else if (prescription instanceof AndesPrescriptions) {
+      console.log('andes');
+      return (prescription.estadoActual.tipo === "vigente");
+    } else {
+      return false;
+    }
   }
 
   printPrescription(prescription: Prescriptions) {
     this.prescriptionPrinter.print(prescription);
-  }
+  } 
 
-  isStatus(prescritpion: Prescriptions, status: string): boolean {
-    return prescritpion.status === status;
+  isStatus(prescription: Prescriptions | AndesPrescriptions, status: string): boolean {
+    console.log('isStatus',prescription);
+    if (prescription instanceof AndesPrescriptions) {
+      const tipo = prescription.estadoActual.tipo;
+      switch (tipo) {
+        case 'vigente': return status === 'Pendiente';
+        case 'finalizada': return status === 'Dispensada';
+      }
+    } else if (prescription instanceof Prescriptions) {
+      return prescription.status === status;
+    }
   }
 
   // Return boolean, accordding with dispensed time plus 2 hours is greater than now
