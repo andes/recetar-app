@@ -102,7 +102,7 @@
           <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
           <ng-container matColumnDef="expandedDetail">
             <td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumns.length">
-              <div class="element-detail"
+              <div *ngIf="'status' in element" class="element-detail"
                    [@detailExpand]="element._id == expandedElement?._id ? 'expanded' : 'collapsed'">
                 <div class="element-diagram">
                   <div class="supplies-list">
@@ -116,6 +116,23 @@
                   </div>
                   <div class="element-description" *ngIf="element.observation"> <span
                           class="description-title">Observaciones:</span> {{element.observation}}
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="'estadoActual' in element" class="element-detail"
+                   [@detailExpand]="element._id == expandedElement?._id ? 'expanded' : 'collapsed'">
+                <div class="element-diagram">
+                  <div class="supplies-list">
+                    <div class="supply-description">
+                      <span>{{ element.medicamento.concepto?.term }} x {{ element.medicamento.cantidad }}</span>
+                      <mat-chip>{{ element.medicamento.cantEnvases }}</mat-chip>
+                    </div>
+                  </div>
+                  <div class="element-description" *ngIf="element.diagnostico"> <span class="description-title">
+                      Diagnóstico:</span> {{element.diagnostico.term}}
+                  </div>
+                  <div class="element-description" *ngIf="element.medicamento.dosisDiaria.notaMedica"> <span
+                          class="description-title">Observaciones:</span> {{element.medicamento.dosisDiaria.notaMedica}}
                   </div>
                 </div>
               </div>

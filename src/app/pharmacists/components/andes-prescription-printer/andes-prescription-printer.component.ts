@@ -35,7 +35,7 @@ export class AndesPrescriptionPrinterComponent implements OnInit {
     pdf.add(pdf.ln(2));
     // Patient
     pdf.add(new Columns([ new Txt("Paciente").bold().end, new Txt("DNI").bold().end ]).end);
-    pdf.add(new Columns([ new Txt(""+prescription.paciente.nombre.toUpperCase()).end, new Txt(""+prescription.paciente.documento).end ]).end);
+    pdf.add(new Columns([ new Txt(""+prescription.paciente.apellido.toUpperCase()+", "+prescription.paciente.nombre.toUpperCase()).end, new Txt(""+prescription.paciente.documento).end ]).end);
     pdf.add(new Canvas([ new Line(10, [500, 10]).end ]).end);
     // Supplies
     pdf.add(pdf.ln(1));
