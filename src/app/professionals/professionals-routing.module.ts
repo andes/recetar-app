@@ -8,7 +8,6 @@ import { ProfessionalFormComponent } from '@professionals/components/professiona
 import { RoleProfessionalGuard } from '@auth/guards/role-professional.guard';
 import { ProfessionalDialogComponent } from '@professionals/components/professional-dialog/professional-dialog.component';
 import { PrescriptionPrinterComponent } from "@professionals/components/prescription-printer/prescription-printer.component";
-import { AndesPrescriptionPrinterComponent } from "@professionals/components/andes-prescription-printer/andes-prescription-printer.component";
 import { SupplyDialogComponent } from './components/supply-dialog/supply-dialog.component';
 
 const routes: Routes = [
@@ -41,6 +40,5 @@ export const routingComponents = [
   ProfessionalDialogComponent,
   SupplyDialogComponent,
   PrescriptionPrinterComponent,
-  AndesPrescriptionPrinterComponent,
   SupplyComponent
 ]

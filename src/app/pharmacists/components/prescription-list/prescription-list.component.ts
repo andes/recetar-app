@@ -14,7 +14,7 @@ import { PrescriptionPrinterComponent } from '@pharmacists/components/prescripti
 import { detailExpand, arrowDirection } from '@animations/animations.template';
 import { DialogReportComponent } from '../dialog-report/dialog-report.component';
 import { combineLatest } from 'rxjs';
-import { AndesPrescriptionPrinterComponent } from '@professionals/components/andes-prescription-printer/andes-prescription-printer.component';
+import { AndesPrescriptionPrinterComponent } from '@pharmacists/components/andes-prescription-printer/andes-prescription-printer.component';
 
 @Component({
   selector: 'app-prescription-list',
