@@ -35,23 +35,33 @@ export class AndesPrescriptionPrinterComponent implements OnInit {
     pdf.add(pdf.ln(2));
     // Patient
     pdf.add(new Columns([ new Txt("Paciente").bold().end, new Txt("DNI").bold().end ]).end);
-    pdf.add(new Columns([ new Txt(""+prescription.paciente.apellido.toUpperCase()+", "+prescription.paciente.nombre.toUpperCase()).end, new Txt(""+prescription.paciente.documento) .end ]).end);
+    pdf.add(new Columns([ new Txt(""+prescription.paciente.nombre.toUpperCase()).end, new Txt(""+prescription.paciente.documento).end ]).end);
     pdf.add(new Canvas([ new Line(10, [500, 10]).end ]).end);
     // Supplies
     pdf.add(pdf.ln(1));
-    prescription.dispensa.forEach(supply => {
-      supply.medicamento.forEach(medicamento => {
-        pdf.add(new Txt(""+medicamento.presentacion+", cantidad de envases: "+medicamento.cantidadEnvases).end);
-        pdf.add(new Txt("").end);
-      });
-    });
+    pdf.add(new Txt("Medicamento prescrito").bold().end);
+    if (prescription.medicamento.cantEnvases === 1){
+      pdf.add(new Txt("Un envase de").end);
+    } else if (prescription.medicamento.cantEnvases > 1) {
+      pdf.add(new Txt(""+prescription.medicamento.cantEnvases+" envases de").end);
+    }
+    pdf.add(new Txt(""+prescription.medicamento.concepto.term+" x "+prescription.medicamento.cantidad).end);
+    pdf.add(new Txt("Dosis: "+prescription.medicamento.dosisDiaria.dosis+`${typeof(prescription.medicamento.dosisDiaria.intervalo) === "string" ? ` por ${prescription.medicamento.dosisDiaria.intervalo}` : ""}`+". Duración tratamiento:"+prescription.medicamento.dosisDiaria.dias+" dia/s").end);
+    
+    pdf.add(new Txt("").end);
+    
     pdf.add(new Canvas([ new Line(10, [500, 10]).end]).end);
     if(prescription.diagnostico){
       pdf.add(pdf.ln(1));
       pdf.add(new Txt("Diagnóstico").bold().end);
       pdf.add(new Txt(""+prescription.diagnostico.term).end);
     }
-    if(prescription.dispensa){
+    if (prescription.medicamento.dosisDiaria.notaMedica){
+      pdf.add(pdf.ln(1));
+      pdf.add(new Txt("Nota medica").bold().end);
+      pdf.add(new Txt(""+prescription.medicamento.dosisDiaria.notaMedica).end);
+    }
+    if(prescription.dispensa.length>0){
       pdf.add(pdf.ln(1));
       pdf.add(new Txt("Observaciones").bold().end);
       prescription.dispensa.forEach(supply => {

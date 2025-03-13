@@ -24,7 +24,7 @@ import { AndesPrescriptionPrinterComponent } from '@pharmacists/components/andes
     detailExpand,
     arrowDirection
   ],
-  providers: [PrescriptionPrinterComponent]
+  providers: [PrescriptionPrinterComponent, AndesPrescriptionPrinterComponent]
 })
 export class PrescriptionListComponent implements OnInit, AfterContentInit {
   

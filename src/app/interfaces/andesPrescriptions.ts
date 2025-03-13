@@ -58,7 +58,7 @@ export default class AndesPrescriptions {
         }
         dosisDiaria: {
             dosis: string;
-            instervalo: {
+            intervalo: {
                 id: string;
                 key: string;
                 nombre: string;
