@@ -22,7 +22,7 @@ export class AndesPrescriptionPrinterComponent implements OnInit {
     const pdf: PdfMakeWrapper = new PdfMakeWrapper();
     pdf.info({
       title: "Receta digital "+prescription.profesional.nombre+", "+prescription.profesional.apellido,
-      author: 'RecetAR'
+      author: 'Andes'
     });
     // Header
     pdf.add(await new Img('assets/img/LogoPdf.jpg').fit([60, 60]).build());
@@ -62,7 +62,7 @@ export class AndesPrescriptionPrinterComponent implements OnInit {
     }
     pdf.add(pdf.ln(2));
 
-    pdf.footer(new Txt("Esta receta se registró en recetar.andes.gob.ar").italics().alignment('center').end);
+    pdf.footer(new Txt("Esta receta se registró en andes.gob.ar").italics().alignment('center').end);
 
     pdf.create().open();
   }
