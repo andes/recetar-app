@@ -122,7 +122,6 @@ export class PrescriptionsService {
   }
 
   get prescriptions(): Observable<Prescriptions[]> {
-    console.log('prescriptions')
     return this.myPrescriptions.asObservable();
   }
 }

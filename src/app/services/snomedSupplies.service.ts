@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { SnomedConcept } from '@interfaces/andesPrescriptions';
+import SnomedConcept from '@interfaces/snomedConcept';
 import { tap } from 'rxjs/operators';
 
 @Injectable({
@@ -30,14 +30,5 @@ export class SnomedSuppliesService {
       );
     }
   }
-
-  // get(term: string): Observable<SnomedConcept[]>{
-  //   const params = new HttpParams().set('supplyName', term);
-  //   return this.http.get<SnomedConcept[]>(`${environment.API_END_POINT}/supplies`, {params});
-  // }
-
-  // get supply(): Observable<SnomedConcept[]> {
-  //   return this.mySupplies.asObservable();
-  // }
 
 }

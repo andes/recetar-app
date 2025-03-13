@@ -118,7 +118,6 @@ export class AndesPrescriptionsService {
   }
 
   get prescriptions(): Observable<AndesPrescriptions[]> {
-    console.log('andesprecription')
     return this.myAndesPrescriptions.asObservable();
   }
 }

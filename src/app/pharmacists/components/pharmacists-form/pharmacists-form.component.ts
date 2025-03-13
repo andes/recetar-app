@@ -71,7 +71,6 @@ export class PharmacistsFormComponent implements OnInit {
         this.lastDate = digestDate;
         this.dniShowSpinner = false;
         this.dateShowSpinner = false;
-        console.log(prescriptionsSuccess, andesPrescriptionsSuccess);
         if (!prescriptionsSuccess && !andesPrescriptionsSuccess) {
           this.openDialog("noPrescriptions");
         }

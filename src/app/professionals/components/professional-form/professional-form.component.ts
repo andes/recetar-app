@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, AbstractControl, Validators, FormArray, FormGroupDirective } from '@angular/forms';
 import { Observable } from 'rxjs';
-import { SuppliesService } from '@services/supplies.service';
+// import { SuppliesService } from '@services/supplies.service';
 import { SnomedSuppliesService } from '@services/snomedSupplies.service';
 import ISnomedConcept from '@interfaces/supplies';
 import { PatientsService } from '@root/app/services/patients.service';
@@ -14,7 +14,8 @@ import { ProfessionalDialogComponent } from '@professionals/components/professio
 import { MatDialog } from '@angular/material/dialog';
 import { InteractionService } from '@professionals/interaction.service';
 import { step, stepLink } from '@animations/animations.template';
-import { SnomedConcept } from '@interfaces/andesPrescriptions';
+import SnomedConcept from '@interfaces/snomedConcept';
+import Supplies from '@interfaces/supplies';
 
 
 @Component({
@@ -29,13 +30,12 @@ import { SnomedConcept } from '@interfaces/andesPrescriptions';
 export class ProfessionalFormComponent implements OnInit {
   @ViewChild('dni', { static: true }) dni: any;
 
-  private supplyRequest: any = null;
   professionalForm: FormGroup;
 
   // filteredOptions: Observable<string[]>;
-  filteredSupplies: ISnomedConcept[] = [];
+  filteredSupplies: Supplies[] = [];
   // options: string[] = [];
-  storedSupplies: ISnomedConcept[] = [];
+  storedSupplies: Supplies[] = [];
   patientSearch: Patient[];
   sex_options: string[] = ["Femenino", "Masculino", "Otro"];
   genero_options: string[] = ['']
@@ -57,7 +57,7 @@ export class ProfessionalFormComponent implements OnInit {
   }
 
   constructor(
-    private suppliesService: SuppliesService,
+    // private suppliesService: SuppliesService,
     private snomedSuppliesService: SnomedSuppliesService,
     private fBuilder: FormBuilder,
     private apiPatients: PatientsService,
@@ -93,34 +93,17 @@ export class ProfessionalFormComponent implements OnInit {
 
     // subscribe to each supply field changes
     this.suppliesForm.controls.map((supplyControl, index) => {
-      supplyControl.get('supply').valueChanges.subscribe((supply: string | SnomedConcept) => {
-        if (typeof (supply) === 'string' && supply.length > 3) {
-          if (this.supplyRequest !== null) this.supplyRequest.unsubscribe();
-
+      supplyControl.get('supply.snomedConcept.term').valueChanges.subscribe((supply: string) => {
+        if (supply.length > 3) {
           this.supplySpinner[index] = { show: true };
-          this.filteredSupplies = this.storedSupplies.filter(item => item.term.toLowerCase().includes(supply.toLowerCase()));
+          this.filteredSupplies = this.storedSupplies.filter(item => item.snomedConcept.term.toLowerCase().includes(supply.toLowerCase()));
+        } else {
+          this.supplySpinner[index] = { show: false };
         }
-        // if (typeof (supply) === 'string' && supply.length > 3) {
-        //   if (this.supplyRequest !== null) this.supplyRequest.unsubscribe();
-
-        //   this.supplySpinner[index] = { show: true };
-        //   this.supplyRequest = this.suppliesService.getSupplyByTerm(encodeURIComponent(supply)).subscribe(
-        //     res => {
-        //       this.storedSupplies = res as Supplies[];
-        //       this.supplySpinner[index] = { show: false };
-        //     },
-        //   );
-        // } else if (typeof (supply) === 'object' || (typeof (supply) === 'string' && supply.length == 0)) {
-        //   this.storedSupplies = [];
-        // } else {
-        //   this.supplySpinner[index] = { show: false };
-        // }
         // add or remove closest quantity validation
         if (index > 0) this.onSuppliesAddControlQuantityValidators(index, (
-          ((typeof (supply) === 'string' && supply.length > 0) ||
-            (typeof (supply) === 'object')) &&
-          (typeof (supply) !== 'undefined' && supply !== null))
-        );
+          (supply.length > 0) || (typeof (supply) === 'object' && supply !== null)
+        ));
       });
     });
 
@@ -163,11 +146,24 @@ export class ProfessionalFormComponent implements OnInit {
       triplicado: [false],
       supplies: this.fBuilder.array([
         this.fBuilder.group({
-          supply: ['', Validators.required],
+          supply: this.fBuilder.group({
+            snomedConcept: this.fBuilder.group({
+              term: [''],
+              fsn: [''],
+              conceptId: [''],
+              semanticTag: ['']
+            }),
+            supply: [''],
+            quantity: [''],
+            _id: [''],
+            name: ['']
+          }),
           quantity: ['', [
             Validators.required,
             Validators.min(1)
-          ]]
+          ]],
+          diagnostic: [''],
+          indication: ['']
         })
       ])
     });
@@ -322,8 +318,8 @@ export class ProfessionalFormComponent implements OnInit {
     return patient.get('sex');
   }
 
-  displayFn(supply: SnomedConcept): string {
-    return supply && supply.term ? supply.term : '';
+  displayFn(supply: Supplies): string {
+    return supply && supply.snomedConcept && supply.snomedConcept.term ? supply.snomedConcept.term : '';
   }
 
   addSupply() {
@@ -332,7 +328,9 @@ export class ProfessionalFormComponent implements OnInit {
       quantity: ['', [
         Validators.required,
         Validators.min(1)
-      ]]
+      ]],
+      diagnostic: [''],
+      indication: ['']
     });
     this.suppliesForm.push(supplies);
     this.supplySpinner.push({ show: false });

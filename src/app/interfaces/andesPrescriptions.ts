@@ -1,15 +1,21 @@
+import SnomedConcept from './snomedConcept';
 
-
-export class SnomedConcept {
-    conceptId: string;
-    term: string;
-    fsn: string;
-    semanticTag: string;
+export class Medicamento {
+    cantidad: number;
+    descripcion: string;
+    medicamento: any;
+    presentacion: string;
+    unidades: string;
+    cantidadEnvases: number;
+    observacion?: {
+        type: string,
+    }
 }
+
 export class Dispensa {
     descripcion: string;
     cantidad: number;
-    medicamento: SnomedConcept;
+    medicamento: Medicamento[];
     presentacion: string;
     unidades: string;
     cantidadEnvases: number;

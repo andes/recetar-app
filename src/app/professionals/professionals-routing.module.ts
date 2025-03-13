@@ -6,7 +6,9 @@ import { ProfessionalsComponent } from '@professionals/professionals.component';
 import { SupplyComponent } from '@professionals/supply.component';
 import { ProfessionalFormComponent } from '@professionals/components/professional-form/professional-form.component';
 import { RoleProfessionalGuard } from '@auth/guards/role-professional.guard';
-import { ProfessionalDialogComponent } from '@professionals/components/professional-dialog/professional-dialog.component';import { PrescriptionPrinterComponent } from "@professionals/components/prescription-printer/prescription-printer.component";
+import { ProfessionalDialogComponent } from '@professionals/components/professional-dialog/professional-dialog.component';
+import { PrescriptionPrinterComponent } from "@professionals/components/prescription-printer/prescription-printer.component";
+import { AndesPrescriptionPrinterComponent } from "@professionals/components/andes-prescription-printer/andes-prescription-printer.component";
 import { SupplyDialogComponent } from './components/supply-dialog/supply-dialog.component';
 
 const routes: Routes = [
@@ -39,5 +41,6 @@ export const routingComponents = [
   ProfessionalDialogComponent,
   SupplyDialogComponent,
   PrescriptionPrinterComponent,
+  AndesPrescriptionPrinterComponent,
   SupplyComponent
 ]
