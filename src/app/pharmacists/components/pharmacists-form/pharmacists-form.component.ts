@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, AbstractControl, Validators } from '@angular/forms';
-import { Observable, forkJoin } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { Observable, combineLatest, forkJoin, of } from 'rxjs';
 
 // Services
 import { PrescriptionsService } from '@services/prescriptions.service';
@@ -64,8 +65,8 @@ export class PharmacistsFormComponent implements OnInit {
       this.dateShowSpinner = this.lastDate != digestDate;
 
       forkJoin([
-        this.apiPrescriptions.getFromDniAndDate({ patient_dni: values.patient_dni, dateFilter: digestDate }),
-        this.apiAndesPrescriptions.getPrescriptionsFromAndes({ patient_dni: values.patient_dni, patient_sex: values.patient_sexo })
+        this.apiPrescriptions.getFromDniAndDate({ patient_dni: values.patient_dni, dateFilter: digestDate }).pipe(catchError(() => of(false))),
+        this.apiAndesPrescriptions.getPrescriptionsFromAndes({ patient_dni: values.patient_dni, patient_sex: values.patient_sexo }).pipe(catchError(() => of(false)))
       ]).subscribe(([prescriptionsSuccess, andesPrescriptionsSuccess]) => {
         this.lastDni = values.patient_dni;
         this.lastDate = digestDate;
@@ -76,14 +77,14 @@ export class PharmacistsFormComponent implements OnInit {
         }
       });
 
-      if (values.patient_dni !== this.lastDniConsult) {
-        this.lastDniConsult = values.patient_dni;
-        this.apiInsurances.getInsuranceByPatientDni(values.patient_dni).subscribe(
-          res => {
-            this.insurances = res;
-          }
-        );
-      }
+      // if (values.patient_dni !== this.lastDniConsult) {
+      //   this.lastDniConsult = values.patient_dni;
+      //   this.apiInsurances.getInsuranceByPatientDni(values.patient_dni).subscribe(
+      //     res => {
+      //       this.insurances = res;
+      //     }
+      //   );
+      // }
     }
   }
 
