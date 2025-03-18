@@ -23,7 +23,7 @@ export class ProfessionalsService {
   //   }
 
   getProfessionalByDni(params): Observable<any> {
-    const url = `${environment.ANDES_API}/core/tm/profesionales/guia`
+    const url = `${environment.API_END_POINT}/auth/professionals-andes`
     return this.http.get(url, { params });
   }
 
