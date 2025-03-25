@@ -16,7 +16,12 @@ export class Prescriptions {
     businessName: string,
   };
   dispensedAt?: Date;
-  supplies: Array<{ supply: Supply, quantity: number }>;
+  supplies: Array<{ 
+    supply: Supply, 
+    quantity: number,
+    diagnostic?: string,
+    indication?: string 
+  }>;
   status: string;
   date: Date;
 
@@ -25,4 +30,5 @@ export class Prescriptions {
   createdAt?: Date;
   updatedAt?: Date;
   triple?: boolean;
+  triplicado?: boolean;
 }
