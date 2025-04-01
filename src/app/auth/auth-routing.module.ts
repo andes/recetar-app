@@ -9,6 +9,7 @@ import { DialogComponent } from '@auth/components/dialog/dialog.component';
 import { ForgotComponent } from '@auth/components/forgot/forgot.component';
 import { RecoveryComponent } from '@auth/components/recovery-password/recovery-password.component';
 import { NewUserComponent } from './components/new-user/new-user.component';
+import { NewUserPharmacistComponent } from './components/new-user-pharmacist/new-user-pharmacist.component';
 
 
 const routes: Routes = [
@@ -19,7 +20,7 @@ const routes: Routes = [
       {
         path: 'login',
         component: LoginComponent,
-        canActivate: [IsSignedInGuard]
+        canActivate: [IsSignedInGuard],
       },
       {
         path: 'reset-password',
@@ -31,12 +32,16 @@ const routes: Routes = [
       },
       {
         path: 'recovery-password/:token',
-        component: RecoveryComponent
+        component: RecoveryComponent,
       },
       {
         path: 'new-user',
-        component: NewUserComponent
-      }
+        component: NewUserComponent,
+      },
+      {
+        path: 'new-user-pharmacist',
+        component: NewUserPharmacistComponent,
+      },
     ]
   }
 ];

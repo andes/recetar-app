@@ -7,6 +7,7 @@ import { PharmacistsFormComponent } from '@pharmacists/components/pharmacists-fo
 import { DialogComponent } from '@pharmacists/components/dialog/dialog.component';
 import { RolePharmacistGuard } from '@auth/guards/role-pharmacist.guard';
 import { PrescriptionPrinterComponent } from '@pharmacists/components/prescription-printer/prescription-printer.component';
+import { AndesPrescriptionPrinterComponent } from './components/andes-prescription-printer/andes-prescription-printer.component';
 
 const routes: Routes = [
   {
@@ -32,5 +33,6 @@ export const routingComponent = [
   PharmacistsComponent,
   PharmacistsFormComponent,
   DialogComponent,
-  PrescriptionPrinterComponent
+  PrescriptionPrinterComponent,
+  AndesPrescriptionPrinterComponent
 ]
