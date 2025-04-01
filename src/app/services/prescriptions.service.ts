@@ -20,7 +20,7 @@ export class PrescriptionsService {
   }
 
   getPrescriptions(params): Observable<boolean> {
-    return this.http.get(`${environment.API_END_POINT}/prescriptions`, {params}).pipe(
+    return this.http.get(`${environment.API_END_POINT}/prescriptions`, { params }).pipe(
       tap((prescriptions: Prescriptions[]) => this.setPrescriptions(prescriptions)),
       map((prescriptions: Prescriptions[]) => prescriptions.length > 0)
     );
