@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { Prescriptions } from "../interfaces/prescriptions";
 import { tap, mapTo, map } from 'rxjs/operators';
@@ -17,13 +17,6 @@ export class PrescriptionsService {
 
   constructor(private http: HttpClient) {
     this.myPrescriptions = new BehaviorSubject<Prescriptions[]>(this.prescriptionsArray);
-  }
-
-  getPrescriptions(params): Observable<boolean> {
-    return this.http.get(`${environment.API_END_POINT}/prescriptions`, {params}).pipe(
-      tap((prescriptions: Prescriptions[]) => this.setPrescriptions(prescriptions)),
-      map((prescriptions: Prescriptions[]) => prescriptions.length > 0)
-    );
   }
 
   getById(id: string): Observable<Prescriptions> {
