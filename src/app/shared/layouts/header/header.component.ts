@@ -12,14 +12,12 @@ export class HeaderComponent implements OnInit {
 
   isLoggedIn$: Observable<boolean>;
   businessName$: Observable<string>;
-  isAuditRole$: Observable<boolean>;
 
   constructor(private authService: AuthService, private router: Router) { }
 
   ngOnInit(): void {
     this.isLoggedIn$ = this.authService.isLoggedIn;
     this.businessName$ = this.authService.getBusinessName;
-    this.isAuditRole$ = this.authService.getIsAudit;
   }
 
   logout(){

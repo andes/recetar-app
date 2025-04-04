@@ -16,9 +16,8 @@ export class NewUserComponent implements OnInit {
     public newUserForm: FormGroup;
     public error: string;
     public roleSelected: 'professional';
-    public regexPassword = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,}$/;
+    public regexPassword = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
     public regexEmail = '^[a-z0-9._%+-]+@[a-z0-9.-]+[\.]{1}[a-z]{2,4}$';
-    public siteKey = '0x4AAAAAAAhL2mZAyxFj63Dw';
 
     constructor(
         private fBuilder: FormBuilder,
@@ -41,8 +40,7 @@ export class NewUserComponent implements OnInit {
             email: ['', Validators.required],
             businessName: [''],
             password: ['', Validators.required],
-            roleType: ['professional', Validators.required],
-            captcha: ['', Validators.required],
+            roleType: ['professional', Validators.required]
         });
     }
 
@@ -69,14 +67,10 @@ export class NewUserComponent implements OnInit {
                         });
                     }
                 } else {
-                    this._snackBar.open('Profesional no se encuentra registrado, contáctese con fiscalización para corroborar sus datos', 'cerrar', {
+                    this._snackBar.open('Profesional no se encuentra registrado, contactese con fiscalización para corroborar sus datos', 'cerrar', {
                         duration: 5000
                     });
                 }
-            })
-        } else {
-            this._snackBar.open('Los campos deben estar completos y ser validos', 'cerrar', {
-                duration: 5000
             })
         }
     }
@@ -92,7 +86,7 @@ export class NewUserComponent implements OnInit {
                 newUserForm.reset();
             },
                 err => {
-                    this._snackBar.open(`Ha ocurrido un error al intentar crear la cuenta: ${JSON.stringify(err)}'`, 'cerrar', {
+                    this._snackBar.open(`Ha ocurrido un error al intentar crear la cuenta: ${JSON.stringify(err.error)}'`, 'cerrar', {
                         duration: 5000
                     });
                 })
