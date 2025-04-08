@@ -81,8 +81,8 @@
                         matTooltip="Dispensar" matTooltipPosition="above">
                   <mat-icon>done_outline</mat-icon>
                 </button>
-                <app-prescription-undo *ngIf="element.status === 'Dispensada' && (element.dispensedBy?.userId === pharmacistId || isAdmin)"
-                                       [dispensedAt]="element.dispensedAt" [prescriptionId]="element._id"
+                <app-prescription-undo *ngIf="canCounterMap.get(element._id)"
+                                       [dispensedAt]="element.dispensedAt || element.estadoActual?.createdAt" [prescriptionId]="element._id"
                                        [lapseTime]="lapseTime" (cancelDispenseEvent)="cancelDispense($event)">
                 </app-prescription-undo>
               </div>
