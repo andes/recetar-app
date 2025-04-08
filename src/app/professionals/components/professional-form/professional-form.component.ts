@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, AbstractControl, Validators, FormArray, FormGroupDirective } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 // import { SuppliesService } from '@services/supplies.service';
 import { SnomedSuppliesService } from '@services/snomedSupplies.service';
 import ISnomedConcept from '@interfaces/supplies';
@@ -16,6 +16,7 @@ import { InteractionService } from '@professionals/interaction.service';
 import { step, stepLink } from '@animations/animations.template';
 import SnomedConcept from '@interfaces/snomedConcept';
 import Supplies from '@interfaces/supplies';
+import { catchError, debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
 
 
 @Component({
@@ -33,9 +34,10 @@ export class ProfessionalFormComponent implements OnInit {
   professionalForm: FormGroup;
 
   // filteredOptions: Observable<string[]>;
-  filteredSupplies: Supplies[] = [];
+  filteredSupplies = [];
+  request;
   // options: string[] = [];
-  storedSupplies: Supplies[] = [];
+  storedSupplies = [];
   patientSearch: Patient[];
   sex_options: string[] = ["Femenino", "Masculino", "Otro"];
   genero_options: string[] = ['']
@@ -68,14 +70,8 @@ export class ProfessionalFormComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.snomedSuppliesService.get().subscribe((res) => {
-      console.log(res);
-      this.storedSupplies = res;
-      this.filteredSupplies = res;
-    });
 
     this.initProfessionalForm();
-
     // On confirm delete prescription
     this._interactionService.deletePrescription$
       .subscribe(
@@ -90,22 +86,6 @@ export class ProfessionalFormComponent implements OnInit {
         this.getPatientByDni(dniValue);
       }
     );
-
-    // subscribe to each supply field changes
-    this.suppliesForm.controls.map((supplyControl, index) => {
-      supplyControl.get('supply.snomedConcept.term').valueChanges.subscribe((supply: string) => {
-        if (supply.length > 3) {
-          this.supplySpinner[index] = { show: true };
-          this.filteredSupplies = this.storedSupplies.filter(item => item.snomedConcept.term.toLowerCase().includes(supply.toLowerCase()));
-        } else {
-          this.supplySpinner[index] = { show: false };
-        }
-        // add or remove closest quantity validation
-        if (index > 0) this.onSuppliesAddControlQuantityValidators(index, (
-          (supply.length > 0) || (typeof (supply) === 'object' && supply !== null)
-        ));
-      });
-    });
 
     // get prescriptions
     this.apiPrescriptions.getByUserId(this.authService.getLoggedUserId()).subscribe(
@@ -140,34 +120,11 @@ export class ProfessionalFormComponent implements OnInit {
       date: [this.today, [
         Validators.required
       ]],
-      diagnostic: [''],
-      observation: [''],
       triple: [false],
-      triplicado: [false],
-      supplies: this.fBuilder.array([
-        this.fBuilder.group({
-          supply: this.fBuilder.group({
-            snomedConcept: this.fBuilder.group({
-              term: [''],
-              fsn: [''],
-              conceptId: [''],
-              semanticTag: ['']
-            }),
-            supply: [''],
-            quantity: [''],
-            _id: [''],
-            name: ['']
-          }),
-          quantity: ['', [
-            Validators.required,
-            Validators.min(1)
-          ]],
-          diagnostic: [''],
-          indication: ['']
-        })
-      ])
+      supplies: this.fBuilder.array([])
     });
-    this.dni.nativeElement.focus();
+    this.addSupply();
+    //this.dni.nativeElement.focus();
   }
 
 
@@ -186,7 +143,6 @@ export class ProfessionalFormComponent implements OnInit {
 
   getPatientByDni(dniValue: string | null): void {
     if (dniValue !== null && (dniValue.length == 7 || dniValue.length == 8)) {
-      console.log("DBI");
       this.dniShowSpinner = true;
       this.apiPatients.getPatientByDni(dniValue).subscribe(
         res => {
@@ -225,7 +181,7 @@ export class ProfessionalFormComponent implements OnInit {
             if (success) this.formReset(professionalNgForm);
           },
           err => {
-            this.handleSupplyError(err);
+            //this.handleSupplyError(err);
           });
 
       } else {
@@ -235,7 +191,7 @@ export class ProfessionalFormComponent implements OnInit {
             if (success) this.formReset(professionalNgForm);
           },
           err => {
-            this.handleSupplyError(err);
+            //this.handleSupplyError(err);
           });
       }
     }
@@ -318,22 +274,74 @@ export class ProfessionalFormComponent implements OnInit {
     return patient.get('sex');
   }
 
-  displayFn(supply: Supplies): string {
-    return supply && supply.snomedConcept && supply.snomedConcept.term ? supply.snomedConcept.term : '';
+  displayFn(supply): string {
+    return supply ? supply : '';
+  }
+  onSupplySelected(supply, index: number) {
+    const control = this.suppliesForm.at(index); // Obtiene el FormGroup en la posición del array
+    const supplyControl = control.get('supply');
+
+    // Actualiza el valor del 'supply' con el 'term' en el 'name'
+    supplyControl.get('name').setValue(supply.term);  // Actualiza solo el 'term' en 'name'
+
+    // También actualizamos el 'snomedConcept' completo con todos los campos
+    supplyControl.setValue({
+      name: supply.term,  // Solo el 'term' va en 'name'
+      snomedConcept: {
+        term: supply.term,
+        fsn: supply.fsn,
+        conceptId: supply.conceptId,
+        semanticTag: supply.semanticTag
+      }
+    });
   }
 
   addSupply() {
     const supplies = this.fBuilder.group({
-      supply: ['', Validators.required],
+      supply: this.fBuilder.group({
+        name: ['', [
+          Validators.required
+        ]],
+        snomedConcept:
+          this.fBuilder.group({
+            term: [''],
+            fsn: [''],
+            conceptId: [''],
+            semanticTag: ['']
+          }),
+      }),
       quantity: ['', [
         Validators.required,
         Validators.min(1)
       ]],
       diagnostic: [''],
-      indication: ['']
+      indication: [''],
+      duplicate: [false],
+      triplicate: [false]
     });
     this.suppliesForm.push(supplies);
     this.supplySpinner.push({ show: false });
+    this.subscribeToSupplyChanges(supplies, this.suppliesForm.length - 1);
+  }
+
+  subscribeToSupplyChanges(control: FormGroup, index: number) {
+    control.get('supply.name').valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      filter((supply: string) => typeof supply === 'string' && supply.length > 3),
+      switchMap((supply: string) => {
+        this.supplySpinner[index] = { show: true };
+        return this.snomedSuppliesService.get(supply).pipe(
+          catchError(() => {
+            this.supplySpinner[index] = { show: false };
+            return of([]);
+          })
+        );
+      })
+    ).subscribe((res) => {
+      this.supplySpinner[index] = { show: false };
+      this.filteredSupplies = [...res];
+    });
   }
 
   deleteSupply(index: number) {
