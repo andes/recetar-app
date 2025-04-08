@@ -18,17 +18,8 @@ export class SnomedSuppliesService {
     this.mySupplies = new BehaviorSubject<any[]>(this.suppliesArray);
   }
 
-  get(): Observable<any[]> {
-    if (this.dataLoaded) {
-      return this.mySupplies.asObservable();
-    } else {
-      return this.http.get<any[]>(`${environment.API_END_POINT}/snomed/supplies`).pipe(
-        tap((supplies: any[]) => {
-          this.mySupplies.next(supplies);
-          this.dataLoaded = true;
-        })
-      );
-    }
+  get(params): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.API_END_POINT}/snomed/supplies?search=${params}`);
   }
 
 }
