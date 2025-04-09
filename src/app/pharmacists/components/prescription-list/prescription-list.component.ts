@@ -41,6 +41,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
 
   canDispenseMap = new Map<string, boolean>();
   isStatusMap = new Map<string, boolean>();
+  canCounterMap = new Map<string, boolean>();
 
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -136,13 +137,23 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
 
   // Dispense prescription, but if was, update table with the correct status.
   cancelDispense(e) {
-    this.prescriptionService.cancelDispense(e, this.pharmacistId).subscribe(
-      success => {
-        if (success) {
-          this.openDialog("cancel-dispensed");
+    if ("status" in e) {
+      this.prescriptionService.cancelDispense(e._id, this.pharmacistId).subscribe(
+        success => {
+          if (success) {
+            this.openDialog("cancel-dispensed", e);
+          }
         }
-      }
-    );
+      );
+    } else if ("estadoActual" in e) {
+      this.andesPrescriptionService.cancelDispense(e._id, this.pharmacistId).subscribe(
+        success => {
+          if (success) {
+            this.openDialog("cancel-dispensed", e);
+          }
+        }
+      );
+    }
   }
 
   // Show a dialog
@@ -229,6 +240,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
     this.dataSource.data.forEach(prescription => {
       this.canDispenseMap.set(prescription._id, this.calculateCanDispense(prescription));
       this.isStatusMap.set(prescription._id, this.calculateIsStatus(prescription, 'Vencida'));
+      this.canCounterMap.set(prescription._id, this.calculateCanCounter(prescription));
     });
   }
 
@@ -250,4 +262,16 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
     return false;
   }
 
+  calculateCanCounter(prescription: Prescriptions | AndesPrescriptions): boolean {
+    if ("status" in prescription) {
+      return prescription.status === 'Dispensada' &&
+        typeof prescription.dispensedAt !== 'undefined' &&
+        prescription.dispensedBy?.userId === this.pharmacistId;
+    } else if ("estadoActual" in prescription) {
+      return prescription.estadoActual.tipo === 'finalizada' &&
+        typeof prescription.estadoActual.createdAt !== 'undefined' &&
+        prescription.dispensa[0].organizacion.id === this.pharmacistId;
+    }
+    return false;
+  }
 }

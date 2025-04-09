@@ -133,10 +133,11 @@ export default class AndesPrescriptions {
         obraSocial: {
             codigoPuco: number;
             nombre: string;
-            financiador: string;
-            origen: string;
-            fechaActualizacion: Date;
-            prepaga: Boolean;
+            financiador?: string;
+            origen?: string;
+            fechaActualizacion?: Date;
+            prepaga?: Boolean;
+            numeroAfiliado?: string;
         }
         genero: string;
         nombreCompleto: string,
