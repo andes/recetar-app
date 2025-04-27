@@ -81,8 +81,8 @@
                         matTooltip="Dispensar" matTooltipPosition="above">
                   <mat-icon>done_outline</mat-icon>
                 </button>
-                <app-prescription-undo *ngIf="element.status === 'Dispensada' && (element.dispensedBy?.userId === pharmacistId || isAdmin)"
-                                       [dispensedAt]="element.dispensedAt" [prescriptionId]="element._id"
+                <app-prescription-undo *ngIf="canCounterMap.get(element._id)"
+                                       [dispensedAt]="element.dispensedAt || element.estadoActual?.createdAt" [prescriptionId]="element._id"
                                        [lapseTime]="lapseTime" (cancelDispenseEvent)="cancelDispense($event)">
                 </app-prescription-undo>
               </div>
@@ -102,8 +102,7 @@
           <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
           <ng-container matColumnDef="expandedDetail">
             <td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumns.length">
-              <div *ngIf="'status' in element" class="element-detail"
-                   [@detailExpand]="element._id == expandedElement?._id ? 'expanded' : 'collapsed'">
+              <div *ngIf="element?.status" class="element-detail" [@detailExpand]="element._id == expandedElement?._id ? 'expanded' : 'collapsed'">
                 <div class="element-diagram">
                   <div class="supplies-list">
                     <div class="supply-description" *ngFor="let supp of element.supplies">
@@ -119,20 +118,19 @@
                   </div>
                 </div>
               </div>
-              <div *ngIf="'estadoActual' in element" class="element-detail"
-                   [@detailExpand]="element._id == expandedElement?._id ? 'expanded' : 'collapsed'">
+              <div *ngIf="element?.estadoActual" class="element-detail" [@detailExpand]="element._id == expandedElement?._id ? 'expanded' : 'collapsed'">
                 <div class="element-diagram">
                   <div class="supplies-list">
                     <div class="supply-description">
-                      <span>{{ element.medicamento?.concepto?.term }} x {{ element.medicamento.cantidad }}</span>
-                      <mat-chip>{{ element.medicamento.cantEnvases }}</mat-chip>
+                      <span>{{ element.medicamento?.concepto?.term }} x {{ element.medicamento?.cantidad }}</span>
+                      <mat-chip>{{ element.medicamento?.cantEnvases }}</mat-chip>
                     </div>
                   </div>
                   <div class="element-description" *ngIf="element.diagnostico"> <span class="description-title">
-                      Diagnóstico:</span> {{element.diagnostico.term}}
+                      Diagnóstico:</span> {{element.diagnostico?.term}}
                   </div>
-                  <div class="element-description" *ngIf="element.medicamento.dosisDiaria.notaMedica"> <span
-                          class="description-title">Observaciones:</span> {{element.medicamento.dosisDiaria.notaMedica}}
+                  <div class="element-description" *ngIf="element.medicamento?.dosisDiaria?.notaMedica"> <span
+                          class="description-title">Observaciones:</span> {{element.medicamento?.dosisDiaria?.notaMedica}}
                   </div>
                 </div>
               </div>

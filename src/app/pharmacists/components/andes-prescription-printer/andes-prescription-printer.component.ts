@@ -36,6 +36,12 @@ export class AndesPrescriptionPrinterComponent implements OnInit {
     // Patient
     pdf.add(new Columns([ new Txt("Paciente").bold().end, new Txt("DNI").bold().end ]).end);
     pdf.add(new Columns([ new Txt(""+prescription.paciente.apellido.toUpperCase()+", "+prescription.paciente.nombre.toUpperCase()).end, new Txt(""+prescription.paciente.documento).end ]).end);
+    // Insurance
+    if (prescription.paciente.obraSocial.nombre && prescription.paciente.obraSocial.numeroAfiliado){
+      pdf.add(pdf.ln(1));
+      pdf.add(new Columns([ new Txt("Obra social").bold().end, new Txt("N° afiliado/a").bold().end ]).end);
+      pdf.add(new Columns([ new Txt(""+prescription.paciente.obraSocial.nombre).end, new Txt(""+prescription.paciente.obraSocial.numeroAfiliado).end ]).end);
+    }
     pdf.add(new Canvas([ new Line(10, [500, 10]).end ]).end);
     // Supplies
     pdf.add(pdf.ln(1));
