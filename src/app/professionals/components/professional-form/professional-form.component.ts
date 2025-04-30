@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, AbstractControl, Validators, FormArray, FormGroupDirective, FormControl } from '@angular/forms';
 import { Observable, of } from 'rxjs';
-// import { SuppliesService } from '@services/supplies.service';
 import { SnomedSuppliesService } from '@services/snomedSupplies.service';
 import ISnomedConcept from '@interfaces/supplies';
 import { PatientsService } from '@root/app/services/patients.service';
@@ -49,7 +48,6 @@ export class ProfessionalFormComponent implements OnInit {
   @ViewChild('dni', { static: true }) dni: any;
 
   professionalForm: FormGroup;
-
   filteredSupplies = [];
   request;
   storedSupplies = [];
@@ -77,7 +75,6 @@ export class ProfessionalFormComponent implements OnInit {
   otraOS: boolean = false;
 
   constructor(
-    // private suppliesService: SuppliesService,
     private snomedSuppliesService: SnomedSuppliesService,
     private fBuilder: FormBuilder,
     private apiPatients: PatientsService,
@@ -90,22 +87,17 @@ export class ProfessionalFormComponent implements OnInit {
   ngOnInit(): void {
 
     this.initProfessionalForm();
-    // On confirm delete prescription
     this._interactionService.deletePrescription$
       .subscribe(
         prescription => {
           this.deletePrescription(prescription);
         }
       );
-
-    // on DNI changes
     this.patientDni.valueChanges.subscribe(
       dniValue => {
         this.getPatientByDni(dniValue);
       }
     );
-
-    // get prescriptions
     this.apiPrescriptions.getByUserId(this.authService.getLoggedUserId()).subscribe(
       res => {
         // this.myPrescriptions = res;
@@ -131,6 +123,7 @@ export class ProfessionalFormComponent implements OnInit {
       os.nombre.toLowerCase().includes(filterValue)
     );
   }
+
 
   initProfessionalForm() {
     this.today = new Date((new Date()));
@@ -163,11 +156,10 @@ export class ProfessionalFormComponent implements OnInit {
       date: [this.today, [
         Validators.required
       ]],
-      triple: [false],
+      trimestral: [false],
       supplies: this.fBuilder.array([])
     });
     this.addSupply();
-    //this.dni.nativeElement.focus();
   }
 
 
@@ -224,7 +216,6 @@ export class ProfessionalFormComponent implements OnInit {
   }
 
   onSubmitProfessionalForm(professionalNgForm: FormGroupDirective): void {
-
     if (this.professionalForm.valid) {
       const newPrescription = this.professionalForm.value;
       this.isSubmit = true;
@@ -232,6 +223,8 @@ export class ProfessionalFormComponent implements OnInit {
         this.apiPrescriptions.newPrescription(newPrescription).subscribe(
           success => {
             if (success) this.formReset(professionalNgForm);
+          },
+          err => {
           });
 
       } else {
@@ -277,7 +270,6 @@ export class ProfessionalFormComponent implements OnInit {
     );
   }
 
-  // Show a dialog
   openDialog(aDialogType: string, aPrescription?: Prescriptions, aText?: string): void {
     const dialogRef = this.dialog.open(ProfessionalDialogComponent, {
       width: '400px',
@@ -332,15 +324,11 @@ export class ProfessionalFormComponent implements OnInit {
     return supply ? supply : '';
   }
   onSupplySelected(supply, index: number) {
-    const control = this.suppliesForm.at(index); // Obtiene el FormGroup en la posición del array
+    const control = this.suppliesForm.at(index);
     const supplyControl = control.get('supply');
-
-    // Actualiza el valor del 'supply' con el 'term' en el 'name'
-    supplyControl.get('name').setValue(supply.term);  // Actualiza solo el 'term' en 'name'
-
-    // También actualizamos el 'snomedConcept' completo con todos los campos
+    supplyControl.get('name').setValue(supply.term);
     supplyControl.setValue({
-      name: supply.term,  // Solo el 'term' va en 'name'
+      name: supply.term,
       snomedConcept: {
         term: supply.term,
         fsn: supply.fsn,
@@ -374,9 +362,49 @@ export class ProfessionalFormComponent implements OnInit {
       ]],
       diagnostic: ['', [Validators.required]],
       indication: [''],
+      trimestral: [false],
       duplicate: [false],
-      triplicate: [false]
+      triplicate: [false],
+      triplicateData: this.fBuilder.group({
+        serie: ['', [Validators.required, Validators.maxLength(1), Validators.pattern('^[a-zA-Z]$')]],
+        numero: ['', Validators.required]
+      }),
     });
+    const trimestralControl = this.professionalForm.get('trimestral');
+    const triplicateControl = supplies.get('triplicate');
+    const triplicateFormGroup = supplies.get('triplicateData');
+    const duplicateControl = supplies.get('duplicate');
+    const serieControl = triplicateFormGroup.get('serie');
+    const numeroControl = triplicateFormGroup.get('numero');
+    triplicateFormGroup.disable();
+    serieControl.clearValidators();
+    numeroControl.clearValidators();
+    serieControl.updateValueAndValidity();
+    numeroControl.updateValueAndValidity();
+    triplicateControl.valueChanges.subscribe(checked => {
+      if (checked) {
+        triplicateFormGroup.enable();
+        duplicateControl.setValue(false, { emitEvent: false });
+        trimestralControl.setValue(false, { emitEvent: false });
+        serieControl.setValidators([Validators.required, Validators.maxLength(1), Validators.pattern("^[a-zA-Z]*$")]); // Added pattern validator
+        numeroControl.setValidators([Validators.required]);
+      } else {
+        triplicateFormGroup.disable();
+        triplicateFormGroup.patchValue({ serie: '', numero: '' });
+        serieControl.clearValidators();
+        numeroControl.clearValidators();
+      }
+      serieControl.updateValueAndValidity();
+      numeroControl.updateValueAndValidity();
+    });
+    duplicateControl.valueChanges.subscribe(checked => {
+      if (checked) {
+        triplicateControl.setValue(false, { emitEvent: false });
+        triplicateFormGroup.disable();
+
+      }
+    });
+
     this.suppliesForm.push(supplies);
     this.supplySpinner.push({ show: false });
     this.subscribeToSupplyChanges(supplies, this.suppliesForm.length - 1);
@@ -407,7 +435,6 @@ export class ProfessionalFormComponent implements OnInit {
     this.supplySpinner.splice(index, 1);
   }
 
-  // set form with prescriptions values and disabled npt editable fields
   editPrescription(e) {
     this.professionalForm.reset({
       _id: e._id,
@@ -426,7 +453,6 @@ export class ProfessionalFormComponent implements OnInit {
     this.isFormShown = true;
   }
 
-  // reset the form as intial values
   clearForm(professionalNgForm: FormGroupDirective) {
     professionalNgForm.resetForm();
     this.professionalForm.reset({
