@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, AbstractControl, Validators, FormArray, FormGroupDirective } from '@angular/forms';
+import { FormBuilder, FormGroup, AbstractControl, Validators, FormArray, FormGroupDirective, FormControl } from '@angular/forms';
 import { Observable, of } from 'rxjs';
 // import { SuppliesService } from '@services/supplies.service';
 import { SnomedSuppliesService } from '@services/snomedSupplies.service';
@@ -17,6 +17,7 @@ import { step, stepLink } from '@animations/animations.template';
 import SnomedConcept from '@interfaces/snomedConcept';
 import Supplies from '@interfaces/supplies';
 import { catchError, debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
+import { fadeOutCollapseOnLeaveAnimation } from 'angular-animations';
 
 
 @Component({
@@ -29,6 +30,24 @@ import { catchError, debounceTime, distinctUntilChanged, filter, switchMap } fro
   ]
 })
 export class ProfessionalFormComponent implements OnInit {
+  onOsSelected(selectedOs: any): void {
+    const numeroAfiliadoControl = this.professionalForm.get('patient.os.numeroAfiliado');
+
+    if (selectedOs) {
+      numeroAfiliadoControl.enable();
+
+      const osFormGroup = this.professionalForm.get('patient.os') as FormGroup;
+      if (osFormGroup) {
+        osFormGroup.patchValue({
+          codigoPuco: selectedOs.codigoPuco,
+          nombre: selectedOs.nombre,
+          numeroAfiliado: selectedOs.numeroAfiliado
+        });
+      }
+    } else {
+      numeroAfiliadoControl.disable();
+    }
+  }
   @ViewChild('dni', { static: true }) dni: any;
 
   professionalForm: FormGroup;
@@ -57,6 +76,9 @@ export class ProfessionalFormComponent implements OnInit {
     tablet: false,
     desktop: false
   }
+  obraSocial: any[];
+  obrasSociales: any[];
+  otraOS: boolean = false;
 
   constructor(
     // private suppliesService: SuppliesService,
@@ -93,6 +115,12 @@ export class ProfessionalFormComponent implements OnInit {
         // this.myPrescriptions = res;
       },
     );
+    this.professionalForm.get('patient.otraOS')?.valueChanges.subscribe(() => {
+      const osGroup = this.professionalForm.get('patient.os') as FormGroup;
+      osGroup.reset();
+      osGroup.get('numeroAfiliado').disable();
+    });
+
   }
 
   initProfessionalForm() {
@@ -115,7 +143,13 @@ export class ProfessionalFormComponent implements OnInit {
         ]],
         sex: ['', [
           Validators.required
-        ]]
+        ]],
+        otraOS: [false],
+        os: this.fBuilder.group({
+          nombre: [''],
+          codigoPuco: [''],
+          numeroAfiliado: [{ value: '', disabled: true }]
+        })
       }),
       date: [this.today, [
         Validators.required
@@ -147,17 +181,29 @@ export class ProfessionalFormComponent implements OnInit {
       this.apiPatients.getPatientByDni(dniValue).subscribe(
         res => {
           if (res.length) {
-            // with the new change on the api, andes MPI return an a array of patient, where more than 1 patient could has the same DNI
             this.patientSearch = res;
           } else {
-            // clean fields
             this.patientSearch = [];
             this.patientLastName.setValue('');
             this.patientFirstName.setValue('');
             this.patientSex.setValue('');
+            this.patientOtraOS.setValue(false);
           }
           this.dniShowSpinner = false;
         });
+      this.apiPatients.getPatientOSByDni(dniValue, this.patientSex.value).subscribe(
+        res => {
+          if (Array.isArray(res)) {
+            this.obraSocial = res;
+          } else {
+            this.obraSocial = [];
+          }
+        });
+      this.apiPatients.getOS().subscribe(
+        res => {
+          this.obrasSociales = (res as Array<any>);
+        }
+      );
     } else {
       this.dniShowSpinner = false;
     }
@@ -168,20 +214,15 @@ export class ProfessionalFormComponent implements OnInit {
     this.patientSex.setValue(patient.sex);
   }
 
-  // Create patient if doesn't exist and create prescription
   onSubmitProfessionalForm(professionalNgForm: FormGroupDirective): void {
 
     if (this.professionalForm.valid) {
       const newPrescription = this.professionalForm.value;
       this.isSubmit = true;
       if (!this.isEdit) {
-        // create
         this.apiPrescriptions.newPrescription(newPrescription).subscribe(
           success => {
             if (success) this.formReset(professionalNgForm);
-          },
-          err => {
-            //this.handleSupplyError(err);
           });
 
       } else {
@@ -189,9 +230,6 @@ export class ProfessionalFormComponent implements OnInit {
         this.apiPrescriptions.editPrescription(newPrescription).subscribe(
           success => {
             if (success) this.formReset(professionalNgForm);
-          },
-          err => {
-            //this.handleSupplyError(err);
           });
       }
     }
@@ -272,6 +310,10 @@ export class ProfessionalFormComponent implements OnInit {
   get patientSex(): AbstractControl {
     const patient = this.professionalForm.get('patient');
     return patient.get('sex');
+  }
+  get patientOtraOS(): AbstractControl {
+    const patient = this.professionalForm.get('patient');
+    return patient.get('otraOS');
   }
 
   displayFn(supply): string {
