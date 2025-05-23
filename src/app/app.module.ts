@@ -30,6 +30,7 @@ import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/
 import { HeaderComponent } from '@shared/layouts/header/header.component';
 import { FooterComponent } from './shared/layouts/footer/footer.component';
 import { DatePipe } from '@angular/common';
+import { MatChipsModule } from '@angular/material/chips';
 
 @NgModule({
   declarations: [
@@ -52,6 +53,7 @@ import { DatePipe } from '@angular/common';
     MatToolbarModule,
     MatButtonModule,
     MatMenuModule,
+    MatChipsModule,
   ],
   providers: [
     {

@@ -11,10 +11,10 @@ export class RolePharmacistGuard implements CanActivate {
   constructor(private authService: AuthService, private router: Router){}
 
   canActivate(): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-      if (!this.authService.isPharmacistsRole() && this.authService.isProfessionalRole()) {
+      if (!(this.authService.isPharmacistsRole() || this.authService.isPharmacistsPublicRole()) && (this.authService.isProfessionalRole() || this.authService.isProfessionalPublicRole())) {
         this.router.navigate(['/profesionales/recetas/nueva']);
         return false;
-      } else if (!this.authService.isPharmacistsRole() && this.authService.isAuditRole()) {
+      } else if (!(this.authService.isPharmacistsRole() || this.authService.isPharmacistsPublicRole()) && this.authService.isAuditRole()) {
         this.router.navigate(['/audit/recetas/auditar']);
         return false;
       }

@@ -9,6 +9,7 @@ import { RoleProfessionalGuard } from '@auth/guards/role-professional.guard';
 import { ProfessionalDialogComponent } from '@professionals/components/professional-dialog/professional-dialog.component';
 import { PrescriptionPrinterComponent } from "@professionals/components/prescription-printer/prescription-printer.component";
 import { SupplyDialogComponent } from './components/supply-dialog/supply-dialog.component';
+import { SelectorAmbitoComponent } from './components/selector-ambito/selector-ambito.component';
 
 const routes: Routes = [
   {
@@ -23,6 +24,10 @@ const routes: Routes = [
       {
         path: 'productos',
         component: SupplyComponent
+      },
+      {
+        path: 'seleccionador-ambito',
+        component: SelectorAmbitoComponent
       }
     ]
   }
