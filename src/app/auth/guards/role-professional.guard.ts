@@ -11,10 +11,10 @@ export class RoleProfessionalGuard implements CanActivate {
   constructor(private authService: AuthService, private router: Router){}
 
   canActivate(): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-    if (!this.authService.isProfessionalRole() && this.authService.isPharmacistsRole()) {
+    if (!(this.authService.isProfessionalRole() || this.authService.isProfessionalPublicRole()) && this.authService.isPharmacistsRole()) {
       this.router.navigate(['/farmacias/recetas/dispensar']);
       return false;
-    } else if (!this.authService.isProfessionalRole && this.authService.isAuditRole()) {
+    } else if (!(this.authService.isProfessionalRole || this.authService.isProfessionalPublicRole())&& this.authService.isAuditRole()) {
       this.router.navigate(['/audit/recetas/auditar']);
       return false;
     }
