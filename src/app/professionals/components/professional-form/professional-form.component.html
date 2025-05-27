@@ -45,82 +45,113 @@
                     </div>
                   </div>
 
-                  <div formGroupName="patient" class="patient-container" fxLayout="row" fxLayoutGap="10px">
-                    <div class="st-bk-patient">
-                      <!-- Dni -->
-                      <mat-form-field appearance="fill">
-                        <mat-label>DNI paciente</mat-label>
-                        <input type="text" tabIndex="1" #dni placeholder="DNI" aria-label="Number" matInput required
-                               maxlength="8" formControlName="dni" [matAutocomplete]="auto">
+                  <div formGroupName="patient">
+                    <div class="patient-container" fxLayout="row" fxLayoutGap="10px">
+                      <div class="st-bk-patient">
+                        <!-- Dni -->
+                        <mat-form-field appearance="fill">
+                          <mat-label>DNI paciente</mat-label>
+                          <input type="text" tabIndex="1" #dni placeholder="DNI" aria-label="Number" matInput required
+                                 maxlength="8" formControlName="dni" [matAutocomplete]="auto">
 
-                        <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20" *ngIf="dniShowSpinner">
-                        </mat-spinner>
+                          <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20" *ngIf="dniShowSpinner">
+                          </mat-spinner>
 
-                        <mat-autocomplete #auto="matAutocomplete">
-                          <mat-option *ngFor="let patient of patientSearch"
-                                      (onSelectionChange)="completePatientInputs(patient)" [value]="patient.dni">
-                            {{patient.lastName}} {{patient.firstName}} DNI {{patient.dni}}
-                          </mat-option>
-                        </mat-autocomplete>
+                          <mat-autocomplete #auto="matAutocomplete">
+                            <mat-option *ngFor="let patient of patientSearch"
+                                        (onSelectionChange)="completePatientInputs(patient)" [value]="patient.dni">
+                              {{patient.lastName}} {{patient.firstName}} DNI {{patient.dni}}
+                            </mat-option>
+                          </mat-autocomplete>
 
-                        <mat-hint align="end">{{dni.value.length}} / 8</mat-hint>
+                          <mat-hint align="end">{{dni.value.length}} / 8</mat-hint>
 
-                        <mat-error *ngIf="patientDni.errors?.required">
-                          Debe ingresar el dni del paciente
-                        </mat-error>
+                          <mat-error *ngIf="patientDni.errors?.required">
+                            Debe ingresar el dni del paciente
+                          </mat-error>
 
-                        <mat-error *ngIf="patientDni.errors?.minlength">
-                          El dni debe contener {{patientDni.errors?.minlength.requiredLength}}
-                          digitos
-                        </mat-error>
+                          <mat-error *ngIf="patientDni.errors?.minlength">
+                            El dni debe contener {{patientDni.errors?.minlength.requiredLength}}
+                            digitos
+                          </mat-error>
 
-                        <mat-error *ngIf="patientDni.errors?.pattern">
-                          El dni debe contener solo números.
-                        </mat-error>
-                      </mat-form-field>
+                          <mat-error *ngIf="patientDni.errors?.pattern">
+                            El dni debe contener solo números.
+                          </mat-error>
+                        </mat-form-field>
 
-                      <!-- Lastname -->
-                      <mat-form-field appearance="fill">
-                        <mat-label>Apellido paciente</mat-label>
-                        <input type="text" tabIndex="3" placeholder="Apellido" matInput required
-                               formControlName="lastName">
+                        <!-- Lastname -->
+                        <mat-form-field appearance="fill">
+                          <mat-label>Apellido paciente</mat-label>
+                          <input type="text" tabIndex="3" placeholder="Apellido" matInput required
+                                 formControlName="lastName">
 
-                        <mat-error *ngIf="patientLastName.errors?.required">
-                          Debe ingresar el apellido del paciente
-                        </mat-error>
-                      </mat-form-field>
+                          <mat-error *ngIf="patientLastName.errors?.required">
+                            Debe ingresar el apellido del paciente
+                          </mat-error>
+                        </mat-form-field>
 
+                      </div>
+                      <div class="nd-bk-patient">
+                        <!-- sex -->
+                        <mat-form-field appearance="fill">
+                          <mat-label>Sexo</mat-label>
+                          <mat-select formControlName="sex" required tabIndex="2">
+                            <mat-option value="Femenino">Femenino</mat-option>
+                            <mat-option value="Masculino">Masculino</mat-option>
+                            <mat-option value="Otro">Otro</mat-option>
+                          </mat-select>
+
+                          <mat-error *ngIf="patientSex.errors?.required">
+                            Debe seleccionar el tipo de sexo
+                          </mat-error>
+                        </mat-form-field>
+                        <mat-form-field appearance="fill">
+                          <mat-label>Nombre paciente</mat-label>
+                          <input type="text" tabIndex="4" placeholder="Nombre" matInput required
+                                 formControlName="firstName">
+
+                          <mat-error *ngIf="patientFirstName.errors?.required">
+                            Debe ingresar el nombre del paciente
+                          </mat-error>
+                        </mat-form-field>
+                      </div>
                     </div>
-                    <div class="nd-bk-patient">
-                      <!-- sex -->
-                      <mat-form-field appearance="fill">
-                        <mat-label>Sexo</mat-label>
-                        <mat-select formControlName="sex" required tabIndex="2">
-                          <mat-option value="Femenino">Femenino</mat-option>
-                          <mat-option value="Masculino">Masculino</mat-option>
-                          <mat-option value="Otro">Otro</mat-option>
-                        </mat-select>
+                    <mat-checkbox formControlName="otraOS" [disabled]="!patientSearch">Elegir otra cobertura
+                      social</mat-checkbox>
+                    <div formGroupName="os" fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center">
 
-                        <mat-error *ngIf="patientSex.errors?.required">
-                          Debe seleccionar el tipo de sexo
-                        </mat-error>
+
+                      <mat-form-field appearance="fill" *ngIf="!professionalForm.get('patient')?.get('otraOS')?.value"
+                                      fxFlex="50%">
+                        <mat-label>Obra Social</mat-label>
+                        <mat-select [disabled]="!this.professionalForm.get('patient.dni').valid"
+                                    (selectionChange)="onOsSelected($event.value)">
+                          <mat-option *ngFor="let os of obraSocial" [value]="os">
+                            {{ os.nombre }}
+                          </mat-option>
+                        </mat-select>
                       </mat-form-field>
 
-                      <!-- Firstname -->
-                      <mat-form-field appearance="fill">
-                        <mat-label>Nombre paciente</mat-label>
-                        <input type="text" tabIndex="4" placeholder="Nombre" matInput required
-                               formControlName="firstName">
+                      <mat-form-field *ngIf="professionalForm.get('patient')?.get('otraOS')?.value" appearance="fill"
+                                      fxFlex="50%">
+                        <mat-label>Obra Social</mat-label>
+                        <mat-select [disabled]="!this.professionalForm.get('patient.dni').valid"
+                                    (selectionChange)="onOsSelected($event.value)">
+                          <mat-option *ngFor="let os of obrasSociales" [value]="os">
+                            {{ os.nombre }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
 
-                        <mat-error *ngIf="patientFirstName.errors?.required">
-                          Debe ingresar el nombre del paciente
-                        </mat-error>
+                      <mat-form-field appearance="fill">
+                        <mat-label>Numero de Afiliado</mat-label>
+                        <input type="number" matInput formControlName="numeroAfiliado"
+                               [disabled]="!this.professionalForm.get('patient.os.nombre')">
                       </mat-form-field>
                     </div>
                   </div>
-
                 </div>
-
                 <div formArrayName="supplies" class="nested-supplies">
                   <div class="custom-error-container">
                     <mat-error

@@ -16,10 +16,16 @@ export class PatientsService {
 
   ) { }
 
-  getPatients(): Observable<any>{
+  getPatients(): Observable<any> {
     return this.http.get(`${environment.API_END_POINT}/patients`);
   }
-
+  getPatientOSByDni(dni: string, sexo: string) {
+    const params = { 'documento': dni, 'sexo': sexo }
+    return this.http.get(`${environment.API_END_POINT}/patients/get-os-by-dni`, { params });
+  }
+  getOS() {
+    return this.http.get(`${environment.API_END_POINT}/patients/get-os`);
+  }
   getPatientByDni(dni: string): Observable<Patient[]> {
     return this.http.get<Patient[]>(`${environment.API_END_POINT}/patients/get-by-dni/${dni}`);
   }
@@ -38,11 +44,11 @@ export class PatientsService {
     );
   }
 
-  getPatientInsurance(dni: string){
+  getPatientInsurance(dni: string) {
     return this.http.get(`https://app.andes.gob.ar/api/modules/obraSocial/puco/?dni=${dni}`);
   }
 
-  private handleError<T> (operation = 'operation', result?: T) {
+  private handleError<T>(operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
 
       // TODO: send the error to remote logging infrastructure
