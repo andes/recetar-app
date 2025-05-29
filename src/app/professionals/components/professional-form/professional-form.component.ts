@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, AbstractControl, Validators, FormArray, FormGroupDirective, FormControl } from '@angular/forms';
 import { Observable, of } from 'rxjs';
-// import { SuppliesService } from '@services/supplies.service';
 import { SnomedSuppliesService } from '@services/snomedSupplies.service';
 import ISnomedConcept from '@interfaces/supplies';
 import { PatientsService } from '@root/app/services/patients.service';
@@ -16,7 +15,7 @@ import { InteractionService } from '@professionals/interaction.service';
 import { step, stepLink } from '@animations/animations.template';
 import SnomedConcept from '@interfaces/snomedConcept';
 import Supplies from '@interfaces/supplies';
-import { catchError, debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
+import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
 import { fadeOutCollapseOnLeaveAnimation } from 'angular-animations';
 
 
@@ -30,32 +29,28 @@ import { fadeOutCollapseOnLeaveAnimation } from 'angular-animations';
   ]
 })
 export class ProfessionalFormComponent implements OnInit {
+  obraSocialControl = new FormControl('');
+  filteredObrasSociales: Observable<any[]>;
+
   onOsSelected(selectedOs: any): void {
-    const numeroAfiliadoControl = this.professionalForm.get('patient.os.numeroAfiliado');
-
-    if (selectedOs) {
-      numeroAfiliadoControl.enable();
-
-      const osFormGroup = this.professionalForm.get('patient.os') as FormGroup;
-      if (osFormGroup) {
-        osFormGroup.patchValue({
-          codigoPuco: selectedOs.codigoPuco,
-          nombre: selectedOs.nombre,
-          numeroAfiliado: selectedOs.numeroAfiliado
-        });
+    const osGroup = this.professionalForm.get('patient.os') as FormGroup;
+    if (osGroup && selectedOs) {
+      osGroup.patchValue({
+        nombre: selectedOs.nombre,
+        codigoPuco: selectedOs.codigoPuco
+      });
+      const numeroAfiliadoControl = osGroup.get('numeroAfiliado');
+      if (numeroAfiliadoControl) {
+        numeroAfiliadoControl.enable();
       }
-    } else {
-      numeroAfiliadoControl.disable();
     }
   }
   @ViewChild('dni', { static: true }) dni: any;
 
   professionalForm: FormGroup;
 
-  // filteredOptions: Observable<string[]>;
   filteredSupplies = [];
   request;
-  // options: string[] = [];
   storedSupplies = [];
   patientSearch: Patient[];
   sex_options: string[] = ["Femenino", "Masculino", "Otro"];
@@ -121,6 +116,19 @@ export class ProfessionalFormComponent implements OnInit {
       osGroup.get('numeroAfiliado').disable();
     });
 
+    this.filteredObrasSociales = this.obraSocialControl.valueChanges.pipe(
+      startWith(''),
+      map(value => {
+        const name = typeof value === 'string' ? value : value?.nombre;
+        return name ? this._filter(name) : this.obrasSociales.slice();
+      })
+    );
+  }
+  private _filter(value: string): any[] {
+    const filterValue = value.toLowerCase();
+    return this.obrasSociales.filter(os =>
+      os.nombre.toLowerCase().includes(filterValue)
+    );
   }
 
   initProfessionalForm() {
@@ -314,6 +322,9 @@ export class ProfessionalFormComponent implements OnInit {
   get patientOtraOS(): AbstractControl {
     const patient = this.professionalForm.get('patient');
     return patient.get('otraOS');
+  }
+  displayOs(os: any): string {
+    return os && os.nombre ? os.nombre : '';
   }
 
   displayFn(supply): string {
