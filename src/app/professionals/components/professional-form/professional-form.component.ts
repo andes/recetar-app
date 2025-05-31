@@ -1,8 +1,9 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, AbstractControl, Validators, FormArray, FormGroupDirective } from '@angular/forms';
-import { Observable } from 'rxjs';
-import { SuppliesService } from '@services/supplies.service'
-import Supplies from '@interfaces/supplies';
+import { FormBuilder, FormGroup, AbstractControl, Validators, FormArray, FormGroupDirective, FormControl } from '@angular/forms';
+import { Observable, of } from 'rxjs';
+// import { SuppliesService } from '@services/supplies.service';
+import { SnomedSuppliesService } from '@services/snomedSupplies.service';
+import ISnomedConcept from '@interfaces/supplies';
 import { PatientsService } from '@root/app/services/patients.service';
 import { PrescriptionsService } from '@services/prescriptions.service';
 import { AuthService } from '@auth/services/auth.service';
@@ -13,6 +14,10 @@ import { ProfessionalDialogComponent } from '@professionals/components/professio
 import { MatDialog } from '@angular/material/dialog';
 import { InteractionService } from '@professionals/interaction.service';
 import { step, stepLink } from '@animations/animations.template';
+import SnomedConcept from '@interfaces/snomedConcept';
+import Supplies from '@interfaces/supplies';
+import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
+import { fadeOutCollapseOnLeaveAnimation } from 'angular-animations';
 
 
 @Component({
@@ -25,19 +30,35 @@ import { step, stepLink } from '@animations/animations.template';
   ]
 })
 export class ProfessionalFormComponent implements OnInit {
+  obraSocialControl = new FormControl('');
+  filteredObrasSociales: Observable<any[]>;
+
+  onOsSelected(selectedOs: any): void {
+    const osGroup = this.professionalForm.get('patient.os') as FormGroup;
+    if (osGroup && selectedOs) {
+      osGroup.patchValue({
+        nombre: selectedOs.nombre,
+        codigoPuco: selectedOs.codigoPuco
+      });
+      const numeroAfiliadoControl = osGroup.get('numeroAfiliado');
+      if (numeroAfiliadoControl) {
+        numeroAfiliadoControl.enable();
+      }
+    }
+  }
   @ViewChild('dni', { static: true }) dni: any;
 
-  private supplyRequest: any = null;
   professionalForm: FormGroup;
 
-  filteredOptions: Observable<string[]>;
-  options: string[] = [];
-  storedSupplies: Supplies[] = [];
+  filteredSupplies = [];
+  request;
+  storedSupplies = [];
   patientSearch: Patient[];
   sex_options: string[] = ["Femenino", "Masculino", "Otro"];
-  today = new Date((new Date()));
+  genero_options: string[] = ['']
+  today = new Date();
   professionalData: any;
-  readonly maxQSupplies: number = 2;
+  readonly maxQSupplies: number = 10;
   readonly spinnerColor: ThemePalette = 'primary';
   readonly spinnerDiameter: number = 30;
   isSubmit: boolean = false;
@@ -51,9 +72,13 @@ export class ProfessionalFormComponent implements OnInit {
     tablet: false,
     desktop: false
   }
+  obraSocial: any[];
+  obrasSociales: any[];
+  otraOS: boolean = false;
 
   constructor(
-    private suppliesService: SuppliesService,
+    // private suppliesService: SuppliesService,
+    private snomedSuppliesService: SnomedSuppliesService,
     private fBuilder: FormBuilder,
     private apiPatients: PatientsService,
     private apiPrescriptions: PrescriptionsService,
@@ -63,8 +88,8 @@ export class ProfessionalFormComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.initProfessionalForm();
 
+    this.initProfessionalForm();
     // On confirm delete prescription
     this._interactionService.deletePrescription$
       .subscribe(
@@ -80,38 +105,30 @@ export class ProfessionalFormComponent implements OnInit {
       }
     );
 
-    // subscribe to each supply field changes
-    this.suppliesForm.controls.map((supplyControl, index) => {
-      supplyControl.get('supply').valueChanges.subscribe((supply: string | { _id: string, name: string }) => {
-        if (typeof (supply) === 'string' && supply.length > 3) {
-          if (this.supplyRequest !== null) this.supplyRequest.unsubscribe();
-
-          this.supplySpinner[index] = { show: true };
-          this.supplyRequest = this.suppliesService.getSupplyByTerm(encodeURIComponent(supply)).subscribe(
-            res => {
-              this.storedSupplies = res as Supplies[];
-              this.supplySpinner[index] = { show: false };
-            },
-          );
-        } else if (typeof (supply) === 'object' || (typeof (supply) === 'string' && supply.length == 0)) {
-          this.storedSupplies = [];
-        } else {
-          this.supplySpinner[index] = { show: false };
-        }
-        // add or remove closest quantity validation
-        if (index > 0) this.onSuppliesAddControlQuantityValidators(index, (
-          ((typeof (supply) === 'string' && supply.length > 0) ||
-            (typeof (supply) === 'object')) &&
-          (typeof (supply) !== 'undefined' && supply !== null))
-        );
-      });
-    });
-
     // get prescriptions
     this.apiPrescriptions.getByUserId(this.authService.getLoggedUserId()).subscribe(
       res => {
         // this.myPrescriptions = res;
       },
+    );
+    this.professionalForm.get('patient.otraOS')?.valueChanges.subscribe(() => {
+      const osGroup = this.professionalForm.get('patient.os') as FormGroup;
+      osGroup.reset();
+      osGroup.get('numeroAfiliado').disable();
+    });
+
+    this.filteredObrasSociales = this.obraSocialControl.valueChanges.pipe(
+      startWith(''),
+      map(value => {
+        const name = typeof value === 'string' ? value : value?.nombre;
+        return name ? this._filter(name) : this.obrasSociales.slice();
+      })
+    );
+  }
+  private _filter(value: string): any[] {
+    const filterValue = value.toLowerCase();
+    return this.obrasSociales.filter(os =>
+      os.nombre.toLowerCase().includes(filterValue)
     );
   }
 
@@ -135,29 +152,22 @@ export class ProfessionalFormComponent implements OnInit {
         ]],
         sex: ['', [
           Validators.required
-        ]]
+        ]],
+        otraOS: [false],
+        os: this.fBuilder.group({
+          nombre: [''],
+          codigoPuco: [''],
+          numeroAfiliado: [{ value: '', disabled: true }]
+        })
       }),
       date: [this.today, [
         Validators.required
       ]],
-      diagnostic: [''],
-      observation: [''],
       triple: [false],
-      supplies: this.fBuilder.array([
-        this.fBuilder.group({
-          supply: ['', Validators.required],
-          quantity: ['', [
-            Validators.required,
-            Validators.min(1)
-          ]]
-        }),
-        this.fBuilder.group({
-          supply: [''],
-          quantity: ['']
-        }),
-      ])
+      supplies: this.fBuilder.array([])
     });
-    this.dni.nativeElement.focus();
+    this.addSupply();
+    //this.dni.nativeElement.focus();
   }
 
 
@@ -176,46 +186,52 @@ export class ProfessionalFormComponent implements OnInit {
 
   getPatientByDni(dniValue: string | null): void {
     if (dniValue !== null && (dniValue.length == 7 || dniValue.length == 8)) {
-      console.log("DBI");
       this.dniShowSpinner = true;
       this.apiPatients.getPatientByDni(dniValue).subscribe(
         res => {
           if (res.length) {
-            // with the new change on the api, andes MPI return an a array of patient, where more than 1 patient could has the same DNI
             this.patientSearch = res;
           } else {
-            // clean fields
             this.patientSearch = [];
             this.patientLastName.setValue('');
             this.patientFirstName.setValue('');
             this.patientSex.setValue('');
+            this.patientOtraOS.setValue(false);
           }
           this.dniShowSpinner = false;
         });
+      this.apiPatients.getPatientOSByDni(dniValue, this.patientSex.value).subscribe(
+        res => {
+          if (Array.isArray(res)) {
+            this.obraSocial = res;
+          } else {
+            this.obraSocial = [];
+          }
+        });
+      this.apiPatients.getOS().subscribe(
+        res => {
+          this.obrasSociales = (res as Array<any>);
+        }
+      );
     } else {
       this.dniShowSpinner = false;
     }
   }
-  completePatientInputs(patient: Patient): void {
+  completePatientInputs(patient: Patient): void {// TODO: REC-38
     this.patientLastName.setValue(patient.lastName);
     this.patientFirstName.setValue(patient.firstName);
     this.patientSex.setValue(patient.sex);
   }
 
-  // Create patient if doesn't exist and create prescription
   onSubmitProfessionalForm(professionalNgForm: FormGroupDirective): void {
 
     if (this.professionalForm.valid) {
       const newPrescription = this.professionalForm.value;
       this.isSubmit = true;
       if (!this.isEdit) {
-        // create
         this.apiPrescriptions.newPrescription(newPrescription).subscribe(
           success => {
             if (success) this.formReset(professionalNgForm);
-          },
-          err => {
-            this.handleSupplyError(err);
           });
 
       } else {
@@ -223,9 +239,6 @@ export class ProfessionalFormComponent implements OnInit {
         this.apiPrescriptions.editPrescription(newPrescription).subscribe(
           success => {
             if (success) this.formReset(professionalNgForm);
-          },
-          err => {
-            this.handleSupplyError(err);
           });
       }
     }
@@ -307,23 +320,87 @@ export class ProfessionalFormComponent implements OnInit {
     const patient = this.professionalForm.get('patient');
     return patient.get('sex');
   }
+  get patientOtraOS(): AbstractControl {
+    const patient = this.professionalForm.get('patient');
+    return patient.get('otraOS');
+  }
+  displayOs(os: any): string {
+    return os && os.nombre ? os.nombre : '';
+  }
 
-  displayFn(supply: Supplies): string {
-    return supply && supply.name ? supply.name : '';
+  displayFn(supply): string {
+    return supply ? supply : '';
+  }
+  onSupplySelected(supply, index: number) {
+    const control = this.suppliesForm.at(index); // Obtiene el FormGroup en la posición del array
+    const supplyControl = control.get('supply');
+
+    // Actualiza el valor del 'supply' con el 'term' en el 'name'
+    supplyControl.get('name').setValue(supply.term);  // Actualiza solo el 'term' en 'name'
+
+    // También actualizamos el 'snomedConcept' completo con todos los campos
+    supplyControl.setValue({
+      name: supply.term,  // Solo el 'term' va en 'name'
+      snomedConcept: {
+        term: supply.term,
+        fsn: supply.fsn,
+        conceptId: supply.conceptId,
+        semanticTag: supply.semanticTag
+      }
+    });
   }
 
   addSupply() {
-    if (this.suppliesForm.length < 2) {
-      const supplies = this.fBuilder.group({
-        supply: [''],
-        quantity: ['']
-      });
-      this.suppliesForm.push(supplies);
-    }
+    const supplies = this.fBuilder.group({
+      supply: this.fBuilder.group({
+        name: ['', [
+          Validators.required
+        ]],
+        snomedConcept:
+          this.fBuilder.group({
+            term: [''],
+            fsn: [''],
+            conceptId: [''],
+            semanticTag: ['']
+          }),
+      }),
+      quantity: ['', [
+        Validators.required,
+        Validators.min(1)
+      ]],
+      diagnostic: [''],
+      indication: [''],
+      duplicate: [false],
+      triplicate: [false]
+    });
+    this.suppliesForm.push(supplies);
+    this.supplySpinner.push({ show: false });
+    this.subscribeToSupplyChanges(supplies, this.suppliesForm.length - 1);
   }
 
-  deleteSupply(i) {
-    this.suppliesForm.removeAt(i);
+  subscribeToSupplyChanges(control: FormGroup, index: number) {
+    control.get('supply.name').valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      filter((supply: string) => typeof supply === 'string' && supply.length > 3),
+      switchMap((supply: string) => {
+        this.supplySpinner[index] = { show: true };
+        return this.snomedSuppliesService.get(supply).pipe(
+          catchError(() => {
+            this.supplySpinner[index] = { show: false };
+            return of([]);
+          })
+        );
+      })
+    ).subscribe((res) => {
+      this.supplySpinner[index] = { show: false };
+      this.filteredSupplies = [...res];
+    });
+  }
+
+  deleteSupply(index: number) {
+    this.suppliesForm.removeAt(index);
+    this.supplySpinner.splice(index, 1);
   }
 
   // set form with prescriptions values and disabled npt editable fields

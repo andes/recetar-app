@@ -1,0 +1,47 @@
+<div class="wrapper">
+  <div fxLayout="row" fxLayoutAlign="space-evenly start" fxLayoutGap="20px" class="cards-container" fxFill>
+    <div class="first-panel">
+      <div class="search-panel">
+        <mat-card fxLayout="column" fxLayoutAlign="space-between">
+          <mat-card-title>
+            <h2 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
+              <mat-icon >search</mat-icon>
+              <span>
+                Buscar farmacia
+              </span>
+            </h2>
+          </mat-card-title>
+          <mat-card-content>
+            <form [formGroup]="prescriptionForm" class="form-container">
+              <div fxLayout fxLayout="column" fxLayoutAlign="center" class="container" fxLayoutGap="20px">
+                <!-- Cuit de la farmacia -->
+                <mat-form-field>
+                  <mat-label>CUIT farmacia</mat-label>
+                  <input type="text"
+                    cdkFocusInitial
+                    placeholder="CUIT"
+                    aria-label="Number"
+                    matInput
+                    maxlength="11"
+                    formControlName="pharmacy_cuit">
+                  <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20" *ngIf="cuitShowSpinner"></mat-spinner>
+                  <mat-hint align="end">{{ pharmacy_cuit.value.length }} / 11</mat-hint>
+                  <mat-error *ngIf="pharmacy_cuit.errors?.required && pharmacy_cuit.touched">
+                    Debe ingresar el cuit de una farmacia
+                  </mat-error>
+
+                  <mat-error *ngIf="pharmacy_cuit.errors?.minlength && pharmacy_cuit.touched">
+                    Debe ingresar al menos 10 dígitos
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+    <div class="prescription-panel">
+      <app-prescription-list></app-prescription-list>
+    </div>
+  </div>
+</div>
