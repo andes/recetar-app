@@ -36,8 +36,8 @@ export const arrowDirection =
 
 export const step =
   trigger('step', [
-    state('left', style({ left: '0px' })),
-    state('right', style({ left: '-100vw' })),
+    state('left', style({ left: '0' })),
+    state('right', style({ left: '0' })),
     transition('left <=> right', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
   ]);
 
