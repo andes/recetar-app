@@ -9,7 +9,7 @@
   <div fxLayout="row" fxLayoutAlign="space-evenly start" fxLayoutGap="20px" class="cards-container" fxFill
        [@step]="isFormShown ? 'left' : 'right'">
     <!-- panel "Formulario receta" -->
-    <div class="prescription-panel">
+    <div class="prescription-panel" *ngIf="isFormShown">
       <mat-card fxLayout="column" fxLayoutAlign="space-between" class="new-prescription">
         <div fxFlex="100" fxLayout="column" fxLayoutAlign="start">
           <mat-card-title>
@@ -26,7 +26,7 @@
                    fxLayoutGap="10px" fxLayoutGap.xs="0">
 
                 <div class="first-block">
-                  <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="center center">
+                  <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center" fxLayoutAlign.xs="center center" >
                     <!-- Fecha de receta -->
                     <mat-form-field appearance="fill">
                       <mat-label>Fecha receta</mat-label>
@@ -262,7 +262,7 @@
       </mat-card>
     </div>
 
-    <div class="my-prescriptions-panel">
+    <div class="my-prescriptions-panel" *ngIf="!isFormShown">
       <app-prescriptions-list (editPrescriptionEvent)="editPrescription($event)"></app-prescriptions-list>
     </div>
 
