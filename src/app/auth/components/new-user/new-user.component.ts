@@ -106,7 +106,7 @@ export class NewUserComponent implements OnInit {
     }
 
     checkMatricula(profesiones) {
-        const lastProfesion = profesiones.find(p => p.profesion.codigo == '1' || p.profesion.codigo == '23');
+        const lastProfesion = profesiones.find(p => p.profesion.codigo == '1' || p.profesion.codigo == '23' || p.profesion.codigo == '2');
         const lastMatriculacion = lastProfesion.matriculacion[lastProfesion.matriculacion.length - 1];
         if (lastMatriculacion) {
             const res = ((moment(lastMatriculacion.fin)) > moment() && (lastMatriculacion.matriculaNumero).toString() === this.newUserForm.get('enrollment').value);
