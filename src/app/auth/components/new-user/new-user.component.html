@@ -30,14 +30,48 @@
         <mat-form-field appearance="fill" fxFlex>
           <mat-label>DNI</mat-label>
           <input matInput formControlName="dni" required>
+          <mat-error *ngIf="newUserForm.get('dni').errors">
+            Formato inválido
+          </mat-error>
         </mat-form-field>
         <mat-form-field appearance="fill" fxFlex>
           <mat-label>CUIL</mat-label>
           <input matInput type="text" formControlName="cuil">
+          <mat-error *ngIf="newUserForm.get('cuil')?.errors?.required">El CUIL es obligatorio.</mat-error>
+          <mat-error *ngIf="newUserForm.get('cuil')?.errors?.invalidFormat">Formato inválido (deben ser 11
+            dígitos).</mat-error>
+          <mat-error *ngIf="newUserForm.get('cuil')?.errors?.invalidCuil">CUIL inválido (falla
+            verificación).</mat-error>
         </mat-form-field>
         <mat-form-field appearance="fill" fxFlex>
           <mat-label>N° Matricula provincial</mat-label>
           <input matInput formControlName="enrollment" required>
+          <mat-error *ngIf="newUserForm.get('enrollment').errors">
+            Formato inválido
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div fxLayout.lg="row" fxLayout.md="column" fxLayout.sm="column" fxLayout.xs="column" fxLayoutGap="0.5rem">
+        <mat-form-field appearance="fill" fxFlex>
+          <mat-label>Fecha de egreso</mat-label>
+          <input matInput [max]="minDate" formControlName="fechaEgreso" [matDatepicker]="fechaEgresoPicker" readonly
+                 required>
+          <mat-datepicker-toggle matSuffix [for]="fechaEgresoPicker"></mat-datepicker-toggle>
+          <mat-datepicker #fechaEgresoPicker></mat-datepicker>
+          <mat-error *ngIf="newUserForm.get('fechaEgreso').errors">
+            Fecha incorrecta debe ser una fecha válida
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="fill" fxFlex>
+          <mat-label matTooltip="Refiere a la fecha de vencimiento de la última renovación">Fecha de
+            vecimiento de matrícula</mat-label>
+          <input matInput formControlName="fechaMatVencimiento" [matDatepicker]="fechaMatVencimientoPicker" readonly
+                 required>
+          <mat-datepicker-toggle matSuffix [for]="fechaMatVencimientoPicker"></mat-datepicker-toggle>
+          <mat-datepicker #fechaMatVencimientoPicker></mat-datepicker>
+          <mat-error *ngIf="newUserForm.get('fechaMatVencimiento').errors">
+            Fecha incorrecta debe ser una fecha válida
+          </mat-error>
         </mat-form-field>
       </div>
       <div fxLayout.lg="row" fxLayout.md="column" fxLayout.sm="column" fxLayout.xs="column" fxLayoutGap="0.5rem">
@@ -54,12 +88,7 @@
         </mat-form-field>
       </div>
       <div fxLayout="row">
-        <ngx-turnstile
-          [siteKey]="siteKey"
-          formControlName="captcha"
-          theme="light"
-          required
-        >
+        <ngx-turnstile [siteKey]="siteKey" formControlName="captcha" theme="light" required>
         </ngx-turnstile>
       </div>
       <div class="botones" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="0.5rem">
