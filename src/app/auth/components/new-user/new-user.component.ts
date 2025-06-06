@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, FormGroupDirective } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { cuilValidator } from '../../../utils/custome-validators/cuil.validator';
+import { fechaValida } from '../../../utils/custome-validators/date.validator';
 import { AuthService } from '@auth/services/auth.service';
 import { ProfessionalsService } from '../../../services/professionals.service';
 import * as moment from 'moment';
@@ -19,6 +21,7 @@ export class NewUserComponent implements OnInit {
     public regexPassword = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,}$/;
     public regexEmail = '^[a-z0-9._%+-]+@[a-z0-9.-]+[\.]{1}[a-z]{2,4}$';
     public siteKey = '0x4AAAAAAAhL2mZAyxFj63Dw';
+    public minDate = new Date();
 
     constructor(
         private fBuilder: FormBuilder,
@@ -34,15 +37,17 @@ export class NewUserComponent implements OnInit {
 
     initNewUserForm(): void {
         this.newUserForm = this.fBuilder.group({
-            dni: [''],
-            cuil: [''],
+            dni: ['', [Validators.required, Validators.pattern(/^\d{5,8}$/)]],
+            cuil: ['', [Validators.required, cuilValidator]],
             username: [''],
-            enrollment: [''],
+            enrollment: ['', [Validators.required, Validators.pattern(/^\d{2,10}$/)]],
             email: ['', Validators.required],
             businessName: [''],
             password: ['', Validators.required],
             roleType: ['professional', Validators.required],
-            captcha: ['', Validators.required],
+            fechaEgreso: ['', [Validators.required, fechaValida]],
+            fechaMatVencimiento: ['', [Validators.required, fechaValida]],
+            captcha: ['', Validators.required]
         });
     }
 
@@ -55,7 +60,11 @@ export class NewUserComponent implements OnInit {
             this.checkUser();
             const params = {
                 documento: newUserForm.get('dni').value,
-                email: newUserForm.get('email').value
+                email: newUserForm.get('email').value,
+                matricula: newUserForm.get('enrollment').value,
+                cuil: newUserForm.get('cuil').value,
+                fechaEgreso: moment(newUserForm.get('fechaEgreso').value).format('DD-MM-YYYY'),
+                fechaMatVencimiento: moment(newUserForm.get('fechaMatVencimiento').value).format('DD-MM-YYYY')
             }
             this.professionalsService.getProfessionalByDni(params).subscribe(res => {
                 if (res.length) {
@@ -73,7 +82,18 @@ export class NewUserComponent implements OnInit {
                         duration: 5000
                     });
                 }
-            })
+            },
+                err => {
+                    if (err.status === 404) {
+                        this._snackBar.open('No se encuentra el profesional.', 'cerrar', {
+                            duration: 5000
+                        });
+                    } else {
+                        this._snackBar.open('Profesional no se encuentra registrado, corrobore los datos ingresados', 'cerrar', {
+                            duration: 5000
+                        });
+                    }
+                })
         } else {
             this._snackBar.open('Los campos deben estar completos y ser validos', 'cerrar', {
                 duration: 5000
@@ -119,4 +139,5 @@ export class NewUserComponent implements OnInit {
     cancelar() {
         this.router.navigate(['/auth/login']);
     }
+
 }
