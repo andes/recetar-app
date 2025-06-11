@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, FormGroupDirective } from '@angular/forms';
 import { AuthService } from '@auth/services/auth.service';
+import { AmbitoService } from '@auth/services/ambito.service';
 import { Router } from '@angular/router';
 import { ThemePalette } from '@angular/material/core';
 import { DialogComponent } from '@auth/components/dialog/dialog.component';
@@ -24,6 +25,7 @@ export class LoginComponent implements OnInit {
   constructor(
     private fBuilder: FormBuilder,
     private authService: AuthService,
+    private ambitoSrevice: AmbitoService,
     private router: Router,
     public dialog: MatDialog
   ) { }
@@ -49,10 +51,20 @@ export class LoginComponent implements OnInit {
       this.showSubmit = true;
       this.authService.login(this.loginForm.value).subscribe(
         res => {
-          if (this.authService.isPharmacistsRole()) {
-            this.router.navigate(['/farmacias/recetas/dispensar']);
-          } else if (this.authService.isProfessionalRole()) {
+          if (this.authService.isProfessionalBothRoles()) {
+            this.router.navigate(['/profesionales/seleccionador-ambito']);
+          } else if (this.authService.isProfessionalPublicRole()) {
+            this.ambitoSrevice.setAmbito('publico');
             this.router.navigate(['/profesionales/recetas/nueva']);
+          } else if (this.authService.isProfessionalRole()) {
+            this.ambitoSrevice.setAmbito('privado');
+            this.router.navigate(['/profesionales/recetas/nueva']); 
+          } else if (this.authService.isPharmacistsPublicRole()) {
+            this.ambitoSrevice.setAmbito('publico');
+            this.router.navigate(['/farmacias/recetas/dispensar']);
+          } else if (this.authService.isPharmacistsRole()) {
+            this.ambitoSrevice.setAmbito('privado');
+            this.router.navigate(['/farmacias/recetas/dispensar']);
           } else if (this.authService.isAuditRole()) {
             this.router.navigate(['/audit/recetas/auditar']);
           }

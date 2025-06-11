@@ -18,6 +18,8 @@ import SnomedConcept from '@interfaces/snomedConcept';
 import Supplies from '@interfaces/supplies';
 import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
 import { fadeOutCollapseOnLeaveAnimation } from 'angular-animations';
+import { PrescriptionsPublicService } from '@services/prescriptionsPublic.service';
+import { AmbitoService } from '@auth/services/ambito.service';
 
 
 @Component({
@@ -75,19 +77,28 @@ export class ProfessionalFormComponent implements OnInit {
   obraSocial: any[];
   obrasSociales: any[];
   otraOS: boolean = false;
+  apiPrescriptions: any;
 
   constructor(
     // private suppliesService: SuppliesService,
     private snomedSuppliesService: SnomedSuppliesService,
     private fBuilder: FormBuilder,
     private apiPatients: PatientsService,
-    private apiPrescriptions: PrescriptionsService,
+    private prescriptionsService: PrescriptionsService, // privado
+    private prescriptionsPublicService: PrescriptionsPublicService, // público
     private authService: AuthService,
     public dialog: MatDialog,
-    private _interactionService: InteractionService
+    private _interactionService: InteractionService,
+    private ambitoService: AmbitoService
   ) { }
 
   ngOnInit(): void {
+
+    // Selecciona el servicio según el ámbito
+    const ambito = this.ambitoService.getAmbito();
+    this.apiPrescriptions = ambito === 'privado'
+      ? this.prescriptionsService
+      : this.prescriptionsPublicService;
 
     this.initProfessionalForm();
     // On confirm delete prescription
