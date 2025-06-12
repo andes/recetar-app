@@ -368,7 +368,11 @@ export class ProfessionalFormComponent implements OnInit {
         Validators.required,
         Validators.min(1)
       ]],
-      diagnostic: [''],
+      quantityPresentation: ['', [
+        Validators.required,
+        Validators.min(1)
+      ]],
+      diagnostic: ['', [Validators.required]],
       indication: [''],
       duplicate: [false],
       triplicate: [false]
