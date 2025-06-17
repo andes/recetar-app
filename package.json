@@ -28,6 +28,7 @@
     "angular-animations": "0.0.10",
     "express": "^4.17.1",
     "file-saver": "^2.0.5",
+    "jsbarcode": "^3.12.1",
     "jwt-decode": "^2.2.0",
     "moment": "^2.25.3",
     "pdfmake": "^0.1.65",

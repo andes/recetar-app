@@ -25,6 +25,7 @@ export class Dispensa {
     }
 }
 export default class AndesPrescriptions {
+    _id: string;
     idAndes: string;
     organizacion: {
         id: string;

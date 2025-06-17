@@ -9,7 +9,14 @@ export class Patient {
     public status?: string,
     public dni?: string,
     public createdAt?: Date,
-    public _id?: string
+    public _id?: string,
+    public fechaNac?: Date,
+    public obraSocial?: {
+      _id: string;
+      nombre?: string;
+      codigoPuco?: string;
+      numeroAfiliado?: string;
+    }
     ) {}
 }
 
