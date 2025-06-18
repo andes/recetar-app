@@ -29,7 +29,7 @@ import { AndesPrescriptionPrinterComponent } from '@pharmacists/components/andes
 export class PrescriptionListComponent implements OnInit, AfterContentInit {
   
 
-  displayedColumns: string[] = ['professional', 'date', 'status', 'supplies', 'action', 'arrow'];
+  displayedColumns: string[] = ['medicamento', 'date', 'status', 'supplies', 'action', 'arrow'];
   dataSource = new MatTableDataSource<any>([]);
   expandedElement: Prescriptions | null;
   loadingPrescriptions: boolean;
