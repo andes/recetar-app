@@ -1,7 +1,7 @@
-import { Component, OnInit, ViewChild, AfterContentInit, Output, EventEmitter} from '@angular/core';
-import {MatTableDataSource} from '@angular/material/table';
-import {MatPaginator} from '@angular/material/paginator';
-import {MatSort} from '@angular/material/sort';
+import { Component, OnInit, ViewChild, AfterContentInit, Output, EventEmitter } from '@angular/core';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
 import { PrescriptionsService } from '@services/prescriptions.service';
 import { Prescriptions } from '@interfaces/prescriptions';
 import * as moment from 'moment';
@@ -26,19 +26,19 @@ import { rowsAnimation, detailExpand, arrowDirection } from '@animations/animati
 export class PrescriptionsListComponent implements OnInit, AfterContentInit {
   @Output() editPrescriptionEvent = new EventEmitter();
 
-  displayedColumns: string[] = ['patient', 'prescription_date', 'status', 'supply_count', 'action', 'arrow'];
+  displayedColumns: string[] = ['patient', 'prescription_date', 'status', 'quantity', 'quantityPresentation', 'action', 'arrow'];
   dataSource = new MatTableDataSource<Prescriptions>([]);
   expandedElement: Prescriptions | null;
   loadingPrescriptions: boolean;
 
-  @ViewChild(MatPaginator, {static: true}) paginator: MatPaginator;
-  @ViewChild(MatSort, {static: true}) sort: MatSort;
+  @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
+  @ViewChild(MatSort, { static: true }) sort: MatSort;
 
   constructor(
     private prescriptionService: PrescriptionsService,
     private authService: AuthService,
     private prescriptionPrinter: PrescriptionPrinterComponent,
-    public dialog: MatDialog){}
+    public dialog: MatDialog) { }
 
 
   ngOnInit() {
@@ -47,7 +47,7 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit {
       this.dataSource = new MatTableDataSource<Prescriptions>(prescriptions);
       // sort after populate dataSource
       this.dataSource.sortingDataAccessor = (item, property) => {
-        switch(property) {
+        switch (property) {
           case 'patient': return item.patient.lastName + item.patient.firstName;
           case 'prescription_date': return new Date(item.date).getTime();
           default: return item[property];
@@ -59,15 +59,14 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit {
     });
   }
 
-  ngAfterContentInit(){
+  ngAfterContentInit() {
     this.paginator._intl.itemsPerPageLabel = "Prescripciones por página";
     this.paginator._intl.firstPageLabel = "Primer página";
     this.paginator._intl.lastPageLabel = "Última página";
     this.paginator._intl.nextPageLabel = "Siguiente";
     this.paginator._intl.previousPageLabel = "Anterior";
     this.paginator._intl.getRangeLabel = (page: number, pageSize: number, length: number): string => {
-      if (length == 0 || pageSize == 0)
-      {
+      if (length == 0 || pageSize == 0) {
         return `0 de ${length}`;
       }
       length = Math.max(length, 0);
@@ -79,7 +78,7 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit {
 
 
   applyFilter(filterValue: string) {
-    this.dataSource.filterPredicate = (data: Prescriptions, filter: string)  => {
+    this.dataSource.filterPredicate = (data: Prescriptions, filter: string) => {
       const accumulator = (currentTerm, key) => {
         // enable filter by lastName / firstName / date
         return currentTerm + data.patient.lastName + data.patient.firstName + moment(data.date, 'YYYY-MM-DD').format('DD/MM/YYY').toString()
@@ -96,39 +95,39 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit {
     }
   }
 
-  canPrint(prescription: Prescriptions): boolean{
+  canPrint(prescription: Prescriptions): boolean {
     return (prescription.professional.userId === this.authService.getLoggedUserId()) && prescription.status !== 'Vencida';
   }
 
-  canEdit(prescription: Prescriptions): boolean{
+  canEdit(prescription: Prescriptions): boolean {
     return prescription.status === "Pendiente";
   }
 
-  canDelete(prescription: Prescriptions): boolean{
+  canDelete(prescription: Prescriptions): boolean {
     return (prescription.professional.userId === this.authService.getLoggedUserId() && prescription.status === "Pendiente");
   }
 
-  printPrescription(prescription: Prescriptions){
+  printPrescription(prescription: Prescriptions) {
     this.prescriptionPrinter.print(prescription);
   }
 
-  editPrescription(prescription: Prescriptions){
+  editPrescription(prescription: Prescriptions) {
     this.editPrescriptionEvent.emit(prescription);
   }
 
-  isStatus(prescritpion: Prescriptions, status: string): boolean{
+  isStatus(prescritpion: Prescriptions, status: string): boolean {
     return prescritpion.status === status;
   }
 
-  deleteDialogPrescription(prescription: Prescriptions){
+  deleteDialogPrescription(prescription: Prescriptions) {
     this.openDialog("delete", prescription);
   }
 
-   // Show a dialog
+  // Show a dialog
   private openDialog(aDialogType: string, aPrescription?: Prescriptions, aText?: string): void {
     const dialogRef = this.dialog.open(ProfessionalDialogComponent, {
       width: '400px',
-      data: {dialogType: aDialogType, prescription: aPrescription, text: aText }
+      data: { dialogType: aDialogType, prescription: aPrescription, text: aText }
     });
 
     dialogRef.afterClosed().subscribe(result => {

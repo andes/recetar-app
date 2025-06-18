@@ -198,7 +198,7 @@
                       <div fxLayout="row" fxLayoutGap="10px">
                         <!-- Cantidad de envase-->
                         <mat-form-field appearance="fill">
-                          <mat-label>Cantidad por envase</mat-label>
+                          <mat-label>Cantidad de envases</mat-label>
                           <input [tabIndex]="5 + i" type="number" matInput formControlName="quantity" required>
                           <mat-error *ngIf="control.get('quantity').hasError('required')">
                             Debe ingresar una cantidad
