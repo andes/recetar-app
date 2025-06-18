@@ -14,22 +14,23 @@
     </h2>
   </mat-card-title>
   <mat-card-content>
-
+    
     <mat-form-field>
       <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filtrar por fecha">
     </mat-form-field>
-
+    
     <div class="container mat-elevation-z8">
       <div class="table-container" *ngIf="!loadingPrescriptions">
         <table mat-table [dataSource]="dataSource" matSort multiTemplateDataRows>
-
-          <!-- Professional Column -->
-          <ng-container matColumnDef="professional">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> Profesional </th>
-            <td mat-cell *matCellDef="let element" class='title-cell' data-label='Profesional'> {{
-              element.professional?.businessName?.toUpperCase() || element.profesional?.nombre?.toUpperCase() }}</td>
+          
+          <!-- Medicamento Column -->
+          <ng-container matColumnDef="medicamento">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Medicamento </th>
+            <td mat-cell *matCellDef="let element" class='title-cell' data-label='Medicamento'>
+              {{ element.medicamento?.concepto?.term || (element.supplies?.length ? element.supplies[0]?.supply?.name : '') }}
+            </td>
           </ng-container>
-
+  
           <!-- Date -->
           <ng-container matColumnDef="date">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> Fecha </th>
@@ -46,6 +47,13 @@
                 [style.color]="isStatusMap.get(element._id) ? 'red': '#000000de'"> {{ element.status?.toUpperCase() ||
               element.estadoActual?.tipo?.toUpperCase() }}
             </td>
+          </ng-container>
+
+          <!-- Insumos Column -->
+          <ng-container matColumnDef="supplies">
+            <th mat-header-cell *matHeaderCellDef> Insumos </th>
+            <td mat-cell *matCellDef="let element" class='has_label_on_mobile' data-label='Insumos:'>
+              {{element.supplies?.length || element.medicamento?.cantidad}} envases</td>
           </ng-container>
 
           <!-- Accion Column -->
@@ -122,6 +130,14 @@
                   <div class="element-description" *ngIf="element.observation"> <span
                           class="description-title">Observaciones:</span> {{element.observation}}
                   </div>
+                  <div class="element-description" *ngIf="element.professional">
+                    <span class="description-title">Profesional:</span>
+                    {{ element.professional?.businessName}}
+                  </div>
+                  <div class="element-description" *ngIf="element.supplies?.length">
+                    <mat-chip *ngIf="element.supplies[0].duplicate">Duplicado</mat-chip>
+                    <mat-chip *ngIf="element.supplies[0].triplicate">Triplicado</mat-chip>
+                  </div>
                 </div>
               </div>
               <div *ngIf="element?.estadoActual" class="element-detail"
@@ -142,6 +158,10 @@
                   <div class="element-description" *ngIf="element.medicamento?.dosisDiaria?.notaMedica"> <span
                           class="description-title">Observaciones:</span>
                     {{element.medicamento?.dosisDiaria?.notaMedica}}
+                  </div>
+                  <div class="element-description" *ngIf="element.profesional">
+                    <span class="description-title">Profesional:</span>
+                    {{ element.profesional?.nombre }}
                   </div>
                 </div>
               </div>
