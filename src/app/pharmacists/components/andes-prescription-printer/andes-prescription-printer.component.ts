@@ -14,20 +14,29 @@ export class AndesPrescriptionPrinterComponent implements OnInit {
   constructor(
     private datePipe: DatePipe,
     private barcodeService: BarcodeService
-    
-  ){}
+
+  ) { }
 
   ngOnInit(): void {
   }
 
   // Print a prescription as PDF
-  async print(prescription: AndesPrescriptions){
+  async print(prescription: AndesPrescriptions) {
     const pdf: PdfMakeWrapper = new PdfMakeWrapper();
-    
+    if (prescription.estadoActual.tipo !== 'vigente') {
+      pdf.watermark({
+        text: 'Receta no valida para dispensa',
+        color: 'grey',
+        opacity: 0.3,
+        bold: true,
+        fontSize: 60
+      });
+    }
+
     const barcodeBase64 = await this.barcodeService.generateBarcodeBase64(prescription._id || prescription.idAndes);
     const barcodeImg = await new Img(barcodeBase64).fit([230, 60]).alignment('center').margin([0, 20]).build();
     pdf.info({
-      title: "Receta digital "+prescription.profesional.nombre+", "+prescription.profesional.apellido,
+      title: "Receta digital " + prescription.profesional.nombre + ", " + prescription.profesional.apellido,
       author: 'Andes'
     });
     // Header
@@ -36,53 +45,53 @@ export class AndesPrescriptionPrinterComponent implements OnInit {
     pdf.add(new Columns([new Txt('RECETAR').bold().alignment('left').end, new Txt(`Fecha prescripción: ${this.datePipe.transform(prescription.fechaPrestacion, 'dd/MM/yyyy')}`).alignment('right').end]).end);
     pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
     pdf.add(new Txt('\n').end);
-    
+
     // paciente
     pdf.add(new Txt([
-      {text:"Paciente:   "},
-      {text: `${prescription.paciente.apellido.toUpperCase()} ${prescription.paciente.nombre.toUpperCase()}`, bold: true}
+      { text: "Paciente:   " },
+      { text: `${prescription.paciente.apellido.toUpperCase()} ${prescription.paciente.nombre.toUpperCase()}`, bold: true }
     ]).end);
     pdf.add(new Txt('\n').end);
 
     pdf.add(new Txt([
-      {text:"DNI:    "},
-      {text:`${prescription.paciente.documento}`, bold: true}
+      { text: "DNI:    " },
+      { text: `${prescription.paciente.documento}`, bold: true }
     ]).end);
     pdf.add(new Txt('\n').end);
     if (prescription.paciente.fechaNacimiento) {
       pdf.add(new Txt([
-        {text:"Fecha Nacimiento:    "}, 
-        {text: `${this.datePipe.transform(prescription.paciente.fechaNacimiento, 'dd/MM/yyyy')}`, bold: true}
-    ]).end);
+        { text: "Fecha Nacimiento:    " },
+        { text: `${this.datePipe.transform(prescription.paciente.fechaNacimiento, 'dd/MM/yyyy')}`, bold: true }
+      ]).end);
       pdf.add(new Txt('\n').end);
     }
     pdf.add(new Txt([
-      {text:"Sexo:    "},
-      {text:`${prescription.paciente.sexo}`, bold: true}
+      { text: "Sexo:    " },
+      { text: `${prescription.paciente.sexo}`, bold: true }
     ]).end);
     pdf.add(new Txt('\n').end);
     pdf.add(new Txt([
-      {text:'Obra Social / Plan de salud :   '},
-      {text:`${(prescription.paciente.obraSocial ? prescription.paciente.obraSocial.nombre : 'No informado')}`, bold: true}
+      { text: 'Obra Social / Plan de salud :   ' },
+      { text: `${(prescription.paciente.obraSocial ? prescription.paciente.obraSocial.nombre : 'No informado')}`, bold: true }
     ]).end);
     pdf.add(new Txt('\n').end);
-    
+
     pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
     pdf.add(new Txt('\n').end);
     pdf.add(new Columns([new Txt("Medicamento").end, new Columns([new Txt('Presentación').end, new Txt("Cantidad").end]).end]).end);
     pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
     // Supplies
     pdf.add(new Txt('\n').end);
-   
+
     pdf.add(new Columns([
-      new Txt("" + prescription.medicamento.concepto.term).bold().end, 
+      new Txt("" + prescription.medicamento.concepto.term).bold().end,
       new Columns([
-        new Txt(`${prescription.medicamento.presentacion} Valor temporal`).bold().end, 
+        new Txt(`${prescription.medicamento.presentacion} Valor temporal`).bold().end,
         new Txt(`${prescription.medicamento.cantEnvases} envase(s) de ${prescription.medicamento.cantidad} unidad(es)`).bold().end]
       ).end
     ]).end);
     pdf.add(new Txt('\n').end);
-    
+
 
     pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
     pdf.add(new Txt('\n').end);
@@ -97,16 +106,16 @@ export class AndesPrescriptionPrinterComponent implements OnInit {
       pdf.add(new Txt("Nota medica").bold().end);
       pdf.add(new Txt("" + prescription.medicamento.dosisDiaria.notaMedica).end);
     }
-    if(prescription.dispensa.length>0){
+    if (prescription.dispensa.length > 0) {
       pdf.add(new Txt('\n').end);
       pdf.add(new Txt("Observaciones").bold().end);
       prescription.dispensa.forEach(supply => {
         supply.medicamento.forEach(medicamento => {
-          pdf.add(new Txt(""+medicamento.observacion).end);
+          pdf.add(new Txt("" + medicamento.observacion).end);
         });
       });
     }
-    pdf.add(new Txt("Dosis: "+prescription.medicamento.dosisDiaria.dosis+`${typeof(prescription.medicamento.dosisDiaria.intervalo) === "string" ? ` por ${prescription.medicamento.dosisDiaria.intervalo}` : ""}`+". Duración tratamiento:"+prescription.medicamento.dosisDiaria.dias+" dia/s").end);
+    pdf.add(new Txt("Dosis: " + prescription.medicamento.dosisDiaria.dosis + `${typeof (prescription.medicamento.dosisDiaria.intervalo) === "string" ? ` por ${prescription.medicamento.dosisDiaria.intervalo}` : ""}` + ". Duración tratamiento:" + prescription.medicamento.dosisDiaria.dias + " dia/s").end);
     pdf.add(new Txt('\n').end);
     pdf.add(new Txt('\n').end);
 
@@ -118,10 +127,10 @@ export class AndesPrescriptionPrinterComponent implements OnInit {
         { text: `\n ${prescription.profesional.apellido} ${prescription.profesional.nombre}`, fontSize: 20 },
         { text: `\n MEDICO MP ${prescription.profesional.matricula}`, bold: true, fontSize: 11 }
       ]).alignment('center').end]).end)
-    
+
     pdf.footer(new Txt([
-      { text:'Esta receta fue creada por emisor inscripto y valido en el Registro de Recetarios Electrónicos del Ministerio de Salud de la Nación - ', italics: true},
-      { text:'RL-2025-63212094-APN-SSVEIYES#MS', bold: true}
+      { text: 'Esta receta fue creada por emisor inscripto y valido en el Registro de Recetarios Electrónicos del Ministerio de Salud de la Nación - ', italics: true },
+      { text: 'RL-2025-63212094-APN-SSVEIYES#MS', bold: true }
     ]).fontSize(11).alignment('center').end);
     pdf.create().open();
   }

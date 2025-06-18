@@ -27,6 +27,17 @@ export class PrescriptionPrinterComponent implements OnInit {
   // Print a prescription as PDF
   async print(prescription: Prescriptions) {
     const pdf: PdfMakeWrapper = new PdfMakeWrapper();
+
+    if (prescription.status !== 'Pendiente') {
+      pdf.watermark({
+        text: 'Receta no valida para dispensa',
+        color: 'grey',
+        opacity: 0.3,
+        bold: true,
+        fontSize: 60
+      });
+    }
+
     const barcodeBase64 = await this.barcodeService.generateBarcodeBase64(prescription._id);
     const barcodeImg = await new Img(barcodeBase64).fit([230, 60]).alignment('center').margin([0, 20]).build();
     pdf.info({
