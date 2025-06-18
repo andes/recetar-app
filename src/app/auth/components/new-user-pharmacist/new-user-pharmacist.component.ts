@@ -57,9 +57,9 @@ export class NewUserPharmacistComponent implements OnInit {
         if (this.newUserForm.valid) {
             this.checkUser();
             const params = {
-                cuil: newUserForm.get('cuil').value
+                cuil: newUserForm.get('cuil').value,
+                disposicionHabilitacion: newUserForm.get('disposicionHabilitacion').value
             }
-            console.log(this.newUserForm.value);
             this.pharmacistsService.getPharmacistByCuit(params).subscribe(res => {
                 if (res.length) {
                     const pharmacist = res[0];
