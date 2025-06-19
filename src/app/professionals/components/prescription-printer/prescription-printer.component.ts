@@ -69,20 +69,32 @@ export class PrescriptionPrinterComponent implements OnInit {
       {text:`${prescription.patient.sex}`, bold: true}
     ]).end);
     pdf.add(new Txt('\n').end);
+
+    let obraSocial = '';
+    let numeroAfiliado = '';
+    if (prescription.patient.obraSocial?.nombre) {
+      obraSocial = prescription.patient.obraSocial.nombre;
+      numeroAfiliado = prescription.patient.obraSocial.numeroAfiliado || '';
+    }
     pdf.add(new Txt([
-      {text:'Obra Social / Plan de salud :   '},
-      {text:`${(prescription.patient.obraSocial ? prescription.patient.obraSocial.nombre : 'No informado')}`, bold: true}
+      { text: 'Obra Social / Plan de salud :   ' }, { text: `${(obraSocial)}`, bold: true }
     ]).end);
+    if (obraSocial) {
+      pdf.add(new Txt([
+        { text: 'Número de afiliado:   ' }, { text: `${numeroAfiliado || 'No informado'}`, bold: true }
+      ]).end);
+    }
     pdf.add(new Txt('\n').end);
 
     pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
     pdf.add(new Txt('\n').end);
-    pdf.add(new Columns([new Txt("Medicamento").end, new Columns([new Txt('Presentación').end, new Txt("Cantidad").end]).end]).end);
+    pdf.add(new Columns([new Txt("Medicamento").end, new Columns([new Txt('').end]).end]).end);
     pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
     // Supplies
     pdf.add(new Txt('\n').end);
     prescription.supplies.forEach(supply => {
-      pdf.add(new Columns([new Txt("" + supply.supply.name).bold().end, new Columns([new Txt(`${supply.quantity} Valor temporal`).bold().end, new Txt(`${supply.quantity} envases`).bold().end]).end]).end);
+      const cant = supply.quantityPresentation ? `${supply.quantity} envase(s) de ${supply.quantityPresentation} unidades` : `x ${supply.quantity}`;
+      pdf.add(new Columns([new Txt("" + supply.supply.name).bold().end, new Columns([new Txt(`${cant} `).bold().end]).end]).end);
       pdf.add(new Txt('\n').end);
     });
 
@@ -101,22 +113,27 @@ export class PrescriptionPrinterComponent implements OnInit {
     }
     pdf.add(new Txt('\n').end);
     pdf.add(new Txt('\n').end);
-
+    pdf.add(new Txt('\n').end);
+    pdf.add(new Txt('\n').end);
+    pdf.add(new Txt('\n').end);
+    pdf.add(new Txt('\n').end);
+    pdf.add(new Txt('\n').end);
 
 
     // Barcode
     pdf.add(new Columns([
       barcodeImg,
       new Txt([
-        {text:`Este documento ha sido firmado electrónicamente por Dr.:`, fontSize: 9, bold: true, italics: true}, 
-        {text:`\n ${prescription.professional.businessName}`, fontSize: 20},
-        {text:`\n MEDICO MP ${prescription.professional.enrollment}`, bold: true, fontSize: 11}
+        { text: `Este documento ha sido firmado \n electrónicamente por Dr.:`, fontSize: 9, bold: true, italics: true },
+        { text: `\n`, fontSize: 3 },
+        { text: `\n ${prescription.professional.businessName}`, fontSize: 14, bold: true },
+        { text: `\n MEDICO MP ${prescription.professional.enrollment}`, bold: true, fontSize: 9 }
       ]).alignment('center').end]).end)
 
 
 
     pdf.footer(new Txt([
-      { text:'Esta receta fue creada por emisor inscripto y valido en el Registro de Recetarios Electrónicos del Ministerio de Salud de la Nación - ', italics: true},
+      { text:'Esta receta fue creada por emisor inscripto y valido en el Registro de Recetarios Electrónicos \n del Ministerio de Salud de la Nación - ', italics: true},
       { text:'RL-2025-63212094-APN-SSVEIYES#MS', bold: true}
     ]).fontSize(11).alignment('center').end);
 
