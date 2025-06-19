@@ -37,7 +37,8 @@
       </mat-card-title>
 
       <mat-card-content>
-        <form [formGroup]="loginForm" #loginNgForm="ngForm" class="form-container"
+        <!-- Formulario de login -->
+        <form *ngIf="!showOtpForm" [formGroup]="loginForm" #loginNgForm="ngForm" class="form-container"
               (ngSubmit)="onSubmitEvent(loginForm, loginNgForm)">
           <div fxLayout fxLayout="column" fxLayoutAlign="center" class="container" fxLayoutGap="20px">
             <mat-form-field>
@@ -86,9 +87,39 @@
             </mat-spinner>
           </div>
         </form>
+
+        <!-- Formulario de OTP -->
+        <form *ngIf="showOtpForm" [formGroup]="otpForm" class="form-container"
+              (ngSubmit)="onSubmitOtp()">
+          <div fxLayout fxLayout="column" fxLayoutAlign="center" class="container" fxLayoutGap="20px">
+            <h3 class="text-center">Verificación de dos factores</h3>
+            <p class="text-center">Ingrese el código de verificación generado por su aplicación de autenticación</p>
+            <mat-form-field>
+              <input matInput placeholder="Código OTP" formControlName="otpToken" autocomplete="off">
+              <mat-error *ngIf="otpToken.errors?.required">
+                Código OTP es requerido
+              </mat-error>
+              <mat-error *ngIf="otpToken.errors?.pattern">
+                El código debe contener solo números
+              </mat-error>
+              <mat-error *ngIf="otpToken.errors?.minlength || otpToken.errors?.maxlength">
+                El código debe tener 6 dígitos
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <mat-error *ngIf="error" class="text-center login-error">
+            {{ error }}
+          </mat-error>
+          <div fxLayout="row" fxLayoutAlign="center" class="login-action" fxLayoutGap="0.5rem">
+            <button class="boton-iniciar-sesion" mat-raised-button type="submit" *ngIf="!showSubmit" fxFlex.lg="50%"
+                    fxFlex.sm="100%">
+              Verificar
+            </button>
+            <mat-spinner [color]="spinnerColor" [diameter]="spinnerDiameter" *ngIf="showSubmit">
+            </mat-spinner>
+          </div>
+        </form>
       </mat-card-content>
     </mat-card>
   </div>
-
-  
 </div>

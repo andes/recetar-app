@@ -15,11 +15,13 @@ import { MatDialog } from '@angular/material/dialog';
 export class LoginComponent implements OnInit {
 
   loginForm: FormGroup;
+  otpForm: FormGroup;
   hide: boolean = true;
   error: string;
   readonly spinnerColor: ThemePalette = 'primary';
   readonly spinnerDiameter: number = 30;
   showSubmit: boolean = false;
+  showOtpForm: boolean = false;
 
   constructor(
     private fBuilder: FormBuilder,
@@ -30,6 +32,12 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     this.initLoginForm();
+    this.initOtpForm();
+    
+    // Suscribirse al observable isOtpRequired
+    this.authService.isOtpRequired.subscribe(required => {
+      this.showOtpForm = required;
+    });
   }
 
   initLoginForm(): void {
@@ -43,18 +51,25 @@ export class LoginComponent implements OnInit {
     });
   }
 
+  initOtpForm(): void {
+    this.otpForm = this.fBuilder.group({
+      otpToken: ['', [
+        Validators.required,
+        Validators.minLength(6),
+        Validators.maxLength(6),
+        Validators.pattern('^[0-9]*$')
+      ]]
+    });
+  }
+
   onSubmitEvent(loginForm: FormGroup, loginNgForm: FormGroupDirective): void {
     if (this.loginForm.valid) {
-
       this.showSubmit = true;
       this.authService.login(this.loginForm.value).subscribe(
         res => {
-          if (this.authService.isPharmacistsRole()) {
-            this.router.navigate(['/farmacias/recetas/dispensar']);
-          } else if (this.authService.isProfessionalRole()) {
-            this.router.navigate(['/profesionales/recetas/nueva']);
-          } else if (this.authService.isAuditRole()) {
-            this.router.navigate(['/audit/recetas/auditar']);
+          console.log("login: primero debe verificar datos válidos", res);
+          if(res && !this.showOtpForm) {
+            this.redirectBasedOnRole();
           }
           this.showSubmit = false;
         },
@@ -64,6 +79,37 @@ export class LoginComponent implements OnInit {
           this.error = err;
           this.showSubmit = false;
         });
+    }
+  }
+
+  onSubmitOtp(): void {
+    if (this.otpForm.valid) {
+      this.showSubmit = true;
+      this.authService.verifyOtp(this.otpForm.value.otpToken).subscribe(
+        res => {
+          console.log("verifyOtp", res);
+          if(res) {
+            this.redirectBasedOnRole();
+          } else {
+            this.error = 'Código OTP inválido';
+          }
+          this.showSubmit = false;
+        },
+        err => {
+          this.otpForm.reset();
+          this.error = err;
+          this.showSubmit = false;
+        });
+    }
+  }
+
+  redirectBasedOnRole(): void {
+    if (this.authService.isPharmacistsRole()) {
+      this.router.navigate(['/farmacias/recetas/dispensar']);
+    } else if (this.authService.isProfessionalRole()) {
+      this.router.navigate(['/profesionales/recetas/nueva']);
+    } else if (this.authService.isAuditRole()) {
+      this.router.navigate(['/audit/recetas/auditar']);
     }
   }
 
@@ -88,6 +134,10 @@ export class LoginComponent implements OnInit {
 
   get password(): AbstractControl {
     return this.loginForm.get('password');
+  }
+
+  get otpToken(): AbstractControl {
+    return this.otpForm.get('otpToken');
   }
 
   forgot() {

@@ -20,6 +20,8 @@ export class AuthService {
   private loggedIn: BehaviorSubject<boolean>;
   private businessName: BehaviorSubject<string>;
   private isAudit: BehaviorSubject<boolean>;
+  private otpRequired: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  private tempUserData: any = null;
 
 
   constructor(
@@ -50,8 +52,42 @@ export class AuthService {
 
   login(user: { username: string, password: string }): Observable<boolean | HttpErrorResponse> {
     return this.http.post<any>(`${this.apiEndPoint}/auth/login`, user).pipe(
-      tap(tokens => this.doLoginUser(tokens)),
+      tap(response => {
+        console.log("response auth: ", response);
+        if (response.requireOtp) {
+          // Si se requiere OTP, guardamos los datos temporalmente y activamos el flag
+          this.tempUserData = user;
+          this.otpRequired.next(true);
+        } else {
+          // Si no se requiere OTP, procedemos con el login normal
+          return this.doLoginUser(response);
+        }
+      }),
       mapTo(true)
+    );
+  }
+
+  verifyOtp(otpToken: string): Observable<boolean | HttpErrorResponse> {
+    console.log("verifyOtp: ",this.tempUserData);
+    if (!this.tempUserData) {
+      return of(false);
+    }
+    
+    return this.http.post<any>(`${this.apiEndPoint}/auth/verify-otp`, {
+      username: this.tempUserData.identifier,
+      otpToken: otpToken
+    }).pipe(
+      tap(tokens => {
+        console.log("tokens: ",tokens);
+        this.doLoginUser(tokens);
+        this.tempUserData = null;
+        // this.otpRequired.next(false);
+      }),
+      mapTo(true),
+      catchError(error => {
+        console.log(error.error);
+        return of(false);
+      })
     );
   }
 
@@ -90,6 +126,10 @@ export class AuthService {
 
   get getIsAudit() {
     return this.isAudit.asObservable();
+  }
+
+  get isOtpRequired() {
+    return this.otpRequired.asObservable();
   }
 
   refreshToken() {
@@ -158,12 +198,15 @@ export class AuthService {
     if (!!this.getJwtToken()) {
       const token = this.getJwtToken();
       const tokenPayload = decode(token);
+
+      console.log("tokenPayload: ", tokenPayload);
       return tokenPayload;
     }
     return false;
   }
 
   private doLoginUser(tokens: Tokens) {
+    console.log("doLoginUser: ",tokens);
     this.storeTokens(tokens);
     this.businessName.next(this.getLoggedBusinessName());
     this.loggedIn.next(this.tokensExists());
