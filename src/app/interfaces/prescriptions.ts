@@ -19,6 +19,7 @@ export class Prescriptions {
   supplies: Array<{ 
     supply: Supply, 
     quantity: number,
+    quantityPresentation?: string,
     diagnostic?: string,
     indication?: string 
   }>;
