@@ -16,10 +16,19 @@
       <p>La receta de {{data.text}} se ha dispensado correctamente!</p>
     </div>
     <div mat-dialog-actions align="end">
-      <button mat-button *ngIf="data.prescription" (click)=printPrescription(data.prescription)>Imprimir</button>
       <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
     </div>
   </div> <!-- End case dispensed -->
+
+  <div *ngSwitchCase="'dispenseError'">
+    <h3 mat-dialog-title><mat-icon>error_outline</mat-icon>  Error</h3>
+    <div mat-dialog-content>
+      <p>{{data.text}}</p>
+    </div>
+    <div mat-dialog-actions align="end">
+      <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
+    </div>
+  </div> <!-- End case dispenseError -->
 
   <div *ngSwitchCase="'cancel-dispensed'">
     <h3 mat-dialog-title><mat-icon>check</mat-icon>  Dispensa cancelada</h3>
@@ -30,6 +39,16 @@
       <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
     </div>
   </div> <!-- End case cansel dispense -->
+
+  <div *ngSwitchCase="'cancel-dispensedError'">
+    <h3 mat-dialog-title><mat-icon>error_outline</mat-icon>  Error</h3>
+    <div mat-dialog-content>
+      <p>La dispensación de la receta no se pudo cancelar!</p>
+    </div>
+    <div mat-dialog-actions align="end">
+      <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
+    </div>
+  </div> <!-- End case cancel dispense error -->
 
   <div *ngSwitchCase="'noPrescriptionsDate'">
     <h3 mat-dialog-title><mat-icon>error_outline</mat-icon>  Atención</h3>

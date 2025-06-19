@@ -122,6 +122,8 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
           if (success) {
             this.openDialog("dispensed", prescription, prescription.professional.businessName);
           }
+        }, error => {
+          this.openDialog("dispenseError", prescription, error.error.message || "Error al dispensar la receta");
         }
       );
     } else if ("estadoActual" in prescription) {
@@ -130,27 +132,34 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
           if (success) {
             this.openDialog("dispensed", prescription, prescription.profesional.nombre);
           }
+        }, error => {
+          this.openDialog("dispenseError", prescription, error.error.message || "Error al dispensar la receta");
         }
       );
     }
   }
 
   // Dispense prescription, but if was, update table with the correct status.
-  cancelDispense(e) {
-    if ("status" in e) {
-      this.prescriptionService.cancelDispense(e._id, this.pharmacistId).subscribe(
+  cancelDispense(prescription: Prescriptions | AndesPrescriptions) {
+    console.log('cancelDispense', prescription);
+    if ("status" in prescription) {
+      this.prescriptionService.cancelDispense(prescription._id, this.pharmacistId).subscribe(
         success => {
           if (success) {
-            this.openDialog("cancel-dispensed", e);
+            this.openDialog("cancel-dispensed", prescription);
           }
+        }, error => {
+          this.openDialog("cancel-dispensedError", prescription, error.error.message || "Error al cancelar la dispensación de la receta");
         }
       );
-    } else if ("estadoActual" in e) {
-      this.andesPrescriptionService.cancelDispense(e._id, this.pharmacistId).subscribe(
+    } else if ("estadoActual" in prescription) {
+      this.andesPrescriptionService.cancelDispense(prescription.idAndes, this.pharmacistId).subscribe(
         success => {
           if (success) {
-            this.openDialog("cancel-dispensed", e);
+            this.openDialog("cancel-dispensed", prescription);
           }
+        }, error => {
+          this.openDialog("cancel-dispensedError", prescription, error.error.message || "Error al cancelar la dispensación de la receta");
         }
       );
     }
