@@ -26,7 +26,7 @@ import { rowsAnimation, detailExpand, arrowDirection } from '@animations/animati
 export class PrescriptionsListComponent implements OnInit, AfterContentInit {
   @Output() editPrescriptionEvent = new EventEmitter();
 
-  displayedColumns: string[] = ['patient', 'prescription_date', 'status', 'quantity', 'quantityPresentation', 'action', 'arrow'];
+  displayedColumns: string[] = ['patient', 'prescription_date', 'status', 'action', 'arrow'];
   dataSource = new MatTableDataSource<Prescriptions>([]);
   expandedElement: Prescriptions | null;
   loadingPrescriptions: boolean;

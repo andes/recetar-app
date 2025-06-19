@@ -195,6 +195,22 @@
                         </mat-form-field>
 
                       </div>
+
+                      <div fxLayout="row" fxLayoutGap="10px">
+                        <!-- Cantidad por presentacion-->
+                        <mat-form-field appearance="fill">
+                          <mat-label>Cantidad</mat-label>
+                          <input [tabIndex]="5 + i" type="number" matInput formControlName="quantityPresentation" required>
+                          <mat-error *ngIf="control.get('quantityPresentation').hasError('required')">
+                            Debe ingresar una cantidad
+                          </mat-error>
+                          <mat-error *ngIf="control.get('quantityPresentation').hasError('min')">
+                            Debe ingresar un mínimo de
+                            {{control.get('quantityPresentation').errors?.min.min}}
+                          </mat-error>
+                        </mat-form-field>
+                      </div>
+
                       <div fxLayout="row" fxLayoutGap="10px">
                         <!-- Cantidad de envase-->
                         <mat-form-field appearance="fill">
@@ -206,22 +222,6 @@
                           <mat-error *ngIf="control.get('quantity').hasError('min')">
                             Debe ingresar un mínimo de
                             {{control.get('quantity').errors?.min.min}}
-                          </mat-error>
-                        </mat-form-field>
-                      </div>
-
-                      <div fxLayout="row" fxLayoutGap="10px">
-                        <!-- Cantidad por presentacion-->
-                        <mat-form-field appearance="fill">
-                          <mat-label>Cantidad</mat-label>
-                          <input [tabIndex]="5 + i" type="number" matInput formControlName="quantityPresentation"
-                                 required>
-                          <mat-error *ngIf="control.get('quantityPresentation').hasError('required')">
-                            Debe ingresar una cantidad
-                          </mat-error>
-                          <mat-error *ngIf="control.get('quantityPresentation').hasError('min')">
-                            Debe ingresar un mínimo de
-                            {{control.get('quantityPresentation').errors?.min.min}}
                           </mat-error>
                         </mat-form-field>
                       </div>
