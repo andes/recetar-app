@@ -3,10 +3,12 @@
     <h2 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
       <mat-icon>gesture</mat-icon>
       <span>
-        Recetas <span *ngIf="dataSource.data.length && dataSource.data[0].patient"> de {{dataSource.data[0].patient.lastName}},
+        Recetas <span *ngIf="dataSource.data.length && dataSource.data[0].patient"> de
+          {{dataSource.data[0].patient.lastName}},
           {{dataSource.data[0].patient.firstName}} DNI {{dataSource.data[0].patient.dni}}</span>
-          <span *ngIf="dataSource.data.length && dataSource.data[0].paciente"> de {{dataSource.data[0].paciente.apellido}},
-            {{dataSource.data[0].paciente.nombre}} DNI {{dataSource.data[0].paciente.documento}}</span>
+        <span *ngIf="dataSource.data.length && dataSource.data[0].paciente"> de
+          {{dataSource.data[0].paciente.apellido}},
+          {{dataSource.data[0].paciente.nombre}} DNI {{dataSource.data[0].paciente.documento}}</span>
       </span>
       <button mat-stroked-button (click)="generateReport()">Generar reporte</button>
     </h2>
@@ -32,8 +34,8 @@
           <ng-container matColumnDef="date">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> Fecha </th>
             <td mat-cell *matCellDef="let element" class='m-card-sub-title' data-label='Fecha'>
-                <span *ngIf="element.date">{{element.date | date : 'dd/MM/yyyy'}}</span>
-                <span *ngIf="element.fechaPrestacion">{{element.fechaPrestacion | date : 'dd/MM/yyyy'}}</span>
+              <span *ngIf="element.date">{{element.date | date : 'dd/MM/yyyy'}}</span>
+              <span *ngIf="element.fechaPrestacion">{{element.fechaPrestacion | date : 'dd/MM/yyyy'}}</span>
             </td>
           </ng-container>
 
@@ -41,15 +43,9 @@
           <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
             <td mat-cell *matCellDef="let element" class='has_label_on_mobile' data-label='Estado:'
-                [style.color]="isStatusMap.get(element._id) ? 'red': '#000000de'"> {{ element.status?.toUpperCase() || element.estadoActual?.tipo?.toUpperCase() }} 
+                [style.color]="isStatusMap.get(element._id) ? 'red': '#000000de'"> {{ element.status?.toUpperCase() ||
+              element.estadoActual?.tipo?.toUpperCase() }}
             </td>
-          </ng-container>
-
-          <!-- Insumos Column -->
-          <ng-container matColumnDef="supplies">
-            <th mat-header-cell *matHeaderCellDef> Insumos </th>
-            <td mat-cell *matCellDef="let element" class='has_label_on_mobile' data-label='Insumos:'>
-              {{element.supplies?.length || element.medicamento?.cantidad}} </td>
           </ng-container>
 
           <!-- Accion Column -->
@@ -62,7 +58,8 @@
               </button>
               <mat-menu #menu="matMenu">
 
-                <button mat-menu-item type="button" *ngIf="canDispenseMap.get(element._id)" (click)="printPrescription(element)">
+                <button mat-menu-item type="button" *ngIf="canDispenseMap.get(element._id)"
+                        (click)="printPrescription(element)">
                   <mat-icon>print</mat-icon>
                   <span>Imprimir receta</span>
                 </button>
@@ -73,8 +70,8 @@
               </mat-menu>
 
               <div fxLayout="row" class="action-buttons">
-                <button mat-menu-item type="button" *ngIf="canDispenseMap.get(element._id)" (click)="printPrescription(element)"
-                        matTooltip="Imprimir" matTooltipPosition="above">
+                <button mat-menu-item type="button" *ngIf="canDispenseMap.get(element._id)"
+                        (click)="printPrescription(element)" matTooltip="Imprimir" matTooltipPosition="above">
                   <mat-icon>print</mat-icon>
                 </button>
                 <button mat-menu-item type="button" *ngIf="canDispenseMap.get(element._id)" (click)="dispense(element)"
@@ -82,8 +79,9 @@
                   <mat-icon>done_outline</mat-icon>
                 </button>
                 <app-prescription-undo *ngIf="canCounterMap.get(element._id)"
-                                       [dispensedAt]="element.dispensedAt || element.estadoActual?.createdAt" [prescriptionId]="element._id"
-                                       [lapseTime]="lapseTime" (cancelDispenseEvent)="cancelDispense($event)">
+                                       [dispensedAt]="element.dispensedAt || element.estadoActual?.createdAt"
+                                       [prescriptionId]="element._id" [lapseTime]="lapseTime"
+                                       (cancelDispenseEvent)="cancelDispense($event)">
                 </app-prescription-undo>
               </div>
             </td>
@@ -102,35 +100,48 @@
           <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
           <ng-container matColumnDef="expandedDetail">
             <td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumns.length">
-              <div *ngIf="element?.status" class="element-detail" [@detailExpand]="element._id == expandedElement?._id ? 'expanded' : 'collapsed'">
+              <div *ngIf="element?.status" class="element-detail"
+                   [@detailExpand]="element._id == expandedElement?._id ? 'expanded' : 'collapsed'">
                 <div class="element-diagram">
                   <div class="supplies-list">
                     <div class="supply-description" *ngFor="let supp of element.supplies">
-                      <span>{{ supp.supply.name }}</span>
-                      <mat-chip>{{ supp.quantity }}</mat-chip>
+                      <span *ngIf="supp.quantityPresentation"> 
+                        {{ supp.supply.name }} x {{supp.quantityPresentation}}
+                      </span>
+                      <span *ngIf="!supp.quantityPresentation">{{ supp.supply.name }} x {{supp.quantity}}</span>
                     </div>
                   </div>
-                  <div class="element-description" *ngIf="element.diagnostic"> <span class="description-title">
-                      Diagnóstico:</span> {{element.diagnostic}}
+                  <div class="element-description" *ngFor="let supp of element.supplies">
+                   <span *ngIf="supp.quantityPresentation"  ><span class="description-title">
+                      Cantidad de envases:</span> {{supp.quantity}}</span>
+                  </div>
+                  <div class="element-description" *ngIf="element.supplies[0].diagnostic"> <span
+                          class="description-title">
+                      Diagnóstico:</span> {{element.supplies[0]?.diagnostic}}
                   </div>
                   <div class="element-description" *ngIf="element.observation"> <span
                           class="description-title">Observaciones:</span> {{element.observation}}
                   </div>
                 </div>
               </div>
-              <div *ngIf="element?.estadoActual" class="element-detail" [@detailExpand]="element._id == expandedElement?._id ? 'expanded' : 'collapsed'">
+              <div *ngIf="element?.estadoActual" class="element-detail"
+                   [@detailExpand]="element._id == expandedElement?._id ? 'expanded' : 'collapsed'">
                 <div class="element-diagram">
                   <div class="supplies-list">
                     <div class="supply-description">
                       <span>{{ element.medicamento?.concepto?.term }} x {{ element.medicamento?.cantidad }}</span>
-                      <mat-chip>{{ element.medicamento?.cantEnvases }}</mat-chip>
                     </div>
+                  </div>
+                  <div class="element-description">
+                    <span class="description-title">
+                      Cantidad de envases: </span> {{ element.medicamento?.cantEnvases }}
                   </div>
                   <div class="element-description" *ngIf="element.diagnostico"> <span class="description-title">
                       Diagnóstico:</span> {{element.diagnostico?.term}}
                   </div>
                   <div class="element-description" *ngIf="element.medicamento?.dosisDiaria?.notaMedica"> <span
-                          class="description-title">Observaciones:</span> {{element.medicamento?.dosisDiaria?.notaMedica}}
+                          class="description-title">Observaciones:</span>
+                    {{element.medicamento?.dosisDiaria?.notaMedica}}
                   </div>
                 </div>
               </div>
