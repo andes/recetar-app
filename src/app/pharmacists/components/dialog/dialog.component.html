@@ -16,7 +16,6 @@
       <p>La receta de {{data.text}} se ha dispensado correctamente!</p>
     </div>
     <div mat-dialog-actions align="end">
-      <button mat-button *ngIf="data.prescription" (click)=printPrescription(data.prescription)>Imprimir</button>
       <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
     </div>
   </div> <!-- End case dispensed -->

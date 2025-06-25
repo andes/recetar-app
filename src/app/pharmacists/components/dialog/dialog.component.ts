@@ -32,9 +32,6 @@ export class DialogComponent implements OnInit {
     this.dialogRef.close();
   }
 
-  printPrescription(prescription: Prescriptions){
-    this.prescriptionPrinter.print(prescription);
-  }
 }
 
 export interface DialogData {
