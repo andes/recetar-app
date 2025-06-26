@@ -4,7 +4,6 @@ import { AuthService } from '@auth/services/auth.service';
 import { Router } from '@angular/router';
 import { ThemePalette } from '@angular/material/core';
 import { DialogComponent } from '@auth/components/dialog/dialog.component';
-// Material
 import { MatDialog } from '@angular/material/dialog';
 
 @Component({
@@ -15,11 +14,15 @@ import { MatDialog } from '@angular/material/dialog';
 export class LoginComponent implements OnInit {
 
   loginForm: FormGroup;
-  hide: boolean = true;
   error: string;
   readonly spinnerColor: ThemePalette = 'primary';
   readonly spinnerDiameter: number = 30;
-  showSubmit: boolean = false;
+  showSubmit = false;
+  randomId = Math.random().toString(36).substring(7);
+  passwordFieldName: string = 'field_' + Math.random().toString(36).substring(7);
+  passwordFieldKey: string = 'pwd_1';
+  passwordName: string = 'pwd_' + Math.random().toString(36).substring(7);
+  hide = true;
 
   constructor(
     private fBuilder: FormBuilder,
@@ -67,7 +70,6 @@ export class LoginComponent implements OnInit {
     }
   }
 
-  // Show a dialog
   openDialog(): void {
     const dialogRef = this.dialog.open(DialogComponent, {
       width: '800px'
@@ -99,6 +101,19 @@ export class LoginComponent implements OnInit {
   }
 
   newUserPharmacist() {
-    this.router.navigate(['/auth/new-user-pharmacist'])
+    this.router.navigate(['/auth/new-user-pharmacist']);
+  }
+
+  updateInputType(inputElement: HTMLInputElement) {
+    if (this.hide) {
+      inputElement.type = inputElement.value.length ? 'password' : 'text';
+    } else {
+      inputElement.type = 'text';
+    }
+  }
+
+  toggleVisibility(inputElement: HTMLInputElement) {
+    this.hide = !this.hide;
+    this.updateInputType(inputElement);
   }
 }
