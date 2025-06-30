@@ -87,15 +87,14 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
     private certificateSubscription;
     public certificate;
     @ViewChild(PrescriptionsListComponent) prescriptionsList: PrescriptionsListComponent;
-    apiPrescriptions: any;
+    ambito: 'publico' | 'privado';
 
     constructor(
         // private suppliesService: SuppliesService,
         private snomedSuppliesService: SnomedSuppliesService,
         private fBuilder: FormBuilder,
         private apiPatients: PatientsService,
-        private prescriptionsService: PrescriptionsService, // privado
-        private prescriptionsPublicService: PrescriptionsPublicService, // público
+        private apiPrescriptions: PrescriptionsService, // privado
         private authService: AuthService,
         public dialog: MatDialog,
         private _interactionService: InteractionService,
@@ -104,6 +103,9 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
     ) { }
 
     ngOnInit(): void {
+
+        // Selecciona el servicio según el ámbito
+        this.ambito = this.ambitoService.getAmbito();
 
         this.initProfessionalForm();
         // On confirm delete prescription
