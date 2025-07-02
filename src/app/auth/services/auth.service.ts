@@ -129,22 +129,34 @@ export class AuthService {
 
   isPharmacistsRole(): boolean {
     const roles: string[] = this.getLoggedRole();
+    if (!roles?.length) {
+      return false;
+    }
     return roles.some((role: string) => role === 'pharmacist');
     // return this.getLoggedRole() === 'pharmacist';
   }
 
   isPharmacistsPublicRole(): boolean {
     const roles: string[] = this.getLoggedRole();
+    if (!roles?.length) {
+      return false;
+    }
     return roles.some((role: string) => role === 'pharmacist-public');
   }
 
   isProfessionalRole(): boolean {
     const roles: string[] = this.getLoggedRole();
+    if (!roles?.length) {
+      return false;
+    }
     return roles.some((role: string) => role === 'professional');
   }
 
   isProfessionalPublicRole(): boolean {
     const roles: string[] = this.getLoggedRole();
+    if (!roles?.length) {
+      return false;
+    }
     return roles.some((role: string) => role === 'professional-public');
   }
 
@@ -162,6 +174,9 @@ export class AuthService {
 
   isAdminRole(): boolean {
     const roles: string[] = this.getLoggedRole();
+    if (!roles?.length) {
+      return false;
+    }
     return roles.some((role: string) => role === 'admin');
   }
   getLoggedRole(): string[] {
