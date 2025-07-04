@@ -134,7 +134,7 @@ export class PrescriptionPrinterComponent implements OnInit {
         { text: `Este documento ha sido firmado \n electrónicamente por Dr.:`, fontSize: 9, bold: true, italics: true },
         { text: `\n`, fontSize: 3 },
         { text: `\n ${prescription.professional.businessName}`, fontSize: 14, bold: true },
-        { text: `\n MEDICO MP ${prescription.professional.enrollment}`, bold: true, fontSize: 10 }
+        { text: `\n MP ${prescription.professional.enrollment}`, bold: true, fontSize: 10 }
       ]).alignment('center').end]).end)
 
     // Pharmacy

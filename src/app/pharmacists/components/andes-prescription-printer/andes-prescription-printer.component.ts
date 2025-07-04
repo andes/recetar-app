@@ -144,7 +144,7 @@ export class AndesPrescriptionPrinterComponent implements OnInit {
         { text: `Este documento ha sido firmado \n electrónicamente por Dr.:`, fontSize: 9, bold: true, italics: true },
         { text: `\n`, fontSize: 3 },
         { text: `\n ${prescription.profesional.apellido}`, fontSize: 14, bold: true },
-        { text: `\n MEDICO MP ${prescription.profesional.matricula}`, bold: true, fontSize: 10 }
+        { text: `\n MP ${prescription.profesional.matricula}`, bold: true, fontSize: 10 }
       ]).alignment('center').end]).end)
 
     pdf.footer(new Txt([
