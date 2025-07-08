@@ -28,12 +28,14 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { PrescriptionsListComponent } from './components/prescriptions-list/prescriptions-list.component';
 import { SupplyListComponent } from './components/supply-list/supply-list.component';
+import { SelectorAmbitoComponent } from './components/selector-ambito/selector-ambito.component';
 
 @NgModule({
   declarations: [
     routingComponents,
     PrescriptionsListComponent,
-    SupplyListComponent
+    SupplyListComponent,
+    SelectorAmbitoComponent,
   ],
   imports: [
     CommonModule,
