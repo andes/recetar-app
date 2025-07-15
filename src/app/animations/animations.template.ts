@@ -37,14 +37,20 @@ export const arrowDirection =
 export const step =
   trigger('step', [
     state('left', style({ left: '0' })),
+    state('center', style({ left: '0' })),
     state('right', style({ left: '0' })),
+    transition('left <=> center', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+    transition('center <=> right', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
     transition('left <=> right', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
   ]);
 
 export const stepLink =
   trigger('stepLink', [
     state('left', style({ left: '0px' })),
-    state('right', style({ left: '50%' })),
+    state('center', style({ left: '33.33%' })),
+    state('right', style({ left: '66.66%' })),
+    transition('left <=> center', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+    transition('center <=> right', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
     transition('left <=> right', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
   ]);
 

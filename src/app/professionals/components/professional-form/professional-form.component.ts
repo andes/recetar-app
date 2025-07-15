@@ -68,6 +68,7 @@ export class ProfessionalFormComponent implements OnInit {
     myPrescriptions: Prescriptions[] = [];
     isEdit = false;
     isFormShown = true;
+    currentTab: string = 'form';
     isCertificateShown = false;
     devices: any = {
         mobile: false,
@@ -443,15 +444,22 @@ export class ProfessionalFormComponent implements OnInit {
     showForm(): void {
         this.isFormShown = true;
         this.isCertificateShown = false;
+        this.currentTab = 'form';
     }
 
     showList(): void {
         this.isFormShown = false;
         this.isCertificateShown = false;
+        this.currentTab = 'certificates';
     }
 
     showCertificados(): void {
         this.isFormShown = false;
         this.isCertificateShown = true;
+    }
+
+    showPractices(): void {
+        this.isFormShown = false;
+        this.currentTab = 'practices';
     }
 }

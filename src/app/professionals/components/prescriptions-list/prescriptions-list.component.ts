@@ -7,11 +7,14 @@ import { Prescriptions } from '@interfaces/prescriptions';
 import * as moment from 'moment';
 import { AuthService } from '@auth/services/auth.service';
 import { PrescriptionPrinterComponent } from '@professionals/components/prescription-printer/prescription-printer.component';
+import { CertificatePracticePrinterComponent } from '@professionals/components/certificate-practice-printer/certificate-practice-printer.component';
 import { ProfessionalDialogComponent } from '@professionals/components/professional-dialog/professional-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { rowsAnimation, detailExpand, arrowDirection } from '@animations/animations.template';
 import { CertificatesService } from '@services/certificates.service';
+import { PracticesService } from '@services/practices.service';
 import { Certificates } from '@interfaces/certificate';
+import { Practice } from '@interfaces/practices';
 import { combineLatest, Subject } from 'rxjs';
 import { takeUntil, map } from 'rxjs/operators';
 
@@ -25,7 +28,7 @@ import { takeUntil, map } from 'rxjs/operators';
         detailExpand,
         arrowDirection
     ],
-    providers: [PrescriptionPrinterComponent]
+    providers: [PrescriptionPrinterComponent, CertificatePracticePrinterComponent]
 })
 export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDestroy {
     private destroy$ = new Subject<void>();
@@ -33,24 +36,30 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
 
     displayedColumns: string[] = ['patient', 'prescription_date', 'status', 'action', 'arrow'];
     certificatesColumns: string[] = ['patient', 'certificate_date', 'action', 'arrow'];
+    practicesColumns: string[] = ['patient', 'practice_date', 'action', 'arrow'];
     dataSource = new MatTableDataSource<Prescriptions>([]);
     expandedElement: Prescriptions | null;
     loadingPrescriptions: boolean;
     loadingCertificates: boolean;
+    loadingPractices: boolean;
     selectedType = 'receta'; // Default type
     dataCertificates = new MatTableDataSource<Certificates>([]);
+    dataPractices = new MatTableDataSource<Practice>([]);
 
     private paginatorsInitialized = false;
 
     @ViewChild('prescriptionsPaginator') prescriptionsPaginator: MatPaginator;
     @ViewChild('certificatesPaginator') certificatesPaginator: MatPaginator;
+    @ViewChild('practicesPaginator') practicesPaginator: MatPaginator;
     @ViewChild(MatSort, { static: true }) sort: MatSort;
 
     constructor(
         private prescriptionService: PrescriptionsService,
         private certificateService: CertificatesService,
+        private practicesService: PracticesService,
         private authService: AuthService,
         private prescriptionPrinter: PrescriptionPrinterComponent,
+        private certificatePracticePrinter: CertificatePracticePrinterComponent,
         public dialog: MatDialog) { }
 
 
@@ -103,15 +112,17 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
     initDataSource() {
         this.loadingPrescriptions = true;
         this.loadingCertificates = true;
+        this.loadingPractices = true;
 
-        // Combinar ambos observables usando combineLatest
+        // Combinar los tres observables usando combineLatest
         combineLatest([
             this.prescriptionService.prescriptions,
-            this.certificateService.certificates
+            this.certificateService.certificates,
+            this.practicesService.practices
         ]).pipe(
             takeUntil(this.destroy$),
-            map(([prescriptions, certificates]) => ({ prescriptions, certificates }))
-        ).subscribe(({ prescriptions, certificates }) => {
+            map(([prescriptions, certificates, practices]) => ({ prescriptions, certificates, practices }))
+        ).subscribe(({ prescriptions, certificates, practices }) => {
             // Configurar DataSource para prescripciones
             this.dataSource = new MatTableDataSource<Prescriptions>(prescriptions);
             this.dataSource.sortingDataAccessor = (item, property) => {
@@ -151,6 +162,26 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
                 }
             });
             this.loadingCertificates = false;
+
+            // Configurar DataSource para prácticas
+            this.dataPractices = new MatTableDataSource<Practice>(practices);
+            this.dataPractices.sortingDataAccessor = (item, property) => {
+                switch (property) {
+                    case 'patient': return item.patient.lastName + item.patient.firstName;
+                    case 'practice_date': return new Date(item.date).getTime();
+                    default: return item[property];
+                }
+            };
+            this.dataPractices.sort = this.sort;
+
+            // Asignar paginator si está disponible
+            setTimeout(() => {
+                if (this.practicesPaginator) {
+                    this.dataPractices.paginator = this.practicesPaginator;
+                    this.configurePaginatorLabels(this.practicesPaginator);
+                }
+            });
+            this.loadingPractices = false;
         });
     }
 
@@ -167,13 +198,17 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
         };
         this.dataSource.filter = filterValue.trim().toLowerCase();
         this.dataCertificates.filter = filterValue.trim().toLowerCase();
+        this.dataPractices.filter = filterValue.trim().toLowerCase();
 
-        // Resetear paginación para ambas tablas
+        // Resetear paginación para todas las tablas
         if (this.prescriptionsPaginator) {
             this.prescriptionsPaginator.firstPage();
         }
         if (this.certificatesPaginator) {
             this.certificatesPaginator.firstPage();
+        }
+        if (this.practicesPaginator) {
+            this.practicesPaginator.firstPage();
         }
     }
 
@@ -207,6 +242,18 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
 
     deleteDialogCertificate(certificate: Certificates) {
         this.openDialog('delete_certificate', certificate);
+    }
+
+    deleteDialogPractice(practice: Practice) {
+        this.openDialog('delete_practice', practice);
+    }
+
+    printCertificate(certificate: Certificates) {
+        this.certificatePracticePrinter.printCertificate(certificate);
+    }
+
+    printPractice(practice: Practice) {
+        this.certificatePracticePrinter.printPractice(practice);
     }
 
     // Show a dialog

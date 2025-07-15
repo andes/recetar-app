@@ -1,16 +1,17 @@
 <div class="custom-tab-link-bar">
     <button mat-flat-button (click)="showForm()">Receta</button>
-    <button mat-flat-button (click)="showCertificados()">Certificados</button>
-    <button mat-flat-button (click)="showList()">Registros</button>
+    <button mat-flat-button (click)="showPractices()">Prácticas</button>
+    <button mat-flat-button (click)="showList()">Certificados</button>
 </div>
 <div class="link-bar-indicator-container">
-    <div class="indicator" [@stepLink]="isFormShown ? 'left' : 'right'"></div>
+    <div class="indicator"
+         [@stepLink]="currentTab === 'form' ? 'left' : currentTab === 'practices' ? 'center' : 'right'"></div>
 </div>
 <div class="pf-container">
     <div fxLayout="row" fxLayoutAlign="space-evenly start" fxLayoutGap="20px" class="cards-container" fxFill
-         [@step]="isFormShown ? 'left' : 'right'">
+         [@step]="currentTab === 'form' ? 'left' : currentTab === 'practices' ? 'center' : 'right'">
         <!-- panel "Formulario receta" -->
-        <div class="prescription-panel" *ngIf="isFormShown && !isCertificateShown">
+        <div class="prescription-panel" *ngIf="currentTab === 'form'">
             <mat-card fxLayout="column" fxLayoutAlign="space-between" class="new-prescription">
                 <div fxFlex="100" fxLayout="column" fxLayoutAlign="start">
                     <mat-card-title>
@@ -297,7 +298,12 @@
             </mat-card>
         </div>
 
-        <div class="my-prescriptions-panel" *ngIf="!isFormShown && !isCertificateShown">
+        <!-- panel "Prácticas" -->
+        <div class="practices-panel" *ngIf="currentTab === 'practices'">
+            <app-practices-form></app-practices-form>
+        </div>
+
+        <div class="my-prescriptions-panel" *ngIf="currentTab === 'certificates'">
             <app-prescriptions-list (editPrescriptionEvent)="editPrescription($event)"></app-prescriptions-list>
         </div>
 
