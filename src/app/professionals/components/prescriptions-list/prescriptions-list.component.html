@@ -188,22 +188,31 @@
                                     <mat-icon>block</mat-icon>
                                     <span>Anular certificado</span>
                                 </button>
-                                <button mat-menu-item type="button" matTooltip="Imprimir" matTooltipPosition="above">
+                                <button mat-menu-item type="button" (click)="printCertificate(element)">
                                     <mat-icon>print</mat-icon>
                                     <span>Imprimir certificado</span>
                                 </button>
+                                <!-- <button mat-menu-item type="button" matTooltip="Eliminar" matTooltipPosition="above"
+                                        (click)="deleteDialogCertificate(element)">
+                                    <mat-icon>delete</mat-icon>
+                                    <span>Eliminar certificado</span>
+                                </button> -->
                             </mat-menu>
 
                             <div fxLayout="row" fxLayoutAlign="center center" class="action-buttons">
-                                <button mat-menu-item type="button" matTooltip="Imprimir" matTooltipPosition="above"
-                                        [disabled]="element.status" [style.opacity]="element.status ? 0.5 : 1">
-                                    <mat-icon>print</mat-icon>
-                                </button>
                                 <button mat-menu-item type="button" matTooltip="Anular" matTooltipPosition="above"
                                         (click)="anulateCertificate(element)" [disabled]="element.status"
                                         [style.opacity]="element.status ? 0.5 : 1">
                                     <mat-icon>block</mat-icon>
+                                <button mat-menu-item type="button" (click)="printCertificate(element)" 
+                                        matTooltip="Imprimir" matTooltipPosition="above"
+                                        [disabled]="element.status" [style.opacity]="element.status ? 0.5 : 1">
+                                    <mat-icon>print</mat-icon>
                                 </button>
+                                <!-- <button mat-menu-item type="button" matTooltip="Eliminar" matTooltipPosition="above"
+                                        (click)="deleteDialogCertificate(element)">
+                                    <mat-icon>delete</mat-icon>
+                                </button> -->
                             </div>
                         </td>
                     </ng-container>
@@ -253,6 +262,111 @@
                 <mat-spinner matSuffix color="primary" [diameter]="40"></mat-spinner>
             </div>
             <mat-paginator #certificatesPaginator [pageSizeOptions]="[10, 20, 30]"></mat-paginator>
+        </div>
+
+        <div *ngIf="selectedType === 'practicas'" class="container mat-elevation-z8">
+            <div class="table-container" *ngIf="!loadingPractices">
+                <table mat-table [dataSource]="dataPractices" matSort multiTemplateDataRows>
+
+                    <!-- Patient Column -->
+                    <ng-container matColumnDef="patient">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Paciente </th>
+                        <td mat-cell *matCellDef="let element" class='title-cell' test data-label='Paciente'> {{
+                            element.patient.lastName.toUpperCase() }}, {{ element.patient.firstName.toUpperCase() }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Practice date Column -->
+                    <ng-container matColumnDef="practice_date">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Fecha </th>
+                        <td mat-cell *matCellDef="let element" class='title-cell' test data-label='Fecha'> {{
+                            element.date | date :'dd/MM/yyyy'}}</td>
+                    </ng-container>
+
+                    <!-- Action Column -->
+                    <ng-container matColumnDef="action">
+                        <th mat-header-cell *matHeaderCellDef> Acción </th>
+                        <td mat-cell *matCellDef="let element" (click)="$event.stopPropagation()" class="actions-cell">
+                            <button mat-menu-item [matMenuTriggerFor]="menu" class="menu-collapse">
+                                <mat-icon>more_vert</mat-icon>
+                            </button>
+
+                            <mat-menu #menu="matMenu">
+                                <button mat-menu-item type="button" (click)="printPractice(element)">
+                                    <mat-icon>print</mat-icon>
+                                    <span>Imprimir práctica</span>
+                                </button>
+                                <button mat-menu-item type="button" matTooltip="Eliminar" matTooltipPosition="above"
+                                        (click)="deleteDialogPractice(element)">
+                                    <mat-icon>delete</mat-icon>
+                                    <span>Eliminar práctica</span>
+                                </button>
+                            </mat-menu>
+
+                            <div fxLayout="row" fxLayoutAlign="center center" class="action-buttons">
+                                <button mat-menu-item type="button" (click)="printPractice(element)" 
+                                        matTooltip="Imprimir" matTooltipPosition="above">
+                                    <mat-icon>print</mat-icon>
+                                </button>
+                                <button mat-menu-item type="button" matTooltip="Eliminar" matTooltipPosition="above"
+                                        (click)="deleteDialogPractice(element)">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="arrow">
+                        <th mat-header-cell *matHeaderCellDef> </th>
+                        <td mat-cell *matCellDef="let element">
+                            <button mat-menu-item type="button">
+                                <mat-icon
+                                          [@arrowDirection]="element._id == expandedElement?._id ? 'up' : 'down'">expand_more</mat-icon>
+                            </button>
+                        </td>
+                    </ng-container>
+
+                    <!-- Expanded Content Column -->
+                    <ng-container matColumnDef="expandedDetail">
+                        <td mat-cell *matCellDef="let element" [attr.colspan]="practicesColumns.length">
+                            <div class="element-detail"
+                                 [@detailExpand]="element._id == expandedElement?._id ? 'expanded' : 'collapsed'">
+                                <div class="element-diagram">
+                                    <div class="supplies-list">
+                                        <div class="supply-description">
+                                            <span style="display: inline-block; text-align: left;"
+                                                  *ngIf="element.practice">
+                                                <strong>Práctica:</strong> {{ element.practice }}
+                                            </span>
+                                            <br *ngIf="element.practice && element.diagnostic">
+                                            <span style="display: inline-block; text-align: left;"
+                                                  *ngIf="element.diagnostic">
+                                                <strong>Diagnóstico:</strong> {{ element.diagnostic }}
+                                            </span>
+                                            <br *ngIf="element.diagnostic && element.indications">
+                                            <span style="display: inline-block; text-align: left;"
+                                                  *ngIf="element.indications">
+                                                <strong>Indicaciones:</strong> {{ element.indications }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="practicesColumns; sticky: true"></tr>
+                    <tr mat-row [@rowsAnimation]="" *matRowDef="let row; columns: practicesColumns;"
+                        class="element-row" [class.expanded-row]="expandedElement === row"
+                        (click)="expandedElement = expandedElement === row ? null : row">
+                    </tr>
+                    <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
+                </table>
+            </div>
+            <div fxLayout="row" fxLayoutAlign="center" class="loading-prescriptions" *ngIf="loadingPractices">
+                <mat-spinner matSuffix color="primary" [diameter]="40"></mat-spinner>
+            </div>
+            <mat-paginator #practicesPaginator [pageSizeOptions]="[10, 20, 30]"></mat-paginator>
         </div>
 
     </mat-card-content>

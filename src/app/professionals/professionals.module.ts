@@ -29,38 +29,42 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { PrescriptionsListComponent } from './components/prescriptions-list/prescriptions-list.component';
 import { CertificateFormComponent } from './components/certificate-form/certificate-form.component';
 import { SupplyListComponent } from './components/supply-list/supply-list.component';
+import { PracticesFormComponent } from './components/practices-form/practices-form.component';
+import { CertificatePracticePrinterComponent } from './components/certificate-practice-printer/certificate-practice-printer.component';
 
 @NgModule({
-    declarations: [
-        routingComponents,
-        PrescriptionsListComponent,
-        SupplyListComponent,
-        CertificateFormComponent
-    ],
-    imports: [
-        CommonModule,
-        BrowserModule,
-        HttpClientModule,
-        ReactiveFormsModule,
-        ProfessionalsRoutingModule,
-        FlexLayoutModule,
-        MatCardModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatButtonModule,
-        MatSelectModule,
-        MatAutocompleteModule,
-        MatMenuModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        MatIconModule,
-        MatProgressSpinnerModule,
-        MatTableModule,
-        MatChipsModule,
-        MatPaginatorModule,
-        MatSortModule,
-        MatTooltipModule,
-        MatCheckboxModule
-    ]
+  declarations: [
+    routingComponents,
+    PrescriptionsListComponent,
+    SupplyListComponent,
+    PracticesFormComponent,
+    CertificateFormComponent,
+    CertificatePracticePrinterComponent
+  ],
+  imports: [
+    CommonModule,
+    BrowserModule,
+    HttpClientModule,
+    ReactiveFormsModule,
+    ProfessionalsRoutingModule,
+    FlexLayoutModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatSelectModule,
+    MatAutocompleteModule,
+    MatMenuModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatTableModule,
+    MatChipsModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatTooltipModule,
+    MatCheckboxModule
+  ]
 })
 export class ProfessionalsModule { }
