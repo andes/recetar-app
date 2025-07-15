@@ -15,8 +15,8 @@ import { CertificatesService } from '@services/certificates.service';
 import { PracticesService } from '@services/practices.service';
 import { Certificate } from '@interfaces/certificate';
 import { Practice } from '@interfaces/practices';
-import { combineLatest, Subject } from 'rxjs';
-import { takeUntil, map } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 
 @Component({
@@ -66,7 +66,94 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
 
     ngOnInit() {
         this.initDataSource();
-        this.selectedType = this.tipo || 'receta'; // Use input tipo or default to 'receta'
+        this.loadDataForSelectedType();
+    }
+
+    // Cargar datos según el tipo seleccionado
+    loadDataForSelectedType() {
+        switch (this.selectedType) {
+            case 'receta':
+                this.loadPrescriptions();
+                break;
+            case 'certificados':
+                this.loadCertificates();
+                break;
+            case 'practicas':
+                this.loadPractices();
+                break;
+        }
+    }
+
+    // Cargar prescripciones
+    private loadPrescriptions(offset: number = 0, limit: number = 10) {
+        this.loadingPrescriptions = true;
+        const userId = this.authService.getLoggedUserId();
+
+        this.prescriptionService.getByUserId(userId, { offset, limit }).pipe(
+            takeUntil(this.destroy$)
+        ).subscribe(() => {
+            // Después de la llamada a la API, suscribirse al observable para obtener los datos actualizados
+            this.prescriptionService.prescriptions.pipe(
+                takeUntil(this.destroy$)
+            ).subscribe((prescriptions: Prescriptions[]) => {
+                this.dataSource.data = prescriptions;
+                setTimeout(() => {
+                    if (this.prescriptionsPaginator) {
+                        this.dataSource.paginator = this.prescriptionsPaginator;
+                        this.configurePaginatorLabels(this.prescriptionsPaginator);
+                    }
+                });
+                this.loadingPrescriptions = false;
+            });
+        });
+    }
+
+    // Cargar certificados
+    private loadCertificates(offset: number = 0, limit: number = 10) {
+        this.loadingCertificates = true;
+        const userId = this.authService.getLoggedUserId();
+
+        this.certificateService.getByUserId(userId, { offset, limit }).pipe(
+            takeUntil(this.destroy$)
+        ).subscribe(() => {
+            // Después de la llamada a la API, suscribirse al observable para obtener los datos actualizados
+            this.certificateService.certificates.pipe(
+                takeUntil(this.destroy$)
+            ).subscribe((certificates: Certificate[]) => {
+                this.dataCertificates.data = certificates;
+                setTimeout(() => {
+                    if (this.certificatesPaginator) {
+                        this.dataCertificates.paginator = this.certificatesPaginator;
+                        this.configurePaginatorLabels(this.certificatesPaginator);
+                    }
+                });
+                this.loadingCertificates = false;
+            });
+        });
+    }
+
+    // Cargar prácticas
+    private loadPractices(offset: number = 0, limit: number = 10) {
+        this.loadingPractices = true;
+        const userId = this.authService.getLoggedUserId();
+
+        this.practicesService.getByUserId(userId, { offset, limit }).pipe(
+            takeUntil(this.destroy$)
+        ).subscribe(() => {
+            // Después de la llamada a la API, suscribirse al observable para obtener los datos actualizados
+            this.practicesService.practices.pipe(
+                takeUntil(this.destroy$)
+            ).subscribe((practices: Practice[]) => {
+                this.dataPractices.data = practices;
+                setTimeout(() => {
+                    if (this.practicesPaginator) {
+                        this.dataPractices.paginator = this.practicesPaginator;
+                        this.configurePaginatorLabels(this.practicesPaginator);
+                    }
+                });
+                this.loadingPractices = false;
+            });
+        });
     }
 
     ngAfterViewInit() {
@@ -78,9 +165,40 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
         setTimeout(() => {
             this.configurePaginatorLabels(this.prescriptionsPaginator);
             this.configurePaginatorLabels(this.certificatesPaginator);
+            this.configurePaginatorLabels(this.practicesPaginator);
+            this.setupPaginationEvents();
             this.assignPaginatorsToDataSources();
             this.paginatorsInitialized = true;
         });
+    }
+
+    private setupPaginationEvents() {
+        // Configurar eventos de paginación para prescripciones
+        if (this.prescriptionsPaginator) {
+            this.prescriptionsPaginator.page.pipe(
+                takeUntil(this.destroy$)
+            ).subscribe((pageEvent) => {
+                this.loadPrescriptions(pageEvent.pageIndex * pageEvent.pageSize, pageEvent.pageSize);
+            });
+        }
+
+        // Configurar eventos de paginación para certificados
+        if (this.certificatesPaginator) {
+            this.certificatesPaginator.page.pipe(
+                takeUntil(this.destroy$)
+            ).subscribe((pageEvent) => {
+                this.loadCertificates(pageEvent.pageIndex * pageEvent.pageSize, pageEvent.pageSize);
+            });
+        }
+
+        // Configurar eventos de paginación para prácticas
+        if (this.practicesPaginator) {
+            this.practicesPaginator.page.pipe(
+                takeUntil(this.destroy$)
+            ).subscribe((pageEvent) => {
+                this.loadPractices(pageEvent.pageIndex * pageEvent.pageSize, pageEvent.pageSize);
+            });
+        }
     }
 
     private assignPaginatorsToDataSources() {
@@ -89,6 +207,9 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
         }
         if (this.dataCertificates.data.length > 0 && this.certificatesPaginator) {
             this.dataCertificates.paginator = this.certificatesPaginator;
+        }
+        if (this.dataPractices.data.length > 0 && this.practicesPaginator) {
+            this.dataPractices.paginator = this.practicesPaginator;
         }
     }
 
@@ -112,79 +233,36 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
     }
 
     initDataSource() {
-        this.loadingPrescriptions = true;
-        this.loadingCertificates = true;
-        this.loadingPractices = true;
+        // Inicializar DataSources vacíos
+        this.dataSource = new MatTableDataSource<Prescriptions>([]);
+        this.dataSource.sortingDataAccessor = (item, property) => {
+            switch (property) {
+                case 'patient': return item.patient.lastName + item.patient.firstName;
+                case 'prescription_date': return new Date(item.date).getTime();
+                default: return item[property];
+            }
+        };
+        this.dataSource.sort = this.sort;
 
-        // Combinar los tres observables usando combineLatest
-        combineLatest([
-            this.prescriptionService.prescriptions,
-            this.certificateService.certificates,
-            this.practicesService.practices
-        ]).pipe(
-            takeUntil(this.destroy$),
-            map(([prescriptions, certificates, practices]) => ({ prescriptions, certificates, practices }))
-        ).subscribe(({ prescriptions, certificates, practices }) => {
-            // Configurar DataSource para prescripciones
-            this.dataSource = new MatTableDataSource<Prescriptions>(prescriptions);
-            this.dataSource.sortingDataAccessor = (item, property) => {
-                switch (property) {
-                    case 'patient': return item.patient.lastName + item.patient.firstName;
-                    case 'prescription_date': return new Date(item.date).getTime();
-                    default: return item[property];
-                }
-            };
-            this.dataSource.sort = this.sort;
+        this.dataCertificates = new MatTableDataSource<Certificate>([]);
+        this.dataCertificates.sortingDataAccessor = (item, property) => {
+            switch (property) {
+                case 'patient': return item.patient.lastName + item.patient.firstName;
+                case 'certificate_date': return new Date(item.createdAt).getTime();
+                default: return item[property];
+            }
+        };
+        this.dataCertificates.sort = this.sort;
 
-            // Asignar paginator si está disponible
-            setTimeout(() => {
-                if (this.prescriptionsPaginator) {
-                    this.dataSource.paginator = this.prescriptionsPaginator;
-                    this.configurePaginatorLabels(this.prescriptionsPaginator);
-                }
-            });
-            this.loadingPrescriptions = false;
-
-            // Configurar DataSource para certificados
-            this.dataCertificates = new MatTableDataSource<Certificate>(certificates);
-            this.dataCertificates.sortingDataAccessor = (item, property) => {
-                switch (property) {
-                    case 'patient': return item.patient.lastName + item.patient.firstName;
-                    case 'prescription_date': return new Date(item.createdAt).getTime();
-                    default: return item[property];
-                }
-            };
-            this.dataCertificates.sort = this.sort;
-
-            // Asignar paginator si está disponible
-            setTimeout(() => {
-                if (this.certificatesPaginator) {
-                    this.dataCertificates.paginator = this.certificatesPaginator;
-                    this.configurePaginatorLabels(this.certificatesPaginator);
-                }
-            });
-            this.loadingCertificates = false;
-
-            // Configurar DataSource para prácticas
-            this.dataPractices = new MatTableDataSource<Practice>(practices);
-            this.dataPractices.sortingDataAccessor = (item, property) => {
-                switch (property) {
-                    case 'patient': return item.patient.lastName + item.patient.firstName;
-                    case 'practice_date': return new Date(item.date).getTime();
-                    default: return item[property];
-                }
-            };
-            this.dataPractices.sort = this.sort;
-
-            // Asignar paginator si está disponible
-            setTimeout(() => {
-                if (this.practicesPaginator) {
-                    this.dataPractices.paginator = this.practicesPaginator;
-                    this.configurePaginatorLabels(this.practicesPaginator);
-                }
-            });
-            this.loadingPractices = false;
-        });
+        this.dataPractices = new MatTableDataSource<Practice>([]);
+        this.dataPractices.sortingDataAccessor = (item, property) => {
+            switch (property) {
+                case 'patient': return item.patient.lastName + item.patient.firstName;
+                case 'practice_date': return new Date(item.date).getTime();
+                default: return item[property];
+            }
+        };
+        this.dataPractices.sort = this.sort;
     }
 
     applyFilter(filterValue: string) {
@@ -272,6 +350,9 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
 
     // Método para manejar el cambio de tipo de selector
     onSelectedTypeChange() {
+        // Cargar datos para el tipo seleccionado
+        this.loadDataForSelectedType();
+
         // Reinicializar paginators cuando cambia el tipo
         setTimeout(() => {
             this.initializePaginators();

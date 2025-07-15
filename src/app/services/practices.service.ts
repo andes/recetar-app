@@ -30,16 +30,17 @@ export class PracticesService {
         return this.http.get<Practice>(`${environment.API_END_POINT}/practices/${id}`);
     }
 
-    getFromDniAndDate(params: { patient_dni: string, dateFilter: string }): Observable<boolean> {
+    getFromDniAndDate(params: { patient_dni: string; dateFilter: string }): Observable<boolean> {
         return this.http.get<Practice[]>(`${environment.API_END_POINT}/practices/find/${params.patient_dni}&${params.dateFilter}`).pipe(
             tap((practices: Practice[]) => this.setPractices(practices)),
             map((practices: Practice[]) => practices.length > 0)
         );
     }
 
-    getByUserId(userId: string): Observable<Boolean> {
-        return this.http.get<Practice[]>(`${environment.API_END_POINT}/practices/get-by-user-id/${userId}`).pipe(
-            tap((practices: Practice[]) => this.setPractices(practices)),
+    getByUserId(userId: string, params?: { offset?: number; limit?: number }): Observable<Boolean> {
+        const queryParams = params || {};
+        return this.http.get<{ practices: Practice[]; total: number; offset: number; limit: number }>(`${environment.API_END_POINT}/practices/user/${userId}`, { params: queryParams }).pipe(
+            tap((response) => this.setPractices(response.practices)),
             mapTo(true)
         );
     }
@@ -111,10 +112,10 @@ export class PracticesService {
             tap((csv: any) => {
                 const header = { type: 'text/csv' };
                 const blob = new Blob([csv], header);
-                const fileName = `reporte-practicas-${moment().format('DD-MM-YYYY-HH:mm')}.csv`
+                const fileName = `reporte-practicas-${moment().format('DD-MM-YYYY-HH:mm')}.csv`;
                 saveAs(blob, fileName);
             })
-        )
+        );
     }
 
     get practices(): Observable<Practice[]> {

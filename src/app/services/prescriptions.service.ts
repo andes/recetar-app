@@ -53,9 +53,10 @@ export class PrescriptionsService {
         );
     }
 
-    getByUserId(userId: string): Observable<Boolean> {
-        return this.http.get<Prescriptions[]>(`${environment.API_END_POINT}/prescriptions/get-by-user-id/${userId}`).pipe(
-            tap((prescriptions: Prescriptions[]) => this.setPrescriptions(prescriptions)),
+    getByUserId(userId: string, params?: { offset?: number; limit?: number }): Observable<Boolean> {
+        const queryParams = params || {};
+        return this.http.get<{ prescriptions: Prescriptions[]; total: number; offset: number; limit: number }>(`${environment.API_END_POINT}/prescriptions/user/${userId}`, { params: queryParams }).pipe(
+            tap((response) => this.setPrescriptions(response.prescriptions)),
             mapTo(true)
         );
     }
