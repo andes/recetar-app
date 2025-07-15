@@ -25,9 +25,10 @@ export class CertificatesService {
         );
     }
 
-    getByUserId(userId: string): Observable<Boolean> {
-        return this.http.get<Certificate[]>(`${environment.API_END_POINT}/certificates/get-by-user-id/${userId}`).pipe(
-            tap((certificates: Certificate[]) => this.setPrescriptions(certificates)),
+    getByUserId(userId: string, params?: { offset?: number; limit?: number }): Observable<Boolean> {
+        const queryParams = params || {};
+        return this.http.get<{ certificates: Certificate[]; total: number; offset: number; limit: number }>(`${environment.API_END_POINT}/certificates/user/${userId}`, { params: queryParams }).pipe(
+            tap((response) => this.setPrescriptions(response.certificates)),
             mapTo(true)
         );
     }
