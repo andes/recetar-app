@@ -18,6 +18,7 @@ import SnomedConcept from '@interfaces/snomedConcept';
 import Supplies from '@interfaces/supplies';
 import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
 import { fadeOutCollapseOnLeaveAnimation } from 'angular-animations';
+import { CertificatesService } from '@services/certificates.service';
 
 
 @Component({
@@ -67,6 +68,7 @@ export class ProfessionalFormComponent implements OnInit {
   myPrescriptions: Prescriptions[] = [];
   isEdit: boolean = false;
   isFormShown: boolean = true;
+  isCertificateShown: boolean = false;
   devices: any = {
     mobile: false,
     tablet: false,
@@ -84,7 +86,8 @@ export class ProfessionalFormComponent implements OnInit {
     private apiPrescriptions: PrescriptionsService,
     private authService: AuthService,
     public dialog: MatDialog,
-    private _interactionService: InteractionService
+    private _interactionService: InteractionService,
+    private certificateService: CertificatesService
   ) { }
 
   ngOnInit(): void {
@@ -106,11 +109,11 @@ export class ProfessionalFormComponent implements OnInit {
     );
 
     // get prescriptions
-    this.apiPrescriptions.getByUserId(this.authService.getLoggedUserId()).subscribe(
-      res => {
-        // this.myPrescriptions = res;
-      },
-    );
+    this.apiPrescriptions.getByUserId(this.authService.getLoggedUserId()).subscribe();
+
+    //get certificates
+    this.certificateService.getByUserId(this.authService.getLoggedUserId()).subscribe();
+
     this.professionalForm.get('patient.otraOS')?.valueChanges.subscribe(() => {
       const osGroup = this.professionalForm.get('patient.os') as FormGroup;
       osGroup.reset();
@@ -224,7 +227,6 @@ export class ProfessionalFormComponent implements OnInit {
   }
 
   onSubmitProfessionalForm(professionalNgForm: FormGroupDirective): void {
-
     if (this.professionalForm.valid) {
       const newPrescription = this.professionalForm.value;
       this.isSubmit = true;
@@ -445,9 +447,16 @@ export class ProfessionalFormComponent implements OnInit {
 
   showForm(): void {
     this.isFormShown = true;
+    this.isCertificateShown = false;
   }
 
   showList(): void {
     this.isFormShown = false;
+    this.isCertificateShown = false;
+  }
+
+  showCertificados(): void {
+    this.isFormShown = false;
+    this.isCertificateShown = true;
   }
 }
