@@ -3,13 +3,14 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { fadeInOnEnterAnimation, fadeOutOnLeaveAnimation } from 'angular-animations';
 import { Prescriptions } from '@interfaces/prescriptions';
 import { InteractionService } from "@professionals/interaction.service";
+import { Certificates } from '@interfaces/certificate';
 
 @Component({
   selector: 'app-professional-dialog',
   templateUrl: './professional-dialog.component.html',
   styleUrls: ['./professional-dialog.component.sass'],
   animations: [
-    fadeInOnEnterAnimation(), 
+    fadeInOnEnterAnimation(),
     fadeOutOnLeaveAnimation()
   ],
 })
@@ -19,7 +20,7 @@ export class ProfessionalDialogComponent implements OnInit {
     public dialogRef: MatDialogRef<ProfessionalDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: DialogData,
     private _interactionService: InteractionService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
   }
@@ -28,8 +29,13 @@ export class ProfessionalDialogComponent implements OnInit {
     this.dialogRef.close();
   }
 
-  deletePrescription(prescription: Prescriptions){
+  deletePrescription(prescription: Prescriptions) {
     this._interactionService.deletePrescription(prescription);
+    this.dialogRef.close();
+  }
+
+  deleteCertificate(certificate) {
+    this._interactionService.deleteCertificate(certificate);
     this.dialogRef.close();
   }
 }

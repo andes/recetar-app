@@ -27,13 +27,15 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { PrescriptionsListComponent } from './components/prescriptions-list/prescriptions-list.component';
+import { CertificateFormComponent } from './components/certificate-form/certificate-form.component';
 import { SupplyListComponent } from './components/supply-list/supply-list.component';
 
 @NgModule({
   declarations: [
     routingComponents,
     PrescriptionsListComponent,
-    SupplyListComponent
+    SupplyListComponent,
+    CertificateFormComponent
   ],
   imports: [
     CommonModule,
