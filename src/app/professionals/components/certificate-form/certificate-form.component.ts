@@ -11,7 +11,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { step, stepLink } from '@animations/animations.template';
 import { debounce, debounceTime, map, startWith } from 'rxjs/operators';
 import { CertificatesService } from '@services/certificates.service';
-import { Certificates } from '@interfaces/certificate';
+import { Certificate } from '@interfaces/certificate';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -59,9 +59,9 @@ export class CertificateFormComponent implements OnInit {
     obraSocial: any[];
     obrasSociales: any[];
     otraOS = false;
-    dataCertificates = new MatTableDataSource<Certificates>([]);
+    dataCertificates = new MatTableDataSource<Certificate>([]);
     private anulateCertificateSubscription: Subscription;
-    public certificate: Certificates;
+    public certificate: Certificate;
 
     @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
     @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -76,11 +76,8 @@ export class CertificateFormComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadingCertificates = true;
-        this.certificateService.certificates.subscribe((certificates: Certificates[]) => {
-            const sortedCertificates = certificates.sort((a, b) => {
-                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-            });
-            this.dataCertificates = new MatTableDataSource<Certificates>(sortedCertificates);
+        this.certificateService.certificates.subscribe((certificates: Certificate[]) => {
+            this.dataCertificates = new MatTableDataSource<Certificate>(certificates);
             this.dataCertificates.sortingDataAccessor = (item, property) => {
                 switch (property) {
                     case 'patient': return item.patient.lastName + item.patient.firstName;

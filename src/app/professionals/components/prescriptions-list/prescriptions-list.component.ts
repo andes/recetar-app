@@ -13,7 +13,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { rowsAnimation, detailExpand, arrowDirection } from '@animations/animations.template';
 import { CertificatesService } from '@services/certificates.service';
 import { PracticesService } from '@services/practices.service';
-import { Certificates } from '@interfaces/certificate';
+import { Certificate } from '@interfaces/certificate';
 import { Practice } from '@interfaces/practices';
 import { combineLatest, Subject } from 'rxjs';
 import { takeUntil, map } from 'rxjs/operators';
@@ -44,7 +44,7 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
     loadingCertificates: boolean;
     loadingPractices: boolean;
     selectedType = 'receta'; // Default type
-    dataCertificates = new MatTableDataSource<Certificates>([]);
+    dataCertificates = new MatTableDataSource<Certificate>([]);
     dataPractices = new MatTableDataSource<Practice>([]);
 
     private paginatorsInitialized = false;
@@ -146,10 +146,7 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
             this.loadingPrescriptions = false;
 
             // Configurar DataSource para certificados
-            this.dataCertificates = new MatTableDataSource<Certificates>(certificates);
-            this.dataCertificates.data = this.dataCertificates.data.sort((a, b) => {
-                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-            });
+            this.dataCertificates = new MatTableDataSource<Certificate>(certificates);
             this.dataCertificates.sortingDataAccessor = (item, property) => {
                 switch (property) {
                     case 'patient': return item.patient.lastName + item.patient.firstName;
@@ -236,7 +233,7 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
         this.editPrescriptionEvent.emit(prescription);
     }
 
-    anulateCertificate(certificate: Certificates) {
+    anulateCertificate(certificate: Certificate) {
         this.certificateService.setCertificate(certificate);
     }
 
@@ -248,19 +245,16 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
         this.openDialog('delete', prescription);
     }
 
-    anulateDialogCertificate(certificate: Certificates) {
+    anulateDialogCertificate(certificate: Certificate) {
         this.openDialog('anulate_certificate', certificate);
     }
 
-    canPrintCertificate(certificate: Certificates) {
-        return true;
-    }
 
     deleteDialogPractice(practice: Practice) {
         this.openDialog('delete_practice', practice);
     }
 
-    printCertificate(certificate: Certificates) {
+    printCertificate(certificate: Certificate) {
         this.certificatePracticePrinter.printCertificate(certificate);
     }
 

@@ -1,7 +1,7 @@
 import { Patient } from '@interfaces/patients';
 
-export class Certificates {
-    _id: string;
+export class Certificate {
+    _id?: string;
     patient: Patient;
     certificate: string;
     createdAt: Date;
