@@ -1,46 +1,45 @@
-import { Injectable } from '@angular/core';
-import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
-import { Certificates } from '../interfaces/certificate';
-import { tap, mapTo } from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { Certificate } from '@interfaces/certificate';
+import * as CryptoJS from 'crypto-js';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { mapTo, tap } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
-@Injectable({ providedIn: 'root' })
-
+@Injectable({
+    providedIn: 'root'
+})
 export class CertificatesService {
 
-    private myCertificates: BehaviorSubject<Certificates[]>;
-    private certificatesArray: Certificates[] = [];
+    private secretKey = environment.CERTIFICATE_SECRET_KEY;
+    private myCertificates: BehaviorSubject<Certificate[]>;
+    private certificatesArray: Certificate[] = [];
 
     constructor(private http: HttpClient) {
-        this.myCertificates = new BehaviorSubject<Certificates[]>(this.certificatesArray);
+        this.myCertificates = new BehaviorSubject<Certificate[]>(this.certificatesArray);
     }
 
-    newCertificate(certificate: Certificates): Observable<Boolean> {
-        return this.http.post<Certificates>(`${environment.API_END_POINT}/certificates`, certificate).pipe(
+    newCertificate(certificate: Certificate): Observable<Boolean> {
+        return this.http.post<Certificate>(`${environment.API_END_POINT}/certificates`, certificate).pipe(
             mapTo(true)
         );
     }
 
     getByUserId(userId: string): Observable<Boolean> {
-        return this.http.get<Certificates[]>(`${environment.API_END_POINT}/certificates/get-by-user-id/${userId}`).pipe(
-            tap((certificates: Certificates[]) => this.setPrescriptions(certificates)),
+        return this.http.get<Certificate[]>(`${environment.API_END_POINT}/certificates/get-by-user-id/${userId}`).pipe(
+            tap((certificates: Certificate[]) => this.setPrescriptions(certificates)),
             mapTo(true)
         );
     }
 
-    get certificates(): Observable<Certificates[]> {
-        return this.myCertificates.asObservable();
-    }
-
     deleteCertificate(certificateId: string): Observable<Boolean> {
-        return this.http.delete<Certificates>(`${environment.API_END_POINT}/certificates/${certificateId}`).pipe(
+        return this.http.delete<Certificate>(`${environment.API_END_POINT}/certificates/${certificateId}`).pipe(
             tap(() => this.removeCertificate(certificateId)),
             mapTo(true)
         );
     }
 
-    private setPrescriptions(certificates: Certificates[]) {
+    private setPrescriptions(certificates: Certificate[]) {
         this.certificatesArray = certificates;
         this.myCertificates.next(certificates);
     }
@@ -52,4 +51,73 @@ export class CertificatesService {
         // this.myCertificates.next(this.certificatesArray);
     }
 
+    /**
+     * Obtiene un certificado por su ID
+     * @param id ID del certificado
+     * @returns Observable con el certificado
+     */
+    getById(id: string): Observable<Certificate> {
+        return this.http.get<Certificate>(`${environment.API_END_POINT}/certificates/${id}`);
+    }
+
+    /**
+     * Descifra un ID de certificado desde formato URL-safe
+     * @param encryptedId ID cifrado en formato URL-safe
+     * @returns ID descifrado
+     */
+    decryptId(encryptedId: string): string {
+        try {
+            // Validar entrada
+            if (!encryptedId || encryptedId.trim() === '') {
+                throw new Error('ID cifrado no puede estar vacío');
+            }
+
+            // Decodificar URL si es necesario
+            const cleanEncryptedId = decodeURIComponent(encryptedId.trim());
+
+            // Restaurar caracteres especiales desde formato URL-safe
+            const base64Encrypted = cleanEncryptedId
+                .replace(/-/g, '+')
+                .replace(/_/g, '/')
+                + '==='.slice(0, (4 - cleanEncryptedId.length % 4) % 4);
+
+            const bytes = CryptoJS.AES.decrypt(base64Encrypted, this.secretKey);
+            const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
+
+            // Validar que el descifrado no esté vacío
+            if (!decryptedText || decryptedText.trim() === '') {
+                throw new Error('Error al descifrar: resultado vacío');
+            }
+
+            return decryptedText;
+        } catch (error) {
+            throw new Error('ID de certificado inválido');
+        }
+    }
+
+    /**
+     * Cifra un ID de certificado para uso en URLs
+     * @param id ID a cifrar
+     * @returns ID cifrado compatible con URLs
+     */
+    encryptId(id: string): string {
+        if (!id || id.trim() === '') {
+            throw new Error('ID no puede estar vacío');
+        }
+
+        const cleanId = id.trim();
+        const encrypted = CryptoJS.AES.encrypt(cleanId, this.secretKey).toString();
+
+        // Hacer el cifrado compatible con URLs reemplazando caracteres especiales
+        const urlSafeEncrypted = encrypted
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=/g, '');
+
+        return urlSafeEncrypted;
+    }
+
+    get certificates(): Observable<Certificate[]> {
+        return this.myCertificates.asObservable();
+    }
 }

@@ -1,0 +1,127 @@
+<div class="certificate-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Cargando certificado...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-container certificate-content">
+    <mat-icon class="error-icon">error</mat-icon>
+    <h2>Error</h2>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" routerLink="/">
+      Volver al inicio
+    </button>
+  </div>
+
+  <!-- Certificate Content -->
+  <div *ngIf="certificate$ | async as certificate" class="certificate-content">
+    <div class="certificate-header">
+      <div class="logo-section">
+        <!-- Aquí puedes agregar el logo de la institución -->
+        <h1>Certificado Médico</h1>
+      </div>
+      <div class="certificate-status">
+        <mat-chip [ngClass]="'status-chip-' + (certificate.status?.toLowerCase() || 'activo')" selected>
+          <mat-icon *ngIf="certificate.status?.toLowerCase() === 'activo'">check_circle</mat-icon>
+          <mat-icon *ngIf="certificate.status?.toLowerCase() === 'cancelado' || certificate.status?.toLowerCase() === 'anulado'">cancel</mat-icon>
+          <mat-icon *ngIf="certificate.status?.toLowerCase() === 'vencido'">timer_off</mat-icon>
+          <mat-icon *ngIf="certificate.status?.toLowerCase() === 'pendiente'">pending</mat-icon>
+          <!-- Fallback icon for testing -->
+          <mat-icon *ngIf="!certificate.status || (!['activo', 'cancelado', 'anulado', 'vencido', 'pendiente'].includes(certificate.status?.toLowerCase()))">info</mat-icon>
+          {{ certificate.status || 'Activo' }}
+        </mat-chip>
+      </div>
+    </div>
+
+    <div class="certificate-body">
+      <!-- Información del Paciente -->
+      <div class="section patient-section">
+        <h3>Paciente</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Nombre:</label>
+            <span>{{ certificate.patient.firstName && certificate.patient.lastName ? certificate.patient.firstName + ' ' + certificate.patient.lastName : '- sin especificar -' }}</span>
+          </div>
+          <div class="info-item">
+            <label>DNI:</label>
+            <span>{{ certificate.patient.dni || '- sin especificar -' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Fecha de Nacimiento:</label>
+            <span>{{ certificate.patient.birthDate ? formatDate(certificate.patient.birthDate) : '- sin especificar -' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Sexo:</label>
+            <span>{{ certificate.patient.sex || '- sin especificar -' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información del Certificado -->
+      <div class="section certificate-section">
+        <h3>Detalles del Certificado</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Tipo:</label>
+            <span>{{ certificate.certificateType || '- sin especificar -' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Fecha de Emisión:</label>
+            <span>{{ certificate.createdAt ? formatDate(certificate.createdAt) : '- sin especificar -' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Fecha de Inicio:</label>
+            <span>{{ certificate.startDate ? formatDate(certificate.startDate) : '- sin especificar -' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Fecha de Fin:</label>
+            <span>{{ certificate.endDate ? formatDate(certificate.endDate) : '- sin especificar -' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información del Profesional -->
+      <div class="section professional-section-bottom">
+        <div class="professional-info-centered">
+          <p class="professional-name">{{ certificate.professional.firstName && certificate.professional.lastName ? certificate.professional.firstName + ' ' + certificate.professional.lastName : '- sin especificar -' }}</p>
+          <p class="professional-enrollment">Mat. {{ certificate.professional.enrollment || '- sin especificar -' }}</p>
+        </div>
+      </div>
+
+      <!-- Descripción -->
+      <div class="section description-section">
+        <h3>Descripción</h3>
+        <p class="description-text">{{ certificate.description || '- sin especificar -' }}</p>
+      </div>
+
+      <!-- Diagnóstico -->
+      <div class="section diagnosis-section">
+        <h3>Diagnóstico</h3>
+        <p class="diagnosis-text">{{ certificate.diagnosis || '- sin especificar -' }}</p>
+      </div>
+
+      <!-- Observaciones -->
+      <div class="section observations-section">
+        <h3>Observaciones</h3>
+        <p class="observations-text">{{ certificate.observations || '- sin especificar -' }}</p>
+      </div>
+    </div>
+
+    <div class="certificate-footer">
+      <div class="signature-section">
+        <div class="signature-line">
+          <p>_________________________________</p>
+          <p class="signature-label">Firma del Profesional</p>
+          <p class="professional-name">{{ certificate.professional.firstName }} {{ certificate.professional.lastName }}</p>
+          <p class="professional-enrollment">Mat. {{ certificate.professional.enrollment }}</p>
+        </div>
+      </div>
+      
+      <div class="certificate-id">
+        <small>ID del Certificado: {{ certificate._id }}</small>
+      </div>
+    </div>
+  </div>
+</div>
