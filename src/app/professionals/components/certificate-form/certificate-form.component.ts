@@ -50,13 +50,13 @@ export class CertificateFormComponent implements OnInit {
     today = new Date();
     professionalData: any;
     readonly spinnerColor: ThemePalette = 'primary';
-    isSubmit: boolean = false;
-    dniShowSpinner: boolean = false;
-    isFormShown: boolean = true;
-    isCertificateShown: boolean = false;
+    isSubmit = false;
+    dniShowSpinner = false;
+    isFormShown = true;
+    isCertificateShown = false;
     obraSocial: any[];
     obrasSociales: any[];
-    otraOS: boolean = false;
+    otraOS = false;
     dataCertificates = new MatTableDataSource<Certificates>([]);
 
     @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
@@ -125,7 +125,7 @@ export class CertificateFormComponent implements OnInit {
                 dni: ['', [
                     Validators.required,
                     Validators.minLength(7),
-                    Validators.pattern("^[0-9]*$")
+                    Validators.pattern('^[0-9]*$')
                 ]],
                 lastName: ['', [
                     Validators.required
@@ -151,7 +151,7 @@ export class CertificateFormComponent implements OnInit {
     }
 
     getPatientByDni(dniValue: string | null): void {
-        if (dniValue !== null && (dniValue.length == 7 || dniValue.length == 8)) {
+        if (dniValue !== null && (dniValue.length === 7 || dniValue.length === 8)) {
             this.dniShowSpinner = true;
             this.apiPatients.getPatientByDni(dniValue).subscribe(
                 res => {
@@ -196,7 +196,7 @@ export class CertificateFormComponent implements OnInit {
             this.isSubmit = true;
             this.certificateService.newCertificate(newPrescription).subscribe(
                 success => {
-                    if (success) this.formReset(professionalNgForm);
+                    if (success) { this.formReset(professionalNgForm); }
                 });
         }
     }
@@ -204,7 +204,7 @@ export class CertificateFormComponent implements OnInit {
     private formReset(professionalNgForm: FormGroupDirective) {
         this.clearForm(professionalNgForm);
         this.isSubmit = false;
-        this.openDialog("created_certificate");
+        this.openDialog('created_certificate');
     }
 
     // Show a dialog
@@ -212,10 +212,6 @@ export class CertificateFormComponent implements OnInit {
         const dialogRef = this.dialog.open(ProfessionalDialogComponent, {
             width: '400px',
             data: { dialogType: aDialogType, prescription: aPrescription, text: aText }
-        });
-
-        dialogRef.afterClosed().subscribe(result => {
-            console.log('The dialog was closed');
         });
     }
 

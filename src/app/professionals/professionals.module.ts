@@ -31,36 +31,36 @@ import { CertificateFormComponent } from './components/certificate-form/certific
 import { SupplyListComponent } from './components/supply-list/supply-list.component';
 
 @NgModule({
-  declarations: [
-    routingComponents,
-    PrescriptionsListComponent,
-    SupplyListComponent,
-    CertificateFormComponent
-  ],
-  imports: [
-    CommonModule,
-    BrowserModule,
-    HttpClientModule,
-    ReactiveFormsModule,
-    ProfessionalsRoutingModule,
-    FlexLayoutModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatSelectModule,
-    MatAutocompleteModule,
-    MatMenuModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatTableModule,
-    MatChipsModule,
-    MatPaginatorModule,
-    MatSortModule,
-    MatTooltipModule,
-    MatCheckboxModule
-  ]
+    declarations: [
+        routingComponents,
+        PrescriptionsListComponent,
+        SupplyListComponent,
+        CertificateFormComponent
+    ],
+    imports: [
+        CommonModule,
+        BrowserModule,
+        HttpClientModule,
+        ReactiveFormsModule,
+        ProfessionalsRoutingModule,
+        FlexLayoutModule,
+        MatCardModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatSelectModule,
+        MatAutocompleteModule,
+        MatMenuModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatIconModule,
+        MatProgressSpinnerModule,
+        MatTableModule,
+        MatChipsModule,
+        MatPaginatorModule,
+        MatSortModule,
+        MatTooltipModule,
+        MatCheckboxModule
+    ]
 })
 export class ProfessionalsModule { }
