@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from "@angular/core/testing";
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { CertificateFormComponent } from "./certificate-form.component";
+import { CertificateFormComponent } from './certificate-form.component';
 
 describe('CertificateFormComponent', () => {
     let component: CertificateFormComponent;
@@ -22,4 +22,4 @@ describe('CertificateFormComponent', () => {
     it('should create', () => {
         expect(component).toBeTruthy();
     });
-})
+});

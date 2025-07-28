@@ -1,4 +1,4 @@
-import { Patient } from '@interfaces/patients'
+import { Patient } from '@interfaces/patients';
 
 export class Certificates {
     patient: Patient;

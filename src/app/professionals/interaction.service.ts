@@ -4,21 +4,21 @@ import { Prescriptions } from '@interfaces/prescriptions';
 import { Certificates } from '@interfaces/certificate';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class InteractionService {
-  private _deletePrescriptionSource = new Subject<Prescriptions>();
-  private _deleteCertificateSource = new Subject<Certificates>();
+    private _deletePrescriptionSource = new Subject<Prescriptions>();
+    private _deleteCertificateSource = new Subject<Certificates>();
 
-  deletePrescription$ = this._deletePrescriptionSource.asObservable();
-  deleteCertificate$ = this._deleteCertificateSource.asObservable();
-  constructor() { }
+    deletePrescription$ = this._deletePrescriptionSource.asObservable();
+    deleteCertificate$ = this._deleteCertificateSource.asObservable();
+    constructor() { }
 
-  deletePrescription(prescription: Prescriptions) {
-    this._deletePrescriptionSource.next(prescription);
-  }
+    deletePrescription(prescription: Prescriptions) {
+        this._deletePrescriptionSource.next(prescription);
+    }
 
-  deleteCertificate(certificate: Certificates) {
-    this._deleteCertificateSource.next(certificate);
-  }
+    deleteCertificate(certificate: Certificates) {
+        this._deleteCertificateSource.next(certificate);
+    }
 }
