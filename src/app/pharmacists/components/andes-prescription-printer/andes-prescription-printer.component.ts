@@ -121,13 +121,14 @@ export class AndesPrescriptionPrinterComponent implements OnInit {
       pdf.add(new Txt('\n').end);
       pdf.add(new Txt("Observaciones").bold().end);
       prescription.dispensa.forEach(supply => {
-        supply.medicamento.forEach(medicamento => {
-          pdf.add(new Txt("" + medicamento.observacion).end);
+        supply.medicamento?.forEach(medicamento => {
+          medicamento.observacion? pdf.add(new Txt("" + medicamento.observacion).end):null;
         });
       });
     }
-    pdf.add(new Txt("Dosis: " + prescription.medicamento.dosisDiaria.dosis + `${typeof (prescription.medicamento.dosisDiaria.intervalo) === "string" ? ` por ${prescription.medicamento.dosisDiaria.intervalo}` : ""}` + ". Duración tratamiento:" + prescription.medicamento.dosisDiaria.dias + " dia/s").end);
-  
+    pdf.add(new Txt('\n').end);
+    pdf.add(new Txt("Dosis: " + (prescription.medicamento.dosisDiaria.dosis? prescription.medicamento.dosisDiaria.dosis : 'No informado') + (`${typeof (prescription.medicamento.dosisDiaria.intervalo) === "string" ? ` por ${prescription.medicamento.dosisDiaria.intervalo}` : ""}`) ).end);
+    pdf.add(new Txt("Duración tratamiento: " + (prescription.medicamento.dosisDiaria.dias? prescription.medicamento.dosisDiaria.dias+ " dia/s" :'No informado' )).end);
     pdf.add(new Txt('\n').end);
     pdf.add(new Txt('\n').end);
     pdf.add(new Txt('\n').end);
