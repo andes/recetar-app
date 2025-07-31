@@ -133,7 +133,6 @@ export class AuthService {
       return false;
     }
     return roles.some((role: string) => role === 'pharmacist');
-    // return this.getLoggedRole() === 'pharmacist';
   }
 
   isPharmacistsPublicRole(): boolean {
@@ -230,7 +229,3 @@ export class AuthService {
     localStorage.removeItem(this.REFRESH_TOKEN);
   }
 }
-
-
-
-

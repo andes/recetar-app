@@ -1,6 +1,6 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, AbstractControl, Validators, FormArray, FormGroupDirective, FormControl } from '@angular/forms';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 // import { SuppliesService } from '@services/supplies.service';
 import { SnomedSuppliesService } from '@services/snomedSupplies.service';
 import ISnomedConcept from '@interfaces/supplies';
@@ -30,9 +30,12 @@ import { AmbitoService } from '@auth/services/ambito.service';
     stepLink
   ]
 })
-export class ProfessionalFormComponent implements OnInit {
+export class ProfessionalFormComponent implements OnInit, OnDestroy {
   obraSocialControl = new FormControl('');
   filteredObrasSociales: Observable<any[]>;
+
+  // Suscripciones
+  private subscriptions: Subscription = new Subscription();
 
   onOsSelected(selectedOs: any): void {
     const osGroup = this.professionalForm.get('patient.os') as FormGroup;
@@ -91,36 +94,51 @@ export class ProfessionalFormComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    // Suscribirse a los cambios del ámbito
+    const ambitoSubscription = this.ambitoService.getAmbitoSeleccionado.subscribe(ambito => {
+      this.ambito = ambito;
+      // Actualizar el formulario si ya está inicializado
+      if (this.professionalForm) {
+        this.professionalForm.patchValue({ ambito: this.ambito });
+      }
+    });
+    this.subscriptions.add(ambitoSubscription);
 
-    // Selecciona el servicio según el ámbito
-    this.ambito = this.ambitoService.getAmbito();
     this.initProfessionalForm();
+    
     // On confirm delete prescription
-    this._interactionService.deletePrescription$
+    const deletePrescriptionSub = this._interactionService.deletePrescription$
       .subscribe(
         prescription => {
           this.deletePrescription(prescription);
         }
       );
+    this.subscriptions.add(deletePrescriptionSub);
 
     // on DNI changes
-    this.patientDni.valueChanges.subscribe(
+    const dniChangesSub = this.patientDni.valueChanges.subscribe(
       dniValue => {
         this.getPatientByDni(dniValue);
       }
     );
+    this.subscriptions.add(dniChangesSub);
 
     // get prescriptions
-    this.apiPrescriptions.getByUserId(this.authService.getLoggedUserId()).subscribe(
+    const prescriptionsSub = this.apiPrescriptions.getByUserId(this.authService.getLoggedUserId()).subscribe(
       res => {
         // this.myPrescriptions = res;
       },
     );
-    this.professionalForm.get('patient.otraOS')?.valueChanges.subscribe(() => {
+    this.subscriptions.add(prescriptionsSub);
+    
+    const otraOSSub = this.professionalForm.get('patient.otraOS')?.valueChanges.subscribe(() => {
       const osGroup = this.professionalForm.get('patient.os') as FormGroup;
       osGroup.reset();
       osGroup.get('numeroAfiliado').disable();
     });
+    if (otraOSSub) {
+      this.subscriptions.add(otraOSSub);
+    }
 
     this.filteredObrasSociales = this.obraSocialControl.valueChanges.pipe(
       startWith(''),
@@ -129,6 +147,10 @@ export class ProfessionalFormComponent implements OnInit {
         return name ? this._filter(name) : this.obrasSociales.slice();
       })
     );
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
   private _filter(value: string): any[] {
     const filterValue = value.toLowerCase();
@@ -140,6 +162,13 @@ export class ProfessionalFormComponent implements OnInit {
   initProfessionalForm() {
     this.today = new Date((new Date()));
     this.professionalData = this.authService.getLoggedUserId();
+    
+    // Obtener el ámbito actual del servicio
+    const currentAmbito = this.ambitoService.getAmbito();
+    if (currentAmbito) {
+      this.ambito = currentAmbito;
+    }
+    
     this.professionalForm = this.fBuilder.group({
       _id: [''],
       professional: [this.professionalData],
@@ -435,6 +464,9 @@ export class ProfessionalFormComponent implements OnInit {
   // reset the form as intial values
   clearForm(professionalNgForm: FormGroupDirective) {
     professionalNgForm.resetForm();
+    
+    const currentAmbito = this.ambitoService.getAmbito();
+    
     this.professionalForm.reset({
       _id: '',
       professional: this.professionalData,
@@ -445,6 +477,7 @@ export class ProfessionalFormComponent implements OnInit {
         lastName: { value: '', disabled: false },
         firstName: { value: '', disabled: false }
       },
+      ambito: currentAmbito
     });
     this.isEdit = false;
   }
