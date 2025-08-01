@@ -81,7 +81,7 @@ export class PracticesFormComponent implements OnInit {
         sex: ['', [Validators.required]],
         lastName: ['', [Validators.required]],
         firstName: ['', [Validators.required]],
-        otraOS: [false],
+        otraOS: [{ value: false, disabled: true }],
         obraSocial: this.fBuilder.group({
           nombre: '',
           codigoPuco: '',
@@ -101,12 +101,16 @@ export class PracticesFormComponent implements OnInit {
         res => {
           if (res.length) {
             this.patientSearch = res;
+            // Habilitar el checkbox otraOS cuando se encuentra un paciente
+            this.patientOtraOS.enable();
           } else {
             this.patientSearch = [];
             this.practicePatientLastName.setValue('');
             this.practicePatientFirstName.setValue('');
             this.practicePatientSex.setValue('');
             this.patientOtraOS.setValue(false);
+            // Deshabilitar el checkbox otraOS cuando no se encuentra un paciente
+            this.patientOtraOS.disable();
           }
           this.dniShowSpinner = false;
         });
@@ -178,6 +182,7 @@ export class PracticesFormComponent implements OnInit {
 
   clearPracticesForm(practicesNgForm: FormGroupDirective): void {
     practicesNgForm.resetForm();
+    this.patientSearch = [];
     this.practicesForm.reset({
       professional: this.professionalData,
       date: new Date(),
@@ -186,11 +191,11 @@ export class PracticesFormComponent implements OnInit {
         sex: '',
         lastName: '',
         firstName: '',
-        otraOS: false,
+        otraOS: { value: false, disabled: true },
         obraSocial: {
           nombre: '',
           codigoPuco: '',
-          numeroAfiliado: ''
+          numeroAfiliado: { value: '', disabled: true }
         }
       },
       practice: '',

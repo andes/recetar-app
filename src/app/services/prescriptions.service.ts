@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, of } from 'rxjs';
 import { Prescriptions } from '../interfaces/prescriptions';
 import { tap, mapTo, map } from 'rxjs/operators';
 import { saveAs } from 'file-saver';
@@ -14,6 +14,8 @@ export class PrescriptionsService {
 
     private myPrescriptions: BehaviorSubject<Prescriptions[]>;
     private prescriptionsArray: Prescriptions[] = [];
+    private searchTimeout: any = null;
+    private searchSubscription: any = null;
 
     constructor(private http: HttpClient) {
         this.myPrescriptions = new BehaviorSubject<Prescriptions[]>(this.prescriptionsArray);
@@ -53,12 +55,57 @@ export class PrescriptionsService {
         );
     }
 
-    getByUserId(userId: string, params?: { offset?: number; limit?: number }): Observable<Boolean> {
+    getByUserId(userId: string, params?: { offset?: number; limit?: number }): Observable<{ prescriptions: Prescriptions[]; total: number; offset: number; limit: number }> {
         const queryParams = params || {};
         return this.http.get<{ prescriptions: Prescriptions[]; total: number; offset: number; limit: number }>(`${environment.API_END_POINT}/prescriptions/user/${userId}`, { params: queryParams }).pipe(
-            tap((response) => this.setPrescriptions(response.prescriptions)),
-            mapTo(true)
+            tap((response) => this.setPrescriptions(response.prescriptions))
         );
+    }
+
+    searchByTerm(userId: string, params?: { searchTerm?: string; offset?: number; limit?: number }): Observable<{ prescriptions: Prescriptions[]; total: number; offset: number; limit: number }> {
+        const queryParams = params || {};
+        const searchTerm = queryParams.searchTerm || '';
+
+        // Verificar que haya al menos 3 caracteres para buscar
+        if (searchTerm && searchTerm.length < 3) {
+            return of({ prescriptions: [], total: 0, offset: queryParams.offset || 0, limit: queryParams.limit || 10 });
+        }
+
+        // Cancelar timeout anterior si existe
+        if (this.searchTimeout) {
+            clearTimeout(this.searchTimeout);
+        }
+
+        // Cancelar suscripción HTTP anterior si existe
+        if (this.searchSubscription) {
+            this.searchSubscription.unsubscribe();
+            this.searchSubscription = null;
+        }
+
+        // Crear un nuevo Observable que espere 500ms antes de hacer la llamada
+        return new Observable(observer => {
+            this.searchTimeout = setTimeout(() => {
+                this.searchSubscription = this.http.get<{ prescriptions: Prescriptions[]; total: number; offset: number; limit: number }>(
+                    `${environment.API_END_POINT}/prescriptions/user/${userId}/search`,
+                    { params: queryParams }
+                ).pipe(
+                    tap((response) => this.setPrescriptions(response.prescriptions))
+                ).subscribe({
+                    next: (response) => {
+                        observer.next(response);
+                        this.searchSubscription = null;
+                    },
+                    error: (error) => {
+                        observer.error(error);
+                        this.searchSubscription = null;
+                    },
+                    complete: () => {
+                        observer.complete();
+                        this.searchSubscription = null;
+                    }
+                });
+            }, 500);
+        });
     }
 
     newPrescription(prescription: Prescriptions): Observable<Boolean> {

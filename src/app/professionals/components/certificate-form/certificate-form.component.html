@@ -1,44 +1,145 @@
 <mat-card fxLayout="column" fxLayoutAlign="space-between">
-    <div fxFlex="100" fxLayout="column" fxLayoutAlign="start">
-        <mat-card-title>
-            <h2 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
-                <mat-icon>{{ "description" }}</mat-icon>
-                <span>{{ anulateCertificate ? "Anular certificado" : "Crear certificado" }}</span>
-            </h2>
-        </mat-card-title>
-        <mat-card-content>
-            <form [formGroup]="certificateForm" #professionalNgForm="ngForm" fxLayout="column"
-                  (ngSubmit)="onSubmitCertificateForm(professionalNgForm)">
-                <div class="sub-container" fxLayout="column" fxLayoutAlign="center" fxLayoutGap="0" fxLayoutGap.xs="0">
-                    <!-- Fecha de receta -->
-                    <div class="first-block" fxLayout="column" fxLayoutGap="0px" fxLayoutGap.xs="0">
-                        <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center"
-                             fxLayoutAlign.xs="center center">
-                            <mat-form-field appearance="fill" fxFlex="96.5">
-                                <mat-label>Fecha certificado</mat-label>
-                                <input matInput [matDatepicker]="picker1" [formControl]="date" autocomplete="off"
-                                       required tabIndex="-1">
-                                <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
-                                <mat-datepicker [startAt]="today" #picker1></mat-datepicker>
-                                <mat-error *ngIf="date.errors?.required">
-                                    La fecha es requerida
+    <mat-card-title>
+        <h2 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
+            <mat-icon>{{ "description" }}</mat-icon> <span>{{ "Registrar nuevo certificado" }}</span>
+        </h2>
+    </mat-card-title>
+    <mat-card-content>
+        <form [formGroup]="certificateForm" #professionalNgForm="ngForm" fxLayout="column"
+              (ngSubmit)="onSubmitCertificateForm(professionalNgForm)">
+            <div class="sub-container" fxLayout="column" fxLayoutAlign="center" fxLayoutGap="0" fxLayoutGap.xs="0">
+                <div class="first-block" fxLayout="column" fxLayoutGap="0px" fxLayoutGap.xs="0">
+                    <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center"
+                         fxLayoutAlign.xs="center center">
+                        <mat-form-field appearance="fill" fxFlex="48">
+                            <mat-label>Fecha inicio</mat-label>
+                            <input matInput [matDatepicker]="picker2" [formControl]="startDate" autocomplete="off" required
+                                   tabIndex="-1">
+                            <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+                            <mat-datepicker [startAt]="today" #picker2></mat-datepicker>
+                            <mat-error *ngIf="startDate.errors?.required">
+                                La fecha de inicio es requerida
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" fxFlex="48">
+                            <mat-label>Fecha fin</mat-label>
+                            <input matInput [matDatepicker]="picker3" [formControl]="endDate" autocomplete="off" required
+                                   tabIndex="-1">
+                            <mat-datepicker-toggle matSuffix [for]="picker3"></mat-datepicker-toggle>
+                            <mat-datepicker [startAt]="today" #picker3></mat-datepicker>
+                            <mat-error *ngIf="endDate.errors?.required">
+                                La fecha de fin es requerida
+                            </mat-error>
+                            <mat-error *ngIf="endDate.errors?.dateRange">
+                                La fecha de fin no puede ser anterior a la fecha de inicio
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div formGroupName="patient">
+                        <div class="patient-container" fxLayout="row wrap" fxLayout.xs="column" fxLayoutGap="10px"
+                             fxLayoutGap.xs="0">
+                            <!-- DNI paciente -->
+                            <mat-form-field appearance="fill" fxFlex="48" fxFlex.xs="100">
+                                <mat-label>DNI paciente</mat-label>
+                                <input type="text" tabIndex="1" #dni placeholder="DNI" aria-label="Number" matInput
+                                       required maxlength="8" formControlName="dni" [matAutocomplete]="auto">
+
+                                <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20" *ngIf="dniShowSpinner">
+                                </mat-spinner>
+
+                                <mat-autocomplete #auto="matAutocomplete">
+                                    <mat-option *ngFor="let patient of patientSearch"
+                                                (onSelectionChange)="completePatientInputs(patient)"
+                                                [value]="patient.dni">
+                                        {{patient.lastName}} {{patient.firstName}} DNI {{patient.dni}}
+                                    </mat-option>
+                                </mat-autocomplete>
+
+                                <mat-hint align="end">{{dni.value.length}} / 8</mat-hint>
+
+                                <mat-error *ngIf="patientDni.errors?.required">
+                                    Debe ingresar el dni del paciente
+                                </mat-error>
+
+                                <mat-error *ngIf="patientDni.errors?.minlength">
+                                    El dni debe contener {{patientDni.errors?.minlength.requiredLength}}
+                                    digitos
+                                </mat-error>
+
+                                <mat-error *ngIf="patientDni.errors?.pattern">
+                                    El dni debe contener solo números.
+                                </mat-error>
+                            </mat-form-field>
+
+                            <!-- Sexo -->
+                            <mat-form-field appearance="fill" fxFlex="48" fxFlex.xs="100">
+                                <mat-label>Sexo</mat-label>
+                                <mat-select formControlName="sex" required tabIndex="2">
+                                    <mat-option value="Femenino">Femenino</mat-option>
+                                    <mat-option value="Masculino">Masculino</mat-option>
+                                    <mat-option value="Otro">Otro</mat-option>
+                                </mat-select>
+
+                                <mat-error *ngIf="patientSex.errors?.required">
+                                    Debe seleccionar el tipo de sexo
+                                </mat-error>
+                            </mat-form-field>
+
+                            <!-- Apellido paciente -->
+                            <mat-form-field appearance="fill" fxFlex="48" fxFlex.xs="100">
+                                <mat-label>Apellido paciente</mat-label>
+                                <input type="text" tabIndex="3" placeholder="Apellido" matInput required
+                                       formControlName="lastName">
+
+                                <mat-error *ngIf="patientLastName.errors?.required">
+                                    Debe ingresar el apellido del paciente
+                                </mat-error>
+                            </mat-form-field>
+
+                            <!-- Nombre paciente -->
+                            <mat-form-field appearance="fill" fxFlex="48" fxFlex.xs="100">
+                                <mat-label>Nombre paciente</mat-label>
+                                <input type="text" tabIndex="4" placeholder="Nombre" matInput required
+                                       formControlName="firstName">
+
+                                <mat-error *ngIf="patientFirstName.errors?.required">
+                                    Debe ingresar el nombre del paciente
                                 </mat-error>
                             </mat-form-field>
                         </div>
+                        <mat-checkbox formControlName="otraOS">Elegir otra cobertura
+                            social</mat-checkbox>
+                        <div formGroupName="obraSocial" fxLayout="row" fxLayout.sm="column" fxLayoutGap="10px"
+                             fxLayoutAlign="start center" fxLayoutAlign.sm="start" fxLayoutGap.sm="0"
+                             fxLayout.xs="column" fxLayoutAlign.xs="start">
 
-                        <div formGroupName="patient">
-                            <div class="patient-container" fxLayout="row wrap" fxLayout.xs="column" fxLayoutGap="10px"
-                                 fxLayoutGap.xs="0">
-                                <!-- DNI paciente -->
-                                <mat-form-field appearance="fill" fxFlex="48" fxFlex.xs="100">
-                                    <mat-label>DNI paciente</mat-label>
-                                    <input type="text" tabIndex="1" #dni placeholder="DNI" aria-label="Number" matInput
-                                           required maxlength="8" formControlName="dni" [matAutocomplete]="auto">
+                            <mat-form-field appearance="fill"
+                                            *ngIf="!certificateForm.get('patient')?.get('otraOS')?.value" fxFlex="80">
+                                <mat-label>Obra Social</mat-label>
+                                <mat-select [disabled]="!this.certificateForm.get('patient.dni').valid"
+                                            (selectionChange)="onOsSelected($event.value)">
+                                    <mat-option *ngFor="let os of obraSocial" [value]="os">
+                                        {{ os?.nombre }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
 
-                                    <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20"
-                                                 *ngIf="dniShowSpinner">
-                                    </mat-spinner>
-
+                            <mat-form-field *ngIf="certificateForm.get('patient')?.get('otraOS')?.value"
+                                            appearance="fill" fxFlex="80" fxFlex.md="100">
+                                <mat-label>Obra Social</mat-label>
+                                <input type="text" matInput [formControl]="obraSocialControl" [matAutocomplete]="auto"
+                                       [disabled]="!this.certificateForm.get('patient.dni').valid"
+                                       placeholder="Buscar obra social">
+                                <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayOs"
+                                                  (optionSelected)="onOsSelected($event.option.value)">
+                                    <mat-option *ngFor="let os of filteredObrasSociales | async" [value]="os">
+                                        {{ os?.nombre }}
+                                    </mat-option>
+                                </mat-autocomplete>
+                            </mat-form-field>
+                                <mat-form-field>
                                     <mat-autocomplete #auto="matAutocomplete">
                                         <mat-option *ngFor="let patient of patientSearch"
                                                     (onSelectionChange)="completePatientInputs(patient)"
@@ -175,8 +276,20 @@
                             </button>
                         </div>
                     </div>
+
+                    <div>
+                        <div fxLayout="column" fxLayoutAlign="start">
+                            <label style="margin-bottom: 5px;">Detalle del documento *</label>
+                            <mat-form-field appearance="fill" fxFlex="96.5">
+                                <textarea matInput required rows="5" required formControlName="certificate"></textarea>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <button mat-raised-button color="primary" type="submit" fxFlex="100%">
+                        Crear certificado
+                    </button>
                 </div>
-            </form>
-        </mat-card-content>
-    </div>
+        </form>
+    </mat-card-content>
 </mat-card>

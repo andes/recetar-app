@@ -1,15 +1,16 @@
 <div class="custom-tab-link-bar">
     <button mat-flat-button (click)="showForm()">Receta</button>
+    <button mat-flat-button (click)="showCertificados()">Certificados</button>
     <button mat-flat-button (click)="showPractices()">Prácticas</button>
-    <button mat-flat-button (click)="showList()">Certificados</button>
+    <button mat-flat-button (click)="showList()">Mis documentos</button>
 </div>
 <div class="link-bar-indicator-container">
     <div class="indicator"
-         [@stepLink]="currentTab === 'form' ? 'left' : currentTab === 'practices' ? 'center' : 'right'"></div>
+         [@stepLink]="currentTab === 'form' ? 'left' : currentTab === 'certificates' ? 'center-left' : currentTab === 'practices' ? 'center-right' : 'right'"></div>
 </div>
 <div class="pf-container">
     <div fxLayout="row" fxLayoutAlign="space-evenly start" fxLayoutGap="20px" class="cards-container" fxFill
-         [@step]="currentTab === 'form' ? 'left' : currentTab === 'practices' ? 'center' : 'right'">
+         [@step]="currentTab === 'form' ? 'left' : currentTab === 'certificates' ? 'center-left' : currentTab === 'practices' ? 'center-right' : 'right'">
         <!-- panel "Formulario receta" -->
         <div class="prescription-panel" *ngIf="currentTab === 'form'">
             <mat-card fxLayout="column" fxLayoutAlign="space-between" class="new-prescription">
@@ -122,7 +123,7 @@
                                                 </mat-error>
                                             </mat-form-field>
                                         </div>
-                                        <mat-checkbox formControlName="otraOS" [disabled]="!patientSearch">Elegir otra
+                                        <mat-checkbox formControlName="otraOS">Elegir otra
                                             cobertura
                                             social</mat-checkbox>
                                         <div formGroupName="os" fxLayout="row" fxLayout.sm="column" fxLayoutGap="10px"
@@ -303,12 +304,11 @@
             <app-practices-form></app-practices-form>
         </div>
 
-        <div class="my-prescriptions-panel" *ngIf="currentTab === 'certificates'">
+        <div class="my-prescriptions-panel" *ngIf="currentTab === 'list'">
             <app-prescriptions-list (editPrescriptionEvent)="editPrescription($event)"></app-prescriptions-list>
         </div>
 
-        <!-- Solo crea el certificado -->
-        <div class="certificates-panel" *ngIf="isCertificateShown && !isFormShown">
+        <div class="certificates-panel" *ngIf="currentTab === 'certificates'">
             <app-certificate-form (anulateCertificateEvent)="anulateCertificate()"></app-certificate-form>
         </div>
     </div>

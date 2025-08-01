@@ -2,8 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Certificate } from '@interfaces/certificate';
 import * as CryptoJS from 'crypto-js';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { mapTo, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { map, mapTo, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -20,6 +20,8 @@ export class CertificatesService {
     private certificateSubject = new BehaviorSubject<Certificate>(null);
     certificate$ = this.certificateSubject.asObservable();
     private secretKey = environment.CERTIFICATE_SECRET_KEY;
+    private searchTimeout: any = null;
+    private searchSubscription: any = null;
 
     constructor(private http: HttpClient) {
         this.myCertificates = new BehaviorSubject<Certificate[]>(this.certificatesArray);
@@ -41,11 +43,10 @@ export class CertificatesService {
         );
     }
 
-    getByUserId(userId: string, params?: { offset?: number; limit?: number }): Observable<Boolean> {
+    getByUserId(userId: string, params?: { offset?: number; limit?: number }): Observable<{ certificates: Certificate[]; total: number; offset: number; limit: number }> {
         const queryParams = params || {};
         return this.http.get<{ certificates: Certificate[]; total: number; offset: number; limit: number }>(`${environment.API_END_POINT}/certificates/user/${userId}`, { params: queryParams }).pipe(
             tap((response) => this.setCertificates(response.certificates)),
-            mapTo(true)
         );
     }
 
@@ -58,6 +59,58 @@ export class CertificatesService {
             mapTo(true)
         );
     }
+
+    searchByTerm(userId: string, params?: { searchTerm?: string; offset?: number; limit?: number }): Observable<{ certificates: Certificate[]; total: number; offset: number; limit: number }> {
+        const queryParams = params || {};
+        const searchTerm = queryParams.searchTerm || '';
+
+        // Si hay menos de 3 caracteres, retornar los certificados actuales sin hacer búsqueda
+        if (searchTerm && searchTerm.length < 3) {
+            return of({
+                certificates: this.certificatesArray,
+                total: this.certificatesArray.length,
+                offset: queryParams.offset || 0,
+                limit: queryParams.limit || 10
+            });
+        }
+
+        // Cancelar timeout anterior si existe
+        if (this.searchTimeout) {
+            clearTimeout(this.searchTimeout);
+        }
+
+        // Cancelar suscripción HTTP anterior si existe
+        if (this.searchSubscription) {
+            this.searchSubscription.unsubscribe();
+            this.searchSubscription = null;
+        }
+
+        // Crear un nuevo Observable que espere 500ms antes de hacer la llamada
+        return new Observable(observer => {
+            this.searchTimeout = setTimeout(() => {
+                this.searchSubscription = this.http.get<{ certificates: Certificate[]; total: number; offset: number; limit: number }>(
+                    `${environment.API_END_POINT}/certificates/user/${userId}/search`,
+                    { params: queryParams }
+                ).pipe(
+                    tap((response) => this.setPrescriptions(response.certificates))
+                ).subscribe({
+                    next: (response) => {
+                        observer.next(response);
+                        this.searchSubscription = null;
+                    },
+                    error: (error) => {
+                        observer.error(error);
+                        this.searchSubscription = null;
+                    },
+                    complete: () => {
+                        observer.complete();
+                        this.searchSubscription = null;
+                    }
+                });
+            }, 500);
+        });
+    }
+
 
     private setCertificates(certificates: Certificate[]) {
         this.certificatesArray = certificates;

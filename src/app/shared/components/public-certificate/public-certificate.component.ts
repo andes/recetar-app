@@ -24,7 +24,6 @@ export class PublicCertificateComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadCertificate();
-        // console.log("id", this.certificatesService.encryptId('687903e961c4b13b343ab97a'))
     }
 
     private loadCertificate(): void {
@@ -75,6 +74,28 @@ export class PublicCertificateComponent implements OnInit {
             month: 'long',
             day: 'numeric'
         });
+    }
+
+    getCertificateStatus(certificate: any): string {
+        if (!certificate.endDate) {
+            return 'activo';
+        }
+
+        const today = new Date();
+        const endDate = new Date(certificate.endDate);
+
+        today.setHours(0, 0, 0, 0);
+        endDate.setHours(0, 0, 0, 0);
+
+        return today > endDate ? 'expirado' : 'activo';
+    }
+
+    getStatusText(status: string): string {
+        const statusMap = {
+            'activo': 'Activo',
+            'expirado': 'Expirado'
+        };
+        return statusMap[status] || 'Activo';
     }
 
     printCertificate(): void {

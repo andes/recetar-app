@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { ProfessionalsRoutingModule, routingComponents } from './professionals-routing.module';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 // flex-layout
 import { FlexLayoutModule } from '@angular/flex-layout';
 // material
@@ -46,6 +46,7 @@ import { CertificatePracticePrinterComponent } from './components/certificate-pr
     BrowserModule,
     HttpClientModule,
     ReactiveFormsModule,
+    FormsModule,
     ProfessionalsRoutingModule,
     FlexLayoutModule,
     MatCardModule,
