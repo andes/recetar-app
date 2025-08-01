@@ -69,8 +69,8 @@ export class PrescriptionPrinterComponent implements OnInit {
         // Header
         pdf.add(new Columns([
             await new Img('assets/img/LogoPdf.jpg').fit([60, 60]).build(),
-            new Txt('RecetAR').bold().fontSize(20).alignment('center').end,
-            new Txt(label ? `${label}` : '').bold().fontSize(20).alignment('center').end]).end);
+            new Txt('RECETA').bold().fontSize(20).alignment('center').end,
+            new Txt(label ? `${label}` : '').bold().italics().fontSize(20).alignment('right').opacity(0.6).end]).end);
         pdf.add(new Txt('\n').end);
         pdf.add(new Columns([new Txt('RECETAR').bold().alignment('left').end, new Txt(`Fecha prescripción: ${this.datePipe.transform(prescription.date, 'dd/MM/yyyy')}`).alignment('right').end]).end);
         pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
