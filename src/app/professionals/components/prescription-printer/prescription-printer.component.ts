@@ -23,6 +23,20 @@ export class PrescriptionPrinterComponent implements OnInit {
     async print(prescription: Prescriptions) {
         const pdf: PdfMakeWrapper = new PdfMakeWrapper();
 
+        // Primera página
+        await this.addPage(pdf, prescription);
+
+        // Duplicado
+        if (prescription.supplies.some(s => s.duplicate)) {
+            pdf.add({ text: '', pageBreak: 'after' });
+            await this.addPage(pdf, prescription, 'DUPLICADO');
+        }
+
+        pdf.create().open();
+    }
+
+    private async addPage(pdf: PdfMakeWrapper, prescription: Prescriptions, label?: string) {
+
         if (prescription.status === 'Vencida') {
             pdf.watermark({
                 text: 'Receta no valida para dispensa',
@@ -50,7 +64,10 @@ export class PrescriptionPrinterComponent implements OnInit {
             author: 'RecetAR'
         });
         // Header
-        pdf.add(new Columns([await new Img('assets/img/LogoPdf.jpg').fit([60, 60]).build(), new Txt('RecetAR').bold().fontSize(20).alignment('center').end, new Txt('').end]).end);
+        pdf.add(new Columns([
+            await new Img('assets/img/LogoPdf.jpg').fit([60, 60]).build(),
+            new Txt('RecetAR').bold().fontSize(20).alignment('center').end,
+            new Txt(label ? `${label}` : '').bold().fontSize(20).alignment('center').end]).end);
         pdf.add(new Txt('\n').end);
         pdf.add(new Columns([new Txt('RECETAR').bold().alignment('left').end, new Txt(`Fecha prescripción: ${this.datePipe.transform(prescription.date, 'dd/MM/yyyy')}`).alignment('right').end]).end);
         pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
@@ -148,7 +165,6 @@ export class PrescriptionPrinterComponent implements OnInit {
             { text: 'RL-2025-63212094-APN-SSVEIYES#MS', bold: true }
         ]).fontSize(11).alignment('center').end);
 
-        pdf.create().open();
     }
 
 }
