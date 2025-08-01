@@ -4,6 +4,7 @@ import { DatePipe } from '@angular/common';
 import { Certificate } from '@interfaces/certificate';
 import { Practice } from '@interfaces/practices';
 import { CertificatesService } from '@services/certificates.service';
+import { PracticesService } from '@services/practices.service';
 import * as QRCode from 'qrcode';
 import { environment } from '@root/environments/environment';
 
@@ -15,7 +16,8 @@ export class CertificatePracticePrinterComponent implements OnInit {
 
     constructor(
         private datePipe: DatePipe,
-        private certificatesService: CertificatesService
+        private certificatesService: CertificatesService,
+        private practicesService: PracticesService
     ) { }
 
     ngOnInit(): void {
@@ -144,7 +146,7 @@ export class CertificatePracticePrinterComponent implements OnInit {
         });
 
         // Generate QR Code
-        const encryptedId = this.certificatesService.encryptId(practice._id);
+        const encryptedId = this.practicesService.encryptId(practice._id);
         const qrUrl = `${environment.FRONTEND_URL}/practice/${encryptedId}`;
         const qrCodeImage = await this.generateQRCode(qrUrl);
 
@@ -237,7 +239,11 @@ export class CertificatePracticePrinterComponent implements OnInit {
         if (qrCodeImage) {
             pdf.add(new Txt('Verificar autenticidad:').bold().alignment('center').end);
             pdf.add(new Txt('\n').end);
-            pdf.add(new Columns([new Txt('').end, await new Img(qrCodeImage).fit([100, 100]).build(), new Txt('').end]).end);
+            pdf.add(await new Img(qrCodeImage)
+                .fit([100, 100])
+                .alignment('center')
+                .link(qrUrl)
+                .build());
             pdf.add(new Txt('\n').end);
         }
 

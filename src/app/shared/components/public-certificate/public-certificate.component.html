@@ -23,14 +23,10 @@
         <h1>Certificado Médico</h1>
       </div>
       <div class="certificate-status">
-        <mat-chip [ngClass]="'status-chip-' + (certificate.status?.toLowerCase() || 'activo')" selected>
-          <mat-icon *ngIf="certificate.status?.toLowerCase() === 'activo'">check_circle</mat-icon>
-          <mat-icon *ngIf="certificate.status?.toLowerCase() === 'cancelado' || certificate.status?.toLowerCase() === 'anulado'">cancel</mat-icon>
-          <mat-icon *ngIf="certificate.status?.toLowerCase() === 'vencido'">timer_off</mat-icon>
-          <mat-icon *ngIf="certificate.status?.toLowerCase() === 'pendiente'">pending</mat-icon>
-          <!-- Fallback icon for testing -->
-          <mat-icon *ngIf="!certificate.status || (!['activo', 'cancelado', 'anulado', 'vencido', 'pendiente'].includes(certificate.status?.toLowerCase()))">info</mat-icon>
-          {{ certificate.status || 'Activo' }}
+        <mat-chip [ngClass]="'status-chip-' + getCertificateStatus(certificate)" selected>
+          <mat-icon *ngIf="getCertificateStatus(certificate) === 'activo'">check_circle</mat-icon>
+          <mat-icon *ngIf="getCertificateStatus(certificate) === 'expirado'">timer_off</mat-icon>
+          {{ getStatusText(getCertificateStatus(certificate)) }}
         </mat-chip>
       </div>
     </div>
@@ -42,7 +38,8 @@
         <div class="info-grid">
           <div class="info-item">
             <label>Nombre:</label>
-            <span>{{ certificate.patient.firstName && certificate.patient.lastName ? certificate.patient.firstName + ' ' + certificate.patient.lastName : '- sin especificar -' }}</span>
+            <span>{{ certificate.patient.firstName && certificate.patient.lastName ? certificate.patient.firstName + ' '
+              + certificate.patient.lastName : '- sin especificar -' }}</span>
           </div>
           <div class="info-item">
             <label>DNI:</label>
@@ -50,7 +47,8 @@
           </div>
           <div class="info-item">
             <label>Fecha de Nacimiento:</label>
-            <span>{{ certificate.patient.birthDate ? formatDate(certificate.patient.birthDate) : '- sin especificar -' }}</span>
+            <span>{{ certificate.patient.birthDate ? formatDate(certificate.patient.birthDate) : '- sin especificar -'
+              }}</span>
           </div>
           <div class="info-item">
             <label>Sexo:</label>
@@ -82,14 +80,6 @@
         </div>
       </div>
 
-      <!-- Información del Profesional -->
-      <div class="section professional-section-bottom">
-        <div class="professional-info-centered">
-          <p class="professional-name">{{ certificate.professional.firstName && certificate.professional.lastName ? certificate.professional.firstName + ' ' + certificate.professional.lastName : '- sin especificar -' }}</p>
-          <p class="professional-enrollment">Mat. {{ certificate.professional.enrollment || '- sin especificar -' }}</p>
-        </div>
-      </div>
-
       <!-- Descripción -->
       <div class="section description-section">
         <h3>Descripción</h3>
@@ -112,15 +102,12 @@
     <div class="certificate-footer">
       <div class="signature-section">
         <div class="signature-line">
+          <p>
+            <span>{{ certificate.professional.businessName }} - Mat. {{ certificate.professional.enrollment }}</span>
+          </p>
           <p>_________________________________</p>
-          <p class="signature-label">Firma del Profesional</p>
-          <p class="professional-name">{{ certificate.professional.firstName }} {{ certificate.professional.lastName }}</p>
-          <p class="professional-enrollment">Mat. {{ certificate.professional.enrollment }}</p>
+          <p class="signature-label">Profesional</p>
         </div>
-      </div>
-      
-      <div class="certificate-id">
-        <small>ID del Certificado: {{ certificate._id }}</small>
       </div>
     </div>
   </div>

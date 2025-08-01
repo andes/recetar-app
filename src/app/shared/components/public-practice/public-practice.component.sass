@@ -1,4 +1,4 @@
-.certificate-container
+.practice-container
   max-width: 800px
   margin: 0 auto
   padding: 40px 20px
@@ -31,17 +31,17 @@
     color: #f44336
     margin: 0
 
-.certificate-content
+.practice-content
   background: white
   border-radius: 8px
   overflow: hidden
 
-.certificate-header
+.practice-header
   display: flex
   justify-content: space-between
   align-items: center
   padding: 30px
-  background: linear-gradient(135deg, #1976d2, #42a5f5)
+  background: linear-gradient(135deg, #4caf50, #81c784)
   color: white
 
   h1
@@ -49,7 +49,7 @@
     font-size: 28px
     font-weight: 300
 
-  .certificate-status
+  .practice-status
     display: flex
     align-items: center
     
@@ -85,32 +85,34 @@
         white-space: nowrap !important
         direction: ltr !important
 
-      &.status-chip-activo
-        background-color: #4caf50 !important
-        color: white !important
+        &.status-chip-active
+          background-color: #4caf50 !important
+          color: white !important
 
-      &.status-chip-expirado
-        background-color: #f44336 !important
-        color: white !important
+        &.status-chip-completed
+          background-color: #2196f3 !important
+          color: white !important
 
-      // Fallback para mat-chip sin clase específica
-      &:not([class*="status-chip-"])
-        background-color: #4caf50 !important
-        color: white !important
+        &.status-chip-cancelled
+          background-color: #f44336 !important
+          color: white !important
 
-.certificate-body
+        &:not([class*="status-chip-"])
+          color: white !important
+
+.practice-body
   padding: 30px
 
 .section
   margin-bottom: 30px
   
   h3
-    color: #1976d2
+    color: #4caf50
     font-size: 18px
     font-weight: 500
     margin-bottom: 15px
     padding-bottom: 5px
-    border-bottom: 2px solid #e3f2fd
+    border-bottom: 2px solid #e8f5e8
 
 .info-grid
   display: grid
@@ -139,8 +141,8 @@
 .professional-section-bottom
   margin-bottom: 30px
   padding: 20px 0
-  border-top: 2px solid #e3f2fd
-  border-bottom: 2px solid #e3f2fd
+  border-top: 2px solid #e8f5e8
+  border-bottom: 2px solid #e8f5e8
 
 .professional-info-centered
   text-align: center
@@ -148,7 +150,7 @@
   .professional-name
     font-size: 18px
     font-weight: 500
-    color: #1976d2
+    color: #4caf50
     margin: 0 0 5px 0
 
   .professional-enrollment
@@ -158,6 +160,7 @@
 
 .description-text,
 .diagnosis-text,
+.indications-text,
 .observations-text
   font-size: 16px
   line-height: 1.6
@@ -165,10 +168,10 @@
   background: #f9f9f9
   padding: 20px
   border-radius: 8px
-  border-left: 4px solid #1976d2
+  border-left: 4px solid #4caf50
   margin: 0
 
-.certificate-footer
+.practice-footer
   padding: 30px
   background: #fafafa
   border-top: 1px solid #e0e0e0
@@ -204,18 +207,18 @@
   .no-print
     display: none !important
 
-  .certificate-container
+  .practice-container
     max-width: none
     margin: 0
     padding: 0
 
-  .certificate-content
+  .practice-content
     border: none
     border-radius: 0
     box-shadow: none
 
-  .certificate-header
-    background: #1976d2 !important
+  .practice-header
+    background: #4caf50 !important
     -webkit-print-color-adjust: exact
     color-adjust: exact
 
@@ -224,6 +227,7 @@
 
   .description-text,
   .diagnosis-text,
+  .indications-text,
   .observations-text
     background: #f9f9f9 !important
     -webkit-print-color-adjust: exact
@@ -231,16 +235,16 @@
 
 // Responsive design
 @media (max-width: 768px)
-  .certificate-container
+  .practice-container
     padding: 10px
 
-  .certificate-header
+  .practice-header
     flex-direction: column
     gap: 20px
     text-align: center
 
-  .certificate-body,
-  .certificate-footer
+  .practice-body,
+  .practice-footer
     padding: 20px
 
   .info-grid
