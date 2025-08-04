@@ -32,7 +32,7 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
     @Output() editPrescriptionEvent = new EventEmitter();
 
     displayedColumns: string[] = ['patient', 'prescription_date', 'status', 'action', 'arrow'];
-    certificatesColumns: string[] = ['patient', 'certificate_date', 'action', 'arrow'];
+    certificatesColumns: string[] = ['patient', 'certificate_date', 'status', 'action', 'arrow'];
     dataSource = new MatTableDataSource<Prescriptions>([]);
     expandedElement: Prescriptions | null;
     loadingPrescriptions: boolean;
@@ -104,10 +104,14 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
         this.loadingPrescriptions = true;
         this.loadingCertificates = true;
 
+        // Obtener certificados de la base de datos
+        const userId = this.authService.getLoggedUserId();
+        this.certificateService.getByUserId(userId).subscribe();
+
         // Combinar ambos observables usando combineLatest
         combineLatest([
             this.prescriptionService.prescriptions,
-            this.certificateService.certificates
+            this.certificateService.certificates,
         ]).pipe(
             takeUntil(this.destroy$),
             map(([prescriptions, certificates]) => ({ prescriptions, certificates }))
@@ -134,6 +138,9 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
 
             // Configurar DataSource para certificados
             this.dataCertificates = new MatTableDataSource<Certificates>(certificates);
+            this.dataCertificates.data = this.dataCertificates.data.sort((a, b) => {
+                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            });
             this.dataCertificates.sortingDataAccessor = (item, property) => {
                 switch (property) {
                     case 'patient': return item.patient.lastName + item.patient.firstName;
@@ -153,7 +160,6 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
             this.loadingCertificates = false;
         });
     }
-
 
     applyFilter(filterValue: string) {
         this.dataSource.filterPredicate = (data: Prescriptions, filter: string) => {
@@ -197,6 +203,10 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
         this.editPrescriptionEvent.emit(prescription);
     }
 
+    anulateCertificate(certificate: Certificates) {
+        this.certificateService.setCertificate(certificate);
+    }
+
     isStatus(prescritpion: Prescriptions, status: string): boolean {
         return prescritpion.status === status;
     }
@@ -205,8 +215,12 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
         this.openDialog('delete', prescription);
     }
 
-    deleteDialogCertificate(certificate: Certificates) {
-        this.openDialog('delete_certificate', certificate);
+    anulateDialogCertificate(certificate: Certificates) {
+        this.openDialog('anulate_certificate', certificate);
+    }
+
+    canPrintCertificate(certificate: Certificates) {
+        return true;
     }
 
     // Show a dialog

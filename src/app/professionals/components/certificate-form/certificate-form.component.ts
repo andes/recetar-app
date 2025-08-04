@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, AbstractControl, Validators, FormGroupDirective, FormControl } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { PatientsService } from '@root/app/services/patients.service';
 import { AuthService } from '@auth/services/auth.service';
 import { Patient } from '@interfaces/patients';
@@ -54,10 +54,13 @@ export class CertificateFormComponent implements OnInit {
     dniShowSpinner = false;
     isFormShown = true;
     isCertificateShown = false;
+    anulateCertificate = false;
     obraSocial: any[];
     obrasSociales: any[];
     otraOS = false;
     dataCertificates = new MatTableDataSource<Certificates>([]);
+    private anulateCertificateSubscription: Subscription;
+    public certificate: Certificates;
 
     @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
     @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -73,7 +76,10 @@ export class CertificateFormComponent implements OnInit {
     ngOnInit(): void {
         this.loadingCertificates = true;
         this.certificateService.certificates.subscribe((certificates: Certificates[]) => {
-            this.dataCertificates = new MatTableDataSource<Certificates>(certificates);
+            const sortedCertificates = certificates.sort((a, b) => {
+                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            });
+            this.dataCertificates = new MatTableDataSource<Certificates>(sortedCertificates);
             this.dataCertificates.sortingDataAccessor = (item, property) => {
                 switch (property) {
                     case 'patient': return item.patient.lastName + item.patient.firstName;
@@ -107,7 +113,35 @@ export class CertificateFormComponent implements OnInit {
                 return name ? this._filter(name) : this.obrasSociales.slice();
             })
         );
+
+        this.certificateService.certificate$.subscribe(
+            certificate => {
+                if (certificate) {
+                    this.certificateForm.reset({
+                        date: { value: certificate.createdAt, disabled: true },
+                        patient: {
+                            dni: { value: certificate.patient.dni, disabled: true },
+                            sex: { value: certificate.patient.sex, disabled: true },
+                            lastName: { value: certificate.patient.lastName, disabled: true },
+                            firstName: { value: certificate.patient.firstName, disabled: true }
+                        }
+                    });
+                    this.anulateCertificate = true;
+                    this.certificate = certificate;
+                } else {
+                    this.anulateCertificate = false;
+                }
+            }
+        );
     }
+
+    // eslint-disable-next-line @angular-eslint/use-lifecycle-interface
+    ngOnDestroy() {
+        if (this.anulateCertificateSubscription) {
+            this.anulateCertificateSubscription.unsubscribe();
+        }
+    }
+
     private _filter(value: string): any[] {
         const filterValue = value.toLowerCase();
         return this.obrasSociales.filter(os =>
@@ -144,6 +178,7 @@ export class CertificateFormComponent implements OnInit {
                 }),
             }),
             certificate: ['', [Validators.required]],
+            anulateReason: [''],
             date: [this.today, [
                 Validators.required
             ]],
@@ -191,20 +226,33 @@ export class CertificateFormComponent implements OnInit {
     }
 
     onSubmitCertificateForm(professionalNgForm: FormGroupDirective): void {
-        if (this.certificateForm.valid) {
-            const newPrescription = this.certificateForm.value;
-            this.isSubmit = true;
-            this.certificateService.newCertificate(newPrescription).subscribe(
-                success => {
-                    if (success) { this.formReset(professionalNgForm); }
-                });
+        if (!this.anulateCertificate) {
+            if (this.certificateForm.valid) {
+                const newPrescription = this.certificateForm.value;
+                this.isSubmit = true;
+                this.certificateService.newCertificate(newPrescription).subscribe(
+                    success => {
+                        if (success) { this.formReset(professionalNgForm); }
+                    });
+            }
+        } else {
+            this.certificate['anulateReason'] = this.certificateForm.value.anulateReason;
+            this.certificate['anulateDate'] = new Date();
+            this.certificateService.anulateCertificate(this.certificate).subscribe(
+                (success) => {
+                    if (success) {
+                        this.formReset(professionalNgForm);
+                    }
+                }
+            );
         }
     }
 
     private formReset(professionalNgForm: FormGroupDirective) {
+        const wasAnulate = this.anulateCertificate;
         this.clearForm(professionalNgForm);
         this.isSubmit = false;
-        this.openDialog('created_certificate');
+        wasAnulate ? this.openDialog('anulate_certificate') : this.openDialog('created_certificate');
     }
 
     // Show a dialog
@@ -252,6 +300,11 @@ export class CertificateFormComponent implements OnInit {
         return patient.get('certificate');
     }
 
+    get patientReason(): AbstractControl {
+        const patient = this.certificateForm.get('anulateReason');
+        return patient.get('anulateReason');
+    }
+
     displayOs(os: any): string {
         return os && os.nombre ? os.nombre : '';
     }
@@ -278,8 +331,10 @@ export class CertificateFormComponent implements OnInit {
                     numeroAfiliado: ''
                 }
             },
-            certificate: ''
+            certificate: '',
+            anulateReason: ''
         });
+        this.certificateService.setCertificate(null);
     }
 
     showForm(): void {
