@@ -128,16 +128,13 @@ export class PrescriptionPrinterComponent implements OnInit {
             const cant = supply.quantityPresentation ? `${supply.quantity} envase(s) de ${supply.quantityPresentation} unidades` : `x ${supply.quantity}`;
             pdf.add(new Columns([new Txt('' + supply.supply.name).bold().end, new Columns([new Txt(`${cant} `).bold().end]).end]).end);
             pdf.add(new Txt('\n').end);
+
+            if (supply.diagnostic) {
+                pdf.add(new Txt('\n').end);
+                pdf.add(new Txt('Diagnóstico').bold().end);
+                pdf.add(new Txt('' + supply.diagnostic? supply.diagnostic : 'Sin datos registrados').end);
+            }
         });
-
-        pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
-        pdf.add(new Txt('\n').end);
-
-        if (prescription.diagnostic) {
-            pdf.add(new Txt('\n').end);
-            pdf.add(new Txt('Diagnóstico').bold().end);
-            pdf.add(new Txt('' + prescription.diagnostic).end);
-        }
         if (prescription.observation) {
             pdf.add(new Txt('\n').end);
             pdf.add(new Txt('Observaciones').bold().end);
