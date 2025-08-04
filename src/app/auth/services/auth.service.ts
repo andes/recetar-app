@@ -20,6 +20,7 @@ export class AuthService {
   private loggedIn: BehaviorSubject<boolean>;
   private businessName: BehaviorSubject<string>;
   private isAudit: BehaviorSubject<boolean>;
+  private isProfessionalBothRolesO: BehaviorSubject<boolean>;
 
 
   constructor(
@@ -30,6 +31,7 @@ export class AuthService {
     this.loggedIn = new BehaviorSubject<boolean>(this.tokensExists());
     this.businessName = new BehaviorSubject<string>(this.getLoggedBusinessName());
     this.isAudit = new BehaviorSubject<boolean>(this.isAuditRole());
+    this.isProfessionalBothRolesO = new BehaviorSubject<boolean>(this.isProfessionalBothRoles());
   }
 
 
@@ -91,6 +93,10 @@ export class AuthService {
   get getIsAudit() {
     return this.isAudit.asObservable();
   }
+  
+  get getIsProfessionalBothRoles() {
+    return this.isProfessionalBothRolesO.asObservable();
+  }
 
   refreshToken() {
     return this.http.post<any>(`${this.apiEndPoint}/auth/refresh`, {
@@ -123,13 +129,38 @@ export class AuthService {
 
   isPharmacistsRole(): boolean {
     const roles: string[] = this.getLoggedRole();
+    if (!roles?.length) {
+      return false;
+    }
     return roles.some((role: string) => role === 'pharmacist');
-    // return this.getLoggedRole() === 'pharmacist';
+  }
+
+  isPharmacistsPublicRole(): boolean {
+    const roles: string[] = this.getLoggedRole();
+    if (!roles?.length) {
+      return false;
+    }
+    return roles.some((role: string) => role === 'pharmacist-public');
   }
 
   isProfessionalRole(): boolean {
     const roles: string[] = this.getLoggedRole();
+    if (!roles?.length) {
+      return false;
+    }
     return roles.some((role: string) => role === 'professional');
+  }
+
+  isProfessionalPublicRole(): boolean {
+    const roles: string[] = this.getLoggedRole();
+    if (!roles?.length) {
+      return false;
+    }
+    return roles.some((role: string) => role === 'professional-public');
+  }
+
+  isProfessionalBothRoles(): boolean {
+    return this.isProfessionalRole() && this.isProfessionalPublicRole();
   }
 
   isAuditRole(): boolean {
@@ -142,6 +173,9 @@ export class AuthService {
 
   isAdminRole(): boolean {
     const roles: string[] = this.getLoggedRole();
+    if (!roles?.length) {
+      return false;
+    }
     return roles.some((role: string) => role === 'admin');
   }
   getLoggedRole(): string[] {
@@ -195,7 +229,3 @@ export class AuthService {
     localStorage.removeItem(this.REFRESH_TOKEN);
   }
 }
-
-
-
-
