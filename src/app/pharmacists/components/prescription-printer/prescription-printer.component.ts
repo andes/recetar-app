@@ -52,11 +52,11 @@ export class PrescriptionPrinterComponent implements OnInit {
         }
         if (prescription.status === 'Dispensada') {
             pdf.watermark({
-                text: 'Receta ya dispensada',
+                text: 'DISPENSADA',
                 color: 'grey',
                 opacity: 0.3,
                 bold: true,
-                fontSize: 60
+                fontSize: 100
             });
         }
 
@@ -132,7 +132,7 @@ export class PrescriptionPrinterComponent implements OnInit {
             if (supply.diagnostic) {
                 pdf.add(new Txt('\n').end);
                 pdf.add(new Txt('Diagnóstico').bold().end);
-                pdf.add(new Txt('' + supply.diagnostic? supply.diagnostic : 'Sin datos registrados').end);
+                pdf.add(new Txt('' + supply.diagnostic ? supply.diagnostic : 'Sin datos registrados').end);
             }
         });
         if (prescription.observation) {

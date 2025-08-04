@@ -48,11 +48,11 @@ export class PrescriptionPrinterComponent implements OnInit {
         }
         if (prescription.status === 'Dispensada') {
             pdf.watermark({
-                text: 'Receta ya dispensada',
+                text: 'DISPENSADA',
                 color: 'grey',
                 opacity: 0.3,
                 bold: true,
-                fontSize: 60
+                fontSize: 100
             });
         }
 
@@ -157,7 +157,12 @@ export class PrescriptionPrinterComponent implements OnInit {
                 { text: `\n ${prescription.professional.businessName}`, fontSize: 14, bold: true },
                 { text: `\n MP ${prescription.professional.enrollment}`, bold: true, fontSize: 9 }
             ]).alignment('center').end]).end);
-
+        // Pharmacy
+        if (prescription.status === 'Dispensada') {
+            pdf.add(new Columns([new Txt('Dispensado por').bold().end, new Txt('CUIL').bold().end]).end);
+            pdf.add(new Columns([new Txt('' + prescription.dispensedBy.businessName.toUpperCase()).end, new Txt('' + prescription.dispensedBy.cuil).end]).end);
+            pdf.add(new Txt(`Fecha dispensación: ${this.datePipe.transform(prescription.dispensedAt, 'dd/MM/yyyy')}`).end);
+        }
 
 
         pdf.footer(new Txt([
