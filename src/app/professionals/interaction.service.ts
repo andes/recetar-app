@@ -18,7 +18,7 @@ export class InteractionService {
         this._deletePrescriptionSource.next(prescription);
     }
 
-    deleteCertificate(certificate: Certificates) {
+    anulateCertificate(certificate: Certificates) {
         this._deleteCertificateSource.next(certificate);
     }
 }

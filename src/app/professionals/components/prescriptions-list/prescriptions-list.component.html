@@ -166,6 +166,14 @@
                             element.createdAt | date :'dd/MM/yyyy'}}</td>
                     </ng-container>
 
+                    <!-- Certificate status Column -->
+
+                    <ng-container matColumnDef="status">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
+                        <td mat-cell *matCellDef="let element" class='has_label_on_mobile' data-label='Estado'
+                            [style.color]="'red'"> {{element?.status | uppercase}}</td>
+                    </ng-container>
+
                     <!-- Action Column -->
                     <ng-container matColumnDef="action">
                         <th mat-header-cell *matHeaderCellDef> Acción </th>
@@ -173,19 +181,28 @@
                             <button mat-menu-item [matMenuTriggerFor]="menu" class="menu-collapse">
                                 <mat-icon>more_vert</mat-icon>
                             </button>
-
                             <mat-menu #menu="matMenu">
-                                <button mat-menu-item type="button" matTooltip="Eliminar" matTooltipPosition="above"
-                                        (click)="deleteDialogCertificate(element)">
-                                    <mat-icon>delete</mat-icon>
-                                    <span>Eliminar receta</span>
+                                <button mat-menu-item type="button" matTooltip="Anular" matTooltipPosition="above"
+                                        (click)="anulateCertificate(element)"
+                                        [disabled]="element?.status === 'anulado'">
+                                    <mat-icon>block</mat-icon>
+                                    <span>Anular certificado</span>
+                                </button>
+                                <button mat-menu-item type="button" matTooltip="Imprimir" matTooltipPosition="above">
+                                    <mat-icon>print</mat-icon>
+                                    <span>Imprimir certificado</span>
                                 </button>
                             </mat-menu>
 
                             <div fxLayout="row" fxLayoutAlign="center center" class="action-buttons">
-                                <button mat-menu-item type="button" matTooltip="Eliminar" matTooltipPosition="above"
-                                        (click)="deleteDialogCertificate(element)">
-                                    <mat-icon>delete</mat-icon>
+                                <button mat-menu-item type="button" matTooltip="Imprimir" matTooltipPosition="above"
+                                        [disabled]="element.status" [style.opacity]="element.status ? 0.5 : 1">
+                                    <mat-icon>print</mat-icon>
+                                </button>
+                                <button mat-menu-item type="button" matTooltip="Anular" matTooltipPosition="above"
+                                        (click)="anulateCertificate(element)" [disabled]="element.status"
+                                        [style.opacity]="element.status ? 0.5 : 1">
+                                    <mat-icon>block</mat-icon>
                                 </button>
                             </div>
                         </td>
@@ -210,8 +227,12 @@
                                     <div class="supplies-list">
                                         <div class="supply-description">
                                             <span style="display: inline-block; text-align: left;"
-                                                  *ngIf="element.certificate">
+                                                  *ngIf="element.certificate && !element.status">
                                                 <strong>Descripción:</strong> {{ element.certificate }}
+                                            </span>
+                                            <span style="display: inline-block; text-align: left;"
+                                                  *ngIf="element.status">
+                                                <strong>Motivo:</strong> {{ element.anulateReason }}
                                             </span>
                                         </div>
                                     </div>
