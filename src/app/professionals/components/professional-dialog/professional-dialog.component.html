@@ -53,3 +53,13 @@
   </div> <!-- End default switch -->
 </div>
 
+<div *ngSwitchCase="'deleted'">
+    <h3 mat-dialog-title><mat-icon>check</mat-icon>  Eliminada</h3>
+    <div mat-dialog-content>
+      <p>La receta se ha eliminado correctamente!</p>
+    </div>
+    <div mat-dialog-actions align="end">
+      <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
+    </div>
+  </div> <!-- End case noPrescriptions -->
+
