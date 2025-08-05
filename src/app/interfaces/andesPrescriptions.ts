@@ -8,8 +8,8 @@ export class Medicamento {
     unidades: string;
     cantidadEnvases: number;
     observacion?: {
-        type: string,
-    }
+        type: string;
+    };
 }
 
 export class Dispensa {
@@ -22,7 +22,7 @@ export class Dispensa {
     organizacion: {
         id: string;
         nombre: string;
-    }
+    };
 }
 export default class AndesPrescriptions {
     _id: string;
@@ -30,7 +30,7 @@ export default class AndesPrescriptions {
     organizacion: {
         id: string;
         nombre: string;
-    }
+    };
     profesional: {
         id: string;
         nombre: string;
@@ -39,13 +39,13 @@ export default class AndesPrescriptions {
         profesion: string;
         especialidad: string;
         matricula: number;
-    }
+    };
     diagnostico: {
         term: string;
         fsn: string;
         conceptId: string;
         semanticTag: string;
-    }
+    };
     fechaResgistro: Date;
     fechaPrestacion: Date;
     idPrestacion: string;
@@ -56,7 +56,7 @@ export default class AndesPrescriptions {
             term: string;
             fsn: string;
             semanticTag: string;
-        }
+        };
         dosisDiaria: {
             dosis: string;
             intervalo: {
@@ -65,17 +65,18 @@ export default class AndesPrescriptions {
                 nombre: string;
                 source: string;
                 type: string;
-            }
+            };
             dias: number;
             notaMedica: string;
-        }
+        };
         presentacion: string;
         unidades: string;
         cantidad: number;
         cantEnvases: number;
         tratamientoProlongado: Boolean;
         tiempoTratamiento: any;
-    }
+        tipoReceta: 'simple' | 'duplicado' | 'triplicado';
+    };
     dispensa: Dispensa[];
     estados: [
         {
@@ -87,10 +88,10 @@ export default class AndesPrescriptions {
                 apellido: string;
                 organizacion: {
                     nombre: string;
-                }
-            }
+                };
+            };
         }
-    ]
+    ];
     estadosDispensa: [
         {
             id: string;
@@ -98,13 +99,13 @@ export default class AndesPrescriptions {
             fecha: Date;
             sistema?: 'sifaho' | 'recetar';
         }
-    ]
+    ];
     appNotificada: [
         {
-            id: string
-            fecha: Date
+            id: string;
+            fecha: Date;
         }
-    ]
+    ];
     estadoActual: {
         id: string;
         tipo: string;
@@ -114,15 +115,15 @@ export default class AndesPrescriptions {
             apellido: string;
             organizacion: {
                 nombre: string;
-            }
-        }
+            };
+        };
 
     };
     estadoDispensaActual: {
         tipo: string;
         fecha: Date;
         id: string;
-    }
+    };
     paciente: {
         carpetaEfectores: [];
         id: string;
@@ -139,29 +140,29 @@ export default class AndesPrescriptions {
             fechaActualizacion?: Date;
             prepaga?: Boolean;
             numeroAfiliado?: string;
-        }
+        };
         genero: string;
-        nombreCompleto: string,
+        nombreCompleto: string;
         edad: number;
         edadReal: {
             valor: number;
             unidad: string;
-        }
-    }
+        };
+    };
     createdAt: Date;
     createdBy: {
         nombre: string;
         apellido: string;
         organizacion: {
             nombre: string;
-        }
-    }
+        };
+    };
     updatedAt: Date;
     updatedBy: {
         nombre: string;
         apellido: string;
         organizacion: {
             nombre: string;
-        }
-    }
+        };
+    };
 }
