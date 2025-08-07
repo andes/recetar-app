@@ -9,7 +9,7 @@ import { Prescriptions } from '@interfaces/prescriptions';
 import { ProfessionalDialogComponent } from '@professionals/components/professional-dialog/professional-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { step, stepLink } from '@animations/animations.template';
-import { map, startWith } from 'rxjs/operators';
+import { debounce, debounceTime, map, startWith } from 'rxjs/operators';
 import { CertificatesService } from '@services/certificates.service';
 import { Certificates } from '@interfaces/certificate';
 import { MatTableDataSource } from '@angular/material/table';
@@ -95,7 +95,9 @@ export class CertificateFormComponent implements OnInit {
         this.initProfessionalForm();
 
         // on DNI changes
-        this.patientDni.valueChanges.subscribe(
+        this.patientDni.valueChanges.pipe(
+            debounceTime(1000)
+        ).subscribe(
             dniValue => {
                 this.getPatientByDni(dniValue);
             }
@@ -188,7 +190,7 @@ export class CertificateFormComponent implements OnInit {
     }
 
     getPatientByDni(dniValue: string | null): void {
-        if (dniValue !== null && dniValue.length === 8) {
+        if (dniValue !== null && ( dniValue.length === 7 || dniValue.length === 8)) {
             this.dniShowSpinner = true;
             this.apiPatients.getPatientByDni(dniValue).subscribe(
                 res => {
