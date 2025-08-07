@@ -2,13 +2,15 @@
     <div fxFlex="100" fxLayout="column" fxLayoutAlign="start">
         <mat-card-title>
             <h2 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
-                <mat-icon>{{ "description" }}</mat-icon> <span>{{ "Registrar nuevo certificado" }}</span>
+                <mat-icon>{{ "description" }}</mat-icon>
+                <span>{{ anulateCertificate ? "Anular certificado" : "Crear certificado" }}</span>
             </h2>
         </mat-card-title>
         <mat-card-content>
             <form [formGroup]="certificateForm" #professionalNgForm="ngForm" fxLayout="column"
                   (ngSubmit)="onSubmitCertificateForm(professionalNgForm)">
                 <div class="sub-container" fxLayout="column" fxLayoutAlign="center" fxLayoutGap="0" fxLayoutGap.xs="0">
+                    <!-- Fecha de receta -->
                     <div class="first-block" fxLayout="column" fxLayoutGap="0px" fxLayoutGap.xs="0">
                         <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center"
                              fxLayoutAlign.xs="center center">
@@ -97,7 +99,9 @@
                                     </mat-error>
                                 </mat-form-field>
                             </div>
-                            <mat-checkbox formControlName="otraOS" [disabled]="!patientSearch">Elegir otra cobertura
+                            <mat-checkbox formControlName="otraOS"
+                                          [disabled]="!patientSearch || anulateCertificate">Elegir
+                                otra cobertura
                                 social</mat-checkbox>
                             <div formGroupName="obraSocial" fxLayout="row" fxLayout.sm="column" fxLayoutGap="10px"
                                  fxLayoutAlign="start center" fxLayoutAlign.sm="start" fxLayoutGap.sm="0"
@@ -146,11 +150,30 @@
                                               formControlName="certificate"></textarea>
                                 </mat-form-field>
                             </div>
+                            <div *ngIf="anulateCertificate" fxLayout="column" fxLayoutAlign="start">
+                                <label style="margin-bottom: 5px;">Motivo de anulación *</label>
+                                <mat-form-field appearance="fill" fxFlex="96.5">
+                                    <textarea matInput required rows="5" required
+                                              formControlName="anulateReason"></textarea>
+                                </mat-form-field>
+                            </div>
                         </div>
 
-                        <button mat-raised-button color="primary" type="submit" fxFlex="100%">
+                        <button *ngIf="!anulateCertificate" mat-raised-button color="primary" type="submit"
+                                fxFlex="100%">
                             Crear certificado
                         </button>
+                        <div fxLayout="row" fxLayoutAlign="center" fxLayout="row" fxLayoutAlign="center"
+                             fxLayoutGap="20px" *ngIf="anulateCertificate" fxFlex="100%">
+                            <button mat-raised-button type="submit" fxFlex="48%"
+                                    (click)="clearForm(professionalNgForm)">
+                                Cancelar
+                            </button>
+                            <button mat-raised-button color="primary" type="submit" fxFlex="48%"
+                                    [disabled]="!certificateForm.get('anulateReason')?.value">
+                                Anular certificado
+                            </button>
+                        </div>
                     </div>
                 </div>
             </form>

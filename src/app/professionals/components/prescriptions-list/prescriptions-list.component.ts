@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, Output, EventEmitter, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewChild, Output, EventEmitter, AfterViewInit, OnDestroy, Input } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -30,14 +30,15 @@ import { takeUntil, map } from 'rxjs/operators';
 export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDestroy {
     private destroy$ = new Subject<void>();
     @Output() editPrescriptionEvent = new EventEmitter();
+    @Input() tipo: any;
 
     displayedColumns: string[] = ['patient', 'prescription_date', 'status', 'action', 'arrow'];
-    certificatesColumns: string[] = ['patient', 'certificate_date', 'action', 'arrow'];
+    certificatesColumns: string[] = ['patient', 'certificate_date', 'status', 'action', 'arrow'];
     dataSource = new MatTableDataSource<Prescriptions>([]);
     expandedElement: Prescriptions | null;
     loadingPrescriptions: boolean;
     loadingCertificates: boolean;
-    selectedType = 'receta'; // Default type
+    selectedType = 'receta';
     dataCertificates = new MatTableDataSource<Certificates>([]);
 
     private paginatorsInitialized = false;
@@ -56,6 +57,7 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
 
     ngOnInit() {
         this.initDataSource();
+        this.selectedType = this.tipo || 'receta'; // Use input tipo or default to 'receta'
     }
 
     ngAfterViewInit() {
@@ -104,10 +106,14 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
         this.loadingPrescriptions = true;
         this.loadingCertificates = true;
 
+        // Obtener certificados de la base de datos
+        const userId = this.authService.getLoggedUserId();
+        this.certificateService.getByUserId(userId).subscribe();
+
         // Combinar ambos observables usando combineLatest
         combineLatest([
             this.prescriptionService.prescriptions,
-            this.certificateService.certificates
+            this.certificateService.certificates,
         ]).pipe(
             takeUntil(this.destroy$),
             map(([prescriptions, certificates]) => ({ prescriptions, certificates }))
@@ -134,6 +140,9 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
 
             // Configurar DataSource para certificados
             this.dataCertificates = new MatTableDataSource<Certificates>(certificates);
+            this.dataCertificates.data = this.dataCertificates.data.sort((a, b) => {
+                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            });
             this.dataCertificates.sortingDataAccessor = (item, property) => {
                 switch (property) {
                     case 'patient': return item.patient.lastName + item.patient.firstName;
@@ -153,7 +162,6 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
             this.loadingCertificates = false;
         });
     }
-
 
     applyFilter(filterValue: string) {
         this.dataSource.filterPredicate = (data: Prescriptions, filter: string) => {
@@ -197,6 +205,10 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
         this.editPrescriptionEvent.emit(prescription);
     }
 
+    anulateCertificate(certificate: Certificates) {
+        this.certificateService.setCertificate(certificate);
+    }
+
     isStatus(prescritpion: Prescriptions, status: string): boolean {
         return prescritpion.status === status;
     }
@@ -205,8 +217,12 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
         this.openDialog('delete', prescription);
     }
 
-    deleteDialogCertificate(certificate: Certificates) {
-        this.openDialog('delete_certificate', certificate);
+    anulateDialogCertificate(certificate: Certificates) {
+        this.openDialog('anulate_certificate', certificate);
+    }
+
+    canPrintCertificate(certificate: Certificates) {
+        return true;
     }
 
     // Show a dialog

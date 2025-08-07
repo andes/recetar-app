@@ -11,9 +11,25 @@ export class CertificatesService {
 
     private myCertificates: BehaviorSubject<Certificates[]>;
     private certificatesArray: Certificates[] = [];
+    private editCertificateSubject = new BehaviorSubject<boolean>(false);
+    editCertificate$ = this.editCertificateSubject.asObservable();
+    private showCertificateSubject = new BehaviorSubject<boolean>(false);
+    showCertificate$ = this.showCertificateSubject.asObservable();
+    private certificateSubject = new BehaviorSubject<Certificates>(null);
+    certificate$ = this.certificateSubject.asObservable();
 
     constructor(private http: HttpClient) {
         this.myCertificates = new BehaviorSubject<Certificates[]>(this.certificatesArray);
+    }
+
+
+
+    setCertificate(value: Certificates) {
+        this.certificateSubject.next(value);
+    }
+
+    getCertificate(): Certificates {
+        return this.certificateSubject.getValue();
     }
 
     newCertificate(certificate: Certificates): Observable<Boolean> {
@@ -24,7 +40,7 @@ export class CertificatesService {
 
     getByUserId(userId: string): Observable<Boolean> {
         return this.http.get<Certificates[]>(`${environment.API_END_POINT}/certificates/get-by-user-id/${userId}`).pipe(
-            tap((certificates: Certificates[]) => this.setPrescriptions(certificates)),
+            tap((certificates: Certificates[]) => this.setCertificates(certificates)),
             mapTo(true)
         );
     }
@@ -33,23 +49,14 @@ export class CertificatesService {
         return this.myCertificates.asObservable();
     }
 
-    deleteCertificate(certificateId: string): Observable<Boolean> {
-        return this.http.delete<Certificates>(`${environment.API_END_POINT}/certificates/${certificateId}`).pipe(
-            tap(() => this.removeCertificate(certificateId)),
+    anulateCertificate(certificate: Certificates): Observable<Boolean> {
+        return this.http.patch<Certificates>(`${environment.API_END_POINT}/certificates/${certificate._id}`, certificate).pipe(
             mapTo(true)
         );
     }
 
-    private setPrescriptions(certificates: Certificates[]) {
+    private setCertificates(certificates: Certificates[]) {
         this.certificatesArray = certificates;
         this.myCertificates.next(certificates);
     }
-
-    private removeCertificate(removedCertificate: string) {
-        // const removeIndex = this.certificatesArray.findIndex((certificate: Certificates) => certificate._id === removedCertificate);
-
-        // this.certificatesArray.splice(removeIndex, 1);
-        // this.myCertificates.next(this.certificatesArray);
-    }
-
 }

@@ -67,6 +67,7 @@ export class ProfessionalFormComponent implements OnInit {
     supplySpinner: { show: boolean }[] = [{ show: false }, { show: false }];
     myPrescriptions: Prescriptions[] = [];
     isEdit = false;
+    isEditCertificate = false;
     isFormShown = true;
     isCertificateShown = false;
     devices: any = {
@@ -77,6 +78,9 @@ export class ProfessionalFormComponent implements OnInit {
     obraSocial: any[];
     obrasSociales: any[];
     otraOS = false;
+    selectType;
+    private certificateSubscription;
+    public certificate;
 
     constructor(
         // private suppliesService: SuppliesService,
@@ -102,7 +106,9 @@ export class ProfessionalFormComponent implements OnInit {
             );
 
         // on DNI changes
-        this.patientDni.valueChanges.subscribe(
+        this.patientDni.valueChanges.pipe(
+            debounceTime(1000)
+        ).subscribe(
             dniValue => {
                 this.getPatientByDni(dniValue);
             }
@@ -110,9 +116,6 @@ export class ProfessionalFormComponent implements OnInit {
 
         // get prescriptions
         this.apiPrescriptions.getByUserId(this.authService.getLoggedUserId()).subscribe();
-
-        // get certificates
-        this.certificateService.getByUserId(this.authService.getLoggedUserId()).subscribe();
 
         this.professionalForm.get('patient.otraOS')?.valueChanges.subscribe(() => {
             const osGroup = this.professionalForm.get('patient.os') as FormGroup;
@@ -127,7 +130,24 @@ export class ProfessionalFormComponent implements OnInit {
                 return name ? this._filter(name) : this.obrasSociales.slice();
             })
         );
+
+        // Suscribirse a cambios en editCertificate
+        this.certificateSubscription = this.certificateService.certificate$.subscribe(
+            certificate => {
+                if (certificate) {
+                    this.isCertificateShown = true;
+                }
+            }
+        );
     }
+
+    // eslint-disable-next-line @angular-eslint/use-lifecycle-interface
+    ngOnDestroy() {
+        if (this.certificateSubscription) {
+            this.certificateSubscription.unsubscribe();
+        }
+    }
+
     private _filter(value: string): any[] {
         const filterValue = value.toLowerCase();
         return this.obrasSociales.filter(os =>
@@ -438,6 +458,13 @@ export class ProfessionalFormComponent implements OnInit {
             },
         });
         this.isEdit = false;
+    }
+
+    anulateCertificate() {
+        this.isCertificateShown = false;
+        this.isFormShown = false;
+        this.certificateService.setCertificate(null);
+        this.selectType = 'certificados';
     }
 
     showForm(): void {

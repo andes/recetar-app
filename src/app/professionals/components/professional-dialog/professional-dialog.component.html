@@ -43,37 +43,14 @@
         </div>
     </div> <!-- End case noPrescriptions -->
 
-    <div *ngSwitchCase="'delete_certificate'">
-        <h3 mat-dialog-title><mat-icon>delete</mat-icon> Desea eliminar el certificado?</h3>
+    <div *ngSwitchCase="'anulate_certificate'">
+        <h3 mat-dialog-title><mat-icon>check</mat-icon> Anulado</h3>
         <div mat-dialog-content>
-            <p>El certificado de {{data.prescription.patient.lastName}}, {{data.prescription.patient.firstName}}</p>
-            <p>Una vez eliminado no se podrá recuperar</p>
+            <p>¡El certificado se ha anulado correctamente!</p>
+            <p>Recuerde que, a partir de este momento, pierde toda validez.</p>
         </div>
-        <div mat-dialog-actions fxLayoutAlign="space-around" align="end">
-            <button mat-button (click)="onNoClick()"
-                    style="background-color: red; color: white; margin-right: 5px;">Cancelar</button>
-            <button mat-raised-button style="background-color: green; color: white;"
-                    (click)="deleteCertificate(data)">Confirmar</button>
+        <div mat-dialog-actions align="end">
+            <button mat-raised-button color="primary" style="background-color: green; color: white;"
+                    (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div>
-
-    <div *ngSwitchCase="'error-dispensed'">
-        <h3 mat-dialog-title><mat-icon>error_outline</mat-icon> Atención</h3>
-        <div mat-dialog-content>
-            <p>La receta ya se ha dispensado y no es posible eliminarla</p>
-        </div>
-        <div mat-dialog-actions align="end">
-            <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
-        </div>
-    </div> <!-- End case noPrescriptions -->
-
-    <div *ngSwitchDefault>
-        <h3 mat-dialog-title><mat-icon>error</mat-icon> Error</h3>
-        <div mat-dialog-content>
-            <p>{{data.text}}</p>
-        </div>
-        <div mat-dialog-actions align="end">
-            <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
-        </div>
-    </div> <!-- End default switch -->
-</div>
