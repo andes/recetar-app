@@ -106,7 +106,9 @@ export class ProfessionalFormComponent implements OnInit {
             );
 
         // on DNI changes
-        this.patientDni.valueChanges.subscribe(
+        this.patientDni.valueChanges.pipe(
+            debounceTime(1000)
+        ).subscribe(
             dniValue => {
                 this.getPatientByDni(dniValue);
             }
