@@ -78,6 +78,7 @@ export class ProfessionalFormComponent implements OnInit {
     obraSocial: any[];
     obrasSociales: any[];
     otraOS = false;
+    selectType;
     private certificateSubscription;
     public certificate;
 
@@ -455,6 +456,13 @@ export class ProfessionalFormComponent implements OnInit {
             },
         });
         this.isEdit = false;
+    }
+
+    anulateCertificate() {
+        this.isCertificateShown = false;
+        this.isFormShown = false;
+        this.certificateService.setCertificate(null);
+        this.selectType = 'certificados';
     }
 
     showForm(): void {

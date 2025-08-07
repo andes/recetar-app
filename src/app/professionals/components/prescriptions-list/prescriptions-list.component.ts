@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, Output, EventEmitter, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewChild, Output, EventEmitter, AfterViewInit, OnDestroy, Input } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -30,6 +30,7 @@ import { takeUntil, map } from 'rxjs/operators';
 export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDestroy {
     private destroy$ = new Subject<void>();
     @Output() editPrescriptionEvent = new EventEmitter();
+    @Input() tipo: any;
 
     displayedColumns: string[] = ['patient', 'prescription_date', 'status', 'action', 'arrow'];
     certificatesColumns: string[] = ['patient', 'certificate_date', 'status', 'action', 'arrow'];
@@ -37,7 +38,7 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
     expandedElement: Prescriptions | null;
     loadingPrescriptions: boolean;
     loadingCertificates: boolean;
-    selectedType = 'receta'; // Default type
+    selectedType = 'receta';
     dataCertificates = new MatTableDataSource<Certificates>([]);
 
     private paginatorsInitialized = false;
@@ -56,6 +57,7 @@ export class PrescriptionsListComponent implements OnInit, AfterViewInit, OnDest
 
     ngOnInit() {
         this.initDataSource();
+        this.selectedType = this.tipo || 'receta'; // Use input tipo or default to 'receta'
     }
 
     ngAfterViewInit() {
