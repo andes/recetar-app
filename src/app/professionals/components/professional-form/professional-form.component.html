@@ -298,13 +298,12 @@
         </div>
 
         <div class="my-prescriptions-panel" *ngIf="!isFormShown && !isCertificateShown">
-            <app-prescriptions-list (editPrescriptionEvent)="editPrescription($event)">
-
+            <app-prescriptions-list (editPrescriptionEvent)="editPrescription($event)" [tipo]="selectType">
             </app-prescriptions-list>
         </div>
 
         <!-- Solo crea el certificado -->
         <div class="certificates-panel" *ngIf="isCertificateShown && !isFormShown">
-            <app-certificate-form></app-certificate-form>
+            <app-certificate-form (anulateCertificateEvent)="anulateCertificate()"></app-certificate-form>
         </div>
     </div>

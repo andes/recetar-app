@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, AbstractControl, Validators, FormGroupDirective, FormControl } from '@angular/forms';
 import { Observable, Subscription } from 'rxjs';
 import { PatientsService } from '@root/app/services/patients.service';
@@ -26,6 +26,7 @@ import { MatSort } from '@angular/material/sort';
     ]
 })
 export class CertificateFormComponent implements OnInit {
+    @Output() anulateCertificateEvent = new EventEmitter();
     obraSocialControl = new FormControl('');
     filteredObrasSociales: Observable<any[]>;
 
@@ -124,7 +125,8 @@ export class CertificateFormComponent implements OnInit {
                             sex: { value: certificate.patient.sex, disabled: true },
                             lastName: { value: certificate.patient.lastName, disabled: true },
                             firstName: { value: certificate.patient.firstName, disabled: true }
-                        }
+                        },
+                        certificate: { value: certificate.certificate, disabled: true },
                     });
                     this.anulateCertificate = true;
                     this.certificate = certificate;
@@ -186,7 +188,7 @@ export class CertificateFormComponent implements OnInit {
     }
 
     getPatientByDni(dniValue: string | null): void {
-        if (dniValue !== null && (dniValue.length === 7 || dniValue.length === 8)) {
+        if (dniValue !== null && dniValue.length === 8) {
             this.dniShowSpinner = true;
             this.apiPatients.getPatientByDni(dniValue).subscribe(
                 res => {
@@ -242,6 +244,7 @@ export class CertificateFormComponent implements OnInit {
                 (success) => {
                     if (success) {
                         this.formReset(professionalNgForm);
+                        this.anulateCertificateEvent.emit();
                     }
                 }
             );
@@ -335,6 +338,7 @@ export class CertificateFormComponent implements OnInit {
             anulateReason: ''
         });
         this.certificateService.setCertificate(null);
+        this.anulateCertificateEvent.emit();
     }
 
     showForm(): void {
