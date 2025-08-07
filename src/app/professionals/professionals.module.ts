@@ -27,38 +27,40 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { PrescriptionsListComponent } from './components/prescriptions-list/prescriptions-list.component';
+import { CertificateFormComponent } from './components/certificate-form/certificate-form.component';
 import { SupplyListComponent } from './components/supply-list/supply-list.component';
 
 @NgModule({
-  declarations: [
-    routingComponents,
-    PrescriptionsListComponent,
-    SupplyListComponent
-  ],
-  imports: [
-    CommonModule,
-    BrowserModule,
-    HttpClientModule,
-    ReactiveFormsModule,
-    ProfessionalsRoutingModule,
-    FlexLayoutModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatSelectModule,
-    MatAutocompleteModule,
-    MatMenuModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatTableModule,
-    MatChipsModule,
-    MatPaginatorModule,
-    MatSortModule,
-    MatTooltipModule,
-    MatCheckboxModule
-  ]
+    declarations: [
+        routingComponents,
+        PrescriptionsListComponent,
+        SupplyListComponent,
+        CertificateFormComponent
+    ],
+    imports: [
+        CommonModule,
+        BrowserModule,
+        HttpClientModule,
+        ReactiveFormsModule,
+        ProfessionalsRoutingModule,
+        FlexLayoutModule,
+        MatCardModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatSelectModule,
+        MatAutocompleteModule,
+        MatMenuModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatIconModule,
+        MatProgressSpinnerModule,
+        MatTableModule,
+        MatChipsModule,
+        MatPaginatorModule,
+        MatSortModule,
+        MatTooltipModule,
+        MatCheckboxModule
+    ]
 })
 export class ProfessionalsModule { }
