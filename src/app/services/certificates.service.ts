@@ -92,7 +92,7 @@ export class CertificatesService {
                     `${environment.API_END_POINT}/certificates/user/${userId}/search`,
                     { params: queryParams }
                 ).pipe(
-                    tap((response) => this.setPrescriptions(response.certificates))
+                    tap((response) => this.setCertificates(response.certificates))
                 ).subscribe({
                     next: (response) => {
                         observer.next(response);
