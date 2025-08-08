@@ -3,9 +3,11 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false,
-  API_END_POINT: 'http://localhost:4000/api',
-  ANDES_API: 'https://app.andes.gob.ar/api',
+    production: false,
+    API_END_POINT: 'http://localhost:4000/api',
+    ANDES_API: 'https://app.andes.gob.ar/api',
+    CERTIFICATE_SECRET_KEY: 'recetar-app-certificate-secret-key-2024',
+    FRONTEND_URL: 'http://localhost:4200',
 };
 /*
  * For easier debugging in development mode, you can import the following file

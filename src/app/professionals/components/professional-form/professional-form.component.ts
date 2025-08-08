@@ -69,6 +69,8 @@ export class ProfessionalFormComponent implements OnInit {
     isEdit = false;
     isEditCertificate = false;
     isFormShown = true;
+    currentTab = 'form';
+    isListShown = false;
     isCertificateShown = false;
     devices: any = {
         mobile: false,
@@ -176,7 +178,7 @@ export class ProfessionalFormComponent implements OnInit {
                 sex: ['', [
                     Validators.required
                 ]],
-                otraOS: [false],
+                otraOS: [{ value: false, disabled: true }],
                 os: this.fBuilder.group({
                     nombre: [''],
                     codigoPuco: [''],
@@ -214,12 +216,16 @@ export class ProfessionalFormComponent implements OnInit {
                 res => {
                     if (res.length) {
                         this.patientSearch = res;
+                        // Habilitar el checkbox otraOS cuando se encuentra un paciente
+                        this.patientOtraOS.enable();
                     } else {
                         this.patientSearch = [];
                         this.patientLastName.setValue('');
                         this.patientFirstName.setValue('');
                         this.patientSex.setValue('');
                         this.patientOtraOS.setValue(false);
+                        // Deshabilitar el checkbox otraOS cuando no se encuentra un paciente
+                        this.patientOtraOS.disable();
                     }
                     this.dniShowSpinner = false;
                 });
@@ -446,6 +452,7 @@ export class ProfessionalFormComponent implements OnInit {
     // reset the form as intial values
     clearForm(professionalNgForm: FormGroupDirective) {
         professionalNgForm.resetForm();
+        this.patientSearch = [];
         this.professionalForm.reset({
             _id: '',
             professional: this.professionalData,
@@ -454,7 +461,13 @@ export class ProfessionalFormComponent implements OnInit {
                 dni: { value: '', disabled: false },
                 sex: { value: '', disabled: false },
                 lastName: { value: '', disabled: false },
-                firstName: { value: '', disabled: false }
+                firstName: { value: '', disabled: false },
+                otraOS: { value: false, disabled: true },
+                os: {
+                    nombre: '',
+                    codigoPuco: '',
+                    numeroAfiliado: { value: '', disabled: true }
+                }
             },
         });
         this.isEdit = false;
@@ -470,15 +483,23 @@ export class ProfessionalFormComponent implements OnInit {
     showForm(): void {
         this.isFormShown = true;
         this.isCertificateShown = false;
+        this.currentTab = 'form';
     }
 
     showList(): void {
         this.isFormShown = false;
-        this.isCertificateShown = false;
+        this.isListShown = false;
+        this.currentTab = 'list';
     }
 
     showCertificados(): void {
         this.isFormShown = false;
         this.isCertificateShown = true;
+        this.currentTab = 'certificates';
+    }
+
+    showPractices(): void {
+        this.isFormShown = false;
+        this.currentTab = 'practices';
     }
 }

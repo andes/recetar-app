@@ -1,6 +1,6 @@
 import { Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, AbstractControl, Validators, FormGroupDirective, FormControl } from '@angular/forms';
 import { Observable, Subscription } from 'rxjs';
+import { FormBuilder, FormGroup, AbstractControl, Validators, FormGroupDirective, FormControl, ValidatorFn } from '@angular/forms';
 import { PatientsService } from '@root/app/services/patients.service';
 import { AuthService } from '@auth/services/auth.service';
 import { Patient } from '@interfaces/patients';
@@ -11,7 +11,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { step, stepLink } from '@animations/animations.template';
 import { debounce, debounceTime, map, startWith } from 'rxjs/operators';
 import { CertificatesService } from '@services/certificates.service';
-import { Certificates } from '@interfaces/certificate';
+import { Certificate } from '@interfaces/certificate';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -29,6 +29,28 @@ export class CertificateFormComponent implements OnInit {
     @Output() anulateCertificateEvent = new EventEmitter();
     obraSocialControl = new FormControl('');
     filteredObrasSociales: Observable<any[]>;
+
+    // Validador personalizado para verificar que endDate no sea anterior a startDate
+    dateRangeValidator(startDate: AbstractControl, endDate: AbstractControl) {
+        if (!startDate.value || !endDate.value) {
+            return null;
+        }
+
+        const start = new Date(startDate.value);
+        const end = new Date(endDate.value);
+
+        if (start && end && end < start) {
+            endDate.setErrors({ dateRange: true });
+        } else {
+            // Limpiar el error dateRange si existe, pero mantener otros errores
+            if (endDate.errors) {
+                delete endDate.errors['dateRange'];
+                if (Object.keys(endDate.errors).length === 0) {
+                    endDate.setErrors(null);
+                }
+            }
+        }
+    }
 
     onOsSelected(selectedOs: any): void {
         const osGroup = this.certificateForm.get('patient.obraSocial') as FormGroup;
@@ -56,12 +78,13 @@ export class CertificateFormComponent implements OnInit {
     isFormShown = true;
     isCertificateShown = false;
     anulateCertificate = false;
+    isListShown = false;
     obraSocial: any[];
     obrasSociales: any[];
     otraOS = false;
-    dataCertificates = new MatTableDataSource<Certificates>([]);
+    dataCertificates = new MatTableDataSource<Certificate>([]);
     private anulateCertificateSubscription: Subscription;
-    public certificate: Certificates;
+    public certificate: Certificate;
 
     @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
     @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -76,11 +99,8 @@ export class CertificateFormComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadingCertificates = true;
-        this.certificateService.certificates.subscribe((certificates: Certificates[]) => {
-            const sortedCertificates = certificates.sort((a, b) => {
-                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-            });
-            this.dataCertificates = new MatTableDataSource<Certificates>(sortedCertificates);
+        this.certificateService.certificates.subscribe((certificates: Certificate[]) => {
+            this.dataCertificates = new MatTableDataSource<Certificate>(certificates);
             this.dataCertificates.sortingDataAccessor = (item, property) => {
                 switch (property) {
                     case 'patient': return item.patient.lastName + item.patient.firstName;
@@ -174,7 +194,7 @@ export class CertificateFormComponent implements OnInit {
                 sex: ['', [
                     Validators.required
                 ]],
-                otraOS: [false],
+                otraOS: [{ value: false, disabled: true }],
                 obraSocial: this.fBuilder.group({
                     nombre: [''],
                     codigoPuco: [''],
@@ -183,9 +203,21 @@ export class CertificateFormComponent implements OnInit {
             }),
             certificate: ['', [Validators.required]],
             anulateReason: [''],
-            date: [this.today, [
+            startDate: [this.today, [
                 Validators.required
             ]],
+            endDate: [this.today, [
+                Validators.required
+            ]],
+        });
+
+        // Agregar listeners para validar el rango de fechas
+        this.certificateForm.get('startDate').valueChanges.subscribe(() => {
+            this.dateRangeValidator(this.certificateForm.get('startDate'), this.certificateForm.get('endDate'));
+        });
+
+        this.certificateForm.get('endDate').valueChanges.subscribe(() => {
+            this.dateRangeValidator(this.certificateForm.get('startDate'), this.certificateForm.get('endDate'));
         });
     }
 
@@ -196,12 +228,16 @@ export class CertificateFormComponent implements OnInit {
                 res => {
                     if (res.length) {
                         this.patientSearch = res;
+                        // Habilitar el checkbox otraOS cuando se encuentra un paciente
+                        this.patientOtraOS.enable();
                     } else {
                         this.patientSearch = [];
                         this.patientLastName.setValue('');
                         this.patientFirstName.setValue('');
                         this.patientSex.setValue('');
                         this.patientOtraOS.setValue(false);
+                        // Deshabilitar el checkbox otraOS cuando no se encuentra un paciente
+                        this.patientOtraOS.disable();
                     }
                     this.dniShowSpinner = false;
                 });
@@ -272,8 +308,14 @@ export class CertificateFormComponent implements OnInit {
         return this.certificateForm.get('professional');
     }
 
-    get date(): AbstractControl {
-        return this.certificateForm.get('date');
+
+
+    get startDate(): AbstractControl {
+        return this.certificateForm.get('startDate');
+    }
+
+    get endDate(): AbstractControl {
+        return this.certificateForm.get('endDate');
     }
 
     get patientDni(): AbstractControl {
@@ -321,19 +363,22 @@ export class CertificateFormComponent implements OnInit {
     // reset the form as intial values
     clearForm(professionalNgForm: FormGroupDirective) {
         professionalNgForm.resetForm();
+        this.patientSearch = [];
         this.certificateForm.reset({
             _id: '',
             professional: this.professionalData,
-            date: this.today,
+            startDate: this.today,
+            endDate: this.today,
             patient: {
                 dni: { value: '', disabled: false },
                 sex: { value: '', disabled: false },
                 lastName: { value: '', disabled: false },
                 firstName: { value: '', disabled: false },
+                otraOS: { value: false, disabled: true },
                 obraSocial: {
                     nombre: '',
                     codigoPuco: '',
-                    numeroAfiliado: ''
+                    numeroAfiliado: { value: '', disabled: true }
                 }
             },
             certificate: '',
@@ -350,7 +395,7 @@ export class CertificateFormComponent implements OnInit {
 
     showList(): void {
         this.isFormShown = false;
-        this.isCertificateShown = false;
+        this.isListShown = false;
     }
 
     showCertificados(): void {

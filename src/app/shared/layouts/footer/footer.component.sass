@@ -6,55 +6,26 @@
   @media (min-width: $x-small-devices) and (max-width: $small-devices)
     height: auto
 
-.logo-01, .logo-02
-    @media (min-width: $xx-larger-devices) and (max-width: $xxx-larger-devices)
-      width: 170px
-      height: 40px
-
-    @media (min-width: $x-larger-devices) and (max-width: $xx-larger-devices)
-      width: 170px
-      height: 40px
-
-    @media (min-width: $larger-devices) and (max-width: $x-larger-devices)
-      width: 170px
-      height: 35px
-
-    @media (min-width: $medium-devices) and (max-width: $larger-devices)
-      width: 120px
-      height: 30px
-
-    @media (min-width: $small-devices) and (max-width: $medium-devices)
-      width: 120px
-      height: 30px
-
-    @media (min-width: $x-small-devices) and (max-width: $small-devices)
-      width: 120px
-      height: 30px
-
-.logo-03
-  @media (min-width: $xx-larger-devices) and (max-width: $xxx-larger-devices)
-    width: 120px
-    height: 40px
-
-  @media (min-width: $x-larger-devices) and (max-width: $xx-larger-devices)
-    width: 120px
-    height: 40px
-
-  @media (min-width: $larger-devices) and (max-width: $x-larger-devices)
-    width: 100px
-    height: 30px
-
-  @media (min-width: $medium-devices) and (max-width: $larger-devices)
-    width: 77px
-    height: 30px
-
-  @media (min-width: $small-devices) and (max-width: $medium-devices)
-    width: 77px
-    height: 30px
-
-  @media (min-width: $x-small-devices) and (max-width: $small-devices)
-    width: 77px
-    height: 30px
+.logo-01, .logo-02, .logo-03
+  max-height: 45px
+  width: auto
+  object-fit: contain
+  
+  @media (max-width: $medium-devices)
+    max-height: 35px
+    
+  @media (max-width: $small-devices)
+    max-height: 30px
 
 footer
   width: 100%
+  padding: 10px 0
+  align-items: center
+  min-height: 60px
+  max-height: 80px
+  
+  img
+    max-height: 50px
+    width: auto
+    object-fit: contain
+    margin: 0 10px

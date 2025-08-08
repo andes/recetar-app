@@ -1,9 +1,9 @@
-import { Component, OnInit, Inject, } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { fadeInOnEnterAnimation, fadeOutOnLeaveAnimation } from 'angular-animations';
+import { Component, Inject, OnInit, } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Prescriptions } from '@interfaces/prescriptions';
 import { InteractionService } from '@professionals/interaction.service';
-import { Certificates } from '@interfaces/certificate';
+import { Certificate } from '@interfaces/certificate';
+import { fadeInOnEnterAnimation, fadeOutOnLeaveAnimation } from 'angular-animations';
 
 @Component({
     selector: 'app-professional-dialog',
