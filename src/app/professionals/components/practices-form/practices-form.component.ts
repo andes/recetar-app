@@ -8,7 +8,7 @@ import { ProfessionalDialogComponent } from '@professionals/components/professio
 import { PatientsService } from '@root/app/services/patients.service';
 import { PracticesService } from '@services/practices.service';
 import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { debounceTime, map, startWith } from 'rxjs/operators';
 
 @Component({
   selector: 'app-practices-form',
@@ -42,7 +42,9 @@ export class PracticesFormComponent implements OnInit {
     this.initPracticesForm();
 
     // on DNI changes
-    this.practicePatientDni.valueChanges.subscribe(
+    this.practicePatientDni.valueChanges.pipe(
+                debounceTime(400)
+            ).subscribe(
       dniValue => {
         this.getPatientByDni(dniValue);
       }

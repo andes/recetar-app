@@ -27,43 +27,28 @@ import { MatSort } from '@angular/material/sort';
 })
 export class CertificateFormComponent implements OnInit {
     @Output() anulateCertificateEvent = new EventEmitter();
-    obraSocialControl = new FormControl('');
-    filteredObrasSociales: Observable<any[]>;
+    @Output() certificateCreatedEvent = new EventEmitter();
 
-    // Validador personalizado para verificar que endDate no sea anterior a startDate
-    dateRangeValidator(startDate: AbstractControl, endDate: AbstractControl) {
-        if (!startDate.value || !endDate.value) {
+    startDateValidator(control: AbstractControl) {
+        if (!control.value) {
             return null;
         }
 
-        const start = new Date(startDate.value);
-        const end = new Date(endDate.value);
+        const selectedDate = new Date(control.value);
+        const today = new Date();
+        const minDate = new Date(today);
+        minDate.setDate(today.getDate() - 15);
 
-        if (start && end && end < start) {
-            endDate.setErrors({ dateRange: true });
-        } else {
-            // Limpiar el error dateRange si existe, pero mantener otros errores
-            if (endDate.errors) {
-                delete endDate.errors['dateRange'];
-                if (Object.keys(endDate.errors).length === 0) {
-                    endDate.setErrors(null);
-                }
-            }
-        }
-    }
+        // Reset time part to compare only dates
+        selectedDate.setHours(0, 0, 0, 0);
+        minDate.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0);
 
-    onOsSelected(selectedOs: any): void {
-        const osGroup = this.certificateForm.get('patient.obraSocial') as FormGroup;
-        if (osGroup && selectedOs) {
-            osGroup.patchValue({
-                nombre: selectedOs.nombre,
-                codigoPuco: selectedOs.codigoPuco
-            });
-            const numeroAfiliadoControl = osGroup.get('numeroAfiliado');
-            if (numeroAfiliadoControl) {
-                numeroAfiliadoControl.enable();
-            }
+        if (selectedDate < minDate) {
+            return { tooOld: true };
         }
+
+        return null;
     }
     @ViewChild('dni', { static: true }) dni: any;
 
@@ -79,12 +64,10 @@ export class CertificateFormComponent implements OnInit {
     isCertificateShown = false;
     anulateCertificate = false;
     isListShown = false;
-    obraSocial: any[];
-    obrasSociales: any[];
-    otraOS = false;
     dataCertificates = new MatTableDataSource<Certificate>([]);
     private anulateCertificateSubscription: Subscription;
     public certificate: Certificate;
+    cantDias = new FormControl('', [Validators.required, Validators.min(1)]);
 
     @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
     @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -123,20 +106,6 @@ export class CertificateFormComponent implements OnInit {
             }
         );
 
-        this.certificateForm.get('patient.otraOS')?.valueChanges.subscribe(() => {
-            const osGroup = this.certificateForm.get('patient.obraSocial') as FormGroup;
-            osGroup.reset();
-            osGroup.get('numeroAfiliado').disable();
-        });
-
-        this.filteredObrasSociales = this.obraSocialControl.valueChanges.pipe(
-            startWith(''),
-            map(value => {
-                const name = typeof value === 'string' ? value : value?.nombre;
-                return name ? this._filter(name) : this.obrasSociales.slice();
-            })
-        );
-
         this.certificateService.certificate$.subscribe(
             certificate => {
                 if (certificate) {
@@ -166,13 +135,6 @@ export class CertificateFormComponent implements OnInit {
         }
     }
 
-    private _filter(value: string): any[] {
-        const filterValue = value.toLowerCase();
-        return this.obrasSociales.filter(os =>
-            os.nombre.toLowerCase().includes(filterValue)
-        );
-    }
-
     initProfessionalForm() {
         this.today = new Date((new Date()));
         this.professionalData = this.authService.getLoggedUserId();
@@ -194,31 +156,16 @@ export class CertificateFormComponent implements OnInit {
                 sex: ['', [
                     Validators.required
                 ]],
-                otraOS: [{ value: false, disabled: true }],
-                obraSocial: this.fBuilder.group({
-                    nombre: [''],
-                    codigoPuco: [''],
-                    numeroAfiliado: [{ value: '', disabled: true }]
-                }),
             }),
             certificate: ['', [Validators.required]],
             anulateReason: [''],
             startDate: [this.today, [
-                Validators.required
+                Validators.required,
+                this.startDateValidator.bind(this)
             ]],
-            endDate: [this.today, [
-                Validators.required
-            ]],
+            cantDias: [''],
         });
 
-        // Agregar listeners para validar el rango de fechas
-        this.certificateForm.get('startDate').valueChanges.subscribe(() => {
-            this.dateRangeValidator(this.certificateForm.get('startDate'), this.certificateForm.get('endDate'));
-        });
-
-        this.certificateForm.get('endDate').valueChanges.subscribe(() => {
-            this.dateRangeValidator(this.certificateForm.get('startDate'), this.certificateForm.get('endDate'));
-        });
     }
 
     getPatientByDni(dniValue: string | null): void {
@@ -228,32 +175,14 @@ export class CertificateFormComponent implements OnInit {
                 res => {
                     if (res.length) {
                         this.patientSearch = res;
-                        // Habilitar el checkbox otraOS cuando se encuentra un paciente
-                        this.patientOtraOS.enable();
                     } else {
                         this.patientSearch = [];
                         this.patientLastName.setValue('');
                         this.patientFirstName.setValue('');
                         this.patientSex.setValue('');
-                        this.patientOtraOS.setValue(false);
-                        // Deshabilitar el checkbox otraOS cuando no se encuentra un paciente
-                        this.patientOtraOS.disable();
                     }
                     this.dniShowSpinner = false;
                 });
-            this.apiPatients.getPatientOSByDni(dniValue, this.patientSex.value).subscribe(
-                res => {
-                    if (Array.isArray(res)) {
-                        this.obraSocial = res;
-                    } else {
-                        this.obraSocial = [];
-                    }
-                });
-            this.apiPatients.getOS().subscribe(
-                res => {
-                    this.obrasSociales = (res as Array<any>);
-                }
-            );
         } else {
             this.dniShowSpinner = false;
         }
@@ -267,8 +196,15 @@ export class CertificateFormComponent implements OnInit {
 
     onSubmitCertificateForm(professionalNgForm: FormGroupDirective): void {
         if (!this.anulateCertificate) {
-            if (this.certificateForm.valid) {
-                const newPrescription = this.certificateForm.value;
+            if (this.certificateForm.valid && this.cantDias.valid) {
+                const startDate = new Date(this.certificateForm.get('startDate').value);
+                startDate.setHours(0, 0, 0, 0);
+                this.certificateForm.get('startDate').setValue(startDate);
+                // Add cantDias to the form value
+                const newPrescription = {
+                    ...this.certificateForm.value,
+                    cantDias: this.cantDias.value
+                };
                 this.isSubmit = true;
                 this.certificateService.newCertificate(newPrescription).subscribe(
                     success => {
@@ -293,7 +229,12 @@ export class CertificateFormComponent implements OnInit {
         const wasAnulate = this.anulateCertificate;
         this.clearForm(professionalNgForm);
         this.isSubmit = false;
-        wasAnulate ? this.openDialog('anulate_certificate') : this.openDialog('created_certificate');
+        if (wasAnulate) {
+            this.openDialog('anulate_certificate');
+        } else {
+            this.openDialog('created_certificate');
+            this.certificateCreatedEvent.emit();
+        }
     }
 
     // Show a dialog
@@ -314,10 +255,10 @@ export class CertificateFormComponent implements OnInit {
         return this.certificateForm.get('startDate');
     }
 
-    get endDate(): AbstractControl {
-        return this.certificateForm.get('endDate');
-    }
-
+    
+        get cantDiasControl(): AbstractControl {
+            return this.cantDias;
+        }
     get patientDni(): AbstractControl {
         const patient = this.certificateForm.get('patient');
         return patient.get('dni');
@@ -337,10 +278,6 @@ export class CertificateFormComponent implements OnInit {
         const patient = this.certificateForm.get('patient');
         return patient.get('sex');
     }
-    get patientOtraOS(): AbstractControl {
-        const patient = this.certificateForm.get('patient');
-        return patient.get('otraOS');
-    }
 
     get patientCertificate(): AbstractControl {
         const patient = this.certificateForm.get('certificate');
@@ -352,8 +289,18 @@ export class CertificateFormComponent implements OnInit {
         return patient.get('anulateReason');
     }
 
-    displayOs(os: any): string {
-        return os && os.nombre ? os.nombre : '';
+    getEndDateHint(): string {
+        const startDate = this.certificateForm.get('startDate')?.value;
+        const cantDias = this.cantDias.value;
+
+        if (!startDate || !cantDias) {
+            return '';
+        }
+
+        const endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + cantDias - 1);
+        endDate.setHours(23, 59, 59, 999);
+        return `Fecha de fin: ${endDate.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}`;
     }
 
     displayFn(supply): string {
@@ -368,18 +315,12 @@ export class CertificateFormComponent implements OnInit {
             _id: '',
             professional: this.professionalData,
             startDate: this.today,
-            endDate: this.today,
+            cantDias: '',
             patient: {
                 dni: { value: '', disabled: false },
                 sex: { value: '', disabled: false },
                 lastName: { value: '', disabled: false },
                 firstName: { value: '', disabled: false },
-                otraOS: { value: false, disabled: true },
-                obraSocial: {
-                    nombre: '',
-                    codigoPuco: '',
-                    numeroAfiliado: { value: '', disabled: true }
-                }
             },
             certificate: '',
             anulateReason: ''

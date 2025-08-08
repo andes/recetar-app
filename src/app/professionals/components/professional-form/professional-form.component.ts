@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, AbstractControl, Validators, FormArray, FormGroupDirective, FormControl } from '@angular/forms';
 import { Observable, of } from 'rxjs';
 // import { SuppliesService } from '@services/supplies.service';
@@ -19,6 +19,7 @@ import Supplies from '@interfaces/supplies';
 import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
 import { fadeOutCollapseOnLeaveAnimation } from 'angular-animations';
 import { CertificatesService } from '@services/certificates.service';
+import { PrescriptionsListComponent } from '@professionals/components/prescriptions-list/prescriptions-list.component';
 
 
 @Component({
@@ -30,7 +31,7 @@ import { CertificatesService } from '@services/certificates.service';
         stepLink
     ]
 })
-export class ProfessionalFormComponent implements OnInit {
+export class ProfessionalFormComponent implements OnInit, AfterViewInit {
     obraSocialControl = new FormControl('');
     filteredObrasSociales: Observable<any[]>;
 
@@ -83,6 +84,7 @@ export class ProfessionalFormComponent implements OnInit {
     selectType;
     private certificateSubscription;
     public certificate;
+    @ViewChild(PrescriptionsListComponent) prescriptionsList: PrescriptionsListComponent;
 
     constructor(
         // private suppliesService: SuppliesService,
@@ -109,7 +111,7 @@ export class ProfessionalFormComponent implements OnInit {
 
         // on DNI changes
         this.patientDni.valueChanges.pipe(
-            debounceTime(1000)
+            debounceTime(400)
         ).subscribe(
             dniValue => {
                 this.getPatientByDni(dniValue);
@@ -478,6 +480,19 @@ export class ProfessionalFormComponent implements OnInit {
         this.isFormShown = false;
         this.certificateService.setCertificate(null);
         this.selectType = 'certificados';
+    }
+
+    ngAfterViewInit() {
+        // Implementation not needed for this case
+    }
+
+    onCertificateCreated() {
+        this.showList();
+        // Set the selected type to 'certificados' in the prescriptions list component
+        if (this.prescriptionsList) {
+            this.prescriptionsList.selectedType = 'certificados';
+            this.prescriptionsList.onSelectedTypeChange();
+        }
     }
 
     showForm(): void {

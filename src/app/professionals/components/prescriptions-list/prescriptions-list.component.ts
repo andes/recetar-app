@@ -33,6 +33,7 @@ import { takeUntil } from 'rxjs/operators';
 export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnDestroy {
     private destroy$ = new Subject<void>();
     @Output() editPrescriptionEvent = new EventEmitter();
+    @Output() anulateCertificateEvent = new EventEmitter<Certificate>();
     @Input() tipo: any;
 
     displayedColumns: string[] = ['patient', 'dni', 'prescription_date', 'status', 'action', 'arrow'];
@@ -131,8 +132,8 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         });
     }
 
-    // Cargar certificados
-    private loadCertificates(offset: number = 0, limit: number = 10) {
+    // Expose loadCertificates method to be called from outside
+    loadCertificates(offset: number = 0, limit: number = 10) {
         this.loadingCertificates = true;
         const userId = this.authService.getLoggedUserId();
 
@@ -326,6 +327,7 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
 
     anulateCertificate(certificate: Certificate) {
         this.certificateService.setCertificate(certificate);
+        this.anulateCertificateEvent.emit(certificate);
     }
 
     isStatus(prescritpion: Prescriptions, status: string): boolean {
@@ -402,5 +404,33 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     ngOnDestroy() {
         this.destroy$.next();
         this.destroy$.complete();
+    }
+
+    getCertificateStatus(certificate: Certificate): string {
+        if (certificate.anulateDate ) {
+            return 'anulado';
+        }
+        const currentDate = new Date();
+        const endDate = new Date(certificate.endDate);
+        
+        if (currentDate > endDate) {
+            return 'expirado';
+        }
+        return 'vigente';
+    }
+
+    getCertificateStatusColor(certificate: Certificate): string {
+        const status = this.getCertificateStatus(certificate);
+        
+        switch (status) {
+            case 'vigente':
+                return 'green'; 
+            case 'expirado':
+                return 'orange'; 
+            case 'anulado':
+                return 'red'; 
+            default:
+                return '#000000de';
+        }
     }
 }

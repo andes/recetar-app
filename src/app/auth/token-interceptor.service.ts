@@ -15,8 +15,9 @@ export class TokenInterceptorService implements HttpInterceptor {
   constructor(private authService: AuthService, private router: Router ) { }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-
-    if (this.authService.getJwtToken()) {
+    const urlPublica = request.headers.get('public') === 'true';
+    if (!urlPublica && this.authService.getJwtToken()) {
+      console.log('Adding token to request:');
       request = this.addToken(request, this.authService.getJwtToken());
     }
 

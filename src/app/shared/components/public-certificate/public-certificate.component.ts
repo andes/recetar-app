@@ -42,7 +42,7 @@ export class PublicCertificateComponent implements OnInit {
                     const decryptedId = this.certificatesService.decryptId(encryptedId);
 
                     // Obtener el certificado
-                    return this.certificatesService.getById(decryptedId).pipe(
+                    return this.certificatesService.getById(decryptedId,true).pipe(
                         catchError(() => {
                             this.error = 'Certificado no encontrado o inválido';
                             this.loading = false;
@@ -77,10 +77,13 @@ export class PublicCertificateComponent implements OnInit {
     }
 
     getCertificateStatus(certificate: any): string {
+
         if (!certificate.endDate) {
             return 'activo';
         }
-
+         if (certificate.anulateDate) {
+            return 'anulado';
+        }
         const today = new Date();
         const endDate = new Date(certificate.endDate);
 
@@ -89,11 +92,14 @@ export class PublicCertificateComponent implements OnInit {
 
         return today > endDate ? 'expirado' : 'activo';
     }
+    getCurrentDate() {
+        return new Date()}
 
     getStatusText(status: string): string {
         const statusMap = {
             'activo': 'Activo',
-            'expirado': 'Expirado'
+            'expirado': 'Expirado',
+            'anulado':'Anulado'
         };
         return statusMap[status] || 'Activo';
     }
