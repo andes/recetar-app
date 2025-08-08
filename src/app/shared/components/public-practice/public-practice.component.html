@@ -39,11 +39,6 @@
             <span>{{ practice.patient.dni || '- sin especificar -' }}</span>
           </div>
           <div class="info-item">
-            <label>Fecha de Nacimiento:</label>
-            <span>{{ practice.patient.birthDate ? formatDate(practice.patient.birthDate) : '- sin especificar -'
-              }}</span>
-          </div>
-          <div class="info-item">
             <label>Sexo:</label>
             <span>{{ practice.patient.sex || '- sin especificar -' }}</span>
           </div>
@@ -54,10 +49,6 @@
       <div class="section practice-section">
         <h3>Detalles de la Práctica</h3>
         <div class="info-grid">
-          <div class="info-item">
-            <label>Tipo:</label>
-            <span>{{ practice.practiceType || '- sin especificar -' }}</span>
-          </div>
           <div class="info-item">
             <label>Fecha de Emisión:</label>
             <span>{{ practice.createdAt ? formatDate(practice.createdAt) : '- sin especificar -' }}</span>

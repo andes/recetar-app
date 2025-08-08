@@ -19,15 +19,24 @@
   <div *ngIf="certificate$ | async as certificate" class="certificate-content">
     <div class="certificate-header">
       <div class="logo-section">
-        <!-- Aquí puedes agregar el logo de la institución -->
         <h1>Certificado Médico</h1>
       </div>
-      <div class="certificate-status">
-        <mat-chip [ngClass]="'status-chip-' + getCertificateStatus(certificate)" selected>
-          <mat-icon *ngIf="getCertificateStatus(certificate) === 'activo'">check_circle</mat-icon>
-          <mat-icon *ngIf="getCertificateStatus(certificate) === 'expirado'">timer_off</mat-icon>
-          {{ getStatusText(getCertificateStatus(certificate)) }}
-        </mat-chip>
+      <div class="header-right">
+        <div class="certificate-status">
+          <mat-chip [ngClass]="'status-chip-' + getCertificateStatus(certificate)" selected>
+            <mat-icon *ngIf="getCertificateStatus(certificate) === 'activo'">check_circle</mat-icon>
+            <mat-icon *ngIf="getCertificateStatus(certificate) === 'expirado'">timer_off</mat-icon>
+            <mat-icon *ngIf="getCertificateStatus(certificate) === 'anulado'">cancel</mat-icon>
+
+            {{ getStatusText(getCertificateStatus(certificate)) }}
+          </mat-chip>
+        </div>
+        <div *ngIf="certificate.anulateDate" class="anulate-date">
+          Fecha anulación: {{ certificate.anulateDate | date:'dd/MM/yyyy HH:mm':'GMT-3' }}
+        </div>
+        <div *ngIf="!certificate.anulateDate" class="anulate-date">
+          Ultima actualización: {{ getCurrentDate() | date:'dd/MM/yyyy HH:mm':'GMT-3' }}
+        </div>
       </div>
     </div>
 
@@ -46,11 +55,6 @@
             <span>{{ certificate.patient.dni || '- sin especificar -' }}</span>
           </div>
           <div class="info-item">
-            <label>Fecha de Nacimiento:</label>
-            <span>{{ certificate.patient.birthDate ? formatDate(certificate.patient.birthDate) : '- sin especificar -'
-              }}</span>
-          </div>
-          <div class="info-item">
             <label>Sexo:</label>
             <span>{{ certificate.patient.sex || '- sin especificar -' }}</span>
           </div>
@@ -61,21 +65,18 @@
       <div class="section certificate-section">
         <h3>Detalles del Certificado</h3>
         <div class="info-grid">
-          <div class="info-item">
-            <label>Tipo:</label>
-            <span>{{ certificate.certificateType || '- sin especificar -' }}</span>
-          </div>
+         
           <div class="info-item">
             <label>Fecha de Emisión:</label>
-            <span>{{ certificate.createdAt ? formatDate(certificate.createdAt) : '- sin especificar -' }}</span>
+            <span>{{ certificate.createdAt ? (certificate.createdAt  | date:'dd/MM/yyyy HH:mm':'GMT-3' ): '- sin especificar -' }}</span>
           </div>
           <div class="info-item">
             <label>Fecha de Inicio:</label>
-            <span>{{ certificate.startDate ? formatDate(certificate.startDate) : '- sin especificar -' }}</span>
+            <span>{{ certificate.startDate ? (certificate.startDate | date:'dd/MM/yyyy HH:mm':'GMT-3') : '- sin especificar -' }}</span>
           </div>
           <div class="info-item">
             <label>Fecha de Fin:</label>
-            <span>{{ certificate.endDate ? formatDate(certificate.endDate) : '- sin especificar -' }}</span>
+            <span>{{ certificate.endDate ? ( certificate.endDate | date:'dd/MM/yyyy HH:mm':'GMT-3') : '- sin especificar -' }}</span>
           </div>
         </div>
       </div>
@@ -83,19 +84,13 @@
       <!-- Descripción -->
       <div class="section description-section">
         <h3>Descripción</h3>
-        <p class="description-text">{{ certificate.description || '- sin especificar -' }}</p>
+        <p class="description-text">{{ certificate.certificate || '- sin especificar -' }}</p>
       </div>
 
       <!-- Diagnóstico -->
-      <div class="section diagnosis-section">
-        <h3>Diagnóstico</h3>
-        <p class="diagnosis-text">{{ certificate.diagnosis || '- sin especificar -' }}</p>
-      </div>
-
-      <!-- Observaciones -->
-      <div class="section observations-section">
-        <h3>Observaciones</h3>
-        <p class="observations-text">{{ certificate.observations || '- sin especificar -' }}</p>
+      <div *ngIf="certificate.anulateReason" class="section diagnosis-section">
+        <h3 class="h3-red">Motivo de anulación</h3>
+        <p class="diagnosis-text-red">{{ certificate.anulateReason}}</p>
       </div>
     </div>
 
@@ -103,7 +98,7 @@
       <div class="signature-section">
         <div class="signature-line">
           <p>
-            <span>{{ certificate.professional.businessName }} - Mat. {{ certificate.professional.enrollment }}</span>
+            <span>{{ certificate.professional?.businessName }} - Mat. {{ certificate.professional?.enrollment }}</span>
           </p>
           <p>_________________________________</p>
           <p class="signature-label">Profesional</p>

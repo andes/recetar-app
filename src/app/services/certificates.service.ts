@@ -92,7 +92,7 @@ export class CertificatesService {
                     `${environment.API_END_POINT}/certificates/user/${userId}/search`,
                     { params: queryParams }
                 ).pipe(
-                    tap((response) => this.setPrescriptions(response.certificates))
+                    tap((response) => this.setCertificates(response.certificates))
                 ).subscribe({
                     next: (response) => {
                         observer.next(response);
@@ -123,8 +123,13 @@ export class CertificatesService {
      * @param id ID del certificado
      * @returns Observable con el certificado
      */
-    getById(id: string): Observable<Certificate> {
-        return this.http.get<Certificate>(`${environment.API_END_POINT}/certificates/${id}`);
+    getById(id: string, publicURL = false): Observable<Certificate> {
+        return this.http.get<Certificate>(`${environment.API_END_POINT}/certificates/${id}`, {
+            headers: {
+                'public': publicURL ? 'true' : 'false'
+            },
+            responseType: 'json'
+        });
     }
 
     /**

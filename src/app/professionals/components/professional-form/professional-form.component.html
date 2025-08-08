@@ -305,10 +305,10 @@
         </div>
 
         <div class="my-prescriptions-panel" *ngIf="currentTab === 'list'">
-            <app-prescriptions-list (editPrescriptionEvent)="editPrescription($event)"></app-prescriptions-list>
+            <app-prescriptions-list (editPrescriptionEvent)="editPrescription($event)" (anulateCertificateEvent)="showCertificados()"></app-prescriptions-list>
         </div>
 
         <div class="certificates-panel" *ngIf="currentTab === 'certificates'">
-            <app-certificate-form (anulateCertificateEvent)="anulateCertificate()"></app-certificate-form>
+            <app-certificate-form (anulateCertificateEvent)="anulateCertificate()" (certificateCreatedEvent)="onCertificateCreated()"></app-certificate-form>
         </div>
     </div>

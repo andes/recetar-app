@@ -9,4 +9,6 @@ export class Certificate {
     createdAt: Date;
     updatedAt: Date;
     status?: string;
+    anulateDate?: Date;
+    anulateReason?:string;
 }
