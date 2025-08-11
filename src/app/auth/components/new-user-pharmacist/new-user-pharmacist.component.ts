@@ -38,7 +38,7 @@ export class NewUserPharmacistComponent implements OnInit {
             cuil: [''],
             username: [''],
             disposicionHabilitacion: [''],
-            enrollment: [''], //matriculaDTResponsable
+            enrollment: [''], // matriculaDTResponsable
             vencimientoHabilitacion: [''],
             email: ['', Validators.required],
             businessName: [''],
@@ -53,31 +53,31 @@ export class NewUserPharmacistComponent implements OnInit {
     }
 
     onSubmitEvent(newUserForm: FormGroup, newUserNgForm: FormGroupDirective) {
-    
+
         if (this.newUserForm.valid) {
             this.checkUser();
             const params = {
                 cuil: newUserForm.get('cuil').value,
                 disposicionHabilitacion: newUserForm.get('disposicionHabilitacion').value
-            }
+            };
             this.pharmacistsService.getPharmacistByCuit(params).subscribe(res => {
                 if (res.length) {
                     const pharmacist = res[0];
                     if (this.checkDisposicionFarmacia(pharmacist) && this.checkMatricula(pharmacist) && this.checkVencimientoHabilitacion(pharmacist)) {
-                        this.userRegister(newUserForm, newUserNgForm)
+                        this.userRegister(newUserForm, newUserNgForm);
                     } else {
                         if (!this.checkDisposicionFarmacia(pharmacist)) {
-                            this._snackBar.open("El número de disposicion no es correcto", 'cerrar', {
+                            this._snackBar.open('El número de disposicion no es correcto', 'cerrar', {
                                 duration: 5000
                             });
                         }
                         if (!this.checkMatricula(pharmacist)) {
-                            this._snackBar.open("El número de matricula no es correcto", 'cerrar', {
+                            this._snackBar.open('El número de matricula no es correcto', 'cerrar', {
                                 duration: 5000
                             });
                         }
                         if (!this.checkVencimientoHabilitacion(pharmacist)) {
-                            this._snackBar.open("La fecha de vencimiento de habilitación no es correcta", 'cerrar', {
+                            this._snackBar.open('La fecha de vencimiento de habilitación no es correcta', 'cerrar', {
                                 duration: 5000
                             });
                         }
@@ -87,11 +87,11 @@ export class NewUserPharmacistComponent implements OnInit {
                         duration: 5000
                     });
                 }
-            })
+            });
         } else {
-            this._snackBar.open('Los campos deben estar completos y ser validos', 'cerrar', {
+            this._snackBar.open('Los campos deben estar completos y ser válidos', 'cerrar', {
                 duration: 5000
-            })
+            });
         }
     }
 
@@ -109,18 +109,18 @@ export class NewUserPharmacistComponent implements OnInit {
                     this._snackBar.open(`Ha ocurrido un error al intentar crear la cuenta: ${JSON.stringify(err)}'`, 'cerrar', {
                         duration: 5000
                     });
-                })
+                });
     }
 
     checkDisposicionFarmacia(pharmacist) {
         const disposicionHabilitacion = this.newUserForm.get('disposicionHabilitacion').value;
-        let salida = pharmacist.disposicionHabilitacion === disposicionHabilitacion ? true : false;
+        const salida = pharmacist.disposicionHabilitacion === disposicionHabilitacion ? true : false;
         return salida;
     }
 
     checkMatricula(pharmacist) {
         const matriculaDTResponsable = this.newUserForm.get('enrollment').value;
-        let salida = pharmacist.matriculaDTResponsable === matriculaDTResponsable ? true : false;
+        const salida = pharmacist.matriculaDTResponsable === matriculaDTResponsable ? true : false;
         return salida;
     }
 
@@ -128,7 +128,7 @@ export class NewUserPharmacistComponent implements OnInit {
         const vencimientoHabilitacionForm = this.newUserForm.get('vencimientoHabilitacion').value;
         const vencimientoHabilitacionAndes = moment(pharmacist.vencimientoHabilitacion);
         const diferencia = vencimientoHabilitacionForm.diff(vencimientoHabilitacionAndes, 'days');
-        let salida = diferencia === 0 ? true : false;
+        const salida = diferencia === 0 ? true : false;
         return salida;
     }
 
