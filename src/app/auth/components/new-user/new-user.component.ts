@@ -65,13 +65,13 @@ export class NewUserComponent implements OnInit {
                 cuil: newUserForm.get('cuil').value,
                 fechaEgreso: moment(newUserForm.get('fechaEgreso').value).format('DD-MM-YYYY'),
                 fechaMatVencimiento: moment(newUserForm.get('fechaMatVencimiento').value).format('DD-MM-YYYY')
-            }
+            };
             this.professionalsService.getProfessionalByDni(params).subscribe(res => {
                 if (res.length) {
                     const profesional = res[0];
                     const { profesiones } = profesional;
                     if (this.checkPersona(profesional) && this.checkMatricula(profesiones)) {
-                        this.userRegister(newUserForm, newUserNgForm)
+                        this.userRegister(newUserForm, newUserNgForm);
                     } else {
                         this._snackBar.open('El número de matricula o el número de cuil no es correcto', 'cerrar', {
                             duration: 5000
@@ -93,11 +93,11 @@ export class NewUserComponent implements OnInit {
                             duration: 5000
                         });
                     }
-                })
+                });
         } else {
-            this._snackBar.open('Los campos deben estar completos y ser validos', 'cerrar', {
+            this._snackBar.open('Los campos deben estar completos y ser válidos', 'cerrar', {
                 duration: 5000
-            })
+            });
         }
     }
 
@@ -115,13 +115,13 @@ export class NewUserComponent implements OnInit {
                     this._snackBar.open(`Ha ocurrido un error al intentar crear la cuenta: ${JSON.stringify(err)}'`, 'cerrar', {
                         duration: 5000
                     });
-                })
+                });
     }
 
 
     checkPersona(profesional) {
         const cuil = this.newUserForm.get('cuil').value;
-        let salida = profesional.cuit == cuil ? true : false
+        const salida = profesional.cuit == cuil ? true : false;
         return salida;
     }
 

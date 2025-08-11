@@ -181,7 +181,7 @@ export class AndesPrescriptionPrinterComponent implements OnInit {
         }
 
         pdf.footer(new Txt([
-            { text: 'Esta receta fue creada por emisor inscripto y valido en el Registro de Recetarios Electrónicos \n del Ministerio de Salud de la Nación - ', italics: true },
+            { text: 'Esta receta fue creada por emisor inscripto y válido en el Registro de Recetarios Electrónicos \n del Ministerio de Salud de la Nación - ', italics: true },
             { text: 'RL-2025-63212094-APN-SSVEIYES#MS', bold: true }
         ]).fontSize(11).alignment('center').end);
     }
