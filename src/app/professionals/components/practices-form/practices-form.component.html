@@ -1,0 +1,175 @@
+<div class="pf-container">
+  <div class="cards-container">
+    <mat-card class="new-practice">
+      <div fxFlex="100" fxLayout="column" fxLayoutAlign="start">
+        <mat-card-title>
+          <h2 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
+            <mat-icon>assignment</mat-icon>
+            <span>Nueva Práctica</span>
+          </h2>
+        </mat-card-title>
+
+        <mat-card-content>
+          <form [formGroup]="practicesForm" #practicesNgForm="ngForm"
+                (ngSubmit)="onSubmitPracticesForm(practicesNgForm)">
+            <div class="sub-container" fxLayout="column" fxLayoutAlign="center" fxLayoutGap="0" fxLayoutGap.xs="0">
+
+              <div class="first-block" fxLayout="column" fxLayoutGap="0px" fxLayoutGap.xs="0">
+                <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center" fxLayoutAlign.xs="center center">
+                  <!-- Fecha de práctica -->
+                  <mat-form-field appearance="fill" fxFlex="48" fxFlex.xs="100">
+                    <mat-label>Fecha práctica</mat-label>
+                    <input matInput [matDatepicker]="picker" formControlName="date" required>
+                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                    <mat-error *ngIf="practicesForm.get('date')?.errors?.required">
+                      Debe ingresar la fecha de la práctica
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div formGroupName="patient" fxLayout="column" fxLayoutGap="10px">
+                  <!-- DNI paciente -->
+                  <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center" fxLayoutAlign.xs="center center">
+                    <mat-form-field appearance="fill" fxFlex="48" fxFlex.xs="100">
+                      <mat-label>DNI paciente</mat-label>
+                      <input type="text" tabIndex="1" #dniPractice placeholder="DNI" aria-label="Number" matInput
+                             required maxlength="8" formControlName="dni" [matAutocomplete]="autoDni">
+                      <mat-spinner matSuffix [color]="'primary'" [diameter]="20" *ngIf="dniShowSpinner"></mat-spinner>
+
+                      <mat-autocomplete #autoDni="matAutocomplete">
+                        <mat-option *ngFor="let patient of patientSearch"
+                                    (onSelectionChange)="completePatientInputsPractices(patient)" [value]="patient.dni">
+                          {{patient.lastName}} {{patient.firstName}} DNI {{patient.dni}}
+                        </mat-option>
+                      </mat-autocomplete>
+
+                      <mat-hint align="end">{{dniPractice.value.length}} / 8</mat-hint>
+
+                      <mat-error *ngIf="practicePatientDni.errors?.required">
+                        Debe ingresar el DNI del paciente
+                      </mat-error>
+                      <mat-error *ngIf="practicePatientDni.errors?.minlength">
+                        El DNI debe tener al menos 7 dígitos
+                      </mat-error>
+                      <mat-error *ngIf="practicePatientDni.errors?.pattern">
+                        El DNI debe contener solo números.
+                      </mat-error>
+                    </mat-form-field>
+
+                    <!-- Sexo paciente -->
+                    <mat-form-field appearance="fill" fxFlex="48" fxFlex.xs="100">
+                      <mat-label>Sexo</mat-label>
+                      <mat-select tabIndex="2" formControlName="sex" required>
+                        <mat-option *ngFor="let sex of sex_options" [value]="sex">
+                          {{ sex }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-error *ngIf="practicePatientSex.errors?.required">
+                        Debe seleccionar el sexo del paciente
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <!-- Apellido y Nombre paciente -->
+                  <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center" fxLayoutAlign.xs="center center">
+                    <mat-form-field appearance="fill" fxFlex="48" fxFlex.xs="100">
+                      <mat-label>Apellido paciente</mat-label>
+                      <input type="text" tabIndex="3" placeholder="Apellido" matInput required
+                             formControlName="lastName">
+                      <mat-error *ngIf="practicePatientLastName.errors?.required">
+                        Debe ingresar el apellido del paciente
+                      </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill" fxFlex="48" fxFlex.xs="100">
+                      <mat-label>Nombre paciente</mat-label>
+                      <input type="text" tabIndex="4" placeholder="Nombre" matInput required
+                             formControlName="firstName">
+                      <mat-error *ngIf="practicePatientFirstName.errors?.required">
+                        Debe ingresar el nombre del paciente
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <!-- Elegir otra cobertura social -->
+                  <mat-checkbox formControlName="otraOS">Elegir otra cobertura
+                    social</mat-checkbox>
+
+                  <div formGroupName="obraSocial" fxLayout="row" fxLayout.sm="column" fxLayoutGap="10px"
+                       fxLayoutAlign="start center" fxLayoutAlign.sm="start" fxLayoutGap.sm="0" fxLayout.xs="column"
+                       fxLayoutAlign.xs="start">
+
+                    <!-- Obra Social (select) -->
+                    <mat-form-field appearance="fill" *ngIf="!practicesForm.get('patient')?.get('otraOS')?.value"
+                                    fxFlex="80">
+                      <mat-label>Obra Social</mat-label>
+                      <mat-select [disabled]="!this.practicesForm.get('patient.dni').valid"
+                                  (selectionChange)="onOsSelected($event.value)">
+                        <mat-option *ngFor="let os of obraSocial" [value]="os">
+                          {{ os?.nombre }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+
+                    <!-- Obra Social (autocomplete) -->
+                    <mat-form-field *ngIf="practicesForm.get('patient')?.get('otraOS')?.value" appearance="fill"
+                                    fxFlex="80" fxFlex.md="100">
+                      <mat-label>Obra Social</mat-label>
+                      <input type="text" matInput [formControl]="obraSocialControl" [matAutocomplete]="autoOs"
+                             [disabled]="!this.practicesForm.get('patient.dni').valid" placeholder="Buscar obra social">
+                      <mat-autocomplete #autoOs="matAutocomplete" [displayWith]="displayOs"
+                                        (optionSelected)="onOsSelected($event.option.value)">
+                        <mat-option *ngFor="let os of filteredObrasSociales | async" [value]="os">
+                          {{ os.nombre }}
+                        </mat-option>
+                      </mat-autocomplete>
+                    </mat-form-field>
+
+                    <!-- Número de Afiliado -->
+                    <mat-form-field appearance="fill" fxFlex="18">
+                      <mat-label>Numero de Afiliado</mat-label>
+                      <input type="number" matInput formControlName="numeroAfiliado"
+                             [disabled]="!this.practicesForm.get('patient.obraSocial.nombre')">
+                    </mat-form-field>
+                  </div>
+                </div>
+
+                <!-- Campos de práctica -->
+                <div fxLayout="column" fxLayoutGap="10px">
+                  <mat-form-field appearance="fill">
+                    <mat-label>Indique Práctica</mat-label>
+                    <textarea matInput formControlName="practice" placeholder="Descripción de la práctica"></textarea>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="fill">
+                    <mat-label>Indique Diagnóstico</mat-label>
+                    <textarea matInput formControlName="diagnostic" placeholder="Diagnóstico"></textarea>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="fill">
+                    <mat-label>Indicaciones</mat-label>
+                    <textarea matInput formControlName="indications" placeholder="Indicaciones"></textarea>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <!-- Botones -->
+              <div fxLayout="column" fxLayoutAlign="center" fxLayoutGap="20px" *ngIf="!isSubmitPractice" fxFlex="100">
+                <button mat-raised-button color="primary" type="submit" [disabled]="!practicesForm.valid">
+                  Crear
+                </button>
+                <button mat-raised-button type="button" (click)="clearPracticesForm(practicesNgForm)">
+                  Limpiar
+                </button>
+              </div>
+              <div fxLayout="row" fxLayoutAlign="center" *ngIf="isSubmitPractice">
+                <mat-spinner [color]="'primary'" [diameter]="30"></mat-spinner>
+              </div>
+            </div>
+          </form>
+        </mat-card-content>
+      </div>
+    </mat-card>
+  </div>
+</div>

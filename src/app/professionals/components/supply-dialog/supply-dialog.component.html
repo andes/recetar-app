@@ -1,17 +1,18 @@
 <div [ngSwitch]="data.dialogType">
 
   <div *ngSwitchCase="'created'">
-    <h3 mat-dialog-title><mat-icon>check</mat-icon>  Creada</h3>
+    <h3 mat-dialog-title><mat-icon>check</mat-icon> Creada</h3>
     <div mat-dialog-content>
       <p>El producto se ha creado correctamente!</p>
     </div>
     <div mat-dialog-actions align="end">
-      <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
+      <button mat-raised-button color="primary" style="background-color: green; color: white;" (click)="onNoClick()"
+              cdkFocusInitial>Aceptar</button>
     </div>
   </div> <!-- End case noPrescriptions -->
 
   <div *ngSwitchCase="'updated'">
-    <h3 mat-dialog-title><mat-icon>check</mat-icon>  Modificado</h3>
+    <h3 mat-dialog-title><mat-icon>check</mat-icon> Modificado</h3>
     <div mat-dialog-content>
       <p>El producto se ha modificado correctamente!</p>
     </div>
@@ -21,7 +22,7 @@
   </div> <!-- End case noPrescriptions -->
 
   <div *ngSwitchDefault>
-    <h3 mat-dialog-title><mat-icon>error</mat-icon>  Error</h3>
+    <h3 mat-dialog-title><mat-icon>error</mat-icon> Error</h3>
     <div mat-dialog-content>
       <p>{{data.text}}</p>
     </div>
@@ -30,4 +31,3 @@
     </div>
   </div> <!-- End default switch -->
 </div>
-

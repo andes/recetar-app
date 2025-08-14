@@ -1,16 +1,18 @@
 <div class="custom-tab-link-bar">
     <button mat-flat-button (click)="showForm()">Receta</button>
     <button mat-flat-button (click)="showCertificados()">Certificados</button>
-    <button mat-flat-button (click)="showList()">Registros</button>
+    <button mat-flat-button (click)="showPractices()">Prácticas</button>
+    <button mat-flat-button (click)="showList()">Mis documentos</button>
 </div>
 <div class="link-bar-indicator-container">
-    <div class="indicator" [@stepLink]="isFormShown ? 'left' : 'right'"></div>
+    <div class="indicator"
+         [@stepLink]="currentTab === 'form' ? 'left' : currentTab === 'certificates' ? 'center-left' : currentTab === 'practices' ? 'center-right' : 'right'"></div>
 </div>
 <div class="pf-container">
     <div fxLayout="row" fxLayoutAlign="space-evenly start" fxLayoutGap="20px" class="cards-container" fxFill
-         [@step]="isFormShown ? 'left' : 'right'">
+         [@step]="currentTab === 'form' ? 'left' : currentTab === 'certificates' ? 'center-left' : currentTab === 'practices' ? 'center-right' : 'right'">
         <!-- panel "Formulario receta" -->
-        <div class="prescription-panel" *ngIf="isFormShown && !isCertificateShown">
+        <div class="prescription-panel" *ngIf="currentTab === 'form'">
             <mat-card fxLayout="column" fxLayoutAlign="space-between" class="new-prescription">
                 <div fxFlex="100" fxLayout="column" fxLayoutAlign="start">
                     <mat-card-title>
@@ -121,7 +123,7 @@
                                                 </mat-error>
                                             </mat-form-field>
                                         </div>
-                                        <mat-checkbox formControlName="otraOS" [disabled]="!patientSearch">Elegir otra
+                                        <mat-checkbox formControlName="otraOS">Elegir otra
                                             cobertura
                                             social</mat-checkbox>
                                         <div formGroupName="os" fxLayout="row" fxLayout.sm="column" fxLayoutGap="10px"
@@ -297,13 +299,16 @@
             </mat-card>
         </div>
 
-        <div class="my-prescriptions-panel" *ngIf="!isFormShown && !isCertificateShown">
-            <app-prescriptions-list (editPrescriptionEvent)="editPrescription($event)" [tipo]="selectType">
-            </app-prescriptions-list>
+        <!-- panel "Prácticas" -->
+        <div class="practices-panel" *ngIf="currentTab === 'practices'">
+            <app-practices-form></app-practices-form>
         </div>
 
-        <!-- Solo crea el certificado -->
-        <div class="certificates-panel" *ngIf="isCertificateShown && !isFormShown">
-            <app-certificate-form (anulateCertificateEvent)="anulateCertificate()"></app-certificate-form>
+        <div class="my-prescriptions-panel" *ngIf="currentTab === 'list'">
+            <app-prescriptions-list (editPrescriptionEvent)="editPrescription($event)" (anulateCertificateEvent)="showCertificados()"></app-prescriptions-list>
+        </div>
+
+        <div class="certificates-panel" *ngIf="currentTab === 'certificates'">
+            <app-certificate-form (anulateCertificateEvent)="anulateCertificate()" (certificateCreatedEvent)="onCertificateCreated()"></app-certificate-form>
         </div>
     </div>

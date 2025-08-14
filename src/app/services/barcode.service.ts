@@ -1,9 +1,11 @@
 import { Injectable } from "@angular/core";
-import * as JsBarcode from "jsbarcode";
+import * as JsBarcode from 'jsbarcode';
+
 
 @Injectable({
   providedIn: "root"
 })
+
 export class BarcodeService {
   constructor() {}
 
@@ -12,7 +14,7 @@ export class BarcodeService {
    * @param element El elemento HTML donde se mostrará el código de barras
    * @param value El valor a codificar
    */
-  generateBarcode(element: HTMLElement, value: string): void {
+  generateBarcode(element: HTMLCanvasElement | HTMLImageElement | SVGElement, value: string): void {
     JsBarcode(element, value, {
       format: "CODE128",
       lineColor: "#000",
@@ -32,7 +34,7 @@ export class BarcodeService {
     return new Promise((resolve, reject) => {
       // Crear un canvas en memoria
       const canvas = document.createElement('canvas');
-
+      
       try {
         JsBarcode(canvas, value, {
           format: 'CODE128',

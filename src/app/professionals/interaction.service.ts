@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { Prescriptions } from '@interfaces/prescriptions';
-import { Certificates } from '@interfaces/certificate';
+import { Certificate } from '@interfaces/certificate';
 
 @Injectable({
     providedIn: 'root'
 })
 export class InteractionService {
     private _deletePrescriptionSource = new Subject<Prescriptions>();
-    private _deleteCertificateSource = new Subject<Certificates>();
+    private _deleteCertificateSource = new Subject<Certificate>();
 
     deletePrescription$ = this._deletePrescriptionSource.asObservable();
     deleteCertificate$ = this._deleteCertificateSource.asObservable();
@@ -18,7 +18,7 @@ export class InteractionService {
         this._deletePrescriptionSource.next(prescription);
     }
 
-    anulateCertificate(certificate: Certificates) {
+    anulateCertificate(certificate: Certificate) {
         this._deleteCertificateSource.next(certificate);
     }
 }
