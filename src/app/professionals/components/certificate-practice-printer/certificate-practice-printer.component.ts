@@ -197,9 +197,11 @@ export class CertificatePracticePrinterComponent implements OnInit {
         // Obra Social information
         let obraSocial = '';
         let numeroAfiliado = '';
-        if (practice.patient.os?.nombre) {
-            obraSocial = practice.patient.os.nombre;
-            numeroAfiliado = practice.patient.os.numeroAfiliado || '';
+                console.log(practice);
+
+        if (practice.patient.obraSocial?.nombre) {
+            obraSocial = practice.patient.obraSocial.nombre;
+            numeroAfiliado = practice.patient.obraSocial.numeroAfiliado || '';
         }
         pdf.add(new Txt([
             { text: 'Obra Social / Plan de salud: ' }, { text: `${obraSocial || 'No informado'}`, bold: true }
@@ -248,9 +250,10 @@ export class CertificatePracticePrinterComponent implements OnInit {
         }
 
         // Footer
-        pdf.add(new Txt('Esta práctica fue registrada digitalmente a través de RecetAR').italics().alignment('center').end);
-        pdf.add(new Txt(`Fecha de registro: ${this.datePipe.transform(practice.createdAt, 'dd/MM/yyyy HH:mm')}`).italics().alignment('center').end);
-
+        pdf.footer(new Txt([
+      { text:'Esta receta fue creada por emisor inscripto y valido en el Registro de Recetarios Electrónicos \n del Ministerio de Salud de la Nación - ', italics: true},
+      { text:'RL-2025-63212094-APN-SSVEIYES#MS', bold: true}
+    ]).fontSize(11).alignment('center').end);
         pdf.create().open();
     }
 }

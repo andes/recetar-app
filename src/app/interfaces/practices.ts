@@ -8,7 +8,7 @@ export class Practice {
         lastName: string;
         firstName: string;
         otraOS?: boolean;
-        os?: {
+        obraSocial?: {
             nombre: string;
             codigoPuco: string;
             numeroAfiliado: string;
@@ -35,7 +35,7 @@ export class Practice {
             lastName: string;
             firstName: string;
             otraOS?: boolean;
-            os?: {
+            obraSocial?: {
                 nombre: string;
                 codigoPuco: string;
                 numeroAfiliado: string;

@@ -42,7 +42,7 @@ export class PublicPracticeComponent implements OnInit {
                     const decryptedId = this.practicesService.decryptId(encryptedId);
 
                     // Obtener la práctica
-                    return this.practicesService.getById(decryptedId).pipe(
+                    return this.practicesService.getById(decryptedId,true).pipe(
                         catchError(() => {
                             this.error = 'Práctica no encontrada o inválida';
                             this.loading = false;
@@ -65,6 +65,7 @@ export class PublicPracticeComponent implements OnInit {
     }
 
     formatDate(date: Date | string): string {
+        console.log('formatDate', this.practice$ );
         if (!date) {return '';}
         const dateObj = typeof date === 'string' ? new Date(date) : date;
         return dateObj.toLocaleDateString('es-ES', {

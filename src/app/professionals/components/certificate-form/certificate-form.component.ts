@@ -200,7 +200,6 @@ export class CertificateFormComponent implements OnInit {
                 const startDate = new Date(this.certificateForm.get('startDate').value);
                 startDate.setHours(0, 0, 0, 0);
                 this.certificateForm.get('startDate').setValue(startDate);
-                // Add cantDias to the form value
                 const newPrescription = {
                     ...this.certificateForm.value,
                     cantDias: this.cantDias.value

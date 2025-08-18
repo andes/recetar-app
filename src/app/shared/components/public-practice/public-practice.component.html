@@ -42,7 +42,16 @@
             <label>Sexo:</label>
             <span>{{ practice.patient.sex || '- sin especificar -' }}</span>
           </div>
+         <br>
         </div>
+        <div class="info-item">
+          <br>
+            <label>Obra Social:</label>
+            <span>{{ practice.patient.obraSocial?.nombre || '- sin especificar -' }}</span>
+             <label>Número Afiliado:</label>
+             <span>{{ practice.patient.obraSocial?.numeroAfiliado || '- sin especificar -' }}</span>
+
+          </div>
       </div>
 
       <!-- Información de la Práctica -->

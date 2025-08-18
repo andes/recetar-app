@@ -30,8 +30,13 @@ export class PracticesService {
         );
     }
 
-    getById(id: string): Observable<Practice> {
-        return this.http.get<Practice>(`${environment.API_END_POINT}/practices/${id}`);
+    getById(id: string, publicURL = false): Observable<Practice> {
+        return this.http.get<Practice>(`${environment.API_END_POINT}/practices/${id}`, {
+            headers: {
+                'public': publicURL ? 'true' : 'false'
+            },
+            responseType: 'json'
+        });
     }
 
     getFromDniAndDate(params: { patient_dni: string; dateFilter: string }): Observable<boolean> {
