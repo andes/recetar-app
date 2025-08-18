@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, AbstractControl, Validators, FormArray, FormGroupDirective, FormControl } from '@angular/forms';
 import { Observable, of } from 'rxjs';
 // import { SuppliesService } from '@services/supplies.service';
@@ -19,6 +19,7 @@ import Supplies from '@interfaces/supplies';
 import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
 import { fadeOutCollapseOnLeaveAnimation } from 'angular-animations';
 import { CertificatesService } from '@services/certificates.service';
+import { PrescriptionsListComponent } from '@professionals/components/prescriptions-list/prescriptions-list.component';
 
 
 @Component({
@@ -30,7 +31,7 @@ import { CertificatesService } from '@services/certificates.service';
         stepLink
     ]
 })
-export class ProfessionalFormComponent implements OnInit {
+export class ProfessionalFormComponent implements OnInit, AfterViewInit {
     obraSocialControl = new FormControl('');
     filteredObrasSociales: Observable<any[]>;
 
@@ -69,6 +70,8 @@ export class ProfessionalFormComponent implements OnInit {
     isEdit = false;
     isEditCertificate = false;
     isFormShown = true;
+    currentTab = 'form';
+    isListShown = false;
     isCertificateShown = false;
     devices: any = {
         mobile: false,
@@ -81,6 +84,7 @@ export class ProfessionalFormComponent implements OnInit {
     selectType;
     private certificateSubscription;
     public certificate;
+    @ViewChild(PrescriptionsListComponent) prescriptionsList: PrescriptionsListComponent;
 
     constructor(
         // private suppliesService: SuppliesService,
@@ -107,7 +111,7 @@ export class ProfessionalFormComponent implements OnInit {
 
         // on DNI changes
         this.patientDni.valueChanges.pipe(
-            debounceTime(1000)
+            debounceTime(400)
         ).subscribe(
             dniValue => {
                 this.getPatientByDni(dniValue);
@@ -176,7 +180,7 @@ export class ProfessionalFormComponent implements OnInit {
                 sex: ['', [
                     Validators.required
                 ]],
-                otraOS: [false],
+                otraOS: [{ value: false, disabled: true }],
                 os: this.fBuilder.group({
                     nombre: [''],
                     codigoPuco: [''],
@@ -214,12 +218,16 @@ export class ProfessionalFormComponent implements OnInit {
                 res => {
                     if (res.length) {
                         this.patientSearch = res;
+                        // Habilitar el checkbox otraOS cuando se encuentra un paciente
+                        this.patientOtraOS.enable();
                     } else {
                         this.patientSearch = [];
                         this.patientLastName.setValue('');
                         this.patientFirstName.setValue('');
                         this.patientSex.setValue('');
                         this.patientOtraOS.setValue(false);
+                        // Deshabilitar el checkbox otraOS cuando no se encuentra un paciente
+                        this.patientOtraOS.disable();
                     }
                     this.dniShowSpinner = false;
                 });
@@ -446,6 +454,7 @@ export class ProfessionalFormComponent implements OnInit {
     // reset the form as intial values
     clearForm(professionalNgForm: FormGroupDirective) {
         professionalNgForm.resetForm();
+        this.patientSearch = [];
         this.professionalForm.reset({
             _id: '',
             professional: this.professionalData,
@@ -454,7 +463,13 @@ export class ProfessionalFormComponent implements OnInit {
                 dni: { value: '', disabled: false },
                 sex: { value: '', disabled: false },
                 lastName: { value: '', disabled: false },
-                firstName: { value: '', disabled: false }
+                firstName: { value: '', disabled: false },
+                otraOS: { value: false, disabled: true },
+                os: {
+                    nombre: '',
+                    codigoPuco: '',
+                    numeroAfiliado: { value: '', disabled: true }
+                }
             },
         });
         this.isEdit = false;
@@ -467,18 +482,39 @@ export class ProfessionalFormComponent implements OnInit {
         this.selectType = 'certificados';
     }
 
+    ngAfterViewInit() {
+        // Implementation not needed for this case
+    }
+
+    onCertificateCreated() {
+        this.showList();
+        // Set the selected type to 'certificados' in the prescriptions list component
+        if (this.prescriptionsList) {
+            this.prescriptionsList.selectedType = 'certificados';
+            this.prescriptionsList.onSelectedTypeChange();
+        }
+    }
+
     showForm(): void {
         this.isFormShown = true;
         this.isCertificateShown = false;
+        this.currentTab = 'form';
     }
 
     showList(): void {
         this.isFormShown = false;
-        this.isCertificateShown = false;
+        this.isListShown = false;
+        this.currentTab = 'list';
     }
 
     showCertificados(): void {
         this.isFormShown = false;
         this.isCertificateShown = true;
+        this.currentTab = 'certificates';
+    }
+
+    showPractices(): void {
+        this.isFormShown = false;
+        this.currentTab = 'practices';
     }
 }
