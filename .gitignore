@@ -41,6 +41,9 @@ yarn-error.log
 testem.log
 /typings
 
+#Angular files
+src/environments/api.key.ts
+
 # System Files
 .DS_Store
 Thumbs.db
