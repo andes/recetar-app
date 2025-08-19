@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { ProfessionalsRoutingModule, routingComponents } from './professionals-routing.module';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 // flex-layout
 import { FlexLayoutModule } from '@angular/flex-layout';
 // material
@@ -27,19 +27,26 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { PrescriptionsListComponent } from './components/prescriptions-list/prescriptions-list.component';
+import { CertificateFormComponent } from './components/certificate-form/certificate-form.component';
 import { SupplyListComponent } from './components/supply-list/supply-list.component';
+import { PracticesFormComponent } from './components/practices-form/practices-form.component';
+import { CertificatePracticePrinterComponent } from './components/certificate-practice-printer/certificate-practice-printer.component';
 
 @NgModule({
   declarations: [
     routingComponents,
     PrescriptionsListComponent,
-    SupplyListComponent
+    SupplyListComponent,
+    PracticesFormComponent,
+    CertificateFormComponent,
+    CertificatePracticePrinterComponent
   ],
   imports: [
     CommonModule,
     BrowserModule,
     HttpClientModule,
     ReactiveFormsModule,
+    FormsModule,
     ProfessionalsRoutingModule,
     FlexLayoutModule,
     MatCardModule,

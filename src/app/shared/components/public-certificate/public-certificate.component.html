@@ -1,0 +1,119 @@
+<div class="certificate-container">
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-container">
+        <mat-spinner></mat-spinner>
+        <p>Cargando certificado...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !loading" class="error-container certificate-content">
+        <mat-icon class="error-icon">error</mat-icon>
+        <h2>Error</h2>
+        <p>{{ error }}</p>
+        <button mat-raised-button color="primary" routerLink="/">
+            Volver al inicio
+        </button>
+    </div>
+
+    <!-- Certificate Content -->
+    <div *ngIf="certificate$ | async as certificate" class="certificate-content">
+        <div class="certificate-header">
+            <div class="logo-section">
+                <h1>Certificado Médico</h1>
+            </div>
+            <div class="header-right">
+                <div class="certificate-status">
+                    <mat-chip [ngClass]="'status-chip-' + getCertificateStatus(certificate)" selected>
+                        <mat-icon *ngIf="getCertificateStatus(certificate) === 'activo'">check_circle</mat-icon>
+                        <mat-icon *ngIf="getCertificateStatus(certificate) === 'expirado'">timer_off</mat-icon>
+                        <mat-icon *ngIf="getCertificateStatus(certificate) === 'anulado'">cancel</mat-icon>
+
+                        {{ getStatusText(getCertificateStatus(certificate)) }}
+                    </mat-chip>
+                </div>
+                <div *ngIf="certificate.anulateDate" class="anulate-date">
+                    Fecha anulación: {{ certificate.anulateDate | date:'dd/MM/yyyy HH:mm':'GMT-3' }}
+                </div>
+                <div *ngIf="!certificate.anulateDate" class="anulate-date">
+                    Ultima actualización: {{ getCurrentDate() | date:'dd/MM/yyyy HH:mm':'GMT-3' }}
+                </div>
+            </div>
+        </div>
+
+        <div class="certificate-body">
+            <!-- Información del Paciente -->
+            <div class="section patient-section">
+                <h3>Paciente</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Nombre:</label>
+                        <span>{{ certificate.patient.firstName && certificate.patient.lastName ?
+                            certificate.patient.firstName + ' '
+                            + certificate.patient.lastName : '- sin especificar -' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <label>DNI:</label>
+                        <span>{{ certificate.patient.dni || '- sin especificar -' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Sexo:</label>
+                        <span>{{ certificate.patient.sex || '- sin especificar -' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información del Certificado -->
+            <div class="section certificate-section">
+                <h3>Detalles del Certificado</h3>
+                <div class="info-grid">
+
+                    <div class="info-item">
+                        <label>Fecha de Emisión:</label>
+                        <span>{{ certificate.createdAt ? (certificate.createdAt | date:'dd/MM/yyyy HH:mm':'GMT-3' ): '-
+                            sin especificar -' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Fecha de Inicio:</label>
+                        <span>{{ certificate.startDate ? (certificate.startDate | date:'dd/MM/yyyy HH:mm':'GMT-3') : '-
+                            sin especificar -' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Fecha de Fin:</label>
+                        <span>{{ certificate.endDate ? ( certificate.endDate | date:'dd/MM/yyyy HH:mm':'GMT-3') : '- sin
+                            especificar -' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Cantidad de días:</label>
+                        <span>{{ certificate.cantDias ? ( certificate.cantDias ) : '- sin especificar -'
+                            }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Descripción -->
+            <div class="section description-section">
+                <h3>Descripción</h3>
+                <p class="description-text">{{ certificate.certificate || '- sin especificar -' }}</p>
+            </div>
+
+            <!-- Diagnóstico -->
+            <div *ngIf="certificate.anulateReason" class="section diagnosis-section">
+                <h3 class="h3-red">Motivo de anulación</h3>
+                <p class="diagnosis-text-red">{{ certificate.anulateReason}}</p>
+            </div>
+        </div>
+
+        <div class="certificate-footer">
+            <div class="signature-section">
+                <div class="signature-line">
+                    <p>
+                        <span>{{ certificate.professional?.businessName }} - Mat. {{
+                            certificate.professional?.enrollment }}</span>
+                    </p>
+                    <p>_________________________________</p>
+                    <p class="signature-label">Profesional</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

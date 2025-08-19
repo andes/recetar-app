@@ -23,6 +23,9 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
 import {MAT_MOMENT_DATE_FORMATS, MomentDateAdapter} from '@angular/material-moment-adapter';
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
 
@@ -52,6 +55,9 @@ import { DatePipe } from '@angular/common';
     MatToolbarModule,
     MatButtonModule,
     MatMenuModule,
+    MatProgressSpinnerModule,
+    MatIconModule,
+    MatChipsModule,
   ],
   providers: [
     {

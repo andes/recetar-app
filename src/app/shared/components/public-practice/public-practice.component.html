@@ -1,0 +1,109 @@
+<div class="practice-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Cargando práctica...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-container practice-content">
+    <mat-icon class="error-icon">error</mat-icon>
+    <h2>Error</h2>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" routerLink="/">
+      Volver al inicio
+    </button>
+  </div>
+
+  <!-- Practice Content -->
+  <div *ngIf="practice$ | async as practice" class="practice-content">
+    <div class="practice-header">
+      <div class="logo-section">
+        <!-- Aquí puedes agregar el logo de la institución -->
+        <h1>Práctica Médica</h1>
+      </div>
+    </div>
+
+    <div class="practice-body">
+      <!-- Información del Paciente -->
+      <div class="section patient-section">
+        <h3>Paciente</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Nombre:</label>
+            <span>{{ practice.patient.firstName && practice.patient.lastName ? practice.patient.firstName + ' ' +
+              practice.patient.lastName : '- sin especificar -' }}</span>
+          </div>
+          <div class="info-item">
+            <label>DNI:</label>
+            <span>{{ practice.patient.dni || '- sin especificar -' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Sexo:</label>
+            <span>{{ practice.patient.sex || '- sin especificar -' }}</span>
+          </div>
+         <br>
+        </div>
+        <div class="info-item">
+          <br>
+            <label>Obra Social:</label>
+            <span>{{ practice.patient.obraSocial?.nombre || '- sin especificar -' }}</span>
+             <label>Número Afiliado:</label>
+             <span>{{ practice.patient.obraSocial?.numeroAfiliado || '- sin especificar -' }}</span>
+
+          </div>
+      </div>
+
+      <!-- Información de la Práctica -->
+      <div class="section practice-section">
+        <h3>Detalles de la Práctica</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Fecha de Emisión:</label>
+            <span>{{ practice.createdAt ? formatDate(practice.createdAt) : '- sin especificar -' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Fecha de la Práctica:</label>
+            <span>{{ practice.date ? formatDate(practice.date) : '- sin especificar -' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Descripción de la Práctica -->
+      <div class="section description-section">
+        <h3>Descripción de la Práctica</h3>
+        <p class="description-text">{{ practice.practice || '- sin especificar -' }}</p>
+      </div>
+
+      <!-- Diagnóstico -->
+      <div class="section diagnosis-section" *ngIf="practice.diagnostic">
+        <h3>Diagnóstico</h3>
+        <p class="diagnosis-text">{{ practice.diagnostic }}</p>
+      </div>
+
+      <!-- Indicaciones -->
+      <div class="section indications-section" *ngIf="practice.indications">
+        <h3>Indicaciones</h3>
+        <p class="indications-text">{{ practice.indications }}</p>
+      </div>
+
+      <!-- Observaciones -->
+      <div class="section observations-section" *ngIf="practice.observations">
+        <h3>Observaciones</h3>
+        <p class="observations-text">{{ practice.observations }}</p>
+      </div>
+    </div>
+
+    <div class="practice-footer">
+      <div class="signature-section">
+        <div class="signature-line">
+          <p>
+            <span>{{ practice.professional.businessName }} - Mat. {{ practice.professional.enrollment }}</span>
+          </p>
+          <p>_________________________________</p>
+          <p class="signature-label">Profesional</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

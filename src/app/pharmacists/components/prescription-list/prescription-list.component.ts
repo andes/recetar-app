@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, AfterContentInit, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterContentInit, ViewChild, OnDestroy } from '@angular/core';
 import { Prescriptions } from '@interfaces/prescriptions';
 import AndesPrescriptions from '@interfaces/andesPrescriptions';
 import { PrescriptionsService } from '@services/prescriptions.service';
@@ -13,7 +13,8 @@ import { AuthService } from '@auth/services/auth.service';
 import { PrescriptionPrinterComponent } from '@pharmacists/components/prescription-printer/prescription-printer.component';
 import { detailExpand, arrowDirection } from '@animations/animations.template';
 import { DialogReportComponent } from '../dialog-report/dialog-report.component';
-import { combineLatest } from 'rxjs';
+import { combineLatest, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { AndesPrescriptionPrinterComponent } from '@pharmacists/components/andes-prescription-printer/andes-prescription-printer.component';
 
 @Component({
@@ -26,16 +27,16 @@ import { AndesPrescriptionPrinterComponent } from '@pharmacists/components/andes
     ],
     providers: [PrescriptionPrinterComponent, AndesPrescriptionPrinterComponent]
 })
-export class PrescriptionListComponent implements OnInit, AfterContentInit {
+export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDestroy {
+    private destroy$ = new Subject<void>();
 
-
-    displayedColumns: string[] = ['medicamento', 'date', 'status', 'supplies', 'action', 'arrow'];
+    displayedColumns: string[] = ['medicamento', 'date', 'status', 'action', 'arrow'];
     dataSource = new MatTableDataSource<any>([]);
     expandedElement: Prescriptions | null;
     loadingPrescriptions: boolean;
     lapseTime = 2; // lapse of time that a dispensed prescription can been undo action, and put it back as "pendiente"
     pharmacistId: string;
-    isAdmin= false;
+    isAdmin = false;
     fechaDesde: Date;
     fechaHasta: Date;
 
@@ -55,28 +56,57 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
         public dialog: MatDialog) { };
 
     ngOnInit(): void {
+        this.pharmacistId = this.authService.getLoggedUserId();
+        this.isAdmin = this.authService.isAdminRole();
+        this.initDataSource();
+        this.loadPrescriptions();
+    }
+
+    private initDataSource(): void {
+        this.dataSource.sortingDataAccessor = (item, property) => {
+            switch (property) {
+                case 'patient': return item.patient?.lastName + item.patient?.firstName;
+                case 'prescription_date': return new Date(item.date || item.fechaPrestacion).getTime();
+                default: return item[property];
+            }
+        };
+        this.dataSource.sort = this.sort;
+    }
+
+    private loadPrescriptions(offset: number = 0, limit: number = 10): void {
         this.loadingPrescriptions = true;
 
+        // Para farmacéuticos, necesitamos cargar todas las prescripciones disponibles
+        // no solo las del usuario actual como en el caso de profesionales
         combineLatest([
             this.andesPrescriptionService.prescriptions,
             this.prescriptionService.prescriptions
-        ]).subscribe(([andesPrescriptions, prescriptions]) => {
+        ]).pipe(
+            takeUntil(this.destroy$)
+        ).subscribe(([andesPrescriptions, prescriptions]) => {
             this.dataSource.data = [...andesPrescriptions, ...prescriptions];
             this.updateMaps();
-            this.dataSource.sortingDataAccessor = (item, property) => {
-                switch (property) {
-                    case 'patient': return item.patient.lastName + item.patient.firstName;
-                    case 'prescription_date': return new Date(item.date).getTime();
-                    default: return item[property];
+
+            setTimeout(() => {
+                if (this.paginator) {
+                    this.dataSource.paginator = this.paginator;
+                    // Configurar eventos de paginación si es necesario
+                    this.paginator.page.pipe(
+                        takeUntil(this.destroy$)
+                    ).subscribe((pageEvent) => {
+                        // La paginación aquí es local ya que se cargan todas las prescripciones
+                        // Si se requiere paginación del servidor, se necesitaría modificar los servicios
+                    });
                 }
-            };
-            this.dataSource.sort = this.sort;
-            this.dataSource.paginator = this.paginator;
+            });
+
             this.loadingPrescriptions = false;
         });
+    }
 
-        this.pharmacistId = this.authService.getLoggedUserId();
-        this.isAdmin = this.authService.isAdminRole();
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     ngAfterContentInit() {

@@ -2,10 +2,13 @@
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
+import { certificate } from './api.key';
 export const environment = {
-  production: false,
-  API_END_POINT: 'http://localhost:4000/api',
-  ANDES_API: 'https://app.andes.gob.ar/api',
+    production: false,
+    API_END_POINT: 'http://localhost:4000/api',
+    ANDES_API: 'https://app.andes.gob.ar/api',
+    CERTIFICATE_SECRET_KEY: certificate.local,
+    FRONTEND_URL: 'http://localhost:4200',
 };
 /*
  * For easier debugging in development mode, you can import the following file
