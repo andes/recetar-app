@@ -1,12 +1,13 @@
 <div class="custom-tab-link-bar">
-    <button mat-flat-button (click)="showForm()">Receta</button>
+    <button mat-flat-button (click)="showForm()">Medicamentos</button>
     <button mat-flat-button (click)="showCertificados()">Certificados</button>
     <button mat-flat-button (click)="showPractices()">Prácticas</button>
     <button mat-flat-button (click)="showList()">Mis documentos</button>
 </div>
 <div class="link-bar-indicator-container">
     <div class="indicator"
-         [@stepLink]="currentTab === 'form' ? 'left' : currentTab === 'certificates' ? 'center-left' : currentTab === 'practices' ? 'center-right' : 'right'"></div>
+         [@stepLink]="currentTab === 'form' ? 'left' : currentTab === 'certificates' ? 'center-left' : currentTab === 'practices' ? 'center-right' : 'right'">
+    </div>
 </div>
 <div class="pf-container">
     <div fxLayout="row" fxLayoutAlign="space-evenly start" fxLayoutGap="20px" class="cards-container" fxFill
@@ -305,10 +306,12 @@
         </div>
 
         <div class="my-prescriptions-panel" *ngIf="currentTab === 'list'">
-            <app-prescriptions-list (editPrescriptionEvent)="editPrescription($event)" (anulateCertificateEvent)="showCertificados()"></app-prescriptions-list>
+            <app-prescriptions-list (editPrescriptionEvent)="editPrescription($event)"
+                                    (anulateCertificateEvent)="showCertificados()"></app-prescriptions-list>
         </div>
 
         <div class="certificates-panel" *ngIf="currentTab === 'certificates'">
-            <app-certificate-form (anulateCertificateEvent)="anulateCertificate()" (certificateCreatedEvent)="onCertificateCreated()"></app-certificate-form>
+            <app-certificate-form (anulateCertificateEvent)="anulateCertificate()"
+                                  (certificateCreatedEvent)="onCertificateCreated()"></app-certificate-form>
         </div>
     </div>

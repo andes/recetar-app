@@ -106,6 +106,29 @@ export class CertificatePracticePrinterComponent implements OnInit {
         }
         pdf.add(new Txt('\n').end);
 
+        if (certificate.startDate) {
+            pdf.add(new Txt([
+                { text: 'Fecha de inicio: ' }, { text: `${this.datePipe.transform(certificate.startDate, 'dd/MM/yyyy HH:mm')} hs`, bold: true }
+            ]).end);
+            pdf.add(new Txt('\n').end);
+
+        }
+        if (certificate.endDate) {
+            pdf.add(new Txt([
+                { text: 'Fecha de fin:     ' }, { text: `${this.datePipe.transform(certificate.endDate, 'dd/MM/yyyy HH:mm')} hs`, bold: true }
+            ]).end);
+            pdf.add(new Txt('\n').end);
+
+        }
+        if (certificate.cantDias) {
+
+            pdf.add(new Txt([
+                { text: 'Cantidad de días: ' }, { text: `${certificate.cantDias}`, bold: true }
+            ]).end);
+            pdf.add(new Txt('\n').end);
+        }
+
+
         pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
         pdf.add(new Txt('\n').end);
 
@@ -197,7 +220,7 @@ export class CertificatePracticePrinterComponent implements OnInit {
         // Obra Social information
         let obraSocial = '';
         let numeroAfiliado = '';
-                console.log(practice);
+        console.log(practice);
 
         if (practice.patient.obraSocial?.nombre) {
             obraSocial = practice.patient.obraSocial.nombre;
@@ -251,9 +274,9 @@ export class CertificatePracticePrinterComponent implements OnInit {
 
         // Footer
         pdf.footer(new Txt([
-      { text:'Esta receta fue creada por emisor inscripto y valido en el Registro de Recetarios Electrónicos \n del Ministerio de Salud de la Nación - ', italics: true},
-      { text:'RL-2025-63212094-APN-SSVEIYES#MS', bold: true}
-    ]).fontSize(11).alignment('center').end);
+            { text: 'Esta receta fue creada por emisor inscripto y valido en el Registro de Recetarios Electrónicos \n del Ministerio de Salud de la Nación - ', italics: true },
+            { text: 'RL-2025-63212094-APN-SSVEIYES#MS', bold: true }
+        ]).fontSize(11).alignment('center').end);
         pdf.create().open();
     }
 }

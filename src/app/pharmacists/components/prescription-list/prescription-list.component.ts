@@ -30,7 +30,7 @@ import { AndesPrescriptionPrinterComponent } from '@pharmacists/components/andes
 export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDestroy {
     private destroy$ = new Subject<void>();
 
-    displayedColumns: string[] = ['professional', 'date', 'status', 'action', 'arrow'];
+    displayedColumns: string[] = ['medicamento', 'date', 'status', 'action', 'arrow'];
     dataSource = new MatTableDataSource<any>([]);
     expandedElement: Prescriptions | null;
     loadingPrescriptions: boolean;

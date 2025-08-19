@@ -487,7 +487,6 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
     }
 
     onCertificateCreated() {
-        this.showList();
         // Set the selected type to 'certificados' in the prescriptions list component
         if (this.prescriptionsList) {
             this.prescriptionsList.selectedType = 'certificados';
