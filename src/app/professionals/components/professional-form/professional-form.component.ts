@@ -43,6 +43,12 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
                 numeroAfiliadoControl.enable();
             }
         }
+    }    
+    existenObrasSociales(array: any[]): boolean {
+        if (!array || array.length === 0) {
+            return false;
+        }
+        return !array.every(item => item === null || item === undefined);
     }
     @ViewChild('dni', { static: true }) dni: any;
 
