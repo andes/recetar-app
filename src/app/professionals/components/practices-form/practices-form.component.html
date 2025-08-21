@@ -134,8 +134,15 @@
                     <!-- Número de Afiliado -->
                     <mat-form-field appearance="fill" fxFlex="18">
                       <mat-label>Numero de Afiliado</mat-label>
-                      <input type="number" matInput formControlName="numeroAfiliado"
-                             [disabled]="!this.practicesForm.get('patient.obraSocial.nombre')">
+                      <input type="text" matInput formControlName="numeroAfiliado"
+                             [disabled]="!this.practicesForm.get('patient.obraSocial.nombre')"
+                             inputmode="numeric" pattern="[0-9]*">
+                      <mat-error *ngIf="practicesForm.get('patient')?.get('obraSocial')?.get('numeroAfiliado')?.errors?.required">
+                        Debe ingresar el número de afiliado.
+                      </mat-error>
+                      <mat-error *ngIf="practicesForm.get('patient')?.get('obraSocial')?.get('numeroAfiliado')?.errors?.pattern">
+                        Sólo se admiten números
+                      </mat-error>
                     </mat-form-field>
                   </div>
                 </div>
