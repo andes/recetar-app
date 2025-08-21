@@ -184,7 +184,7 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
                 os: this.fBuilder.group({
                     nombre: [''],
                     codigoPuco: [''],
-                    numeroAfiliado: [{ value: '', disabled: true }]
+                    numeroAfiliado: [{ value: '', disabled: true }, [Validators.required, Validators.pattern('^[0-9]*$')]]
                 })
             }),
             date: [this.today, [
