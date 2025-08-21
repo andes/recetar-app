@@ -106,9 +106,14 @@
                       <mat-label>Obra Social</mat-label>
                       <mat-select [disabled]="!this.practicesForm.get('patient.dni').valid"
                                   (selectionChange)="onOsSelected($event.value)">
-                        <mat-option *ngFor="let os of obraSocial" [value]="os">
-                          {{ os?.nombre }}
-                        </mat-option>
+                        <mat-option *ngIf="!existenObrasSociales(obraSocial)" [disabled]="true">
+                                                        Sin obras sociales del paciente
+                      </mat-option>
+                      <ng-container *ngIf="existenObrasSociales(obraSocial)">
+                          <mat-option *ngFor="let os of obraSocial" [value]="os">
+                              {{ os?.nombre }}
+                          </mat-option>
+                      </ng-container>
                       </mat-select>
                     </mat-form-field>
 
@@ -121,7 +126,7 @@
                       <mat-autocomplete #autoOs="matAutocomplete" [displayWith]="displayOs"
                                         (optionSelected)="onOsSelected($event.option.value)">
                         <mat-option *ngFor="let os of filteredObrasSociales | async" [value]="os">
-                          {{ os.nombre }}
+                          {{ os?.nombre }}
                         </mat-option>
                       </mat-autocomplete>
                     </mat-form-field>
