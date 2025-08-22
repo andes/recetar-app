@@ -20,7 +20,6 @@ import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter,
 import { fadeOutCollapseOnLeaveAnimation } from 'angular-animations';
 import { CertificatesService } from '@services/certificates.service';
 import { PrescriptionsListComponent } from '@professionals/components/prescriptions-list/prescriptions-list.component';
-import { PrescriptionsPublicService } from '@services/prescriptionsPublic.service';
 import { AmbitoService } from '@auth/services/ambito.service';
 
 // Validador personalizado para fechas
