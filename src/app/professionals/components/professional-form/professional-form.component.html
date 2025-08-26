@@ -18,8 +18,8 @@
                 <div fxFlex="100" fxLayout="column" fxLayoutAlign="start">
                     <mat-card-title>
                         <h2 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
-                            <mat-icon>{{ isEdit ? "edit" : "gesture" }}</mat-icon> <span>{{ isEdit ? "Editar receta" :
-                                "Registrar nueva receta" }}</span>
+                            <mat-icon>gesture</mat-icon> <span>
+                                Registrar nueva receta </span>
                         </h2>
                     </mat-card-title>
 
@@ -44,7 +44,7 @@
                                                 Debe ingresar una fecha válida
                                             </mat-error>
                                         </mat-form-field>
-                                        <div class="check" *ngIf="!isEdit">
+                                        <div class="check">
                                             <mat-checkbox formControlName="trimestral">Generar receta trimestral
                                             </mat-checkbox>
                                         </div>
@@ -248,33 +248,33 @@
                                                 <mat-checkbox fxFlex="50%" matInput formControlName="duplicate">Receta
                                                     por
                                                     duplicado
-                                                </mat-checkbox>             
+                                                </mat-checkbox>
                                             </div>
                                             <div fxLayout="row" fxLayoutGap="10px">
-                                                 <mat-checkbox fxFlex="50%" matInput formControlName="triplicate">Receta
+                                                <mat-checkbox fxFlex="50%" matInput formControlName="triplicate">Receta
                                                     por
                                                     triplicado
                                                 </mat-checkbox>
                                                 <div formGroupName="triplicateData" fxLayout="row" fxLayoutGap="10px">
-                                                        <mat-form-field appearance="fill" fxFlex="50%">
+                                                    <mat-form-field appearance="fill" fxFlex="50%">
                                                         <mat-label>Serie</mat-label>
-                                                        <input type="text" matInput formControlName="serie" maxlength="1"
-                                                                placeholder="Ingrese una letra" required>            
-                                                        </mat-form-field>
-                                                        <mat-form-field appearance="fill" fxFlex="50%">
+                                                        <input type="text" matInput formControlName="serie"
+                                                               maxlength="1" placeholder="Ingrese una letra" required>
+                                                    </mat-form-field>
+                                                    <mat-form-field appearance="fill" fxFlex="50%">
                                                         <mat-label>Número</mat-label>
-                                                        <input type="number" matInput formControlName="numero" placeholder="Ingrese un número"
-                                                                required>
-                                                        </mat-form-field>
-                                                    </div>                    
+                                                        <input type="number" matInput formControlName="numero"
+                                                               placeholder="Ingrese un número" required>
+                                                    </mat-form-field>
                                                 </div>
-                                                <span *ngIf="control.get('triplicate')?.value"
-                                                        style="position: relative; font-style: italic; bottom: 15px;">
-                                                    Recuerde que sigue
-                                                    siendo
-                                                    obligatoria la
-                                                    entrega del formulario triplicado en papel
-                                                </span>
+                                            </div>
+                                            <span *ngIf="control.get('triplicate')?.value"
+                                                  style="position: relative; font-style: italic; bottom: 15px;">
+                                                Recuerde que sigue
+                                                siendo
+                                                obligatoria la
+                                                entrega del formulario triplicado en papel
+                                            </span>
                                             <mat-form-field appearance="fill">
                                                 <mat-label>Diagnóstico</mat-label>
                                                 <textarea matInput placeholder="Diagnóstico"
@@ -300,13 +300,8 @@
                             <div fxLayout="row" fxLayoutAlign="center">
                                 <div fxLayout="row" fxLayoutAlign="center" fxLayoutGap="20px" *ngIf="!isSubmit"
                                      fxFlex="100%">
-                                    <button mat-raised-button type="button" *ngIf="isEdit" fxFlex="100%"
-                                            (click)="clearForm(professionalNgForm)">
-                                        Cancelar
-                                    </button>
-
                                     <button mat-raised-button color="primary" type="submit" fxFlex="100%">
-                                        {{ !isEdit ? 'Crear' : 'Guardar' }}
+                                        Crear
                                     </button>
                                 </div>
 
@@ -325,8 +320,7 @@
         </div>
 
         <div class="my-prescriptions-panel" *ngIf="currentTab === 'list'">
-            <app-prescriptions-list (editPrescriptionEvent)="editPrescription($event)"
-                                    (anulateCertificateEvent)="showCertificados()"></app-prescriptions-list>
+            <app-prescriptions-list (anulateCertificateEvent)="showCertificados()"></app-prescriptions-list>
         </div>
 
         <div class="certificates-panel" *ngIf="currentTab === 'certificates'">

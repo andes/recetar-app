@@ -88,11 +88,6 @@
                                         <mat-icon>print</mat-icon>
                                         <span>Imprimir receta</span>
                                     </button>
-                                    <button mat-menu-item type="button" *ngIf="canEdit(element)"
-                                            (click)="editPrescription(element)">
-                                        <mat-icon>edit</mat-icon>
-                                        <span>Editar receta</span>
-                                    </button>
                                     <button mat-menu-item type="button" *ngIf="canDelete(element)"
                                             (click)="deleteDialogPrescription(element)">
                                         <mat-icon>delete</mat-icon>
@@ -105,11 +100,6 @@
                                             (click)="printPrescription(element)" matTooltip="Imprimir"
                                             matTooltipPosition="above">
                                         <mat-icon>print</mat-icon>
-                                    </button>
-                                    <button mat-menu-item type="button" *ngIf="canEdit(element)"
-                                            (click)="editPrescription(element)" matTooltip="Editar"
-                                            matTooltipPosition="above">
-                                        <mat-icon>edit</mat-icon>
                                     </button>
                                     <button mat-menu-item type="button" *ngIf="canDelete(element)"
                                             (click)="deleteDialogPrescription(element)" matTooltip="Eliminar"

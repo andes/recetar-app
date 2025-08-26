@@ -63,7 +63,6 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
     dniShowSpinner = false;
     supplySpinner: { show: boolean }[] = [{ show: false }, { show: false }];
     myPrescriptions: Prescriptions[] = [];
-    isEdit = false;
     isEditCertificate = false;
     isFormShown = true;
     currentTab = 'form';
@@ -197,7 +196,6 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
             supplies: this.fBuilder.array([])
         });
         this.addSupply();
-        // this.dni.nativeElement.focus();
     }
 
 
@@ -259,19 +257,10 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
         if (this.professionalForm.valid) {
             const newPrescription = this.professionalForm.value;
             this.isSubmit = true;
-            if (!this.isEdit) {
-                this.apiPrescriptions.newPrescription(newPrescription).subscribe(
-                    success => {
-                        if (success) { this.formReset(professionalNgForm); }
-                    });
-
-            } else {
-                // edit
-                this.apiPrescriptions.editPrescription(newPrescription).subscribe(
-                    success => {
-                        if (success) { this.formReset(professionalNgForm); }
-                    });
-            }
+            this.apiPrescriptions.newPrescription(newPrescription).subscribe(
+                success => {
+                    if (success) { this.formReset(professionalNgForm); }
+                });
         }
     }
 
@@ -291,10 +280,9 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
 
     private formReset(professionalNgForm: FormGroupDirective) {
 
-        this.isEdit ? this.openDialog('updated') : this.openDialog('created');
+        this.openDialog('created');
         this.clearForm(professionalNgForm);
         this.isSubmit = false;
-        this.dni.nativeElement.focus();
     }
 
     deletePrescription(prescription: Prescriptions) {
@@ -408,11 +396,11 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
                 numero: ['', Validators.required]
             }),
         });
-        
+
         const triplicateDataGroup = supplies.get('triplicateData') as FormGroup;
         triplicateDataGroup.get('serie')?.disable();
         triplicateDataGroup.get('numero')?.disable();
-        
+
         this.suppliesForm.push(supplies);
         this.supplySpinner.push({ show: false });
         this.subscribeToSupplyChanges(supplies, this.suppliesForm.length - 1);
@@ -491,23 +479,6 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
         this.supplySpinner.splice(index, 1);
     }
 
-    editPrescription(e) {
-        this.professionalForm.reset({
-            _id: e._id,
-            date: e.date,
-            diagnostic: e.diagnostic,
-            observation: e.observation,
-            patient: {
-                dni: { value: e.patient.dni, disabled: true },
-                sex: { value: e.patient.sex, disabled: true },
-                lastName: { value: e.patient.lastName, disabled: true },
-                firstName: { value: e.patient.firstName, disabled: true }
-            },
-            supplies: e.supplies
-        });
-        this.isEdit = true;
-        this.isFormShown = true;
-    }
 
     // reset the form as intial values
     clearForm(professionalNgForm: FormGroupDirective) {
@@ -530,7 +501,6 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
                 }
             },
         });
-        this.isEdit = false;
     }
 
     anulateCertificate() {
