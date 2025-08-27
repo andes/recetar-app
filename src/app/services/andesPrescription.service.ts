@@ -46,8 +46,8 @@ export class AndesPrescriptionsService {
   }
 
   cancelDispense(prescriptionId: string, pharmacistId: string): Observable<boolean> {
-    var params = { 'prescriptionId': prescriptionId, 'pharmacistId': pharmacistId };
-    return this.http.patch<AndesPrescriptions>(`${environment.API_END_POINT}/prescriptions/${params.prescriptionId}/cancel-dispense`, params).pipe(
+    const params = { 'prescriptionId': prescriptionId, 'pharmacistId': pharmacistId };
+    return this.http.patch<AndesPrescriptions>(`${environment.API_END_POINT}/andes-prescriptions/cancel-dispense`, params).pipe(
       tap((updatedPrescription: AndesPrescriptions) => this.updatePrescription(updatedPrescription)),
       mapTo(true)
     );

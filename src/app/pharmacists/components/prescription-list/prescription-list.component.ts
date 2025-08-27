@@ -84,21 +84,28 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         ]).pipe(
             takeUntil(this.destroy$)
         ).subscribe(([andesPrescriptions, prescriptions]) => {
-            this.dataSource.data = [...andesPrescriptions, ...prescriptions];
+            const previousDataLength = this.dataSource.data.length;
+            const newData = [...andesPrescriptions, ...prescriptions];
+            
+            this.dataSource.data = newData;
             this.updateMaps();
 
-            setTimeout(() => {
-                if (this.paginator) {
-                    this.dataSource.paginator = this.paginator;
-                    // Configurar eventos de paginación si es necesario
-                    this.paginator.page.pipe(
-                        takeUntil(this.destroy$)
-                    ).subscribe((pageEvent) => {
-                        // La paginación aquí es local ya que se cargan todas las prescripciones
-                        // Si se requiere paginación del servidor, se necesitaría modificar los servicios
-                    });
-                }
-            });
+            // Si hay cambios en la cantidad de datos o es la primera carga,
+            // actualizar la paginación
+            if (previousDataLength !== newData.length || previousDataLength === 0) {
+                setTimeout(() => {
+                    if (this.paginator) {
+                        this.dataSource.paginator = this.paginator;
+                        // Configurar eventos de paginación si es necesario
+                        this.paginator.page.pipe(
+                            takeUntil(this.destroy$)
+                        ).subscribe((pageEvent) => {
+                            // La paginación aquí es local ya que se cargan todas las prescripciones
+                            // Si se requiere paginación del servidor, se necesitaría modificar los servicios
+                        });
+                    }
+                });
+            }
 
             this.loadingPrescriptions = false;
         });
@@ -107,6 +114,20 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
     ngOnDestroy(): void {
         this.destroy$.next();
         this.destroy$.complete();
+    }
+
+    /**
+     * Refresca las prescripciones desde los servicios
+     * Útil para asegurar que los datos estén sincronizados
+     */
+    refreshPrescriptions(): void {
+        this.loadingPrescriptions = true;
+        
+        // Refrescar ambos tipos de prescripciones
+        // Nota: Esto podría necesitar ajustes según la implementación específica de los servicios
+        // Por ahora, simplemente forzamos la actualización de los mapas
+        this.updateMaps();
+        this.loadingPrescriptions = false;
     }
 
     ngAfterContentInit() {
@@ -150,37 +171,57 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
             this.prescriptionService.dispense(prescription._id, this.pharmacistId).subscribe(
                 success => {
                     if (success) {
+                        // Actualizar los mapas después de la operación exitosa
+                        this.updateMaps();
                         this.openDialog('dispensed', prescription, prescription.professional.businessName);
                     }
+                },
+                error => {
+                    this.openDialog('error-dispensed', prescription, error.message || 'Error al dispensar la prescripción');
                 }
             );
         } else if ('estadoActual' in prescription) {
             this.andesPrescriptionService.dispense(prescription, this.pharmacistId).subscribe(
                 success => {
                     if (success) {
+                        // Actualizar los mapas después de la operación exitosa
+                        this.updateMaps();
                         this.openDialog('dispensed', prescription, prescription.profesional.nombre);
                     }
+                },
+                error => {
+                    this.openDialog('error-dispensed', prescription, error.message || 'Error al dispensar la prescripción');
                 }
             );
         }
     }
 
-    // Dispense prescription, but if was, update table with the correct status.
-    cancelDispense(e) {
-        if ('status' in e) {
-            this.prescriptionService.cancelDispense(e._id, this.pharmacistId).subscribe(
+    // Cancel dispense prescription, but if was, update table with the correct status.
+    cancelDispense(prescription: Prescriptions | AndesPrescriptions) {
+        if ('status' in prescription) {
+            this.prescriptionService.cancelDispense(prescription._id, this.pharmacistId).subscribe(
                 success => {
                     if (success) {
-                        this.openDialog('cancel-dispensed', e);
+                        // Actualizar los mapas después de la operación exitosa
+                        this.updateMaps();
+                        this.openDialog('cancel-dispensed', prescription);
                     }
+                },
+                error => {
+                    this.openDialog('error-cancel-dispensed', prescription, error.message || 'Error al cancelar la dispensación');
                 }
             );
-        } else if ('estadoActual' in e) {
-            this.andesPrescriptionService.cancelDispense(e._id, this.pharmacistId).subscribe(
+        } else if ('estadoActual' in prescription) {
+            this.andesPrescriptionService.cancelDispense(prescription._id, this.pharmacistId).subscribe(
                 success => {
                     if (success) {
-                        this.openDialog('cancel-dispensed', e);
+                        // Actualizar los mapas después de la operación exitosa
+                        this.updateMaps();
+                        this.openDialog('cancel-dispensed', prescription);
                     }
+                },
+                error => {
+                    this.openDialog('error-cancel-dispensed', prescription, error.message || 'Error al cancelar la dispensación');
                 }
             );
         }
@@ -205,16 +246,14 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
     }
 
     canDispense(prescription: Prescriptions | AndesPrescriptions): boolean {
-        // eslint-disable-next-line no-console
-        if ('status' in prescription) {
-
-            return (prescription.status === 'Pendiente' && moment() >= moment(prescription.date));
-
-        } else if ('estadoActual' in prescription) {
-            return (prescription.estadoActual.tipo === 'vigente');
-        } else {
-            return false;
+        // Usar el mapa calculado para mejor rendimiento
+        const canDispenseFromMap = this.canDispenseMap.get(prescription._id);
+        if (canDispenseFromMap !== undefined) {
+            return canDispenseFromMap;
         }
+
+        // Fallback al cálculo directo si no está en el mapa
+        return this.calculateCanDispense(prescription);
     }
 
     printPrescription(prescription: Prescriptions | AndesPrescriptions) {
@@ -226,31 +265,28 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
     }
 
     isStatus(prescription: Prescriptions | AndesPrescriptions, status: string): boolean {
-        if ('estadoActual' in prescription) {
-            const tipo = prescription.estadoActual.tipo;
-            switch (tipo) {
-                case 'vigente': return status === 'Pendiente';
-                case 'finalizada': return status === 'Dispensada';
+        // Para casos específicos como 'Vencida', usar el mapa
+        if (status === 'Vencida') {
+            const isExpiredFromMap = this.isStatusMap.get(prescription._id);
+            if (isExpiredFromMap !== undefined) {
+                return isExpiredFromMap;
             }
-        } else if ('status' in prescription) {
-            return prescription.status === status;
         }
+
+        // Para otros estados, cálculo directo
+        return this.calculateIsStatus(prescription, status);
     }
 
-    // Return boolean, accordding with dispensed time plus 2 hours is greater than now
-    canCounter(prescription: Prescriptions): boolean {
-        if (prescription.status === 'Dispensada' &&
-            typeof prescription.dispensedAt !== 'undefined' &&
-            prescription.dispensedBy?.userId === this.pharmacistId) {
-
-            const dispensedAt = moment(prescription.dispensedAt);
-            const now = moment();
-            // dispensedAt.add(10, 'seconds');
-            dispensedAt.add(this.lapseTime, 'hours');
-            return dispensedAt.isAfter(now);
-
+    // Return boolean, according with dispensed time plus 2 hours is greater than now
+    canCounter(prescription: Prescriptions | AndesPrescriptions): boolean {
+        // Usar el mapa calculado para mejor rendimiento
+        const canCounterFromMap = this.canCounterMap.get(prescription._id);
+        if (canCounterFromMap !== undefined) {
+            return canCounterFromMap;
         }
-        return false;
+
+        // Fallback al cálculo directo si no está en el mapa
+        return this.calculateCanCounter(prescription);
     }
 
     generateReport() {
@@ -267,10 +303,18 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
     }
 
     updateMaps() {
+        // Limpiar mapas existentes
+        this.canDispenseMap.clear();
+        this.isStatusMap.clear();
+        this.canCounterMap.clear();
+        
+        // Recalcular todos los valores para las prescripciones actuales
         this.dataSource.data.forEach(prescription => {
-            this.canDispenseMap.set(prescription._id, this.calculateCanDispense(prescription));
-            this.isStatusMap.set(prescription._id, this.calculateIsStatus(prescription, 'Vencida'));
-            this.canCounterMap.set(prescription._id, this.calculateCanCounter(prescription));
+            if (prescription && prescription._id) {
+                this.canDispenseMap.set(prescription._id, this.calculateCanDispense(prescription));
+                this.isStatusMap.set(prescription._id, this.calculateIsStatus(prescription, 'Vencida'));
+                this.canCounterMap.set(prescription._id, this.calculateCanCounter(prescription));
+            }
         });
     }
 
@@ -294,13 +338,28 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
 
     calculateCanCounter(prescription: Prescriptions | AndesPrescriptions): boolean {
         if ('status' in prescription) {
-            return prescription.status === 'Dispensada' &&
+            // Prescripción regular
+            if (prescription.status === 'Dispensada' &&
                 typeof prescription.dispensedAt !== 'undefined' &&
-                prescription.dispensedBy?.userId === this.pharmacistId;
+                prescription.dispensedBy?.userId === this.pharmacistId) {
+
+                const dispensedAt = moment(prescription.dispensedAt);
+                const now = moment();
+                dispensedAt.add(this.lapseTime, 'hours');
+                return dispensedAt.isAfter(now);
+            }
         } else if ('estadoActual' in prescription) {
-            return prescription.estadoActual.tipo === 'finalizada' &&
+            // Prescripción de Andes
+            if (prescription.estadoActual.tipo === 'finalizada' &&
                 typeof prescription.estadoActual.createdAt !== 'undefined' &&
-                prescription.dispensa[0].organizacion.id === this.pharmacistId;
+                prescription.dispensa && prescription.dispensa.length > 0 &&
+                prescription.dispensa[0].organizacion.id === this.pharmacistId) {
+
+                const dispensedAt = moment(prescription.estadoActual.createdAt);
+                const now = moment();
+                dispensedAt.add(this.lapseTime, 'hours');
+                return dispensedAt.isAfter(now);
+            }
         }
         return false;
     }
