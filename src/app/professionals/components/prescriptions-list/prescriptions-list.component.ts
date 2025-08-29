@@ -32,7 +32,6 @@ import { takeUntil } from 'rxjs/operators';
 })
 export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnDestroy {
     private destroy$ = new Subject<void>();
-    @Output() editPrescriptionEvent = new EventEmitter();
     @Output() anulateCertificateEvent = new EventEmitter<Certificate>();
     @Input() tipo: any;
 
@@ -308,11 +307,6 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     canPrint(prescription: Prescriptions): boolean {
         return (prescription.professional.userId === this.authService.getLoggedUserId()) && prescription.status !== 'Vencida';
     }
-
-    canEdit(prescription: Prescriptions): boolean {
-        return prescription.status === 'Pendiente';
-    }
-
     canDelete(prescription: Prescriptions): boolean {
         return (prescription.professional.userId === this.authService.getLoggedUserId() && prescription.status === 'Pendiente');
     }
@@ -320,11 +314,6 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     printPrescription(prescription: Prescriptions) {
         this.prescriptionPrinter.print(prescription);
     }
-
-    editPrescription(prescription: Prescriptions) {
-        this.editPrescriptionEvent.emit(prescription);
-    }
-
     anulateCertificate(certificate: Certificate) {
         this.certificateService.setCertificate(certificate);
         this.anulateCertificateEvent.emit(certificate);
