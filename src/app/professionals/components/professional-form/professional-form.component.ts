@@ -1,9 +1,7 @@
 import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, AbstractControl, Validators, FormArray, FormGroupDirective, FormControl } from '@angular/forms';
 import { Observable, of } from 'rxjs';
-// import { SuppliesService } from '@services/supplies.service';
 import { SnomedSuppliesService } from '@services/snomedSupplies.service';
-import ISnomedConcept from '@interfaces/supplies';
 import { PatientsService } from '@root/app/services/patients.service';
 import { PrescriptionsService } from '@services/prescriptions.service';
 import { AuthService } from '@auth/services/auth.service';
@@ -14,8 +12,6 @@ import { ProfessionalDialogComponent } from '@professionals/components/professio
 import { MatDialog } from '@angular/material/dialog';
 import { InteractionService } from '@professionals/interaction.service';
 import { step, stepLink } from '@animations/animations.template';
-import SnomedConcept from '@interfaces/snomedConcept';
-import Supplies from '@interfaces/supplies';
 import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
 import { fadeOutCollapseOnLeaveAnimation } from 'angular-animations';
 import { CertificatesService } from '@services/certificates.service';
@@ -118,8 +114,15 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
             }
         );
 
-        // get prescriptions
         this.apiPrescriptions.getByUserId(this.authService.getLoggedUserId()).subscribe();
+
+        this.professionalForm.get('trimestral')?.valueChanges.subscribe(isChecked => {
+            if (isChecked) {
+                this.suppliesForm.controls.forEach((supplyControl: FormGroup) => {
+                    supplyControl.get('triplicate')?.setValue(false);
+                });
+            }
+        });
 
         this.professionalForm.get('patient.otraOS')?.valueChanges.subscribe(() => {
             const osGroup = this.professionalForm.get('patient.os') as FormGroup;
@@ -190,7 +193,7 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
             date: [this.today, [
                 Validators.required
             ]],
-            triple: [false],
+            trimestral: [false],
             supplies: this.fBuilder.array([])
         });
         this.addSupply();
@@ -218,7 +221,6 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
                 res => {
                     if (res.length) {
                         this.patientSearch = res;
-                        // Habilitar el checkbox otraOS cuando se encuentra un paciente
                         this.patientOtraOS.enable();
                     } else {
                         this.patientSearch = [];
@@ -226,7 +228,6 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
                         this.patientFirstName.setValue('');
                         this.patientSex.setValue('');
                         this.patientOtraOS.setValue(false);
-                        // Deshabilitar el checkbox otraOS cuando no se encuentra un paciente
                         this.patientOtraOS.disable();
                     }
                     this.dniShowSpinner = false;
@@ -400,11 +401,23 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
             diagnostic: ['', [Validators.required]],
             indication: [''],
             duplicate: [false],
-            triplicate: [false]
+            trimestral: [false],
+            triplicate: [false],
+            triplicateData: this.fBuilder.group({
+                serie: ['', [Validators.required, Validators.maxLength(1), Validators.pattern('^[a-zA-Z]$')]],
+                numero: ['', Validators.required]
+            }),
         });
+        
+        const triplicateDataGroup = supplies.get('triplicateData') as FormGroup;
+        triplicateDataGroup.get('serie')?.disable();
+        triplicateDataGroup.get('numero')?.disable();
+        
         this.suppliesForm.push(supplies);
         this.supplySpinner.push({ show: false });
         this.subscribeToSupplyChanges(supplies, this.suppliesForm.length - 1);
+        this.subscribeToTriplicateChanges(supplies, this.suppliesForm.length - 1);
+        this.subscribeToDuplicateChanges(supplies, this.suppliesForm.length - 1);
     }
 
     subscribeToSupplyChanges(control: FormGroup, index: number) {
@@ -427,12 +440,57 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
         });
     }
 
+    subscribeToTriplicateChanges(control: FormGroup, index: number) {
+        const triplicateControl = control.get('triplicate');
+        const triplicateDataGroup = control.get('triplicateData') as FormGroup;
+        const serieControl = triplicateDataGroup?.get('serie');
+        const numeroControl = triplicateDataGroup?.get('numero');
+
+        if (triplicateControl && serieControl && numeroControl) {
+            if (triplicateControl.value) {
+                serieControl.enable();
+                numeroControl.enable();
+            } else {
+                serieControl.disable();
+                numeroControl.disable();
+                serieControl.reset();
+                numeroControl.reset();
+            }
+
+            triplicateControl.valueChanges.subscribe(isChecked => {
+                if (isChecked) {
+                    serieControl.enable();
+                    numeroControl.enable();
+                    control.get('duplicate')?.setValue(false);
+                    this.professionalForm.get('trimestral')?.setValue(false);
+                } else {
+                    serieControl.disable();
+                    numeroControl.disable();
+                    serieControl.reset();
+                    numeroControl.reset();
+                }
+            });
+        }
+    }
+
+    subscribeToDuplicateChanges(control: FormGroup, index: number) {
+        const duplicateControl = control.get('duplicate');
+        const triplicateControl = control.get('triplicate');
+
+        if (duplicateControl && triplicateControl) {
+            duplicateControl.valueChanges.subscribe(isChecked => {
+                if (isChecked) {
+                    triplicateControl.setValue(false);
+                }
+            });
+        }
+    }
+
     deleteSupply(index: number) {
         this.suppliesForm.removeAt(index);
         this.supplySpinner.splice(index, 1);
     }
 
-    // set form with prescriptions values and disabled npt editable fields
     editPrescription(e) {
         this.professionalForm.reset({
             _id: e._id,
