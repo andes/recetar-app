@@ -38,10 +38,13 @@
                 <!-- Sexo del paciente -->
                 <mat-form-field>
                   <mat-label>Sexo paciente</mat-label>
-                  <mat-select formControlName="patient_sexo">
+                  <mat-select formControlName="patient_sexo" required>
                     <mat-option value="masculino">Masculino</mat-option>
                     <mat-option value="femenino">Femenino</mat-option>
                   </mat-select>
+                  <mat-error *ngIf="prescriptionForm.get('patient_sexo')?.hasError('required') && prescriptionForm.get('patient_sexo')?.touched">
+                    Debe seleccionar el sexo del paciente
+                  </mat-error>
                 </mat-form-field>
 
                 <!-- Fecha de receta -->
@@ -62,7 +65,7 @@
                 </mat-form-field>
 
                 <!-- Botón de búsqueda -->
-                <button mat-raised-button color="primary" type="button" (click)="searchPrescriptions()">
+                <button mat-raised-button color="primary" type="button" (click)="searchPrescriptions()" [disabled]="!prescriptionForm.valid">
                   Buscar
                 </button>
               </div>

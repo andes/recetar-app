@@ -45,7 +45,7 @@
                                             </mat-error>
                                         </mat-form-field>
                                         <div class="check" *ngIf="!isEdit">
-                                            <mat-checkbox formControlName="triple">Generar receta trimestral
+                                            <mat-checkbox formControlName="trimestral">Generar receta trimestral
                                             </mat-checkbox>
                                         </div>
                                     </div>
@@ -248,12 +248,33 @@
                                                 <mat-checkbox fxFlex="50%" matInput formControlName="duplicate">Receta
                                                     por
                                                     duplicado
-                                                </mat-checkbox>
-                                                <mat-checkbox fxFlex="50%" matInput formControlName="triplicate">Receta
+                                                </mat-checkbox>             
+                                            </div>
+                                            <div fxLayout="row" fxLayoutGap="10px">
+                                                 <mat-checkbox fxFlex="50%" matInput formControlName="triplicate">Receta
                                                     por
                                                     triplicado
                                                 </mat-checkbox>
-                                            </div>
+                                                <div formGroupName="triplicateData" fxLayout="row" fxLayoutGap="10px">
+                                                        <mat-form-field appearance="fill" fxFlex="50%">
+                                                        <mat-label>Serie</mat-label>
+                                                        <input type="text" matInput formControlName="serie" maxlength="1"
+                                                                placeholder="Ingrese una letra" required>            
+                                                        </mat-form-field>
+                                                        <mat-form-field appearance="fill" fxFlex="50%">
+                                                        <mat-label>Número</mat-label>
+                                                        <input type="number" matInput formControlName="numero" placeholder="Ingrese un número"
+                                                                required>
+                                                        </mat-form-field>
+                                                    </div>                    
+                                                </div>
+                                                <span *ngIf="control.get('triplicate')?.value"
+                                                        style="position: relative; font-style: italic; bottom: 15px;">
+                                                    Recuerde que sigue
+                                                    siendo
+                                                    obligatoria la
+                                                    entrega del formulario triplicado en papel
+                                                </span>
                                             <mat-form-field appearance="fill">
                                                 <mat-label>Diagnóstico</mat-label>
                                                 <textarea matInput placeholder="Diagnóstico"
@@ -262,7 +283,6 @@
                                                     Debe ingresar un diagnóstico
                                                 </mat-error>
                                             </mat-form-field>
-
                                             <mat-form-field appearance="fill">
                                                 <mat-label>Indicaciones</mat-label>
                                                 <textarea matInput placeholder="Indicaciones"
@@ -271,7 +291,6 @@
                                         </mat-card>
                                     </div>
                                 </div>
-
                                 <button mat-raised-button color="primary" type="button" (click)="addSupply()"
                                         *ngIf="suppliesForm.controls.length < maxQSupplies">
                                     Agregar medicamento
