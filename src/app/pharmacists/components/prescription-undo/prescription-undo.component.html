@@ -1,4 +1,4 @@
-<button mat-menu-item class="cancel-dispense" type="button" *ngIf="counter > 0 || isAdmin" (click)="cancelDispense(prescriptionId)" matTooltip="Anular dispensa" matTooltipPosition="above" (mouseenter)="showtimes = !showtimes" (mouseleave)="showtimes = !showtimes">
+<button mat-menu-item class="cancel-dispense" type="button" *ngIf="counter > 0 || isAdmin" (click)="cancelDispense(prescription)" matTooltip="Anular dispensa" matTooltipPosition="above" (mouseenter)="showtimes = !showtimes" (mouseleave)="showtimes = !showtimes">
   <div class="timer-indicator" [@hidetimer]="(showtimes && counter > 0) ? 'show' : 'hide'">
 
     <mat-spinner class="track" mode="determinate" value="100" diameter="35"></mat-spinner>

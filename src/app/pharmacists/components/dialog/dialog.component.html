@@ -30,6 +30,15 @@
     </div>
   </div> <!-- End case cansel dispense -->
 
+    <div *ngSwitchCase="'error-cancel-dispensed'">
+        <h3 mat-dialog-title><mat-icon>error</mat-icon>  Error</h3>
+        <div mat-dialog-content>
+        <p>No se ha podido dispensar la receta de {{data.text}}. Inténtelo de nuevo más tarde.</p>
+        </div>
+        <div mat-dialog-actions align="end">
+        <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
+    </div>
+
   <div *ngSwitchCase="'noPrescriptionsDate'">
     <h3 mat-dialog-title><mat-icon>error_outline</mat-icon>  Atención</h3>
     <div mat-dialog-content>

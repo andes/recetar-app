@@ -3,7 +3,8 @@ import { timer, Subscription } from 'rxjs';
 import * as moment from 'moment';
 import { showCancelDispense, hideTimer } from '@animations/animations.template';
 import { AuthService } from '@auth/services/auth.service';
-
+import { Prescriptions } from '@interfaces/prescriptions';
+import AndesPrescriptions from '@interfaces/andesPrescriptions';
 @Injectable()
 export class CounterDownService {
     getCounter(tick) {
@@ -24,7 +25,7 @@ export class PrescriptionUndoComponent implements OnInit, OnDestroy {
 
     @Output() cancelDispenseEvent = new EventEmitter();
     @Input() dispensedAt: Date;
-    @Input() prescriptionId: string;
+    @Input() prescription: Prescriptions | AndesPrescriptions;
     @Input() lapseTime: number;
     subscriptions: Subscription = new Subscription();
     tick = 1000;
@@ -57,8 +58,8 @@ export class PrescriptionUndoComponent implements OnInit, OnDestroy {
         this.subscriptions.unsubscribe(); // on complete timer, destroy this component and it subscriptions
     }
 
-    cancelDispense(prescriptionId: string) {
-        this.cancelDispenseEvent.emit(prescriptionId);
+    cancelDispense(prescription: Prescriptions | AndesPrescriptions) {
+        this.cancelDispenseEvent.emit(prescription);
     }
 
     getTimeeDiffInSeconds(): number {
