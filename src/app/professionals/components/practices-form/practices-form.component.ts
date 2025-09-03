@@ -239,4 +239,10 @@ export class PracticesFormComponent implements OnInit {
     const patient = this.practicesForm.get('patient');
     return patient.get('otraOS');
   }
+  existenObrasSociales(array: any[]): boolean {
+        if (!array || array.length === 0) {
+            return false;
+        }
+        return !array.every(item => item === null || item === undefined);
+    }
 }
