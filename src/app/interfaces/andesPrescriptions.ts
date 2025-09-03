@@ -46,7 +46,7 @@ export default class AndesPrescriptions {
         conceptId: string;
         semanticTag: string;
     };
-    fechaResgistro: Date;
+    fechaRegistro: Date;
     fechaPrestacion: Date;
     idPrestacion: string;
     idRegistro: string;
