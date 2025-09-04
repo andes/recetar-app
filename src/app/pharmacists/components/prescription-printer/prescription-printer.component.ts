@@ -126,7 +126,9 @@ export class PrescriptionPrinterComponent implements OnInit {
 
         prescription.supplies.forEach(supply => {
             const cant = supply.quantityPresentation ? `${supply.quantity} envase(s) de ${supply.quantityPresentation} unidades` : `x ${supply.quantity}`;
-            pdf.add(new Columns([new Txt('' + supply.supply.name).bold().end, new Columns([new Txt(`${cant} `).bold().end]).end]).end);
+            pdf.add(new Columns([new Txt('' + supply.supply.name).bold().end,
+            new Txt(' ').end,
+            new Columns([new Txt(`${cant} `).bold().end]).end]).end);
             pdf.add(new Txt('\n').end);
 
             if (supply.diagnostic) {
