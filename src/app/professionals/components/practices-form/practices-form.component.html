@@ -11,13 +11,13 @@
 
         <mat-card-content>
           <form [formGroup]="practicesForm" #practicesNgForm="ngForm"
-                (ngSubmit)="onSubmitPracticesForm(practicesNgForm)">
-            <div class="sub-container" fxLayout="column" fxLayoutAlign="center" fxLayoutGap="0" fxLayoutGap.xs="0">
-
-              <div class="first-block" fxLayout="column" fxLayoutGap="0px" fxLayoutGap.xs="0">
+                (ngSubmit)="onSubmitPracticesForm(practicesNgForm)" fxLayout="column">
+            <div class="sub-container" fxLayout="column" fxLayoutAlign="center" fxLayoutGap="10px"
+                 fxLayoutGap.xs="10px">
+              <div class="first-block" fxLayout="column" fxLayoutGap="10px" fxLayoutGap.xs="10px">
                 <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center" fxLayoutAlign.xs="center center">
                   <!-- Fecha de práctica -->
-                  <mat-form-field appearance="fill" fxFlex="48" fxFlex.xs="100">
+                  <mat-form-field appearance="fill" fxFlex="50" fxFlex.xs="100">
                     <mat-label>Fecha práctica</mat-label>
                     <input matInput [matDatepicker]="picker" formControlName="date" required>
                     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
@@ -29,7 +29,7 @@
                 </div>
 
                 <!-- Componente reutilizable de paciente -->
-                <app-patient-form formControlName="patient" ></app-patient-form>
+                <app-patient-form #patientForm formControlName="patient"></app-patient-form>
 
                 <!-- Campos de práctica -->
                 <div fxLayout="column" fxLayoutGap="10px">
@@ -52,7 +52,7 @@
 
               <!-- Botones -->
               <div fxLayout="column" fxLayoutAlign="center" fxLayoutGap="20px" *ngIf="!isSubmitPractice" fxFlex="100">
-                <button mat-raised-button color="primary" type="submit" [disabled]="!practicesForm.valid">
+                <button mat-raised-button color="primary" type="submit">
                   Crear
                 </button>
                 <button mat-raised-button type="button" (click)="clearPracticesForm(practicesNgForm)">

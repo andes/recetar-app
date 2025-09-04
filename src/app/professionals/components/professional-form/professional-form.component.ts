@@ -19,6 +19,7 @@ import { CertificatesService } from '@services/certificates.service';
 import { PrescriptionsListComponent } from '@professionals/components/prescriptions-list/prescriptions-list.component';
 import { Subject } from 'rxjs';
 import { AmbitoService } from '@auth/services/ambito.service';
+import { PatientFormComponent } from '@shared/components/patient-form/patient-form.component';
 
 // Validador personalizado para fechas
 function validDateValidator(): ValidatorFn {
@@ -60,33 +61,18 @@ function validDateValidator(): ValidatorFn {
     ]
 })
 export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewInit {
-    obraSocialControl = new FormControl('');
-    filteredObrasSociales: Observable<any[]>;
-
     // Suscripciones
     private subscriptions: Subscription = new Subscription();
 
-    onOsSelected(selectedOs: any): void {
-        const osGroup = this.professionalForm.get('patient.os') as FormGroup;
-        if (osGroup && selectedOs) {
-            osGroup.patchValue({
-                nombre: selectedOs.nombre,
-                codigoPuco: selectedOs.codigoPuco
-            });
-            const numeroAfiliadoControl = osGroup.get('numeroAfiliado');
-            if (numeroAfiliadoControl) {
-                numeroAfiliadoControl.enable();
-            }
-        }
-    }
+    // Método removido - funcionalidad manejada por patient-form component
     existenObrasSociales(array: any[]): boolean {
         if (!array || array.length === 0) {
             return false;
         }
         return !array.every(item => item === null || item === undefined);
     }
-    @ViewChild('dni', { static: true }) dni: any;
     @ViewChild(PrescriptionsListComponent) prescriptionsList: PrescriptionsListComponent;
+    @ViewChild('patientForm') patientFormComponent: PatientFormComponent;
 
     private destroy$ = new Subject<void>();
     professionalForm: FormGroup;
@@ -94,18 +80,12 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     filteredSupplies = [];
     request;
     storedSupplies = [];
-    patientSearch: Patient[];
-    sex_options: string[] = ['Femenino', 'Masculino', 'Otro'];
-    genero_options: string[] = [''];
     today = new Date();
     professionalData: any;
     readonly maxQSupplies: number = 10;
     readonly spinnerColor: ThemePalette = 'primary';
     readonly spinnerDiameter: number = 30;
-    minDate = new Date('1900-01-01');
-    maxDate = new Date();
     isSubmit = false;
-    dniShowSpinner = false;
     supplySpinner: { show: boolean }[] = [{ show: false }, { show: false }];
     myPrescriptions: Prescriptions[] = [];
     isEditCertificate = false;
@@ -119,14 +99,10 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         tablet: false,
         desktop: false
     };
-    obraSocial: any[];
-    obrasSociales: any[];
-    otraOS = false;
     selectType;
     private certificateSubscription;
     public certificate;
     ambito: 'publico' | 'privado';
-    showFechaNac = false;
 
     constructor(
         // private suppliesService: SuppliesService,
@@ -145,10 +121,8 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         // Suscribirse a los cambios del ámbito
         const ambitoSubscription = this.ambitoService.getAmbitoSeleccionado.subscribe(ambito => {
             this.ambito = ambito;
-            this.showFechaNac = this.ambito === 'publico';
             // Actualizar el formulario si ya está inicializado
             if (this.professionalForm) {
-                this.updateFechaNacValidators();
                 this.professionalForm.patchValue({ ambito: this.ambito });
             }
         });
@@ -169,16 +143,6 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
             );
         this.subscriptions.add(deletePrescriptionSub);
 
-        // on DNI changes
-        const dniChangesSub = this.patientDni.valueChanges.pipe(
-            debounceTime(400)
-        ).subscribe(
-            dniValue => {
-                this.getPatientByDni(dniValue);
-            }
-        );
-        this.subscriptions.add(dniChangesSub);
-
         // get prescriptions
         const prescriptionsSub = this.apiPrescriptions.getByUserId(this.authService.getLoggedUserId()).subscribe();
         this.subscriptions.add(prescriptionsSub);
@@ -191,23 +155,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
             }
         });
 
-        const otraOSSub = this.professionalForm.get('patient.otraOS')?.valueChanges.subscribe(() => {
-            const osGroup = this.professionalForm.get('patient.os') as FormGroup;
-            osGroup.reset();
-            osGroup.get('numeroAfiliado').disable();
-        });
-        if (otraOSSub) {
-            this.subscriptions.add(otraOSSub);
-        }
-
-        // Configurar filtro de obras sociales
-        this.filteredObrasSociales = this.obraSocialControl.valueChanges.pipe(
-            startWith(''),
-            map(value => {
-                const name = typeof value === 'string' ? value : value?.nombre;
-                return name ? this._filter(name) : this.obrasSociales.slice();
-            })
-        );
+        // Lógica de obras sociales y DNI removida - funcionalidad manejada por patient-form component
 
         // Suscribirse a cambios en editCertificate
         this.certificateSubscription = this.certificateService.certificate$.subscribe(
@@ -232,12 +180,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         // Implementation not needed for this case
     }
 
-    private _filter(value: string): any[] {
-        const filterValue = value.toLowerCase();
-        return this.obrasSociales.filter(os =>
-            os.nombre.toLowerCase().includes(filterValue)
-        );
-    }
+    // Método removido - funcionalidad manejada por patient-form component
 
     initProfessionalForm() {
         this.today = new Date((new Date()));
@@ -249,37 +192,10 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
             this.ambito = currentAmbito;
         }
 
-        this.showFechaNac = this.ambito === 'publico';
-
         this.professionalForm = this.fBuilder.group({
             _id: [''],
             professional: [this.professionalData],
-            patient: this.fBuilder.group({
-                dni: ['', [
-                    Validators.required,
-                    Validators.minLength(7),
-                    Validators.pattern('^[0-9]*$')
-                ]],
-                lastName: ['', [
-                    Validators.required
-                ]],
-                firstName: ['', [
-                    Validators.required
-                ]],
-                sex: ['', [
-                    Validators.required
-                ]],
-                otraOS: [{ value: false, disabled: true }],
-                os: this.fBuilder.group({
-                    nombre: [''],
-                    codigoPuco: [''],
-                    numeroAfiliado: [{ value: '', disabled: true }]
-                }),
-                fechaNac: ['', this.ambito === 'publico' ? [
-                    Validators.required,
-                    validDateValidator()
-                ] : [validDateValidator()]]
-            }),
+            patient: [null, [Validators.required]],
             date: [this.today, [
                 Validators.required
             ]],
@@ -303,67 +219,11 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         quantity.updateValueAndValidity();
     }
 
-    getPatientByDni(dniValue: string | null): void {
-        if (dniValue !== null && (dniValue.length === 7 || dniValue.length === 8)) {
-            this.dniShowSpinner = true;
-            this.apiPatients.getPatientByDni(dniValue).subscribe(
-                res => {
-                    if (res.length) {
-                        this.patientSearch = res;
-                        this.patientOtraOS.enable();
-                    } else {
-                        this.patientSearch = [];
-                        this.patientLastName.setValue('');
-                        this.patientFirstName.setValue('');
-                        this.patientSex.setValue('');
-                        this.patientOtraOS.setValue(false);
-                        this.patientFechaNac.setValue('');
-                        // Resetear showFechaNac cuando no se encuentra paciente
-                        this.showFechaNac = this.ambito === 'publico';
-                        // Deshabilitar el checkbox otraOS cuando no se encuentra un paciente
-                        this.patientOtraOS.disable();
-                    }
-                    this.dniShowSpinner = false;
-                });
-            this.apiPatients.getPatientOSByDni(dniValue, this.patientSex.value).subscribe(
-                res => {
-                    if (Array.isArray(res)) {
-                        this.obraSocial = res;
-                    } else {
-                        this.obraSocial = [];
-                    }
-                });
-            this.apiPatients.getOS().subscribe(
-                res => {
-                    this.obrasSociales = (res as Array<any>);
-                }
-            );
-        } else {
-            this.dniShowSpinner = false;
-        }
-    }
+    // Método removido - funcionalidad manejada por patient-form component
 
-    private updateFechaNacValidators(): void {
-        const fechaNacControl = this.patientFechaNac;
-        if (this.showFechaNac) {
-            fechaNacControl.setValidators([
-                Validators.required,
-                validDateValidator()
-            ]);
-        } else {
-            fechaNacControl.setValidators([validDateValidator()]);
-        }
-        fechaNacControl.updateValueAndValidity();
-    }
+    // Método removido - funcionalidad manejada por patient-form component
 
-    completePatientInputs(patient: Patient): void {// TODO: REC-38
-        this.patientLastName.setValue(patient.lastName);
-        this.patientFirstName.setValue(patient.firstName);
-        this.patientSex.setValue(patient.sex);
-        this.showFechaNac = this.ambito === 'publico' && !patient.idMPI;
-        this.updateFechaNacValidators();
-        this.patientFechaNac.setValue(patient.fechaNac);
-    }
+    // Método removido - funcionalidad manejada por patient-form component
 
     onSubmitProfessionalForm(professionalNgForm: FormGroupDirective): void {
         if (this.professionalForm.valid) {
@@ -387,6 +247,13 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
                     err => {
                         this.handleSupplyError(err);
                     });
+            }
+        } else {
+            // Marcar todos los campos como touched para mostrar errores
+            this.markFormGroupTouched(this.professionalForm);
+            // También marcar los campos del patient-form como touched
+            if (this.patientFormComponent) {
+                this.patientFormComponent.markAllFieldsTouched();
             }
         }
     }
@@ -431,39 +298,9 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         return this.professionalForm.get('supplies') as FormArray;
     }
 
-    get patientDni(): AbstractControl {
-        const patient = this.professionalForm.get('patient');
-        return patient.get('dni');
-    }
+    // Getters removidos - funcionalidad manejada por patient-form component
 
-    get patientLastName(): AbstractControl {
-        const patient = this.professionalForm.get('patient');
-        return patient.get('lastName');
-    }
-
-    get patientFirstName(): AbstractControl {
-        const patient = this.professionalForm.get('patient');
-        return patient.get('firstName');
-    }
-
-    get patientFechaNac(): AbstractControl {
-        const patient = this.professionalForm.get('patient');
-        return patient.get('fechaNac');
-    }
-
-    get patientSex(): AbstractControl {
-        const patient = this.professionalForm.get('patient');
-        return patient.get('sex');
-    }
-
-    get patientOtraOS(): AbstractControl {
-        const patient = this.professionalForm.get('patient');
-        return patient.get('otraOS');
-    }
-
-    displayOs(os: any): string {
-        return os && os.nombre ? os.nombre : '';
-    }
+    // Método removido - funcionalidad manejada por patient-form component
 
     displayFn(supply): string {
         return supply ? supply : '';
@@ -627,8 +464,6 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     clearForm(professionalNgForm: FormGroupDirective) {
         professionalNgForm.resetForm();
         const currentAmbito = this.ambitoService.getAmbito();
-        this.patientSearch = [];
-        this.showFechaNac = currentAmbito === 'publico';
         this.professionalForm.reset({
             _id: '',
             professional: this.professionalData,
@@ -648,8 +483,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
             },
             ambito: currentAmbito
         });
-        // Actualizar las validaciones después de resetear el formulario
-        this.updateFechaNacValidators();
+        // Validaciones ahora manejadas por patient-form component
     }
 
     anulateCertificate() {
@@ -688,5 +522,24 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     showPractices(): void {
         this.isFormShown = false;
         this.currentTab = 'practices';
+    }
+
+    private markFormGroupTouched(formGroup: FormGroup): void {
+        Object.keys(formGroup.controls).forEach(key => {
+            const control = formGroup.get(key);
+            control?.markAsTouched();
+
+            if (control instanceof FormGroup) {
+                this.markFormGroupTouched(control);
+            } else if (control instanceof FormArray) {
+                control.controls.forEach(arrayControl => {
+                    if (arrayControl instanceof FormGroup) {
+                        this.markFormGroupTouched(arrayControl);
+                    } else {
+                        arrayControl.markAsTouched();
+                    }
+                });
+            }
+        });
     }
 }

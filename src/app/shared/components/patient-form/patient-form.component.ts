@@ -1,11 +1,42 @@
-import { Component, Input, Output, EventEmitter, OnInit, ViewChild, forwardRef } from '@angular/core';
-import { FormBuilder, FormGroup, AbstractControl, Validators, ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { Component, Input, Output, EventEmitter, OnInit, ViewChild, forwardRef, OnDestroy } from '@angular/core';
+import { FormBuilder, FormGroup, AbstractControl, Validators, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidatorFn } from '@angular/forms';
 import { PatientsService } from '@services/patients.service';
 import { Patient } from '@interfaces/patients';
 import { ThemePalette } from '@angular/material/core';
 import { debounceTime } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
+import { AmbitoService } from '@auth/services/ambito.service';
+
+// Validador personalizado para fechas
+function validDateValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+        if (!control.value) {
+            return null; // Si no hay valor, no validamos (required se encarga)
+        }
+
+        const date = new Date(control.value);
+        const isValidDate = date instanceof Date && !isNaN(date.getTime());
+
+        if (!isValidDate) {
+            return { 'invalidDate': { value: control.value } };
+        }
+
+        // Validar que la fecha no sea futura para fecha de nacimiento
+        const today = new Date();
+        if (date > today) {
+            return { 'futureDate': { value: control.value } };
+        }
+
+        // Validar que la fecha sea razonable (no muy antigua)
+        const minDate = new Date('1900-01-01');
+        if (date < minDate) {
+            return { 'tooOldDate': { value: control.value } };
+        }
+
+        return null;
+    };
+}
 
 @Component({
     selector: 'app-patient-form',
@@ -19,10 +50,11 @@ import { map, startWith } from 'rxjs/operators';
         }
     ]
 })
-export class PatientFormComponent implements OnInit, ControlValueAccessor {
+export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAccessor {
     @Input() showObraSocial = false;
     @Input() appearance = 'fill';
     @Input() layout = 'row'; // 'row' or 'column'
+    @Input() showFechaNac = false;
     @Output() patientFound = new EventEmitter<Patient>();
     @Output() patientNotFound = new EventEmitter<void>();
 
@@ -38,18 +70,41 @@ export class PatientFormComponent implements OnInit, ControlValueAccessor {
     filteredObrasSociales: Observable<any[]>;
     fieldsDisabled = false;
     lastSearchedDni = '';
+    selectedPatient: Patient | null = null;
+    ambito: 'publico' | 'privado';
+    minDate = new Date('1900-01-01');
+    maxDate = new Date();
 
     private onChange = (value: any) => { };
     private onTouched = () => { };
+    private subscriptions: Subscription = new Subscription();
 
     constructor(
         private fBuilder: FormBuilder,
-        private apiPatients: PatientsService
+        private apiPatients: PatientsService,
+        private ambitoService: AmbitoService
     ) {
         this.initPatientForm();
     }
 
     ngOnInit(): void {
+        // Suscribirse a los cambios del ámbito
+        const ambitoSubscription = this.ambitoService.getAmbitoSeleccionado.subscribe(ambito => {
+            this.ambito = ambito;
+            this.showFechaNac = this.ambito === 'publico';
+            // Actualizar el formulario si ya está inicializado
+            if (this.patientForm) {
+                this.updateFechaNacValidators();
+            }
+        });
+        this.subscriptions.add(ambitoSubscription);
+
+        // Obtener el ámbito actual del servicio
+        const currentAmbito = this.ambitoService.getAmbito();
+        if (currentAmbito) {
+            this.ambito = currentAmbito;
+            this.showFechaNac = this.ambito === 'publico';
+        }
         // Suscribirse a cambios en el DNI
         this.patientDni.valueChanges.pipe(
             debounceTime(400)
@@ -122,6 +177,10 @@ export class PatientFormComponent implements OnInit, ControlValueAccessor {
         }
     }
 
+    ngOnDestroy(): void {
+        this.subscriptions.unsubscribe();
+    }
+
     private initPatientForm(): void {
         const baseForm = {
             dni: ['', [
@@ -132,6 +191,10 @@ export class PatientFormComponent implements OnInit, ControlValueAccessor {
             lastName: ['', Validators.required],
             firstName: ['', Validators.required],
             sex: ['', Validators.required],
+            fechaNac: ['', this.showFechaNac ? [
+                Validators.required,
+                validDateValidator()
+            ] : [validDateValidator()]],
             otraOS: [{ value: false, disabled: true }],
             os: this.fBuilder.group({
                 nombre: [''],
@@ -172,9 +235,12 @@ export class PatientFormComponent implements OnInit, ControlValueAccessor {
                         this.patientSearch = [];
                         this.patientNotFound.emit();
                         this.resetPatientFields();
+                        // Resetear showFechaNac cuando no se encuentra paciente
+                        this.showFechaNac = this.ambito === 'publico';
+                        this.updateFechaNacValidators();
                         if (this.showObraSocial) {
                             this.patientOtraOS?.setValue(false);
-                            this.patientOtraOS?.disable();
+                            this.patientOtraOS?.enable(); // Habilitar para permitir agregar obra social aunque el paciente no exista
                         }
                     }
                     this.dniShowSpinner = false;
@@ -197,6 +263,10 @@ export class PatientFormComponent implements OnInit, ControlValueAccessor {
 
         if (dniValue && sexValue && dniValue.length >= 7 && dniValue.length <= 8) {
             this.loadPatientOS(dniValue);
+            // Habilitar el checkbox otraOS cuando se tienen DNI y sexo válidos
+            if (this.showObraSocial) {
+                this.patientOtraOS?.enable();
+            }
         }
     }
 
@@ -257,9 +327,13 @@ export class PatientFormComponent implements OnInit, ControlValueAccessor {
     }
 
     private resetPatientFields(): void {
+        // Limpiar referencia del paciente seleccionado
+        this.selectedPatient = null;
+
         this.patientLastName.setValue('');
         this.patientFirstName.setValue('');
         this.patientSex.setValue('');
+        this.patientFechaNac.setValue('');
         if (this.showObraSocial) {
             const osGroup = this.patientForm.get('os') as FormGroup;
             osGroup.reset();
@@ -277,6 +351,7 @@ export class PatientFormComponent implements OnInit, ControlValueAccessor {
         this.patientLastName.disable({ onlySelf: true, emitEvent: false });
         this.patientFirstName.disable({ onlySelf: true, emitEvent: false });
         this.patientSex.disable({ onlySelf: true, emitEvent: false });
+        this.patientFechaNac.disable({ onlySelf: true, emitEvent: false });
     }
 
     private enableFields(): void {
@@ -284,12 +359,21 @@ export class PatientFormComponent implements OnInit, ControlValueAccessor {
         this.patientLastName.enable();
         this.patientFirstName.enable();
         this.patientSex.enable();
+        this.patientFechaNac.enable();
     }
 
     completePatientInputs(patient: Patient): void {
+        // Guardar referencia del paciente seleccionado
+        this.selectedPatient = patient;
+
         this.patientLastName.setValue(patient.lastName);
         this.patientFirstName.setValue(patient.firstName);
         this.patientSex.setValue(patient.sex);
+
+        // Configurar fechaNac según el ámbito y si el paciente tiene idMPI
+        this.showFechaNac = this.ambito === 'publico' && !patient.idMPI;
+        this.updateFechaNacValidators();
+        this.patientFechaNac.setValue(patient.fechaNac);
 
         // Deshabilitar campos después de autocompletar
         this.disableFields();
@@ -431,12 +515,27 @@ export class PatientFormComponent implements OnInit, ControlValueAccessor {
         return this.showObraSocial ? this.patientForm.get('os') : null;
     }
 
+    get patientFechaNac(): AbstractControl {
+        return this.patientForm.get('fechaNac')!;
+    }
+
+    get displayPatientName(): string {
+        if (this.selectedPatient && this.selectedPatient.nombreAutopercibido) {
+            return this.selectedPatient.nombreAutopercibido;
+        }
+        return this.patientFirstName.value || '';
+    }
+
     // Método público para resetear el formulario
     resetForm(): void {
+        this.selectedPatient = null;
         this.patientForm.reset();
         this.patientSearch = [];
         this.fieldsDisabled = false;
         this.lastSearchedDni = '';
+        // Resetear showFechaNac según el ámbito
+        this.showFechaNac = this.ambito === 'publico';
+        this.updateFechaNacValidators();
         if (this.showObraSocial) {
             this.patientOtraOS?.setValue(false);
             this.patientOtraOS?.disable();
@@ -453,5 +552,25 @@ export class PatientFormComponent implements OnInit, ControlValueAccessor {
     // Método público para verificar si el formulario es válido
     isValid(): boolean {
         return this.patientForm.valid;
+    }
+
+    private updateFechaNacValidators(): void {
+        const fechaNacControl = this.patientFechaNac;
+        if (this.showFechaNac) {
+            fechaNacControl.setValidators([
+                Validators.required,
+                validDateValidator()
+            ]);
+        } else {
+            fechaNacControl.setValidators([validDateValidator()]);
+        }
+        fechaNacControl.updateValueAndValidity();
+    }
+
+    markAllFieldsTouched(): void {
+        Object.keys(this.patientForm.controls).forEach(key => {
+            const control = this.patientForm.get(key);
+            control?.markAsTouched();
+        });
     }
 }

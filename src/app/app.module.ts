@@ -33,14 +33,14 @@ import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/materia
 import { HeaderComponent } from '@shared/layouts/header/header.component';
 import { FooterComponent } from './shared/layouts/footer/footer.component';
 import { DatePipe } from '@angular/common';
-// import { SharedModule } from '@shared/shared.module';
+import { SharedModule } from '@shared/shared.module';
 
 @NgModule({
     declarations: [
         AppComponent,
         routingComponents,
         HeaderComponent,
-        FooterComponent,
+        FooterComponent
     ],
     imports: [
         BrowserModule,
@@ -59,6 +59,7 @@ import { DatePipe } from '@angular/common';
         MatProgressSpinnerModule,
         MatIconModule,
         MatChipsModule,
+        SharedModule,
     ],
     providers: [
         {

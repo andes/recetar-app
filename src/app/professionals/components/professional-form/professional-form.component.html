@@ -29,11 +29,11 @@
                             <div class="sub-container" fxLayout="column" fxLayoutAlign="center" fxLayoutGap="0"
                                 fxLayoutGap.xs="0">
 
-                                <div class="first-block" fxLayout="column" fxLayoutGap="0px" fxLayoutGap.xs="0">
+                                <div class="first-block" fxLayout="column" fxLayoutGap="10px" fxLayoutGap.xs="0">
                                     <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center"
                                         fxLayoutAlign.xs="center center">
                                         <!-- Fecha de receta -->
-                                        <mat-form-field appearance="fill" fxFlex="48" fxFlex.xs="100">
+                                        <mat-form-field appearance="fill" fxFlex="100">
                                             <mat-label>Fecha receta</mat-label>
                                             <input matInput [matDatepicker]="picker1" [formControl]="date"
                                                 autocomplete="off" required tabIndex="-1" readonly="true">
@@ -44,17 +44,15 @@
                                                 Debe ingresar una fecha válida
                                             </mat-error>
                                         </mat-form-field>
-                                        <div class="check">
+                                        <div class="check" fxFlex="100">
                                             <mat-checkbox formControlName="trimestral">Generar receta trimestral
                                             </mat-checkbox>
                                         </div>
                                     </div>
 
-                                    <div formGroupName="patient">
-                                        <app-patient-form [showObraSocial]="true" [appearance]="'fill'" [layout]="'row'"
-                                                          formControlName="patientData">
-                                        </app-patient-form>
-                                    </div>
+                                    <app-patient-form #patientForm [showObraSocial]="true" [appearance]="'fill'" [layout]="'row'"
+                                                      formControlName="patient">
+                                    </app-patient-form>
                                 </div>
                                 <div formArrayName="supplies" class="nested-supplies">
                                     <div class="custom-error-container">

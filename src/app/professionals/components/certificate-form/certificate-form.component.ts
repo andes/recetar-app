@@ -1,20 +1,20 @@
 import { Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
-import { FormBuilder, FormGroup, AbstractControl, Validators, FormGroupDirective, FormControl, ValidatorFn } from '@angular/forms';
-import { PatientsService } from '@root/app/services/patients.service';
-import { AuthService } from '@auth/services/auth.service';
-import { Patient } from '@interfaces/patients';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, FormGroupDirective, Validators } from '@angular/forms';
 import { ThemePalette } from '@angular/material/core';
-import { Prescriptions } from '@interfaces/prescriptions';
-import { ProfessionalDialogComponent } from '@professionals/components/professional-dialog/professional-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { step, stepLink } from '@animations/animations.template';
-import { debounce, debounceTime, map, startWith } from 'rxjs/operators';
-import { CertificatesService } from '@services/certificates.service';
-import { Certificate } from '@interfaces/certificate';
-import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
+import { step, stepLink } from '@animations/animations.template';
+import { AuthService } from '@auth/services/auth.service';
+import { Certificate } from '@interfaces/certificate';
+import { Prescriptions } from '@interfaces/prescriptions';
+import { ProfessionalDialogComponent } from '@professionals/components/professional-dialog/professional-dialog.component';
+import { PatientsService } from '@root/app/services/patients.service';
+import { CertificatesService } from '@services/certificates.service';
+import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
+import { Subscription } from 'rxjs';
+import { PatientFormComponent } from '@shared/components/patient-form/patient-form.component';
 
 @Component({
     selector: 'app-certificate-form',
@@ -67,13 +67,15 @@ export class CertificateFormComponent implements OnInit {
 
     @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
     @ViewChild(MatSort, { static: true }) sort: MatSort;
+    @ViewChild('patientForm') patientFormComponent: PatientFormComponent;
 
     constructor(
         private fBuilder: FormBuilder,
         private apiPatients: PatientsService,
         private certificateService: CertificatesService,
         private authService: AuthService,
-        public dialog: MatDialog
+        public dialog: MatDialog,
+        private patientNamePipe: PatientNamePipe
     ) { }
 
     ngOnInit(): void {
@@ -82,7 +84,7 @@ export class CertificateFormComponent implements OnInit {
             this.dataCertificates = new MatTableDataSource<Certificate>(certificates);
             this.dataCertificates.sortingDataAccessor = (item, property) => {
                 switch (property) {
-                    case 'patient': return item.patient.lastName + item.patient.firstName;
+                    case 'patient': return item.patient.lastName + this.patientNamePipe.transform(item.patient);
                     case 'prescription_date': return new Date(item.createdAt).getTime();
                     default: return item[property];
                 }
@@ -152,6 +154,14 @@ export class CertificateFormComponent implements OnInit {
                     success => {
                         if (success) { this.formReset(professionalNgForm); }
                     });
+            } else {
+                // Marcar todos los campos como touched para mostrar errores
+                this.markFormGroupTouched(this.certificateForm);
+                this.cantDias.markAsTouched();
+                // También marcar los campos del patient-form como touched
+                if (this.patientFormComponent) {
+                    this.patientFormComponent.markAllFieldsTouched();
+                }
             }
         } else {
             this.certificate['anulateReason'] = this.certificateForm.value.anulateReason;
@@ -260,5 +270,16 @@ export class CertificateFormComponent implements OnInit {
     showCertificados(): void {
         this.isFormShown = false;
         this.isCertificateShown = true;
+    }
+
+    private markFormGroupTouched(formGroup: FormGroup): void {
+        Object.keys(formGroup.controls).forEach(key => {
+            const control = formGroup.get(key);
+            control?.markAsTouched();
+
+            if (control instanceof FormGroup) {
+                this.markFormGroupTouched(control);
+            }
+        });
     }
 }
