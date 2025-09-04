@@ -33,7 +33,7 @@
                                     <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center"
                                          fxLayoutAlign.xs="center center">
                                         <!-- Fecha de receta -->
-                                        <mat-form-field appearance="fill" fxFlex="48" fxFlex.xs="100">
+                                        <mat-form-field appearance="fill" fxFlex="100">
                                             <mat-label>Fecha receta</mat-label>
                                             <input matInput [matDatepicker]="picker1" [formControl]="date"
                                                    autocomplete="off" required tabIndex="-1">
@@ -44,7 +44,7 @@
                                                 Debe ingresar una fecha válida
                                             </mat-error>
                                         </mat-form-field>
-                                        <div class="check">
+                                        <div class="check" fxFlex="100">
                                             <mat-checkbox formControlName="trimestral">Generar receta trimestral
                                             </mat-checkbox>
                                         </div>

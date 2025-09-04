@@ -38,6 +38,7 @@ export class PatientFormComponent implements OnInit, ControlValueAccessor {
     filteredObrasSociales: Observable<any[]>;
     fieldsDisabled = false;
     lastSearchedDni = '';
+    selectedPatient: Patient | null = null;
 
     private onChange = (value: any) => { };
     private onTouched = () => { };
@@ -257,6 +258,9 @@ export class PatientFormComponent implements OnInit, ControlValueAccessor {
     }
 
     private resetPatientFields(): void {
+        // Limpiar referencia del paciente seleccionado
+        this.selectedPatient = null;
+
         this.patientLastName.setValue('');
         this.patientFirstName.setValue('');
         this.patientSex.setValue('');
@@ -287,6 +291,9 @@ export class PatientFormComponent implements OnInit, ControlValueAccessor {
     }
 
     completePatientInputs(patient: Patient): void {
+        // Guardar referencia del paciente seleccionado
+        this.selectedPatient = patient;
+
         this.patientLastName.setValue(patient.lastName);
         this.patientFirstName.setValue(patient.firstName);
         this.patientSex.setValue(patient.sex);
@@ -431,8 +438,16 @@ export class PatientFormComponent implements OnInit, ControlValueAccessor {
         return this.showObraSocial ? this.patientForm.get('os') : null;
     }
 
+    get displayPatientName(): string {
+        if (this.selectedPatient && this.selectedPatient.nombreAutopercibido) {
+            return this.selectedPatient.nombreAutopercibido;
+        }
+        return this.patientFirstName.value || '';
+    }
+
     // Método público para resetear el formulario
     resetForm(): void {
+        this.selectedPatient = null;
         this.patientForm.reset();
         this.patientSearch = [];
         this.fieldsDisabled = false;

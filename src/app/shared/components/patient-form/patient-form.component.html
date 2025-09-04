@@ -14,7 +14,7 @@
       <mat-autocomplete #auto="matAutocomplete">
         <mat-option *ngFor="let patient of patientSearch" (onSelectionChange)="completePatientInputs(patient)"
                     [value]="patient.dni">
-          {{patient.lastName}} {{patient.firstName}} DNI {{patient.dni}}
+          {{patient.lastName}} {{patient.nombreAutopercibido || patient.firstName}} DNI {{patient.dni}}
         </mat-option>
       </mat-autocomplete>
 
@@ -66,7 +66,8 @@
     <!-- Nombre paciente -->
     <mat-form-field [appearance]="appearance" fxFlex="100">
       <mat-label>Nombre paciente</mat-label>
-      <input type="text" tabIndex="4" placeholder="Nombre" matInput required formControlName="firstName">
+      <input type="text" tabIndex="4" placeholder="Nombre" matInput required formControlName="firstName" 
+             [value]="displayPatientName" readonly>
 
       <mat-error *ngIf="patientFirstName.errors?.['required'] && patientFirstName.touched">
         Debe ingresar el nombre del paciente
@@ -85,7 +86,7 @@
 
       <!-- Obra Social - Select cuando hay paciente y checkbox no marcado -->
       <mat-form-field appearance="fill" fxFlex="100"
-                      *ngIf="obraSocial && obraSocial.length > 0 && !patientForm.get('otraOS')?.value">
+                      *ngIf="!patientForm.get('otraOS')?.value">
         <mat-label>Obra Social</mat-label>
         <mat-select formControlName="nombre" (selectionChange)="onOsSelected($event.value)">
           <mat-option *ngFor="let os of obraSocial" [value]="os.nombre">

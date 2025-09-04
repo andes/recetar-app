@@ -195,7 +195,15 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
             this.apiPrescriptions.newPrescription(prescription).subscribe(
                 success => {
                     if (success) { this.formReset(professionalNgForm); }
-                });
+                },
+                () => {
+                    // En caso de error en la petición, resetear el estado de loading
+                    this.isSubmit = false;
+                }
+            );
+        } else {
+            // Si el formulario no es válido, resetear el estado de loading
+            this.isSubmit = false;
         }
     }
 
