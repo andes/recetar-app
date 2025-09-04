@@ -50,16 +50,12 @@ export class CertificateFormComponent implements OnInit {
 
         return null;
     }
-    @ViewChild('dni', { static: true }) dni: any;
-
     certificateForm: FormGroup;
     loadingCertificates: boolean;
-    patientSearch: Patient[];
     today = new Date();
     professionalData: any;
     readonly spinnerColor: ThemePalette = 'primary';
     isSubmit = false;
-    dniShowSpinner = false;
     isFormShown = true;
     isCertificateShown = false;
     anulateCertificate = false;
@@ -97,26 +93,12 @@ export class CertificateFormComponent implements OnInit {
         });
         this.initProfessionalForm();
 
-        // on DNI changes
-        this.patientDni.valueChanges.pipe(
-            debounceTime(1000)
-        ).subscribe(
-            dniValue => {
-                this.getPatientByDni(dniValue);
-            }
-        );
-
         this.certificateService.certificate$.subscribe(
             certificate => {
                 if (certificate) {
                     this.certificateForm.reset({
                         date: { value: certificate.createdAt, disabled: true },
-                        patient: {
-                            dni: { value: certificate.patient.dni, disabled: true },
-                            sex: { value: certificate.patient.sex, disabled: true },
-                            lastName: { value: certificate.patient.lastName, disabled: true },
-                            firstName: { value: certificate.patient.firstName, disabled: true }
-                        },
+                        patient: certificate.patient,
                         certificate: { value: certificate.certificate, disabled: true },
                     });
                     this.anulateCertificate = true;
@@ -141,22 +123,7 @@ export class CertificateFormComponent implements OnInit {
         this.certificateForm = this.fBuilder.group({
             _id: [''],
             professional: [this.professionalData],
-            patient: this.fBuilder.group({
-                dni: ['', [
-                    Validators.required,
-                    Validators.minLength(7),
-                    Validators.pattern('^[0-9]*$')
-                ]],
-                lastName: ['', [
-                    Validators.required
-                ]],
-                firstName: ['', [
-                    Validators.required
-                ]],
-                sex: ['', [
-                    Validators.required
-                ]],
-            }),
+            patient: ['', [Validators.required]],
             certificate: ['', [Validators.required]],
             anulateReason: [''],
             startDate: [this.today, [
@@ -168,31 +135,7 @@ export class CertificateFormComponent implements OnInit {
 
     }
 
-    getPatientByDni(dniValue: string | null): void {
-        if (dniValue !== null && ( dniValue.length === 7 || dniValue.length === 8)) {
-            this.dniShowSpinner = true;
-            this.apiPatients.getPatientByDni(dniValue).subscribe(
-                res => {
-                    if (res.length) {
-                        this.patientSearch = res;
-                    } else {
-                        this.patientSearch = [];
-                        this.patientLastName.setValue('');
-                        this.patientFirstName.setValue('');
-                        this.patientSex.setValue('');
-                    }
-                    this.dniShowSpinner = false;
-                });
-        } else {
-            this.dniShowSpinner = false;
-        }
-    }
 
-    completePatientInputs(patient: Patient): void {// TODO: REC-38
-        this.patientLastName.setValue(patient.lastName);
-        this.patientFirstName.setValue(patient.firstName);
-        this.patientSex.setValue(patient.sex);
-    }
 
     onSubmitCertificateForm(professionalNgForm: FormGroupDirective): void {
         if (!this.anulateCertificate) {
@@ -254,29 +197,11 @@ export class CertificateFormComponent implements OnInit {
         return this.certificateForm.get('startDate');
     }
 
-    
-        get cantDiasControl(): AbstractControl {
-            return this.cantDias;
-        }
-    get patientDni(): AbstractControl {
-        const patient = this.certificateForm.get('patient');
-        return patient.get('dni');
+
+    get cantDiasControl(): AbstractControl {
+        return this.cantDias;
     }
 
-    get patientLastName(): AbstractControl {
-        const patient = this.certificateForm.get('patient');
-        return patient.get('lastName');
-    }
-
-    get patientFirstName(): AbstractControl {
-        const patient = this.certificateForm.get('patient');
-        return patient.get('firstName');
-    }
-
-    get patientSex(): AbstractControl {
-        const patient = this.certificateForm.get('patient');
-        return patient.get('sex');
-    }
 
     get patientCertificate(): AbstractControl {
         const patient = this.certificateForm.get('certificate');
@@ -309,18 +234,12 @@ export class CertificateFormComponent implements OnInit {
     // reset the form as intial values
     clearForm(professionalNgForm: FormGroupDirective) {
         professionalNgForm.resetForm();
-        this.patientSearch = [];
         this.certificateForm.reset({
             _id: '',
             professional: this.professionalData,
             startDate: this.today,
             cantDias: '',
-            patient: {
-                dni: { value: '', disabled: false },
-                sex: { value: '', disabled: false },
-                lastName: { value: '', disabled: false },
-                firstName: { value: '', disabled: false },
-            },
+            patient: '',
             certificate: '',
             anulateReason: ''
         });

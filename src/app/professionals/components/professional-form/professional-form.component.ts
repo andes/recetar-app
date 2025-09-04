@@ -1,21 +1,18 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
-import { FormBuilder, FormGroup, AbstractControl, Validators, FormArray, FormGroupDirective, FormControl } from '@angular/forms';
-import { Observable, of } from 'rxjs';
-import { SnomedSuppliesService } from '@services/snomedSupplies.service';
-import { PatientsService } from '@root/app/services/patients.service';
-import { PrescriptionsService } from '@services/prescriptions.service';
-import { AuthService } from '@auth/services/auth.service';
-import { Patient } from '@interfaces/patients';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, FormGroupDirective, Validators } from '@angular/forms';
 import { ThemePalette } from '@angular/material/core';
-import { Prescriptions } from '@interfaces/prescriptions';
-import { ProfessionalDialogComponent } from '@professionals/components/professional-dialog/professional-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { InteractionService } from '@professionals/interaction.service';
 import { step, stepLink } from '@animations/animations.template';
-import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
-import { fadeOutCollapseOnLeaveAnimation } from 'angular-animations';
-import { CertificatesService } from '@services/certificates.service';
+import { AuthService } from '@auth/services/auth.service';
+import { Prescriptions } from '@interfaces/prescriptions';
 import { PrescriptionsListComponent } from '@professionals/components/prescriptions-list/prescriptions-list.component';
+import { ProfessionalDialogComponent } from '@professionals/components/professional-dialog/professional-dialog.component';
+import { InteractionService } from '@professionals/interaction.service';
+import { CertificatesService } from '@services/certificates.service';
+import { PrescriptionsService } from '@services/prescriptions.service';
+import { SnomedSuppliesService } from '@services/snomedSupplies.service';
+import { Observable, of } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, filter, map, startWith, switchMap } from 'rxjs/operators';
 
 
 @Component({
@@ -30,29 +27,10 @@ import { PrescriptionsListComponent } from '@professionals/components/prescripti
 export class ProfessionalFormComponent implements OnInit, AfterViewInit {
     obraSocialControl = new FormControl('');
     filteredObrasSociales: Observable<any[]>;
-
-    onOsSelected(selectedOs: any): void {
-        const osGroup = this.professionalForm.get('patient.os') as FormGroup;
-        if (osGroup && selectedOs) {
-            osGroup.patchValue({
-                nombre: selectedOs.nombre,
-                codigoPuco: selectedOs.codigoPuco
-            });
-            const numeroAfiliadoControl = osGroup.get('numeroAfiliado');
-            if (numeroAfiliadoControl) {
-                numeroAfiliadoControl.enable();
-            }
-        }
-    }
-    @ViewChild('dni', { static: true }) dni: any;
-
     professionalForm: FormGroup;
-
     filteredSupplies = [];
     request;
     storedSupplies = [];
-    patientSearch: Patient[];
-    sex_options: string[] = ['Femenino', 'Masculino', 'Otro'];
     genero_options: string[] = [''];
     today = new Date();
     professionalData: any;
@@ -60,7 +38,6 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
     readonly spinnerColor: ThemePalette = 'primary';
     readonly spinnerDiameter: number = 30;
     isSubmit = false;
-    dniShowSpinner = false;
     supplySpinner: { show: boolean }[] = [{ show: false }, { show: false }];
     myPrescriptions: Prescriptions[] = [];
     isEditCertificate = false;
@@ -79,13 +56,13 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
     selectType;
     private certificateSubscription;
     public certificate;
+
     @ViewChild(PrescriptionsListComponent) prescriptionsList: PrescriptionsListComponent;
+    @ViewChild('dni', { static: true }) dni: any;
 
     constructor(
-        // private suppliesService: SuppliesService,
         private snomedSuppliesService: SnomedSuppliesService,
         private fBuilder: FormBuilder,
-        private apiPatients: PatientsService,
         private apiPrescriptions: PrescriptionsService,
         private authService: AuthService,
         public dialog: MatDialog,
@@ -103,15 +80,6 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
                     this.deletePrescription(prescription);
                 }
             );
-
-        // on DNI changes
-        this.patientDni.valueChanges.pipe(
-            debounceTime(400)
-        ).subscribe(
-            dniValue => {
-                this.getPatientByDni(dniValue);
-            }
-        );
 
         this.apiPrescriptions.getByUserId(this.authService.getLoggedUserId()).subscribe();
 
@@ -168,20 +136,7 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
             _id: [''],
             professional: [this.professionalData],
             patient: this.fBuilder.group({
-                dni: ['', [
-                    Validators.required,
-                    Validators.minLength(7),
-                    Validators.pattern('^[0-9]*$')
-                ]],
-                lastName: ['', [
-                    Validators.required
-                ]],
-                firstName: ['', [
-                    Validators.required
-                ]],
-                sex: ['', [
-                    Validators.required
-                ]],
+                patientData: [null, Validators.required],
                 otraOS: [{ value: false, disabled: true }],
                 os: this.fBuilder.group({
                     nombre: [''],
@@ -198,7 +153,6 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
         this.addSupply();
     }
 
-
     onSuppliesAddControlQuantityValidators(index: number, add: boolean) {
         const quantity = this.suppliesForm.controls[index].get('quantity');
         if (add && !quantity.validator) {
@@ -212,70 +166,37 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
         quantity.updateValueAndValidity();
     }
 
-    getPatientByDni(dniValue: string | null): void {
-        if (dniValue !== null && (dniValue.length === 7 || dniValue.length === 8)) {
-            this.dniShowSpinner = true;
-            this.apiPatients.getPatientByDni(dniValue).subscribe(
-                res => {
-                    if (res.length) {
-                        this.patientSearch = res;
-                        this.patientOtraOS.enable();
-                    } else {
-                        this.patientSearch = [];
-                        this.patientLastName.setValue('');
-                        this.patientFirstName.setValue('');
-                        this.patientSex.setValue('');
-                        this.patientOtraOS.setValue(false);
-                        this.patientOtraOS.disable();
-                    }
-                    this.dniShowSpinner = false;
-                });
-            this.apiPatients.getPatientOSByDni(dniValue, this.patientSex.value).subscribe(
-                res => {
-                    if (Array.isArray(res)) {
-                        this.obraSocial = res;
-                    } else {
-                        this.obraSocial = [];
-                    }
-                });
-            this.apiPatients.getOS().subscribe(
-                res => {
-                    this.obrasSociales = (res as Array<any>);
-                }
-            );
-        } else {
-            this.dniShowSpinner = false;
-        }
-    }
-    completePatientInputs(patient: Patient): void {// TODO: REC-38
-        this.patientLastName.setValue(patient.lastName);
-        this.patientFirstName.setValue(patient.firstName);
-        this.patientSex.setValue(patient.sex);
-    }
-
     onSubmitProfessionalForm(professionalNgForm: FormGroupDirective): void {
+        this.isSubmit = true;
         if (this.professionalForm.valid) {
-            const newPrescription = this.professionalForm.value;
-            this.isSubmit = true;
-            this.apiPrescriptions.newPrescription(newPrescription).subscribe(
+
+            const formValue = this.professionalForm.getRawValue();
+            const patientFormData = formValue.patient.patientData;
+            // Obtener la obra social del formulario de paciente
+            const prescription: any = {
+                date: formValue.date,
+                patient: {
+                    dni: patientFormData.dni,
+                    firstName: patientFormData.firstName,
+                    lastName: patientFormData.lastName,
+                    sex: patientFormData.sex,
+                    os: patientFormData.os // La obra social está dentro del objeto patientData
+                },
+                professional: formValue.professional,
+                trimestral: formValue.trimestral,
+                supplies: formValue.supplies
+            };
+
+            // Si no hay obra social en patientData, usar la del formulario principal
+            if (!prescription.patient.os || Object.keys(prescription.patient.os).length === 0) {
+                prescription.patient.os = formValue.patient.os;
+            }
+
+            this.apiPrescriptions.newPrescription(prescription).subscribe(
                 success => {
                     if (success) { this.formReset(professionalNgForm); }
                 });
         }
-    }
-
-    private handleSupplyError(err) {
-        if (err.error.length > 0) {
-            err.error.map(err => {
-                // handle supplies error
-                this.suppliesForm.controls.map(control => {
-                    if (control.get('supply').value === err.supply) {
-                        control.get('supply').setErrors({ invalid: err.message });
-                    }
-                });
-            });
-        }
-        this.isSubmit = false;
     }
 
     private formReset(professionalNgForm: FormGroupDirective) {
@@ -287,9 +208,9 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
 
     deletePrescription(prescription: Prescriptions) {
         this.apiPrescriptions.deletePrescription(prescription._id).subscribe(
-            success => {
+            () => {
             },
-            err => {
+            () => {
                 this.openDialog('error-dispensed');
             }
         );
@@ -297,7 +218,7 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
 
     // Show a dialog
     openDialog(aDialogType: string, aPrescription?: Prescriptions, aText?: string): void {
-        const dialogRef = this.dialog.open(ProfessionalDialogComponent, {
+        this.dialog.open(ProfessionalDialogComponent, {
             width: '400px',
             data: { dialogType: aDialogType, prescription: aPrescription, text: aText }
         });
@@ -315,29 +236,14 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
         return this.professionalForm.get('supplies') as FormArray;
     }
 
-    get patientDni(): AbstractControl {
-        const patient = this.professionalForm.get('patient');
-        return patient.get('dni');
-    }
-
-    get patientLastName(): AbstractControl {
-        const patient = this.professionalForm.get('patient');
-        return patient.get('lastName');
-    }
-
-    get patientFirstName(): AbstractControl {
-        const patient = this.professionalForm.get('patient');
-        return patient.get('firstName');
-    }
-
-    get patientSex(): AbstractControl {
-        const patient = this.professionalForm.get('patient');
-        return patient.get('sex');
+    get patientData(): AbstractControl {
+        return this.professionalForm.get('patient.patientData');
     }
     get patientOtraOS(): AbstractControl {
         const patient = this.professionalForm.get('patient');
         return patient.get('otraOS');
     }
+
     displayOs(os: any): string {
         return os && os.nombre ? os.nombre : '';
     }
@@ -345,6 +251,7 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
     displayFn(supply): string {
         return supply ? supply : '';
     }
+
     onSupplySelected(supply, index: number) {
         const control = this.suppliesForm.at(index); // Obtiene el FormGroup en la posición del array
         const supplyControl = control.get('supply');
@@ -483,7 +390,7 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
     // reset the form as intial values
     clearForm(professionalNgForm: FormGroupDirective) {
         professionalNgForm.resetForm();
-        this.patientSearch = [];
+        // this.patientSearch = [];
         this.professionalForm.reset({
             _id: '',
             professional: this.professionalData,
