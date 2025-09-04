@@ -413,13 +413,9 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
 
     // Show a dialog
     openDialog(aDialogType: string, aPrescription?: Prescriptions, aText?: string): void {
-        const dialogRef = this.dialog.open(ProfessionalDialogComponent, {
+        this.dialog.open(ProfessionalDialogComponent, {
             width: '400px',
             data: { dialogType: aDialogType, prescription: aPrescription, text: aText }
-        });
-
-        dialogRef.afterClosed().subscribe(result => {
-            // console.log('The dialog was closed');
         });
     }
 

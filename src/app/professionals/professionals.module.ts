@@ -32,42 +32,45 @@ import { SupplyListComponent } from './components/supply-list/supply-list.compon
 import { PracticesFormComponent } from './components/practices-form/practices-form.component';
 import { CertificatePracticePrinterComponent } from './components/certificate-practice-printer/certificate-practice-printer.component';
 import { SelectorAmbitoComponent } from './components/selector-ambito/selector-ambito.component';
+import { PatientFormComponent } from '@shared/components/patient-form/patient-form.component';
 
 @NgModule({
-  declarations: [
-    routingComponents,
-    PrescriptionsListComponent,
-    SupplyListComponent,
-    PracticesFormComponent,
-    CertificateFormComponent,
-    CertificatePracticePrinterComponent,
-    SelectorAmbitoComponent,
-  ],
-  imports: [
-    CommonModule,
-    BrowserModule,
-    HttpClientModule,
-    ReactiveFormsModule,
-    FormsModule,
-    ProfessionalsRoutingModule,
-    FlexLayoutModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatSelectModule,
-    MatAutocompleteModule,
-    MatMenuModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatTableModule,
-    MatChipsModule,
-    MatPaginatorModule,
-    MatSortModule,
-    MatTooltipModule,
-    MatCheckboxModule
-  ]
+    declarations: [
+        routingComponents,
+        PrescriptionsListComponent,
+        CertificateFormComponent,
+        SupplyListComponent,
+        PracticesFormComponent,
+        CertificatePracticePrinterComponent,
+        PatientFormComponent,
+        SelectorAmbitoComponent
+    ],
+    imports: [
+        CommonModule,
+        BrowserModule,
+        HttpClientModule,
+        ReactiveFormsModule,
+        FormsModule,
+        ProfessionalsRoutingModule,
+        FlexLayoutModule,
+        MatCardModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatSelectModule,
+        MatAutocompleteModule,
+        MatMenuModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatIconModule,
+        MatProgressSpinnerModule,
+        MatTableModule,
+        MatChipsModule,
+        MatPaginatorModule,
+        MatSortModule,
+        MatTooltipModule,
+        MatCheckboxModule
+    ],
+    exports: [PatientFormComponent]
 })
 export class ProfessionalsModule { }
