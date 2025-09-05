@@ -31,6 +31,7 @@ import { CertificateFormComponent } from './components/certificate-form/certific
 import { SupplyListComponent } from './components/supply-list/supply-list.component';
 import { PracticesFormComponent } from './components/practices-form/practices-form.component';
 import { CertificatePracticePrinterComponent } from './components/certificate-practice-printer/certificate-practice-printer.component';
+import { SelectorAmbitoComponent } from './components/selector-ambito/selector-ambito.component';
 
 @NgModule({
   declarations: [
@@ -39,7 +40,8 @@ import { CertificatePracticePrinterComponent } from './components/certificate-pr
     SupplyListComponent,
     PracticesFormComponent,
     CertificateFormComponent,
-    CertificatePracticePrinterComponent
+    CertificatePracticePrinterComponent,
+    SelectorAmbitoComponent,
   ],
   imports: [
     CommonModule,

@@ -11,10 +11,10 @@ export class RoleAuditGuard implements CanActivate {
   constructor(private authService: AuthService, private router: Router){}
 
   canActivate(): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-      if (!this.authService.isAuditRole() && this.authService.isPharmacistsRole()) {
+      if (!this.authService.isAuditRole() && (this.authService.isPharmacistsRole() || this.authService.isPharmacistsPublicRole())) {
         this.router.navigate(['/farmacias/recetas/dispensar']);
         return false;
-      } else if (!this.authService.isAuditRole() && this.authService.isProfessionalRole()) {
+      } else if (!this.authService.isAuditRole() && (this.authService.isProfessionalRole() || this.authService.isProfessionalPublicRole())) {
         this.router.navigate(['/profesionales/recetas/nueva']);
         return false;
       }
