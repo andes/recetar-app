@@ -32,15 +32,26 @@
         </div>
     </div> <!-- End case noPrescriptions -->
 
+    <div *ngSwitchCase="'deleted'">
+        <h3 mat-dialog-title><mat-icon>check</mat-icon> Eliminada</h3>
+        <div mat-dialog-content>
+            <p>La receta se ha eliminado correctamente!</p>
+        </div>
+        <div mat-dialog-actions align="end">
+            <button mat-raised-button color="primary" style="background-color: green; color: white;"
+                    (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
+        </div>
+    </div> <!-- End case deleted -->
+
     <div *ngSwitchCase="'delete'">
         <h3 mat-dialog-title><mat-icon>delete</mat-icon> Desea eliminar la receta?</h3>
         <div mat-dialog-content>
-            <p>Receta de {{data.prescription.patient.lastName}}, {{data.prescription.patient.firstName}}</p>
+            <p>Receta de {{data.item.patient.lastName}}, {{data.item.patient?.firstName}}</p>
             <p>Una vez eliminada no se podrá recuperar</p>
         </div>
         <div mat-dialog-actions fxLayoutAlign="space-around" align="end">
             <button mat-button (click)="onNoClick()" cdkFocusInitial>Cancelar</button>
-            <button mat-raised-button color="warn" (click)="deletePrescription(data.prescription)">Confirmar</button>
+            <button mat-raised-button color="warn" (click)="deletePrescription(data.item)">Confirmar</button>
         </div>
     </div> <!-- End case noPrescriptions -->
 
