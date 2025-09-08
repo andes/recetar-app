@@ -15,7 +15,7 @@ import { fadeInOnEnterAnimation, fadeOutOnLeaveAnimation } from 'angular-animati
     ],
 })
 export class ProfessionalDialogComponent implements OnInit {
-
+    prescription: Prescriptions;
     constructor(
         public dialogRef: MatDialogRef<ProfessionalDialogComponent>,
         @Inject(MAT_DIALOG_DATA) public data: DialogData,
@@ -30,13 +30,25 @@ export class ProfessionalDialogComponent implements OnInit {
     }
 
     deletePrescription(prescription: Prescriptions) {
-        this._interactionService.deletePrescription(prescription);
-        this.dialogRef.close();
+        this._interactionService.deletePrescription(prescription).subscribe(
+            success => {
+                if (success) {
+                    // Emitir evento para actualizar listas
+                    this._interactionService.emitPrescriptionDeleted(prescription);
+                    this.dialogRef.close('deleted');
+                } else {
+                    this.dialogRef.close('error');
+                }
+            },
+            error => {
+                this.dialogRef.close('error-dispensed');
+            }
+        );
     }
 }
 
 export interface DialogData {
-    prescription: Prescriptions;
+    item: Prescriptions;
     dialogType: string;
     text: string;
 }

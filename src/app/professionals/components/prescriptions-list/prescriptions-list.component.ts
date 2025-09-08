@@ -17,6 +17,7 @@ import { Certificate } from '@interfaces/certificate';
 import { Practice } from '@interfaces/practices';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { InteractionService } from '@professionals/interaction.service';
 
 
 @Component({
@@ -78,12 +79,23 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         private authService: AuthService,
         private prescriptionPrinter: PrescriptionPrinterComponent,
         private certificatePracticePrinter: CertificatePracticePrinterComponent,
-        public dialog: MatDialog) { }
+        public dialog: MatDialog,
+        private interactionService: InteractionService) { }
 
 
     ngOnInit() {
         this.initDataSource();
         // No cargar datos inicialmente
+        
+        // Suscribirse a eventos de eliminación de prescripciones
+        this.interactionService.deletePrescription$
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(prescription => {
+                // Recargar los datos si estamos viendo prescripciones
+                if (this.selectedType === 'receta') {
+                    this.loadPrescriptions();
+                }
+            });
     }
 
     // Cargar datos según el tipo seleccionado
@@ -349,6 +361,25 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         const dialogRef = this.dialog.open(ProfessionalDialogComponent, {
             width: '400px',
             data: { dialogType: aDialogType, item: aItem, text: aText }
+        });
+
+        // Manejar el resultado del dialog
+        dialogRef.afterClosed().subscribe(result => {
+            if (result === 'deleted') {
+                // Mostrar mensaje de éxito
+                this.openSuccessDialog('deleted');
+            } else if (result === 'error') {
+                // Mostrar mensaje de error
+                this.openSuccessDialog('error-dispensed');
+            }
+        });
+    }
+
+    // Método para mostrar mensajes de éxito o error
+    private openSuccessDialog(dialogType: string): void {
+        this.dialog.open(ProfessionalDialogComponent, {
+            width: '400px',
+            data: { dialogType: dialogType }
         });
     }
 

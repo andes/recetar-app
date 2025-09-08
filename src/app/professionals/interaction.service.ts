@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 import { Prescriptions } from '@interfaces/prescriptions';
 import { Certificate } from '@interfaces/certificate';
+import { PrescriptionsService } from '@services/prescriptions.service';
 
 @Injectable({
     providedIn: 'root'
@@ -12,9 +13,16 @@ export class InteractionService {
 
     deletePrescription$ = this._deletePrescriptionSource.asObservable();
     deleteCertificate$ = this._deleteCertificateSource.asObservable();
-    constructor() { }
+    
+    constructor(private prescriptionsService: PrescriptionsService) { }
 
-    deletePrescription(prescription: Prescriptions) {
+    deletePrescription(prescription: Prescriptions): Observable<Boolean> {
+        // Eliminar la prescripción mediante el servicio
+        return this.prescriptionsService.deletePrescription(prescription._id);
+    }
+
+    // Método para emitir el evento después de la eliminación exitosa
+    emitPrescriptionDeleted(prescription: Prescriptions) {
         this._deletePrescriptionSource.next(prescription);
     }
 

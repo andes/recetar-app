@@ -12,10 +12,11 @@ import { ProfessionalDialogComponent } from '@professionals/components/professio
 import { MatDialog } from '@angular/material/dialog';
 import { InteractionService } from '@professionals/interaction.service';
 import { step, stepLink } from '@animations/animations.template';
-import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
+import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
 import { fadeOutCollapseOnLeaveAnimation } from 'angular-animations';
 import { CertificatesService } from '@services/certificates.service';
 import { PrescriptionsListComponent } from '@professionals/components/prescriptions-list/prescriptions-list.component';
+import { Subject } from 'rxjs';
 
 
 @Component({
@@ -52,6 +53,7 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
     }
     @ViewChild('dni', { static: true }) dni: any;
 
+    private destroy$ = new Subject<void>();
     professionalForm: FormGroup;
 
     filteredSupplies = [];
@@ -104,9 +106,13 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
         this.initProfessionalForm();
         // On confirm delete prescription
         this._interactionService.deletePrescription$
+            .pipe(takeUntil(this.destroy$))
             .subscribe(
                 prescription => {
-                    this.deletePrescription(prescription);
+                    // Solo actualizar la lista si está visible
+                    if (this.prescriptionsList && this.currentTab === 'list') {
+                        this.prescriptionsList.loadDataForSelectedType();
+                    }
                 }
             );
 
@@ -155,6 +161,8 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
 
     // eslint-disable-next-line @angular-eslint/use-lifecycle-interface
     ngOnDestroy() {
+        this.destroy$.next();
+        this.destroy$.complete();
         if (this.certificateSubscription) {
             this.certificateSubscription.unsubscribe();
         }
@@ -289,16 +297,6 @@ export class ProfessionalFormComponent implements OnInit, AfterViewInit {
         this.openDialog('created');
         this.clearForm(professionalNgForm);
         this.isSubmit = false;
-    }
-
-    deletePrescription(prescription: Prescriptions) {
-        this.apiPrescriptions.deletePrescription(prescription._id).subscribe(
-            success => {
-            },
-            err => {
-                this.openDialog('error-dispensed');
-            }
-        );
     }
 
     // Show a dialog
