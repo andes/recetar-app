@@ -16,7 +16,8 @@ export class Patient {
       nombre?: string;
       codigoPuco?: string;
       numeroAfiliado?: string;
-    }
+    },
+    public idMPI?: string,
     ) {}
 }
 
