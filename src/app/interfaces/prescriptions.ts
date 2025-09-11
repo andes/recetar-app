@@ -3,6 +3,7 @@ import { Patient } from '@interfaces/patients';
 
 export class Prescriptions {
     _id: string;
+    prescriptionId?: string;
     patient: Patient;
     professional: {
         userId: string;
