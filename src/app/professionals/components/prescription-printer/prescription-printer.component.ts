@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { PdfMakeWrapper, Txt, Canvas, Line, Img, Columns, Table } from 'pdfmake-wrapper';
+import { PdfMakeWrapper, Txt, Canvas, Line, Img, Columns, Table, Stack } from 'pdfmake-wrapper';
 import { DatePipe } from '@angular/common';
 import { Prescriptions } from '@interfaces/prescriptions';
 import { BarcodeService } from '@services/barcode.service';
@@ -59,6 +59,15 @@ export class PrescriptionPrinterComponent implements OnInit {
 
         const barcodeBase64 = await this.barcodeService.generateBarcodeBase64(prescription._id);
         const barcodeImg = await new Img(barcodeBase64).fit([230, 60]).alignment('center').margin([0, 20]).build();
+
+        // Segundo código de barras para prescriptionId
+        let prescriptionIdBarcodeImg = null;
+        let prescriptionIdLabel = null;
+        if (prescription.prescriptionId) {
+            const prescriptionIdBarcodeBase64 = await this.barcodeService.generateBarcodeBase64(prescription.prescriptionId);
+            prescriptionIdLabel = new Txt('Número de receta:').fontSize(9).bold().alignment('center').margin([0, 5, 0, 0]).end;
+            prescriptionIdBarcodeImg = await new Img(prescriptionIdBarcodeBase64).fit([230, 60]).alignment('center').margin([0, 5]).build();
+        }
         pdf.info({
             title: 'Receta digital ' + prescription.professional.businessName,
             author: 'RecetAR'
@@ -147,16 +156,33 @@ export class PrescriptionPrinterComponent implements OnInit {
         pdf.add(new Txt('\n').end);
         pdf.add(new Txt('\n').end);
 
-
         // Barcode
+        const barcodeElements = [barcodeImg];
+        if (prescriptionIdBarcodeImg) {
+            barcodeElements.push(prescriptionIdLabel);
+            barcodeElements.push(prescriptionIdBarcodeImg);
+        }
+
         pdf.add(new Columns([
-            barcodeImg,
-            new Txt([
-                { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
-                { text: '\n', fontSize: 3 },
-                { text: `\n ${prescription.professional.businessName}`, fontSize: 14, bold: true },
-                { text: `\n MP ${prescription.professional.enrollment}`, bold: true, fontSize: 9 }
-            ]).alignment('center').end]).end);
+            {
+                stack: [barcodeImg],
+                alignment: 'left',
+                width: '55%'
+            },
+            {
+                stack: prescriptionIdBarcodeImg ? [prescriptionIdLabel, prescriptionIdBarcodeImg] : [],
+                alignment: 'right',
+                width: '45%'
+            }
+        ]).alignment('center').width('100%').end);
+
+        pdf.add(new Txt([
+            { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
+            { text: '\n', fontSize: 3 },
+            { text: `\n ${prescription.professional.businessName}`, fontSize: 14, bold: true },
+            { text: `\n MP ${prescription.professional.enrollment}`, bold: true, fontSize: 9 }
+        ]).alignment('center').margin([0, 25, 0, 0]).end);
+
         // Pharmacy
         if (prescription.status === 'Dispensada') {
             pdf.add(new Columns([new Txt('Dispensado por').bold().end, new Txt('CUIL').bold().end]).end);
@@ -164,12 +190,9 @@ export class PrescriptionPrinterComponent implements OnInit {
             pdf.add(new Txt(`Fecha dispensación: ${this.datePipe.transform(prescription.dispensedAt, 'dd/MM/yyyy')}`).end);
         }
 
-
         pdf.footer(new Txt([
             { text: 'Esta receta fue creada por emisor inscripto y válido en el Registro de Recetarios Electrónicos \n del Ministerio de Salud de la Nación - ', italics: true },
             { text: 'RL-2025-63212094-APN-SSVEIYES#MS', bold: true }
         ]).fontSize(11).alignment('center').end);
-
     }
-
 }
