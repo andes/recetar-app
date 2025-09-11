@@ -5,7 +5,7 @@
             <span>
                 Recetas <span *ngIf="dataSource.data.length && dataSource.data[0].patient"> de
                     {{dataSource.data[0].patient.lastName}},
-                    {{dataSource.data[0].patient.firstName}} DNI {{dataSource.data[0].patient.dni}}</span>
+                    {{dataSource.data[0].patient | patientName}} DNI {{dataSource.data[0].patient.dni}}</span>
                 <span *ngIf="dataSource.data.length && dataSource.data[0].paciente"> de
                     {{dataSource.data[0].paciente.apellido}},
                     {{dataSource.data[0].paciente.nombre}} DNI {{dataSource.data[0].paciente.documento}}</span>

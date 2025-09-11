@@ -46,7 +46,7 @@
     <div *ngSwitchCase="'delete'">
         <h3 mat-dialog-title><mat-icon>delete</mat-icon> Desea eliminar la receta?</h3>
         <div mat-dialog-content>
-            <p>Receta de {{data.item.patient.lastName}}, {{data.item.patient?.firstName}}</p>
+            <p>Receta de {{data.item.patient.lastName}}, {{data.item.patient | patientName}}</p>
             <p>Una vez eliminada no se podrá recuperar</p>
         </div>
         <div mat-dialog-actions fxLayoutAlign="space-around" align="end">

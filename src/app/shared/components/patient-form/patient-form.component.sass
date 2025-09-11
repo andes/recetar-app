@@ -1,0 +1,54 @@
+.patient-form-container
+  width: 100%
+  
+  .patient-container
+    margin-bottom: 10px
+    
+    mat-form-field
+      margin-bottom: 10px
+      
+      &:not(:last-child)
+        margin-right: 10px
+        
+        @media (max-width: 599px)
+          margin-right: 0
+  
+  .obra-social-section
+    margin-top: 15px
+    
+    mat-checkbox
+      margin-bottom: 15px
+      
+    .obra-social-container
+      mat-form-field
+        margin-bottom: 10px
+        
+        &:not(:last-child)
+          margin-right: 10px
+          
+          @media (max-width: 599px)
+            margin-right: 0
+
+// Responsive adjustments
+@media (max-width: 599px)
+  .patient-form-container
+    .patient-container
+      flex-direction: column !important
+      
+    .obra-social-section
+      .obra-social-container
+        flex-direction: column !important
+
+// Disabled field styling
+.patient-form-container
+  mat-form-field
+    &.mat-form-field-disabled
+      .mat-form-field-label
+        color: rgba(0, 0, 0, 0.38)
+        
+      .mat-input-element:disabled
+        color: rgba(0, 0, 0, 0.38)
+
+// Spinner alignment
+.mat-spinner
+  margin-right: 8px
