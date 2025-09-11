@@ -16,6 +16,17 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 
+function noWhitespaceValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+        if (!control.value) {
+            return null; 
+        }
+
+        const isWhitespace = (control.value || '').trim().length === 0;
+        return isWhitespace ? { 'whitespace': { value: control.value } } : null;
+    };
+}
+
 @Component({
     selector: 'app-certificate-form',
     templateUrl: './certificate-form.component.html',
@@ -50,6 +61,7 @@ export class CertificateFormComponent implements OnInit {
 
         return null;
     }
+    
     @ViewChild('dni', { static: true }) dni: any;
 
     certificateForm: FormGroup;
@@ -157,7 +169,7 @@ export class CertificateFormComponent implements OnInit {
                     Validators.required
                 ]],
             }),
-            certificate: ['', [Validators.required]],
+            certificate: ['', [Validators.required, noWhitespaceValidator()]],
             anulateReason: [''],
             startDate: [this.today, [
                 Validators.required,
