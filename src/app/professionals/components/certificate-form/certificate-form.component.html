@@ -119,7 +119,14 @@
                         <label style="margin-bottom: 5px;">Descripción*</label>
                         <mat-form-field appearance="fill" fxFlex="96.5">
                             <textarea matInput required rows="5" formControlName="certificate"></textarea>
+                            <mat-error *ngIf="certificateForm.get('certificate').hasError('required')">
+                                Debe ingresar una descripción
+                            </mat-error>
+                            <mat-error *ngIf="certificateForm.get('certificate').hasError('whitespace')">
+                                La descripción no puede contener sólo espacios en blanco
+                            </mat-error>
                         </mat-form-field>
+                          
                     </div>
 
                     <!-- Motivo de anulación - Fuera del grupo patient según FormBuilder -->
