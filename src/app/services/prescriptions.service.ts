@@ -2,10 +2,11 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, of } from 'rxjs';
-import { Prescriptions } from '../interfaces/prescriptions';
+import { Prescriptions, PrescriptionsResponse } from '../interfaces/prescriptions';
 import { tap, mapTo, map } from 'rxjs/operators';
 import { saveAs } from 'file-saver';
 import * as moment from 'moment';
+import { AmbitoService } from '../auth/services/ambito.service';
 
 @Injectable({
     providedIn: 'root'
@@ -17,7 +18,7 @@ export class PrescriptionsService {
     private searchTimeout: any = null;
     private searchSubscription: any = null;
 
-    constructor(private http: HttpClient) {
+    constructor(private http: HttpClient, private ambitoService: AmbitoService) {
         this.myPrescriptions = new BehaviorSubject<Prescriptions[]>(this.prescriptionsArray);
     }
 
@@ -55,20 +56,32 @@ export class PrescriptionsService {
         );
     }
 
-    getByUserId(userId: string, params?: { offset?: number; limit?: number }): Observable<{ prescriptions: Prescriptions[]; total: number; offset: number; limit: number }> {
-        const queryParams = params || {};
-        return this.http.get<{ prescriptions: Prescriptions[]; total: number; offset: number; limit: number }>(`${environment.API_END_POINT}/prescriptions/user/${userId}`, { params: queryParams }).pipe(
-            tap((response) => this.setPrescriptions(response.prescriptions))
+    getByUserId(userId: string, params?: { offset?: number; limit?: number }): Observable<PrescriptionsResponse> {
+        const queryParams = {
+            ...(params || {}),
+            ambito: this.ambitoService.getAmbito() || 'privado'
+        };
+        return this.http.get<PrescriptionsResponse>(`${environment.API_END_POINT}/prescriptions/user/${userId}`, { params: queryParams }).pipe(
+            tap((response) => this.setPrescriptions(response.prescriptions as Prescriptions[]))
         );
     }
 
-    searchByTerm(userId: string, params?: { searchTerm?: string; offset?: number; limit?: number }): Observable<{ prescriptions: Prescriptions[]; total: number; offset: number; limit: number }> {
-        const queryParams = params || {};
+    searchByTerm(userId: string, params?: { searchTerm?: string; offset?: number; limit?: number }): Observable<PrescriptionsResponse> {
+        const queryParams = {
+            ...(params || {}),
+            ambito: this.ambitoService.getAmbito() || 'privado'
+        };
         const searchTerm = queryParams.searchTerm || '';
 
         // Verificar que haya al menos 3 caracteres para buscar
         if (searchTerm && searchTerm.length < 3) {
-            return of({ prescriptions: [], total: 0, offset: queryParams.offset || 0, limit: queryParams.limit || 10 });
+            return of({
+                prescriptions: [],
+                total: 0,
+                offset: queryParams.offset || 0,
+                limit: queryParams.limit || 10,
+                sources: { local: 0, andes: 0 }
+            });
         }
 
         // Cancelar timeout anterior si existe
@@ -85,11 +98,11 @@ export class PrescriptionsService {
         // Crear un nuevo Observable que espere 500ms antes de hacer la llamada
         return new Observable(observer => {
             this.searchTimeout = setTimeout(() => {
-                this.searchSubscription = this.http.get<{ prescriptions: Prescriptions[]; total: number; offset: number; limit: number }>(
+                this.searchSubscription = this.http.get<PrescriptionsResponse>(
                     `${environment.API_END_POINT}/prescriptions/user/${userId}/search`,
                     { params: queryParams }
                 ).pipe(
-                    tap((response) => this.setPrescriptions(response.prescriptions))
+                    tap((response) => this.setPrescriptions(response.prescriptions as Prescriptions[]))
                 ).subscribe({
                     next: (response) => {
                         observer.next(response);
