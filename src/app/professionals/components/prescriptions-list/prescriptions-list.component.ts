@@ -3,6 +3,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { PrescriptionsService } from '@services/prescriptions.service';
+import { AndesPrescriptionsService } from '@services/andesPrescription.service';
 import { Prescriptions } from '@interfaces/prescriptions';
 import AndesPrescriptions from '@interfaces/andesPrescriptions';
 import { AndesPrescriptionPrinterComponent } from '@pharmacists/components/andes-prescription-printer/andes-prescription-printer.component';
@@ -81,6 +82,7 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
 
     constructor(
         private prescriptionService: PrescriptionsService,
+        private andesPrescriptionsService: AndesPrescriptionsService,
         private certificateService: CertificatesService,
         private practicesService: PracticesService,
         private authService: AuthService,
@@ -95,13 +97,13 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     ngOnInit() {
         this.initDataSource();
         // No cargar datos inicialmente
-        
+
         this.ambitoService.getAmbitoSeleccionado
             .pipe(takeUntil(this.destroy$))
             .subscribe(ambito => {
                 this.ambito = ambito;
             });
-        
+
         // Suscribirse a eventos de eliminación de prescripciones
         this.interactionService.deletePrescription$
             .pipe(takeUntil(this.destroy$))
@@ -347,10 +349,35 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
 
     getPrescriptionStatus(item: MixedPrescription): string {
         if (this.isAndesPrescription(item)) {
-            return item.estadoActual.tipo;
+            return this.normalizeStatus(item.estadoActual.tipo);
         } else {
-            return item.status;
+            return this.normalizeStatus(item.status);
         }
+    }
+
+    // Método para normalizar los estados y mostrarlos en mayúsculas con equivalencias de Andes
+    private normalizeStatus(status: string): string {
+        if (!status) {
+            return '';
+        }
+
+        const statusLower = status.toLowerCase();
+
+        // Mapeo de estados: Todo se normaliza a la nomenclatura de Andes en mayúsculas
+        const statusMap: { [key: string]: string } = {
+            // Estados de Andes (ya normalizados)
+            'vigente': 'VIGENTE',
+            'finalizada': 'FINALIZADA',
+            'vencida': 'VENCIDA',
+            'suspendida': 'SUSPENDIDA',
+            'rechazada': 'RECHAZADA',
+
+            // Estados locales mapear a equivalentes de Andes
+            'pendiente': 'VIGENTE',
+            'dispensada': 'FINALIZADA'
+        };
+
+        return statusMap[statusLower] || status.toUpperCase();
     }
 
     getPrescriptionId(item: MixedPrescription): string {
@@ -390,18 +417,25 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     canPrint(prescription: MixedPrescription): boolean {
         if (this.isAndesPrescription(prescription)) {
             // Las prescripciones de ANDES se pueden imprimir si no están vencidas
-            return prescription.estadoActual.tipo !== 'vencida';
+            return !['VENCIDA', 'SUSPENDIDA', 'FINALIZADA'].includes(this.normalizeStatus(prescription.estadoActual.tipo));
         } else {
-            return (prescription.professional.userId === this.authService.getLoggedUserId()) && prescription.status !== 'Vencida';
+            return (prescription.professional.userId === this.authService.getLoggedUserId()) && this.normalizeStatus(prescription.status) !== 'VENCIDA' && this.normalizeStatus(prescription.status) !== 'SUSPENDIDA';
         }
     }
     canDelete(prescription: MixedPrescription): boolean {
         if (this.isAndesPrescription(prescription)) {
-            // Las prescripciones de ANDES no se pueden eliminar desde esta app
-            return false;
+            // Las prescripciones de ANDES se pueden suspender si están vigentes y el profesional es el autor
+            return this.canSuspendAndesPrescription(prescription);
         } else {
-            return (prescription.professional.userId === this.authService.getLoggedUserId() && prescription.status === 'Pendiente');
+            return (prescription.professional.userId === this.authService.getLoggedUserId() && this.normalizeStatus(prescription.status) === 'VIGENTE');
         }
+    }
+
+    canSuspendAndesPrescription(prescription: AndesPrescriptions): boolean {
+        // Solo verificar si el estado actual es vigente
+        const isVigente = this.normalizeStatus(prescription.estadoActual?.tipo) === 'VIGENTE';
+
+        return isVigente;
     }
 
     printPrescription(prescription: MixedPrescription) {
@@ -418,13 +452,37 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
 
     isStatus(prescription: MixedPrescription, status: string): boolean {
         const currentStatus = this.getPrescriptionStatus(prescription);
-        return currentStatus === status;
+        return currentStatus === status.toUpperCase();
     }
 
     deleteDialogPrescription(prescription: MixedPrescription) {
         if (this.isLocalPrescription(prescription)) {
             this.openDialog('delete', prescription);
+        } else if (this.isAndesPrescription(prescription)) {
+            this.openDialog('suspend_andes', prescription);
         }
+    }
+
+    suspendAndesPrescription(prescription: AndesPrescriptions) {
+        const profesionalId = this.authService.getLoggedUserId();
+        const recetaId = prescription._id;
+        this.andesPrescriptionsService.suspendPrescription(recetaId, profesionalId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: () => {
+                    this.openSuccessDialog('suspend_andes_success');
+                    // Recargar los datos si estamos viendo prescripciones
+                    if (this.selectedType === 'receta') {
+                        this.loadPrescriptions(
+                            this.prescriptionsPageIndex * this.prescriptionsPageSize,
+                            this.prescriptionsPageSize
+                        );
+                    }
+                },
+                error: (error) => {
+                    this.openSuccessDialog('suspend_andes_error');
+                }
+            });
     }
 
     anulateDialogCertificate(certificate: Certificate) {
@@ -459,6 +517,9 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
             } else if (result === 'error') {
                 // Mostrar mensaje de error
                 this.openSuccessDialog('error-dispensed');
+            } else if (result === 'suspend_andes') {
+                // Suspender prescripción de ANDES
+                this.suspendAndesPrescription(aItem as AndesPrescriptions);
             }
         });
     }
@@ -515,12 +576,12 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     }
 
     getCertificateStatus(certificate: Certificate): string {
-        if (certificate.anulateDate ) {
+        if (certificate.anulateDate) {
             return 'anulado';
         }
         const currentDate = new Date();
         const endDate = new Date(certificate.endDate);
-        
+
         if (currentDate > endDate) {
             return 'expirado';
         }
