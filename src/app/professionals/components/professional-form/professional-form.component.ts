@@ -273,7 +273,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
                 os: this.fBuilder.group({
                     nombre: [''],
                     codigoPuco: [''],
-                    numeroAfiliado: [{ value: '', disabled: true }]
+                    numeroAfiliado: [{ value: '', disabled: true }, [Validators.required, Validators.pattern('^[0-9]*$')]]
                 }),
                 fechaNac: ['', this.ambito === 'publico' ? [
                     Validators.required,
