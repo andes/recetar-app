@@ -251,6 +251,9 @@
                                                     <mat-error *ngIf="control.get('supply.name').hasError('required')">
                                                         Debe seleccionar un insumo
                                                     </mat-error>
+                                                    <mat-error *ngIf="control.get('supply.name').hasError('medicationNotSelected')">
+                                                        Debe seleccionar un medicamento de la lista desplegable
+                                                    </mat-error>
                                                     <mat-error *ngIf="control.get('supply.name').hasError('invalid')">
                                                         {{ control.get('supply').getError('invalid') }}
                                                     </mat-error>
@@ -329,6 +332,9 @@
                                                     formControlName="diagnostic" required></textarea>
                                                 <mat-error *ngIf="control.get('diagnostic').hasError('required')">
                                                     Debe ingresar un diagnóstico
+                                                </mat-error>
+                                                <mat-error *ngIf="control.get('diagnostic').hasError('whitespace')">
+                                                    El diagnóstico no puede contener solo espacios en blanco
                                                 </mat-error>
                                             </mat-form-field>
                                             <mat-form-field appearance="fill">

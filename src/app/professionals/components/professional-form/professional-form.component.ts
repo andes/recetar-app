@@ -50,6 +50,37 @@ function validDateValidator(): ValidatorFn {
     };
 }
 
+function medicationSelectedValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+        if (!control.value) {
+            return null; 
+        }
+
+        const supplyGroup = control.parent;
+        if (!supplyGroup) {
+            return null;
+        }
+
+        const snomedConcept = supplyGroup.get('snomedConcept');
+        if (!snomedConcept || !snomedConcept.value || !snomedConcept.value.conceptId) {
+            return { 'medicationNotSelected': { value: control.value } };
+        }
+
+        return null;
+    };
+}
+
+function noWhitespaceValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+        if (!control.value) {
+            return null; 
+        }
+
+        const isWhitespace = (control.value || '').trim().length === 0;
+        return isWhitespace ? { 'whitespace': { value: control.value } } : null;
+    };
+}
+
 @Component({
     selector: 'app-professional-form',
     templateUrl: './professional-form.component.html',
@@ -490,13 +521,16 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
                 semanticTag: supply.semanticTag
             }
         });
+
+        supplyControl.get('name').updateValueAndValidity();
     }
 
     addSupply() {
         const supplies = this.fBuilder.group({
             supply: this.fBuilder.group({
                 name: ['', [
-                    Validators.required
+                    Validators.required,
+                    medicationSelectedValidator()
                 ]],
                 snomedConcept:
                     this.fBuilder.group({
@@ -514,7 +548,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
                 Validators.required,
                 Validators.min(1)
             ]],
-            diagnostic: ['', [Validators.required]],
+            diagnostic: ['', [Validators.required, noWhitespaceValidator()]],
             indication: [''],
             duplicate: [false],
             trimestral: [false],
@@ -539,20 +573,30 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     subscribeToSupplyChanges(control: FormGroup, index: number) {
         control.get('supply.name').valueChanges.pipe(
             debounceTime(300),
-            distinctUntilChanged(),
-            filter((supply: string) => typeof supply === 'string' && supply.length > 3),
-            switchMap((supply: string) => {
-                this.supplySpinner[index] = { show: true };
-                return this.snomedSuppliesService.get(supply).pipe(
-                    catchError(() => {
+            distinctUntilChanged()
+        ).subscribe((supply: string) => {
+            if (typeof supply === 'string') {
+                const snomedConcept = control.get('supply.snomedConcept');
+                const currentConceptId = snomedConcept?.get('conceptId')?.value;
+                
+                if (currentConceptId && supply !== snomedConcept?.get('term')?.value) {
+                    snomedConcept.reset();
+                    control.get('supply.name').updateValueAndValidity();
+                }
+                
+                if (supply.length > 3) {
+                    this.supplySpinner[index] = { show: true };
+                    this.snomedSuppliesService.get(supply).pipe(
+                        catchError(() => {
+                            this.supplySpinner[index] = { show: false };
+                            return of([]);
+                        })
+                    ).subscribe((res) => {
                         this.supplySpinner[index] = { show: false };
-                        return of([]);
-                    })
-                );
-            })
-        ).subscribe((res) => {
-            this.supplySpinner[index] = { show: false };
-            this.filteredSupplies = [...res];
+                        this.filteredSupplies = [...res];
+                    });
+                }
+            }
         });
     }
 
