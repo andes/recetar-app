@@ -31,7 +31,7 @@
         <div class="info-grid">
           <div class="info-item">
             <label>Nombre:</label>
-            <span>{{ practice.patient.firstName && practice.patient.lastName ? practice.patient.firstName + ' ' +
+            <span>{{ practice.patient.firstName && practice.patient.lastName ? (practice.patient | patientName) + ' ' +
               practice.patient.lastName : '- sin especificar -' }}</span>
           </div>
           <div class="info-item">

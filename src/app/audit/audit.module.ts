@@ -32,42 +32,44 @@ import { UsersListComponent } from './components/user-list/users-list.component'
 import { PrescriptionListComponent } from './components/prescription-list/prescription-list.component';
 import { FormatTimePipe } from './pipes/format-time.pipe';
 import { DialogReportComponent } from './components/dialog-report/dialog-report.component';
+import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 
 @NgModule({
-  declarations: [
-    routingComponent,
-    UsersListComponent,
-    PrescriptionListComponent,
-    FormatTimePipe,
-    DialogReportComponent,
-  ],
-  imports: [
-    BrowserModule,
-    CommonModule,
-    AuditRoutingModule,
-    ReactiveFormsModule,
-    FormsModule,
-    HttpClientModule,
-    FlexLayoutModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatSelectModule,
-    MatAutocompleteModule,
-    MatMenuModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatListModule,
-    MatTableModule,
-    MatIconModule,
-    MatTooltipModule,
-    MatChipsModule,
-    MatSnackBarModule,
-    MatDialogModule,
-    MatProgressSpinnerModule,
-    MatSortModule,
-    MatPaginatorModule
-  ]
+    declarations: [
+        routingComponent,
+        UsersListComponent,
+        PrescriptionListComponent,
+        FormatTimePipe,
+        DialogReportComponent,
+    ],
+    imports: [
+        BrowserModule,
+        CommonModule,
+        AuditRoutingModule,
+        ReactiveFormsModule,
+        FormsModule,
+        HttpClientModule,
+        FlexLayoutModule,
+        MatCardModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatSelectModule,
+        MatAutocompleteModule,
+        MatMenuModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatListModule,
+        MatTableModule,
+        MatIconModule,
+        MatTooltipModule,
+        MatChipsModule,
+        MatSnackBarModule,
+        MatDialogModule,
+        MatProgressSpinnerModule,
+        MatSortModule,
+        MatPaginatorModule
+    ],
+    providers: [PatientNamePipe]
 })
 export class AuditModule { }
