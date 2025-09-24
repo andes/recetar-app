@@ -32,42 +32,45 @@ import { PrescriptionListComponent } from './components/prescription-list/prescr
 import { PrescriptionUndoComponent } from './components/prescription-undo/prescription-undo.component';
 import { FormatTimePipe } from './pipes/format-time.pipe';
 import { DialogReportComponent } from './components/dialog-report/dialog-report.component';
-
+import { SharedModule } from '@shared/shared.module';
+import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 @NgModule({
-  declarations: [
-    routingComponent,
-    PrescriptionListComponent,
-    PrescriptionUndoComponent,
-    FormatTimePipe,
-    DialogReportComponent
-  ],
-  imports: [
-    BrowserModule,
-    CommonModule,
-    PharmacistsRoutingModule,
-    ReactiveFormsModule,
-    FormsModule,
-    HttpClientModule,
-    FlexLayoutModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatSelectModule,
-    MatAutocompleteModule,
-    MatMenuModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatListModule,
-    MatTableModule,
-    MatIconModule,
-    MatTooltipModule,
-    MatChipsModule,
-    MatSnackBarModule,
-    MatDialogModule,
-    MatProgressSpinnerModule,
-    MatSortModule,
-    MatPaginatorModule
-  ]
+    declarations: [
+        routingComponent,
+        PrescriptionListComponent,
+        PrescriptionUndoComponent,
+        FormatTimePipe,
+        DialogReportComponent
+    ],
+    imports: [
+        BrowserModule,
+        CommonModule,
+        PharmacistsRoutingModule,
+        ReactiveFormsModule,
+        FormsModule,
+        HttpClientModule,
+        FlexLayoutModule,
+        MatCardModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatSelectModule,
+        MatAutocompleteModule,
+        MatMenuModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatListModule,
+        MatTableModule,
+        MatIconModule,
+        MatTooltipModule,
+        MatChipsModule,
+        MatSnackBarModule,
+        MatDialogModule,
+        MatProgressSpinnerModule,
+        MatSortModule,
+        MatPaginatorModule,
+        SharedModule
+    ],
+    providers: [PatientNamePipe]
 })
 export class PharmacistsModule { }
