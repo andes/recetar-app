@@ -15,6 +15,7 @@ import { CertificatesService } from '@services/certificates.service';
 import { PracticesService } from '@services/practices.service';
 import { Certificate } from '@interfaces/certificate';
 import { Practice } from '@interfaces/practices';
+import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { InteractionService } from '@professionals/interaction.service';
@@ -83,19 +84,21 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         private certificatePracticePrinter: CertificatePracticePrinterComponent,
         public dialog: MatDialog,
         private interactionService: InteractionService,
-        private ambitoService: AmbitoService) { }
+        private ambitoService: AmbitoService,
+        private patientNamePipe: PatientNamePipe
+    ) { }
 
 
     ngOnInit() {
         this.initDataSource();
         // No cargar datos inicialmente
-        
+
         this.ambitoService.getAmbitoSeleccionado
             .pipe(takeUntil(this.destroy$))
             .subscribe(ambito => {
                 this.ambito = ambito;
             });
-        
+
         // Suscribirse a eventos de eliminación de prescripciones
         this.interactionService.deletePrescription$
             .pipe(takeUntil(this.destroy$))
@@ -278,7 +281,7 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         this.dataSource = new MatTableDataSource<Prescriptions>([]);
         this.dataSource.sortingDataAccessor = (item, property) => {
             switch (property) {
-                case 'patient': return item.patient.lastName + item.patient.firstName;
+                case 'patient': return item.patient.lastName + this.patientNamePipe.transform(item.patient);
                 case 'prescription_date': return new Date(item.date).getTime();
                 default: return item[property];
             }
@@ -288,7 +291,7 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         this.dataCertificates = new MatTableDataSource<Certificate>([]);
         this.dataCertificates.sortingDataAccessor = (item, property) => {
             switch (property) {
-                case 'patient': return item.patient.lastName + item.patient.firstName;
+                case 'patient': return item.patient.lastName + this.patientNamePipe.transform(item.patient);
                 case 'certificate_date': return new Date(item.createdAt).getTime();
                 default: return item[property];
             }
@@ -298,7 +301,7 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         this.dataPractices = new MatTableDataSource<Practice>([]);
         this.dataPractices.sortingDataAccessor = (item, property) => {
             switch (property) {
-                case 'patient': return item.patient.lastName + item.patient.firstName;
+                case 'patient': return item.patient.lastName + this.patientNamePipe.transform(item.patient);
                 case 'practice_date': return new Date(item.date).getTime();
                 default: return item[property];
             }
@@ -436,12 +439,12 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     }
 
     getCertificateStatus(certificate: Certificate): string {
-        if (certificate.anulateDate ) {
+        if (certificate.anulateDate) {
             return 'anulado';
         }
         const currentDate = new Date();
         const endDate = new Date(certificate.endDate);
-        
+
         if (currentDate > endDate) {
             return 'expirado';
         }
@@ -450,14 +453,14 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
 
     getCertificateStatusColor(certificate: Certificate): string {
         const status = this.getCertificateStatus(certificate);
-        
+
         switch (status) {
             case 'vigente':
-                return 'green'; 
+                return 'green';
             case 'expirado':
-                return 'orange'; 
+                return 'orange';
             case 'anulado':
-                return 'red'; 
+                return 'red';
             default:
                 return '#000000de';
         }
