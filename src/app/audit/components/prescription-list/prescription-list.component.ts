@@ -8,6 +8,7 @@ import { AuthService } from '@auth/services/auth.service';
 import { Prescriptions } from '@interfaces/prescriptions';
 import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unified-printer.component';
 import { PrescriptionsService } from '@services/prescriptions.service';
+import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 import * as moment from 'moment';
 import { DialogReportComponent } from '../dialog-report/dialog-report.component';
 
@@ -43,7 +44,8 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
         private authService: AuthService,
         private prescriptionService: PrescriptionsService,
         private unifiedPrinter: UnifiedPrinterComponent,
-        public dialog: MatDialog) { };
+        public dialog: MatDialog,
+        private patientNamePipe: PatientNamePipe) { };
 
     ngOnInit(): void {
         this.loadingPrescriptions = true;
@@ -52,7 +54,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
             // sort after populate dataSource
             this.dataSource.sortingDataAccessor = (item, property) => {
                 switch (property) {
-                    case 'patient': return item.patient.lastName + item.patient.firstName;
+                    case 'patient': return item.patient.lastName + this.patientNamePipe.transform(item.patient);
                     case 'prescription_date': return new Date(item.date).getTime();
                     default: return item[property];
                 }

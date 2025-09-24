@@ -22,7 +22,7 @@
         <div *ngIf="!selectedType" class="no-selection-message">
             <mat-card class="message-card">
                 <mat-card-content>
-                    <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="8px">
+                    <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="10px">
                         <mat-icon
                                   style="color: #757575; font-size: 24px; display: flex; justify-content: center; margin: 0;">info</mat-icon>
                         <h5 style="color: #757575; margin: 0;">Seleccione una tipo de registro para mostrar resultados
@@ -238,7 +238,8 @@
                         <ng-container matColumnDef="patient">
                             <th mat-header-cell *matHeaderCellDef> Paciente </th>
                             <td mat-cell *matCellDef="let element" class='title-cell' test data-label='Paciente'> {{
-                                element.patient.lastName.toUpperCase() }}, {{ element.patient.firstName.toUpperCase() }}
+                                element.patient.lastName.toUpperCase() }}, {{ (element.patient |
+                                patientName).toUpperCase() }}
                             </td>
                         </ng-container>
 
@@ -377,7 +378,8 @@
                         <ng-container matColumnDef="patient">
                             <th mat-header-cell *matHeaderCellDef> Paciente </th>
                             <td mat-cell *matCellDef="let element" class='title-cell' test data-label='Paciente'> {{
-                                element.patient.lastName.toUpperCase() }}, {{ element.patient.firstName.toUpperCase() }}
+                                element.patient.lastName.toUpperCase() }}, {{ (element.patient |
+                                patientName).toUpperCase() }}
                             </td>
                         </ng-container>
 
