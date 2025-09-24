@@ -4,6 +4,7 @@ import * as pdfFontsX from 'pdfmake-unicode/dist/pdfmake-unicode.js';
 import { DatePipe } from '@angular/common';
 import { Prescriptions } from '@interfaces/prescriptions';
 import { BarcodeService } from '@services/barcode.service';
+import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 
 PdfMakeWrapper.setFonts(pdfFontsX);
 
@@ -18,7 +19,8 @@ export class PrescriptionPrinterComponent implements OnInit {
 
     constructor(
         private datePipe: DatePipe,
-        private barcodeService: BarcodeService
+        private barcodeService: BarcodeService,
+        private patientNamePipe: PatientNamePipe
     ) { }
 
     ngOnInit(): void {
@@ -88,7 +90,7 @@ export class PrescriptionPrinterComponent implements OnInit {
         // Patient
         pdf.add(new Txt([
             { text: 'Paciente:   ' },
-            { text: `${prescription.patient.lastName.toUpperCase()} ${prescription.patient.firstName.toUpperCase()}`, bold: true }
+            { text: `${prescription.patient.lastName.toUpperCase()} ${this.patientNamePipe.transform(prescription.patient).toUpperCase()}`, bold: true }
         ]).end);
         pdf.add(new Txt('\n').end);
 

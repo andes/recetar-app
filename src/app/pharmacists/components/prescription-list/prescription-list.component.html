@@ -1,17 +1,17 @@
 <mat-card fxLayout="column" fxLayoutAlign="space-between">
     <mat-card-title>
-        <h2 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
-            <mat-icon>gesture</mat-icon>
-            <span>
-                Recetas <span *ngIf="dataSource.data.length && dataSource.data[0].patient"> de
-                    {{dataSource.data[0].patient.lastName}},
-                    {{dataSource.data[0].patient.firstName}} DNI {{dataSource.data[0].patient.dni}}</span>
-                <span *ngIf="dataSource.data.length && dataSource.data[0].paciente"> de
-                    {{dataSource.data[0].paciente.apellido}},
-                    {{dataSource.data[0].paciente.nombre}} DNI {{dataSource.data[0].paciente.documento}}</span>
-            </span>
-            <button mat-stroked-button (click)="generateReport()">Generar reporte</button>
-        </h2>
+        <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
+            <div fxFlex="75" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
+                <mat-icon>gesture</mat-icon>
+                <h2>
+                    Recetas <span *ngIf="selectedPatient"> de
+                        {{selectedPatient.lastName || selectedPatient.apellido}}, {{selectedPatient | patientName}} DNI {{selectedPatient.dni || selectedPatient.documento}}</span>
+                </h2>
+            </div>
+            <div fxFlex="25" fxLayout="row" fxLayoutAlign="end center">
+                <button mat-stroked-button (click)="generateReport()">Generar reporte</button>
+            </div>
+        </div>
     </mat-card-title>
     <mat-card-content>
 
