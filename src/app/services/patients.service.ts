@@ -3,7 +3,7 @@ import { environment } from '../../environments/environment';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, tap, map } from 'rxjs/operators';
 import { Observable, of, throwError } from 'rxjs';
-import { Patient, PatientAdapter } from "../interfaces/patients";
+import { Patient } from "../interfaces/patients";
 
 @Injectable({
   providedIn: 'root'
@@ -12,8 +12,6 @@ export class PatientsService {
 
   constructor(
     private http: HttpClient,
-    private adapter: PatientAdapter,
-
   ) { }
 
   getPatients(): Observable<any> {

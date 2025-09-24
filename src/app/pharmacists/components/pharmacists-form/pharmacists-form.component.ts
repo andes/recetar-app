@@ -17,6 +17,7 @@ import { Insurances } from '@interfaces/insurances';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogComponent } from '@pharmacists/components/dialog/dialog.component';
 import { ThemePalette } from '@angular/material/core';
+import { PatientsService } from '@services/patients.service';
 
 
 @Component({
@@ -48,9 +49,10 @@ export class PharmacistsFormComponent implements OnInit {
     private fBuilder: FormBuilder,
     private apiPrescriptions: PrescriptionsService,
     private apiAndesPrescriptions: AndesPrescriptionsService,
+    private patientsService: PatientsService,
     private apiInsurances: InsurancesService,
     public dialog: MatDialog,
-  ){}
+  ) { }
 
   ngOnInit(): void {
     this.initFilterPrescriptionForm();
@@ -58,16 +60,17 @@ export class PharmacistsFormComponent implements OnInit {
 
   searchPrescriptions(): void {
     const values = this.prescriptionForm.value;
-    const digestDate = typeof(values.dateFilter) !== 'undefined' && values.dateFilter != null && values.dateFilter !== '' ? values.dateFilter.format('YYYY-MM-DD') : '';
+    const digestDate = typeof (values.dateFilter) !== 'undefined' && values.dateFilter != null && values.dateFilter !== '' ? values.dateFilter.format('YYYY-MM-DD') : '';
 
-    if (typeof(values.patient_dni) !== 'undefined' && values.patient_dni.length >= 7) {
+    if (typeof (values.patient_dni) !== 'undefined' && values.patient_dni.length >= 7) {
       this.dniShowSpinner = this.lastDni != values.patient_dni;
       this.dateShowSpinner = this.lastDate != digestDate;
 
       forkJoin([
         this.apiPrescriptions.getFromDniAndDate({ patient_dni: values.patient_dni, dateFilter: digestDate }).pipe(catchError(() => of(false))),
-        this.apiAndesPrescriptions.getPrescriptionsFromAndes({ patient_dni: values.patient_dni, patient_sex: values.patient_sexo }).pipe(catchError(() => of(false)))
-      ]).subscribe(([prescriptionsSuccess, andesPrescriptionsSuccess]) => {
+        this.apiAndesPrescriptions.getPrescriptionsFromAndes({ patient_dni: values.patient_dni, patient_sex: values.patient_sexo }).pipe(catchError(() => of(false))),
+        this.patientsService.getPatientByDni(values.patient_dni)
+      ]).subscribe(([prescriptionsSuccess, andesPrescriptionsSuccess, patientSuccess]) => {
         this.lastDni = values.patient_dni;
         this.lastDate = digestDate;
         this.dniShowSpinner = false;
@@ -75,20 +78,13 @@ export class PharmacistsFormComponent implements OnInit {
         if (!prescriptionsSuccess && !andesPrescriptionsSuccess) {
           this.openDialog("noPrescriptions");
         }
-      });
 
-      // if (values.patient_dni !== this.lastDniConsult) {
-      //   this.lastDniConsult = values.patient_dni;
-      //   this.apiInsurances.getInsuranceByPatientDni(values.patient_dni).subscribe(
-      //     res => {
-      //       this.insurances = res;
-      //     }
-      //   );
-      // }
+        this.patient = patientSuccess[0]
+      });
     }
   }
 
-  initFilterPrescriptionForm(){
+  initFilterPrescriptionForm() {
     this.prescriptionForm = this.fBuilder.group({
       patient_dni: ['', [
         Validators.required,
@@ -101,7 +97,7 @@ export class PharmacistsFormComponent implements OnInit {
   }
 
   // clear dapicker input
-  cleanDateEvent(){
+  cleanDateEvent() {
     this.dateFilter.setValue('');
   }
 
@@ -109,7 +105,7 @@ export class PharmacistsFormComponent implements OnInit {
   openDialog(aDialogType: string, aPrescription?: Prescriptions, aText?: string): void {
     const dialogRef = this.dialog.open(DialogComponent, {
       width: '400px',
-      data: {dialogType: aDialogType, prescription: aPrescription, text: aText }
+      data: { dialogType: aDialogType, prescription: aPrescription, text: aText }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -118,15 +114,15 @@ export class PharmacistsFormComponent implements OnInit {
   }
 
 
-  get patient_dni(): AbstractControl{
+  get patient_dni(): AbstractControl {
     return this.prescriptionForm.get('patient_dni');
   }
 
-  get patient_sexo(): AbstractControl{
+  get patient_sexo(): AbstractControl {
     return this.prescriptionForm.get('patient_sexo');
   }
 
-  get dateFilter(): AbstractControl{
+  get dateFilter(): AbstractControl {
     return this.prescriptionForm.get('dateFilter');
   }
 }

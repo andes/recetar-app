@@ -9,8 +9,10 @@ import { Practice } from '@interfaces/practices';
 import { BarcodeService } from '@services/barcode.service';
 import { CertificatesService } from '@services/certificates.service';
 import { PracticesService } from '@services/practices.service';
+import { PatientsService } from '@services/patients.service';
 import * as QRCode from 'qrcode';
 import { environment } from '../../../../environments/environment';
+import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 
 PdfMakeWrapper.setFonts(pdfFontsX);
 
@@ -21,9 +23,11 @@ export class UnifiedPrinterComponent {
 
     constructor(
         private datePipe: DatePipe,
+        private patientNamePipe: PatientNamePipe,
         private barcodeService: BarcodeService,
         private certificatesService: CertificatesService,
-        private practicesService: PracticesService
+        private practicesService: PracticesService,
+        private patientsService: PatientsService
     ) { }
 
     private async _generatePdf(buildFunction: (pdf: PdfMakeWrapper) => Promise<void> | void) {
@@ -92,45 +96,14 @@ export class UnifiedPrinterComponent {
         pdf.add(new Txt('\n').end);
 
         // Patient
-        pdf.add(new Txt([
-            { text: 'Paciente:   ' },
-            { text: `${prescription.patient.lastName.toUpperCase()} ${prescription.patient.firstName.toUpperCase()}`, bold: true }
-        ]).end);
-        pdf.add(new Txt('\n').end);
-
-        pdf.add(new Txt([
-            { text: 'DNI:    ' },
-            { text: `${prescription.patient.dni}`, bold: true }
-        ]).end);
-        pdf.add(new Txt('\n').end);
-        if (prescription.patient.fechaNac) {
-            pdf.add(new Txt([
-                { text: 'Fecha Nacimiento:    ' },
-                { text: `${this.datePipe.transform(prescription.patient.fechaNac, 'dd/MM/yyyy')}`, bold: true }
-            ]).end);
-            pdf.add(new Txt('\n').end);
-        }
-        pdf.add(new Txt([
-            { text: 'Sexo:    ' },
-            { text: `${prescription.patient.sex}`, bold: true }
-        ]).end);
-        pdf.add(new Txt('\n').end);
-
-        let obraSocial = '';
-        let numeroAfiliado = '';
-        if (prescription.patient.obraSocial?.nombre) {
-            obraSocial = prescription.patient.obraSocial.nombre;
-            numeroAfiliado = prescription.patient.obraSocial.numeroAfiliado || '';
-        }
-        pdf.add(new Txt([
-            { text: 'Obra Social / Plan de salud :   ' }, { text: `${(obraSocial)}`, bold: true }
-        ]).end);
-        if (obraSocial) {
-            pdf.add(new Txt([
-                { text: 'Número de afiliado:   ' }, { text: `${numeroAfiliado || 'No informado'}`, bold: true }
-            ]).end);
-        }
-        pdf.add(new Txt('\n').end);
+        this.addPatientData(pdf, {
+            name: `${prescription.patient.lastName.toUpperCase()}, ${this.patientNamePipe.transform(prescription.patient).toUpperCase()}`,
+            dni: `${prescription.patient.dni}`,
+            dob: prescription.patient.fechaNac,
+            sex: `${prescription.patient.sex}`,
+            obraSocial: prescription.patient.obraSocial?.nombre,
+            affiliateNumber: prescription.patient.obraSocial?.numeroAfiliado
+        });
 
         pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
         pdf.add(new Txt('\n').end);
@@ -187,38 +160,18 @@ export class UnifiedPrinterComponent {
                 { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
                 { text: '\n', fontSize: 3 },
                 { text: `\n ${prescription.professional.businessName}`, fontSize: 14, bold: true },
-                { text: `\n ${prescription.professional?.profesionGrado?.length ?
-                prescription.professional.profesionGrado
-                    .map(g => `${g.profesion} MP ${g.numeroMatricula}`)
-                    .join('\n')
-                : (prescription.professional?.enrollment ? `MP ${prescription.professional.enrollment}\n` : '')
-            }`, bold: true, fontSize: 9 }            
-        ]).alignment('center').margin([0, 25, 0, 0]).end);
+                {
+                    text: `\n ${prescription.professional?.profesionGrado?.length ?
+                        prescription.professional.profesionGrado
+                            .map(g => `${g.profesion} MP ${g.numeroMatricula}`)
+                            .join('\n')
+                        : (prescription.professional?.enrollment ? `MP ${prescription.professional.enrollment}\n` : '')
+                        }`, bold: true, fontSize: 9
+                }
+            ]).alignment('center').margin([0, 25, 0, 0]).end);
         } else {
             // Si no hay prescriptionId, mostrar código de barras y firma en columnas
-            pdf.add(new Columns([
-                {
-                    stack: [barcodeImg],
-                    alignment: 'center',
-                    width: '50%'
-                },
-                {
-                    stack: [
-                        new Txt([
-                            { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
-                            { text: '\n', fontSize: 3 },
-                            { text: `\n ${prescription.professional.businessName}`, fontSize: 14, bold: true },
-  { text: `\n ${prescription.professional?.profesionGrado?.length ?
-                prescription.professional.profesionGrado
-                    .map(g => `${g.profesion} MP ${g.numeroMatricula}`)
-                    .join('\n')
-                : (prescription.professional?.enrollment ? `MP ${prescription.professional.enrollment}\n` : '')
-            }`, bold: true, fontSize: 9 }                          ]).alignment('center').margin([0, 25, 0, 0]).end
-                    ],
-                    alignment: 'center',
-                    width: '50%'
-                }
-            ]).alignment('center').width('100%').end);
+            this.addProfessionalSignature(pdf, prescription.professional, [barcodeImg]);
         }
 
         // Pharmacy
@@ -285,7 +238,7 @@ export class UnifiedPrinterComponent {
 
         pdf.add(new Columns([
             await new Img('assets/img/LogoPdf.jpg').fit([60, 60]).build(),
-            new Txt('RecetAR').bold().fontSize(20).alignment('center').end,
+            new Txt('RECETA').bold().fontSize(20).alignment('center').end,
             new Txt(label ? `${label}` : '').bold().italics().fontSize(20).alignment('right').opacity(0.6).end
         ]).end);
         pdf.add(new Txt('\n').end);
@@ -293,45 +246,17 @@ export class UnifiedPrinterComponent {
         pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
         pdf.add(new Txt('\n').end);
 
-        pdf.add(new Txt([
-            { text: 'Paciente:   ' },
-            { text: `${prescription.paciente.apellido.toUpperCase()} ${prescription.paciente.nombre.toUpperCase()}`, bold: true }
-        ]).end);
-        pdf.add(new Txt('\n').end);
+        const patients = await this.patientsService.getPatientByDni(prescription.paciente.documento).toPromise();
+        const patient = patients[0];
 
-        pdf.add(new Txt([
-            { text: 'DNI:    ' },
-            { text: `${prescription.paciente.documento}`, bold: true }
-        ]).end);
-        pdf.add(new Txt('\n').end);
-        if (prescription.paciente.fechaNacimiento) {
-            pdf.add(new Txt([
-                { text: 'Fecha Nacimiento:    ' },
-                { text: `${this.datePipe.transform(prescription.paciente.fechaNacimiento, 'dd/MM/yyyy')}`, bold: true }
-            ]).end);
-            pdf.add(new Txt('\n').end);
-        }
-        pdf.add(new Txt([
-            { text: 'Sexo:    ' },
-            { text: `${prescription.paciente.sexo}`, bold: true }
-        ]).end);
-        pdf.add(new Txt('\n').end);
-
-        let obraSocial = 'No informado';
-        let numeroAfiliado = '';
-        if (prescription.paciente.obraSocial) {
-            obraSocial = prescription.paciente.obraSocial.nombre ? prescription.paciente.obraSocial.nombre : 'No informado';
-            numeroAfiliado = obraSocial ? prescription.paciente.obraSocial.numeroAfiliado : '';
-        }
-        pdf.add(new Txt([
-            { text: 'Obra Social / Plan de salud :   ' }, { text: `${obraSocial}`, bold: true }
-        ]).end);
-        if (obraSocial) {
-            pdf.add(new Txt([
-                { text: 'Número de afiliado:' }, { text: `${numeroAfiliado || 'No informado'}`, bold: true }
-            ]).end);
-        }
-        pdf.add(new Txt('\n').end);
+        this.addPatientData(pdf, {
+            name: `${prescription.paciente.apellido.toUpperCase()}, ${this.patientNamePipe.transform(patient).toUpperCase()}`,
+            dni: `${prescription.paciente.documento}`,
+            dob: prescription.paciente.fechaNacimiento,
+            sex: `${prescription.paciente.sexo}`,
+            obraSocial: prescription.paciente.obraSocial?.nombre,
+            affiliateNumber: prescription.paciente.obraSocial?.numeroAfiliado
+        });
 
         pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
         pdf.add(new Txt('\n').end);
@@ -414,55 +339,20 @@ export class UnifiedPrinterComponent {
             const qrUrl = `${environment.FRONTEND_URL}/certificate/${encryptedId}`;
             const qrCodeImage = await this.generateQRCode(qrUrl);
 
-            pdf.add(new Columns([await new Img('assets/img/LogoPdf.jpg').fit([60, 60]).build(), new Txt('RecetAR').bold().fontSize(20).alignment('center').end, new Txt('').end]).end);
-            pdf.add(new Txt('\n').end);
-            pdf.add(new Txt('CERTIFICADO MÉDICO').bold().fontSize(16).alignment('center').end);
+            pdf.add(new Columns([await new Img('assets/img/LogoPdf.jpg').fit([60, 60]).build(), new Txt('CERTIFICADO MÉDICO').bold().fontSize(20).alignment('center').end, new Txt('').end]).end);
             pdf.add(new Txt('\n').end);
             pdf.add(new Txt(`Fecha: ${this.datePipe.transform(certificate.createdAt, 'dd/MM/yyyy')}`).alignment('right').end);
             pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
             pdf.add(new Txt('\n').end);
 
-            pdf.add(new Txt([
-                { text: 'Paciente: ' },
-                { text: `${certificate.patient.lastName.toUpperCase()} ${certificate.patient.firstName.toUpperCase()}`, bold: true }
-            ]).end);
-            pdf.add(new Txt('\n').end);
-
-            pdf.add(new Txt([
-                { text: 'DNI: ' },
-                { text: `${certificate.patient.dni}`, bold: true }
-            ]).end);
-            pdf.add(new Txt('\n').end);
-
-            if (certificate.patient.fechaNac) {
-                pdf.add(new Txt([
-                    { text: 'Fecha Nacimiento: ' },
-                    { text: `${this.datePipe.transform(certificate.patient.fechaNac, 'dd/MM/yyyy')}`, bold: true }
-                ]).end);
-                pdf.add(new Txt('\n').end);
-            }
-
-            pdf.add(new Txt([
-                { text: 'Sexo: ' },
-                { text: `${certificate.patient.sex}`, bold: true }
-            ]).end);
-            pdf.add(new Txt('\n').end);
-
-            let obraSocial = '';
-            let numeroAfiliado = '';
-            if (certificate.patient.obraSocial?.nombre) {
-                obraSocial = certificate.patient.obraSocial.nombre;
-                numeroAfiliado = certificate.patient.obraSocial.numeroAfiliado || '';
-            }
-            pdf.add(new Txt([
-                { text: 'Obra Social / Plan de salud: ' }, { text: `${obraSocial || 'No informado'}`, bold: true }
-            ]).end);
-            if (obraSocial) {
-                pdf.add(new Txt([
-                    { text: 'Número de afiliado: ' }, { text: `${numeroAfiliado || 'No informado'}`, bold: true }
-                ]).end);
-            }
-            pdf.add(new Txt('\n').end);
+            this.addPatientData(pdf, {
+                name: `${certificate.patient.lastName.toUpperCase()}, ${this.patientNamePipe.transform(certificate.patient).toUpperCase()}`,
+                dni: `${certificate.patient.dni}`,
+                dob: certificate.patient.fechaNac,
+                sex: `${certificate.patient.sex}`,
+                obraSocial: certificate.patient.obraSocial?.nombre,
+                affiliateNumber: certificate.patient.obraSocial?.numeroAfiliado
+            });
 
             if (certificate.startDate) {
                 pdf.add(new Txt([
@@ -497,37 +387,15 @@ export class UnifiedPrinterComponent {
             pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
             pdf.add(new Txt('\n').end);
 
-            pdf.add(new Columns([
-                {
-                    stack: [
-                        new Txt([
-                            { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
-                            { text: '\n', fontSize: 3 },
-                            { text: `\n ${certificate.professional.businessName}`, fontSize: 14, bold: true },
-                            { text: `\n ${certificate.professional?.profesionGrado?.length ?
-                                certificate.professional.profesionGrado
-                                    .map(g => `${g.profesion} MP ${g.numeroMatricula}`)
-                                    .join('\n')
-                                : (certificate.professional?.enrollment ? `MP ${certificate.professional.enrollment}\n` : '')
-                            }`, bold: true, fontSize: 9 }
-                        ]).alignment('center').margin([0, 25, 0, 0]).end
-                    ],
-                    alignment: 'center',
-                    width: '50%'
-                },
-                {
-                    stack: qrCodeImage ? [
-                        new Txt('Verificar autenticidad:').bold().alignment('center').end,
-                        new Txt('\n').end,
-                        await new Img(qrCodeImage).fit([100, 100]).alignment('center').link(qrUrl).build()
-                    ] : [],
-                    alignment: 'center',
-                    width: '50%'
-                }
-            ]).alignment('center').width('100%').end);
+            const qrStack = qrCodeImage ? [
+                new Txt('Verificar autenticidad:').bold().alignment('center').end,
+                new Txt('\n').end,
+                await new Img(qrCodeImage).fit([100, 100]).alignment('center').link(qrUrl).build()
+            ] : [];
+            this.addProfessionalSignature(pdf, certificate.professional, qrStack);
             pdf.footer(new Txt([
-            { text:'Este certificado fue emitido digitalmente a través de RecetAR - ', italics: true },
-            { text:`Fecha de emisión: ${this.datePipe.transform(certificate.createdAt, 'dd/MM/yyyy HH:mm')}`, bold: true }
+                { text: 'Este certificado fue emitido digitalmente a través de RecetAR - ', italics: true },
+                { text: `Fecha de emisión: ${this.datePipe.transform(certificate.createdAt, 'dd/MM/yyyy HH:mm')}`, bold: true }
             ]).fontSize(11).alignment('center').end);
         });
     }
@@ -544,9 +412,7 @@ export class UnifiedPrinterComponent {
             const qrUrl = `${environment.FRONTEND_URL}/practice/${encryptedId}`;
             const qrCodeImage = await this.generateQRCode(qrUrl);
 
-            pdf.add(new Columns([await new Img('assets/img/LogoPdf.jpg').fit([60, 60]).build(), new Txt('RecetAR').bold().fontSize(20).alignment('center').end, new Txt('').end]).end);
-            pdf.add(new Txt('\n').end);
-            pdf.add(new Txt('PRÁCTICA MÉDICA').bold().fontSize(16).alignment('center').end);
+            pdf.add(new Columns([await new Img('assets/img/LogoPdf.jpg').fit([60, 60]).build(), new Txt('PRÁCTICA MÉDICA').bold().fontSize(20).alignment('center').end, new Txt('').end]).end);
             pdf.add(new Txt('\n').end);
             pdf.add(new Txt(`Fecha: ${this.datePipe.transform(practice.date, 'dd/MM/yyyy')}`).alignment('right').end);
             pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
@@ -567,40 +433,14 @@ export class UnifiedPrinterComponent {
             pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
             pdf.add(new Txt('\n').end);
 
-            pdf.add(new Txt([
-                { text: 'Paciente: ' },
-                { text: `${practice.patient.lastName.toUpperCase()} ${practice.patient.firstName.toUpperCase()}`, bold: true }
-            ]).end);
-            pdf.add(new Txt('\n').end);
-
-            pdf.add(new Txt([
-                { text: 'DNI: ' },
-                { text: `${practice.patient.dni}`, bold: true }
-            ]).end);
-            pdf.add(new Txt('\n').end);
-
-            pdf.add(new Txt([
-                { text: 'Sexo: ' },
-                { text: `${practice.patient.sex}`, bold: true }
-            ]).end);
-            pdf.add(new Txt('\n').end);
-
-            let obraSocial = '';
-            let numeroAfiliado = '';
-
-            if (practice.patient.obraSocial?.nombre) {
-                obraSocial = practice.patient.obraSocial.nombre;
-                numeroAfiliado = practice.patient.obraSocial.numeroAfiliado || '';
-            }
-            pdf.add(new Txt([
-                { text: 'Obra Social / Plan de salud: ' }, { text: `${obraSocial || 'No informado'}`, bold: true }
-            ]).end);
-            if (obraSocial) {
-                pdf.add(new Txt([
-                    { text: 'Número de afiliado: ' }, { text: `${numeroAfiliado || 'No informado'}`, bold: true }
-                ]).end);
-            }
-            pdf.add(new Txt('\n').end);
+            this.addPatientData(pdf, {
+                name: `${practice.patient.lastName.toUpperCase()}, ${this.patientNamePipe.transform(practice.patient as any).toUpperCase()}`,
+                dni: `${practice.patient.dni}`,
+                dob: null,
+                sex: `${practice.patient.sex}`,
+                obraSocial: practice.patient.obraSocial?.nombre,
+                affiliateNumber: practice.patient.obraSocial?.numeroAfiliado
+            });
 
             pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
             pdf.add(new Txt('\n').end);
@@ -625,34 +465,12 @@ export class UnifiedPrinterComponent {
             pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
             pdf.add(new Txt('\n').end);
 
-            pdf.add(new Columns([
-                {
-                    stack: [
-                        new Txt([
-                            { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
-                            { text: '\n', fontSize: 3 },
-                            { text: `\n ${practice.professional.businessName}`, fontSize: 14, bold: true },
-                            { text: `\n ${practice.professional?.profesionGrado?.length ?
-                                practice.professional.profesionGrado
-                                    .map(g => `${g.profesion} MP ${g.numeroMatricula}`)
-                                    .join('\n')
-                                : (practice.professional?.enrollment ? `MP ${practice.professional.enrollment}\n` : '')
-                            }`, bold: true, fontSize: 9 }
-                        ]).alignment('center').margin([0, 25, 0, 0]).end
-                    ],
-                    alignment: 'center',
-                    width: '50%'
-                },
-                {
-                    stack: qrCodeImage ? [
-                        new Txt('Verificar autenticidad:').bold().alignment('center').end,
-                        new Txt('\n').end,
-                        await new Img(qrCodeImage).fit([100, 100]).alignment('center').link(qrUrl).build()
-                    ] : [],
-                    alignment: 'center',
-                    width: '50%'
-                }
-            ]).alignment('center').width('100%').end);
+            const qrStack = qrCodeImage ? [
+                new Txt('Verificar autenticidad:').bold().alignment('center').end,
+                new Txt('\n').end,
+                await new Img(qrCodeImage).fit([100, 100]).alignment('center').link(qrUrl).build()
+            ] : [];
+            this.addProfessionalSignature(pdf, practice.professional, qrStack);
             pdf.footer(new Txt([
                 { text: 'Esta receta fue creada por emisor inscripto y valido en el Registro de Recetarios Electrónicos \n del Ministerio de Salud de la Nación - ', italics: true },
                 { text: 'RL-2025-63212094-APN-SSVEIYES#MS', bold: true }
@@ -660,10 +478,10 @@ export class UnifiedPrinterComponent {
         });
     }
 
-    private addProfessionalSignature(pdf: PdfMakeWrapper, professional: any) {
+    private addProfessionalSignature(pdf: PdfMakeWrapper, professional: any, leftStack?: any[]) {
         pdf.add(new Columns([
             {
-                stack: [],
+                stack: leftStack || [],
                 alignment: 'center',
                 width: '50%'
             },
@@ -673,18 +491,58 @@ export class UnifiedPrinterComponent {
                         { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
                         { text: '\n', fontSize: 3 },
                         { text: `\n ${professional.businessName}`, fontSize: 14, bold: true },
-                        { text: `\n ${professional?.profesionGrado?.length ?
-                            professional.profesionGrado
-                                .map(g => `${g.profesion} MP ${g.numeroMatricula}`)
-                                .join('\n')
-                            : (professional?.enrollment ? `MP ${professional.enrollment}\n` : '')
-                        }`, bold: true, fontSize: 9 }
+                        {
+                            text: `\n ${professional?.profesionGrado?.length ?
+                                professional.profesionGrado
+                                    .map((g: any) => `${g.profesion} MP ${g.numeroMatricula}`)
+                                    .join('\n')
+                                : (professional?.enrollment ? `MP ${professional.enrollment}\n` : '')
+                                }`, bold: true, fontSize: 9
+                        }
                     ]).alignment('center').margin([0, 25, 0, 0]).end
                 ],
                 alignment: 'center',
                 width: '50%'
             }
         ]).alignment('center').width('100%').end);
+    }
+
+    private addPatientData(pdf: PdfMakeWrapper, data: { name: string, dni: string, dob?: Date | string, sex: string, obraSocial?: string, affiliateNumber?: string }) {
+        pdf.add(new Txt([
+            { text: 'Paciente:   ' },
+            { text: data.name, bold: true }
+        ]).end);
+        pdf.add(new Txt('\n').end);
+
+        pdf.add(new Txt([
+            { text: 'DNI:    ' },
+            { text: data.dni, bold: true }
+        ]).end);
+        pdf.add(new Txt('\n').end);
+
+        if (data.dob) {
+            pdf.add(new Txt([
+                { text: 'Fecha Nacimiento:    ' },
+                { text: this.datePipe.transform(data.dob, 'dd/MM/yyyy'), bold: true }
+            ]).end);
+            pdf.add(new Txt('\n').end);
+        }
+
+        pdf.add(new Txt([
+            { text: 'Sexo:    ' },
+            { text: data.sex, bold: true }
+        ]).end);
+        pdf.add(new Txt('\n').end);
+
+        pdf.add(new Txt([
+            { text: 'Obra Social / Plan de salud :   ' }, { text: data.obraSocial || 'No informado', bold: true }
+        ]).end);
+        if (data.obraSocial) {
+            pdf.add(new Txt([
+                { text: 'Número de afiliado:   ' }, { text: data.affiliateNumber || 'No informado', bold: true }
+            ]).end);
+        }
+        pdf.add(new Txt('\n').end);
     }
 
     private async generateQRCode(url: string): Promise<string> {

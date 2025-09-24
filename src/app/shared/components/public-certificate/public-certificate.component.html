@@ -48,7 +48,7 @@
                     <div class="info-item">
                         <label>Nombre:</label>
                         <span>{{ certificate.patient.firstName && certificate.patient.lastName ?
-                            certificate.patient.firstName + ' '
+                    (certificate.patient | patientName) + ' '
                             + certificate.patient.lastName : '- sin especificar -' }}</span>
                     </div>
                     <div class="info-item">
