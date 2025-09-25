@@ -47,12 +47,15 @@ export const stepLink =
       state('center-left', style({ left: '25%' })),
       state('center-right', style({ left: '50%' })),
       state('right', style({ left: '75%' })),
+      state('left-2', style({ left: '0px' })),
+      state('right-2', style({ left: '50%' })),
       transition('left <=> center-left', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
       transition('center-left <=> center-right', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
       transition('center-right <=> right', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
       transition('left <=> center-right', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
       transition('center-left <=> right', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
       transition('left <=> right', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+      transition('left-2 <=> right-2', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
   ]);
 
 export const showCancelDispense =
