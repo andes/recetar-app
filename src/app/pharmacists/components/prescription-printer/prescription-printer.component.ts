@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { PdfMakeWrapper, Txt, Canvas, Line, Img, Table, Columns } from 'pdfmake-wrapper';
+import { PdfMakeWrapper, Txt, Canvas, Line, Img, Table, Columns, Stack } from 'pdfmake-wrapper';
 import * as pdfFontsX from 'pdfmake-unicode/dist/pdfmake-unicode.js';
 import { DatePipe } from '@angular/common';
 import { Prescriptions } from '@interfaces/prescriptions';
@@ -62,6 +62,15 @@ export class PrescriptionPrinterComponent implements OnInit {
 
         const barcodeBase64 = await this.barcodeService.generateBarcodeBase64(prescription._id);
         const barcodeImg = await new Img(barcodeBase64).fit([230, 60]).alignment('center').margin([0, 20]).build();
+
+        // Segundo código de barras para prescriptionId
+        let prescriptionIdBarcodeImg = null;
+        let prescriptionIdLabel = null;
+        if (prescription.prescriptionId) {
+            const prescriptionIdBarcodeBase64 = await this.barcodeService.generateBarcodeBase64(prescription.prescriptionId);
+            prescriptionIdLabel = new Txt('Número de receta:').fontSize(9).bold().alignment('center').margin([0, 5, 0, 0]).end;
+            prescriptionIdBarcodeImg = await new Img(prescriptionIdBarcodeBase64).fit([230, 60]).alignment('center').margin([0, 5]).build();
+        }
         pdf.info({
             title: 'Receta digital ' + prescription.professional.businessName,
             author: 'RecetAR'
@@ -152,20 +161,58 @@ export class PrescriptionPrinterComponent implements OnInit {
 
 
         // Barcode
-        pdf.add(new Columns([
-            barcodeImg,
-            new Txt([
+        if (prescriptionIdBarcodeImg) {
+            // Si hay prescriptionId, mostrar ambos códigos en columnas
+            pdf.add(new Columns([
+                {
+                    stack: [barcodeImg],
+                    alignment: 'left',
+                    width: '55%'
+                },
+                {
+                    stack: [prescriptionIdLabel, prescriptionIdBarcodeImg],
+                    alignment: 'right',
+                    width: '45%'
+                }
+            ]).alignment('center').width('100%').end);
+
+            // Firma del profesional debajo cuando hay prescriptionId
+            pdf.add(new Txt([
                 { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
                 { text: '\n', fontSize: 3 },
                 { text: `\n ${prescription.professional.businessName}`, fontSize: 14, bold: true },
-                { text: `\n MP ${prescription.professional.enrollment}`, bold: true, fontSize: 10 }
-            ]).alignment('center').end]).end);
+                { text: `\n MP ${prescription.professional.enrollment}`, bold: true, fontSize: 9 }
+            ]).alignment('center').margin([0, 25, 0, 0]).end);
+        } else {
+            // Si no hay prescriptionId, mostrar código de barras y firma en columnas
+            pdf.add(new Columns([
+                {
+                    stack: [barcodeImg],
+                    alignment: 'center',
+                    width: '50%'
+                },
+                {
+                    stack: [
+                        new Txt([
+                            { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
+                            { text: '\n', fontSize: 3 },
+                            { text: `\n ${prescription.professional.businessName}`, fontSize: 14, bold: true },
+                            { text: `\n MP ${prescription.professional.enrollment}`, bold: true, fontSize: 9 }
+                        ]).alignment('center').margin([0, 25, 0, 0]).end
+                    ],
+                    alignment: 'center',
+                    width: '50%'
+                }
+            ]).alignment('center').width('100%').end);
+        }
 
         // Pharmacy
         if (prescription.status === 'Dispensada') {
-            pdf.add(new Columns([new Txt('Dispensado por').bold().end, new Txt('CUIL').bold().end]).end);
-            pdf.add(new Columns([new Txt('' + prescription.dispensedBy.businessName.toUpperCase()).end, new Txt('' + prescription.dispensedBy.cuil).end]).end);
-            pdf.add(new Txt(`Fecha dispensación: ${this.datePipe.transform(prescription.dispensedAt, 'dd/MM/yyyy')}`).end);
+            pdf.add(new Txt('\n').margin([0, 10]).end);
+            pdf.add(new Columns([new Txt('Dispensado por').bold().alignment('center').end, new Txt('CUIL').bold().alignment('center').end]).alignment('center').end);
+            pdf.add(new Columns([new Txt('' + prescription.dispensedBy.businessName.toUpperCase()).alignment('center').end, new Txt('' + prescription.dispensedBy.cuil).alignment('center').end]).alignment('center').end);
+            pdf.add(new Txt('\n').margin([0, 5]).end);
+            pdf.add(new Txt(`Fecha dispensación: ${this.datePipe.transform(prescription.dispensedAt, 'dd/MM/yyyy')}`).alignment('center').end);
         }
 
         pdf.footer(new Txt([
