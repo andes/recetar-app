@@ -30,6 +30,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PrescriptionListComponent } from './components/prescription-list/prescription-list.component';
 import { PrescriptionUndoComponent } from './components/prescription-undo/prescription-undo.component';
+import { AndesPrescriptionPrinterComponent } from './components/andes-prescription-printer/andes-prescription-printer.component';
 import { FormatTimePipe } from './pipes/format-time.pipe';
 import { DialogReportComponent } from './components/dialog-report/dialog-report.component';
 
@@ -38,6 +39,7 @@ import { DialogReportComponent } from './components/dialog-report/dialog-report.
     routingComponent,
     PrescriptionListComponent,
     PrescriptionUndoComponent,
+    AndesPrescriptionPrinterComponent,
     FormatTimePipe,
     DialogReportComponent
   ],
@@ -68,6 +70,9 @@ import { DialogReportComponent } from './components/dialog-report/dialog-report.
     MatProgressSpinnerModule,
     MatSortModule,
     MatPaginatorModule
+  ],
+  exports: [
+    AndesPrescriptionPrinterComponent
   ]
 })
 export class PharmacistsModule { }

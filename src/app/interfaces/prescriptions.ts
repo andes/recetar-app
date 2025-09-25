@@ -1,5 +1,18 @@
 import Supply from '@interfaces/supplies';
 import { Patient } from '@interfaces/patients';
+import AndesPrescriptions from './andesPrescriptions';
+
+// Interfaz para la respuesta mixta de prescripciones
+export interface PrescriptionsResponse {
+    prescriptions: (Prescriptions | AndesPrescriptions)[];
+    total: number;
+    offset: number;
+    limit: number;
+    sources?: {
+        local: number;
+        andes: number;
+    };
+}
 
 export class Prescriptions {
     _id: string;
@@ -25,6 +38,10 @@ export class Prescriptions {
         indication?: string;
         duplicate?: boolean;
         triplicate?: boolean;
+        triplicateData?: {
+            serie: string;
+            numero: number;
+        };
     }>;
     status: string;
     date: Date;
