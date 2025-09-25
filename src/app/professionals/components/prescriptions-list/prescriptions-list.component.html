@@ -8,8 +8,8 @@
             <mat-select placeholder="Seleccione un tipo de registro" [(value)]="selectedType"
                         (selectionChange)="onSelectedTypeChange()" class="select-type">
                 <mat-option value="receta">Medicamentos</mat-option>
-                <mat-option value="practicas">Prácticas</mat-option>
-                <mat-option value="certificados">Certificados</mat-option>
+                <mat-option value="practicas" *ngIf="ambito !== 'publico'">Prácticas</mat-option>
+                <mat-option value="certificados" *ngIf="ambito !== 'publico'">Certificados</mat-option>
             </mat-select>
         </mat-form-field>
 
