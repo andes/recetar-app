@@ -18,6 +18,7 @@ import { Practice } from '@interfaces/practices';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { InteractionService } from '@professionals/interaction.service';
+import { AmbitoService } from '@auth/services/ambito.service';
 
 
 @Component({
@@ -64,6 +65,7 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
 
     // Variable para almacenar el término de búsqueda
     currentSearchTerm = '';
+    ambito: 'publico' | 'privado' | null = null;
 
     private paginatorsInitialized = false;
 
@@ -80,12 +82,19 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         private prescriptionPrinter: PrescriptionPrinterComponent,
         private certificatePracticePrinter: CertificatePracticePrinterComponent,
         public dialog: MatDialog,
-        private interactionService: InteractionService) { }
+        private interactionService: InteractionService,
+        private ambitoService: AmbitoService) { }
 
 
     ngOnInit() {
         this.initDataSource();
         // No cargar datos inicialmente
+        
+        this.ambitoService.getAmbitoSeleccionado
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(ambito => {
+                this.ambito = ambito;
+            });
         
         // Suscribirse a eventos de eliminación de prescripciones
         this.interactionService.deletePrescription$
