@@ -33,10 +33,20 @@ export class TokenInterceptorService implements HttpInterceptor {
     }
 
     errorHandler(err: HttpErrorResponse) {
-        if (err.status == 422) {
+        if (err.status === 422) {
             return throwError(err);
         }
-        return throwError(err.error.message || 'Server Error');
+
+        let errorMessage = 'Server Error';
+        if (err.error) {
+            if (err.error.mensaje) {
+                errorMessage = err.error.mensaje;
+            } else if (typeof err.error === 'string') {
+                errorMessage = err.error;
+            }
+        }
+
+        return throwError(errorMessage);
     }
 
     private addToken(request: HttpRequest<any>, token: string) {
