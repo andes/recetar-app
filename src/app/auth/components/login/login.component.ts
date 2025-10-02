@@ -61,13 +61,15 @@ export class LoginComponent implements OnInit {
             this.router.navigate(['/profesionales/recetas/nueva']);
           } else if (this.authService.isProfessionalRole()) {
             this.ambitoSrevice.setAmbito('privado');
-            this.router.navigate(['/profesionales/recetas/nueva']); 
+            this.router.navigate(['/profesionales/recetas/nueva']);
           } else if (this.authService.isPharmacistsPublicRole()) {
             this.ambitoSrevice.setAmbito('publico');
             this.router.navigate(['/farmacias/recetas/dispensar']);
           } else if (this.authService.isPharmacistsRole()) {
             this.ambitoSrevice.setAmbito('privado');
             this.router.navigate(['/farmacias/recetas/dispensar']);
+          } else if (this.authService.isOnlyAuditRole()) {
+            this.router.navigate(['/audit/users']);
           } else if (this.authService.isAuditRole()) {
             this.router.navigate(['/audit/recetas/auditar']);
           }

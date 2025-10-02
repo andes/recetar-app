@@ -21,6 +21,7 @@ export class AuthService {
     private businessName: BehaviorSubject<string>;
     private isAudit: BehaviorSubject<boolean>;
     private isProfessionalBothRolesO: BehaviorSubject<boolean>;
+    private isOnlyAudit: BehaviorSubject<boolean>;
 
 
     constructor(
@@ -32,6 +33,7 @@ export class AuthService {
         this.businessName = new BehaviorSubject<string>(this.getLoggedBusinessName());
         this.isAudit = new BehaviorSubject<boolean>(this.isAuditRole());
         this.isProfessionalBothRolesO = new BehaviorSubject<boolean>(this.isProfessionalBothRoles());
+        this.isOnlyAudit = new BehaviorSubject<boolean>(this.isOnlyAuditRole());
     }
 
 
@@ -91,6 +93,10 @@ export class AuthService {
 
     get getIsAudit() {
         return this.isAudit.asObservable();
+    }
+
+    get getIsOnlyAudit() {
+        return this.isOnlyAudit.asObservable();
     }
 
     get getIsProfessionalBothRoles() {
@@ -175,6 +181,14 @@ export class AuthService {
         return roles.some((role: string) => role === 'auditor');
     }
 
+    isOnlyAuditRole(): boolean {
+        const roles: string[] = this.getLoggedRole();
+        if (!roles?.length) {
+            return false;
+        }
+        return roles.length === 1 && roles[0] === 'auditor';
+    }
+
     isAdminRole(): boolean {
         const roles: string[] = this.getLoggedRole();
         if (!roles?.length) {
@@ -206,6 +220,7 @@ export class AuthService {
         this.businessName.next(this.getLoggedBusinessName());
         this.loggedIn.next(this.tokensExists());
         this.isAudit.next(this.isAuditRole());
+        this.isOnlyAudit.next(this.isOnlyAuditRole());
     }
 
     private doLogoutUser() {
@@ -213,6 +228,7 @@ export class AuthService {
         this.removeTokens();
         this.loggedIn.next(this.tokensExists());
         this.isAudit.next(this.isAuditRole());
+        this.isOnlyAudit.next(this.isOnlyAuditRole());
     }
 
     private getRefreshToken() {
