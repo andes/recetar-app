@@ -28,7 +28,10 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatRadioModule } from '@angular/material/radio';
 import { UsersListComponent } from './components/user-list/users-list.component';
+import { UserCreateComponent } from './components/user-create/user-create.component';
 import { PrescriptionListComponent } from './components/prescription-list/prescription-list.component';
 import { FormatTimePipe } from './pipes/format-time.pipe';
 import { DialogReportComponent } from './components/dialog-report/dialog-report.component';
@@ -37,6 +40,7 @@ import { DialogReportComponent } from './components/dialog-report/dialog-report.
   declarations: [
     routingComponent,
     UsersListComponent,
+    UserCreateComponent,
     PrescriptionListComponent,
     FormatTimePipe,
     DialogReportComponent,
@@ -67,7 +71,9 @@ import { DialogReportComponent } from './components/dialog-report/dialog-report.
     MatDialogModule,
     MatProgressSpinnerModule,
     MatSortModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    MatCheckboxModule,
+    MatRadioModule
   ]
 })
 export class AuditModule { }
