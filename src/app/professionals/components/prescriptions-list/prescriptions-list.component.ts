@@ -50,16 +50,14 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     loadingPrescriptions: boolean;
     loadingCertificates: boolean;
     loadingPractices: boolean;
-    selectedType: string = null; // No default selection
+    selectedType: string = null;
     dataCertificates = new MatTableDataSource<Certificate>([]);
     dataPractices = new MatTableDataSource<Practice>([]);
 
-    // Totales para paginación
     totalPrescriptions = 0;
     totalCertificates = 0;
     totalPractices = 0;
 
-    // Configuración de paginadores
     prescriptionsPageSize = 10;
     certificatesPageSize = 10;
     practicesPageSize = 10;
@@ -68,7 +66,6 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     practicesPageIndex = 0;
     pageSizeOptions = [10, 20, 30];
 
-    // Variable para almacenar el término de búsqueda
     currentSearchTerm = '';
     ambito: 'publico' | 'privado' | null = null;
 
@@ -94,7 +91,6 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     ngOnInit() {
         this.initDataSource();
         // No cargar datos inicialmente
-
         this.ambitoService.getAmbitoSeleccionado
             .pipe(takeUntil(this.destroy$))
             .subscribe(ambito => {
@@ -105,17 +101,15 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         this.interactionService.deletePrescription$
             .pipe(takeUntil(this.destroy$))
             .subscribe(prescription => {
-                // Recargar los datos si estamos viendo prescripciones
                 if (this.selectedType === 'receta') {
                     this.loadPrescriptions();
                 }
             });
     }
 
-    // Cargar datos según el tipo seleccionado
     loadDataForSelectedType() {
         if (!this.selectedType) {
-            return; // No cargar si no hay selección
+            return;
         }
 
         switch (this.selectedType) {
@@ -131,7 +125,6 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         }
     }
 
-    // Cargar prescripciones
     private loadPrescriptions(offset: number = 0, limit: number = 10) {
         this.loadingPrescriptions = true;
         const userId = this.authService.getLoggedUserId();
@@ -143,21 +136,17 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         serviceCall.pipe(
             takeUntil(this.destroy$)
         ).subscribe((response) => {
-            // Capturar el total de la respuesta del servidor
             this.totalPrescriptions = response.total || 0;
 
-            // Usar directamente los datos de la respuesta
             this.dataSource.data = response.prescriptions;
             this.loadingPrescriptions = false;
 
-            // Configurar paginator después de que los datos estén cargados
             setTimeout(() => {
                 this.setupPrescriptionsPaginator();
             }, 100);
         });
     }
 
-    // Expose loadCertificates method to be called from outside
     loadCertificates(offset: number = 0, limit: number = 10) {
         this.loadingCertificates = true;
         const userId = this.authService.getLoggedUserId();
@@ -169,21 +158,17 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         serviceCall.pipe(
             takeUntil(this.destroy$)
         ).subscribe((response) => {
-            // Capturar el total de la respuesta del servidor
             this.totalCertificates = response.total || 0;
 
-            // Usar directamente los datos de la respuesta
             this.dataCertificates.data = response.certificates;
             this.loadingCertificates = false;
 
-            // Configurar paginator después de que los datos estén cargados
             setTimeout(() => {
                 this.setupCertificatesPaginator();
             }, 100);
         });
     }
 
-    // Cargar prácticas
     private loadPractices(offset: number = 0, limit: number = 10) {
         this.loadingPractices = true;
         const userId = this.authService.getLoggedUserId();
@@ -195,14 +180,11 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         serviceCall.pipe(
             takeUntil(this.destroy$)
         ).subscribe((response) => {
-            // Capturar el total de la respuesta del servidor
             this.totalPractices = response.total || 0;
 
-            // Usar directamente los datos de la respuesta
             this.dataPractices.data = response.practices;
             this.loadingPractices = false;
 
-            // Configurar paginator después de que los datos estén cargados
             setTimeout(() => {
                 this.setupPracticesPaginator();
             }, 100);
@@ -210,7 +192,6 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     }
 
     ngAfterContentInit() {
-        // Configurar paginators después de que la vista esté inicializada
         this.initializePaginators();
     }
 
@@ -224,8 +205,6 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     }
 
     private setupPaginationEvents() {
-        // Los eventos de paginación ahora se manejan directamente desde el HTML
-        // Este método se mantiene para compatibilidad pero ya no es necesario
     }
 
     private assignPaginatorsToDataSources() {
@@ -280,7 +259,7 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
 
     initDataSource() {
         // Inicializar DataSources vacíos
-        this.dataSource = new MatTableDataSource<MixedPrescription>([]);
+        this.dataSource = new MatTableDataSource<Prescriptions>([]);
         this.dataSource.sortingDataAccessor = (item, property) => {
             switch (property) {
                 case 'patient': return this.getPatientName(item);
@@ -393,15 +372,12 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     }
 
     applyFilter(filterValue: string) {
-        // Actualizar el término de búsqueda
         this.currentSearchTerm = filterValue.trim();
 
-        // Resetear índices de página
         this.prescriptionsPageIndex = 0;
         this.certificatesPageIndex = 0;
         this.practicesPageIndex = 0;
 
-        // Recargar datos según el tipo seleccionado
         if (this.selectedType === 'receta') {
             this.loadPrescriptions(0, this.prescriptionsPageSize);
         } else if (this.selectedType === 'certificados') {
@@ -499,20 +475,16 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         await this.unifiedPrinter.printPractice(practice);
     }
 
-    // Show a dialog
     private openDialog(aDialogType: string, aItem?: any, aText?: string): void {
         const dialogRef = this.dialog.open(ProfessionalDialogComponent, {
             width: '400px',
             data: { dialogType: aDialogType, item: aItem, text: aText }
         });
 
-        // Manejar el resultado del dialog
         dialogRef.afterClosed().subscribe(result => {
             if (result === 'deleted') {
-                // Mostrar mensaje de éxito
                 this.openSuccessDialog('deleted');
             } else if (result === 'error') {
-                // Mostrar mensaje de error
                 this.openSuccessDialog('error-dispensed');
             } else if (result === 'suspend_andes') {
                 // Suspender prescripción de ANDES
@@ -521,7 +493,6 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         });
     }
 
-    // Método para mostrar mensajes de éxito o error
     private openSuccessDialog(dialogType: string): void {
         this.dialog.open(ProfessionalDialogComponent, {
             width: '400px',
@@ -529,7 +500,6 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         });
     }
 
-    // Métodos para manejar eventos de paginación
     onPrescriptionsPageChange(event: any) {
         this.prescriptionsPageIndex = event.pageIndex;
         this.prescriptionsPageSize = event.pageSize;
@@ -548,20 +518,15 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         this.loadPractices(event.pageIndex * event.pageSize, event.pageSize);
     }
 
-    // Método para manejar el cambio de tipo de selector
     onSelectedTypeChange() {
-        // Resetear índices de página cuando cambia el tipo
         this.prescriptionsPageIndex = 0;
         this.certificatesPageIndex = 0;
         this.practicesPageIndex = 0;
 
-        // Limpiar el término de búsqueda
         this.currentSearchTerm = '';
 
-        // Cargar datos para el tipo seleccionado
         this.loadDataForSelectedType();
 
-        // Reinicializar paginators cuando cambia el tipo
         setTimeout(() => {
             this.initializePaginators();
         }, 100);

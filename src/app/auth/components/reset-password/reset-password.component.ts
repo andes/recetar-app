@@ -16,7 +16,7 @@ export class ResetPasswordComponent implements OnInit {
   resetForm: FormGroup;
   hideOldPassword: boolean = true;
   hideNewPassword: boolean = true;
-  error: string;
+
   showSubmit: boolean = false;
   // readonly spinnerColor: ThemePalette = 'accent';
   readonly spinnerColor: ThemePalette = 'primary';
@@ -34,7 +34,7 @@ export class ResetPasswordComponent implements OnInit {
     this.initResetForm();
   }
 
-  initResetForm(){
+  initResetForm() {
     this.resetForm = this.fBuild.group({
       oldPassword: ['', [
         Validators.required
@@ -46,28 +46,29 @@ export class ResetPasswordComponent implements OnInit {
     });
   }
 
-  onSubmitEvent(resetForm: FormGroup, resetNgForm: FormGroupDirective): void{
-    if(this.resetForm.valid){
+  onSubmitEvent(resetForm: FormGroup, resetNgForm: FormGroupDirective): void {
+    if (this.resetForm.valid) {
       this.showSubmit = true;
       this.authService.resetPassword(this.resetForm.value).subscribe(
         res => {
-          // menssage
-          this.showSubmit = false;
           setTimeout(() => {
-            if(this.authService.isPharmacistsRole()){
+            if (this.authService.isPharmacistsRole()) {
               this.router.navigate(['/farmacias/recetas/dispensar']);
-            } else if(this.authService.isProfessionalRole()){
+            } else if (this.authService.isProfessionalRole()) {
               this.router.navigate(['/profesionales/recetas/nueva']);
             }
           }, 3000);
-          this.openSnackBar(res, "Cerrar");
+
+          const message = res.message || res.mensaje || 'Contraseña cambiada exitosamente';
+          this.openSnackBar(message, "Cerrar");
         },
         err => {
           resetNgForm.resetForm();
           resetForm.reset();
-          this.error = err;
+          const errorMessage = typeof err === 'string' ? err : (err.error?.message || err.message || 'Error al cambiar contraseña');
+          this.openSnackBar(errorMessage, "Cerrar");
           this.showSubmit = false;
-      });
+        });
     }
   }
 

@@ -1,47 +1,104 @@
 <div class="wrapper">
-  <div fxLayout="row" fxLayoutAlign="space-evenly start" fxLayoutGap="20px" class="cards-container" fxFill>
-
-
-    <div class="user-panel">
+  <div fxLayout="row" fxLayoutAlign="center start" fxLayoutGap="20px" class="cards-container" fxFill>
+    <div class="user-panel" style="width: 95%">
 
       <mat-card fxLayout="column" fxLayoutAlign="space-between">
-        <mat-card-title>
-          <h2 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
-            <mat-icon>person</mat-icon>
-            <span>
-              Usuarios
-            </span>
-            <!--
-            
-            <button mat-stroked-button (click)="generateReport()">Generar reporte</button>
-            -->
-          </h2>
-        </mat-card-title>
+        <mat-card-header class="card-header">
+          <div mat-card-avatar class="header-avatar">
+            <mat-icon>people</mat-icon>
+          </div>
+          <mat-card-title class="header-title">Gestión de Usuarios</mat-card-title>
+          <mat-card-subtitle class="header-subtitle">Administre los usuarios del sistema</mat-card-subtitle>
+          <div class="header-actions">
+            <button *ngIf="!showCreateForm" 
+                    mat-raised-button 
+                    (click)="showCreateUserForm()"
+                    style="background-color: #3f51b5; color: white;">
+              <mat-icon>person_add</mat-icon>
+              Crear usuario
+            </button>
+          </div>
+        </mat-card-header>
         <mat-card-content>
+          <div *ngIf="!showCreateForm">
+            <div class="table-section">
+              <h3 class="section-title">
+                <mat-icon>list</mat-icon>
+                Lista de Usuarios
+              </h3>
 
-
-
-          <mat-form-field>
-            <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filtrar">
-          </mat-form-field>
-
-          <div class="container mat-elevation-z8">
-            <div class="table-container" *ngIf="!loadingUsers">
+              <div class="filter-section">
+                <mat-form-field appearance="outline" class="filter-field">
+                  <mat-label>Buscar usuarios</mat-label>
+                  <mat-icon matPrefix>search</mat-icon>
+                  <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Buscar por nombre, nombre de usuario, email o CUIL">
+                  <mat-hint>Escriba para filtrar la lista de usuarios</mat-hint>
+                </mat-form-field>
+                </div>
+              
+              <div class="container mat-elevation-z8">
+                <div class="table-container" *ngIf="!loadingUsers">
               <table mat-table [dataSource]="dataSource" matSort #tbSort="matSort" multiTemplateDataRows>
 
-                <!-- Name Column -->
                 <ng-container matColumnDef="businessName">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header> Nombre </th>
                   <td mat-cell *matCellDef="let element" class='title-cell' test data-label='Nombre'>
-                    <mat-icon *ngIf="element.roles[0].role === 'professional'" matTooltip="Profesional">medical_services</mat-icon>
-                    <mat-icon *ngIf="element.roles[0].role === 'pharmacist'" matTooltip="Farmacia">local_pharmacy</mat-icon>
-                    <mat-icon *ngIf="element.roles[0].role === 'auditor'" matTooltip="Auditor">health_and_safety</mat-icon>
-                    <span>{{element.businessName.toUpperCase() }}</span>
+                    <div *ngIf="!isUserInEditMode(element)">
+                      <span>{{element.businessName.toUpperCase() }}</span>
+                    </div>
+                    <div *ngIf="isUserInEditMode(element)" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5px">
+                      <mat-form-field appearance="outline" style="width: 90%;">
+                        <mat-label>Nombre del usuario</mat-label>
+                        <input matInput [value]="element.businessName" 
+                               (input)="tempEditValue = $event.target.value"
+                               (keyup.enter)="startEdit(element, 'businessName'); saveAllChanges()" 
+                               (keyup.escape)="cancelEdit()"
+                               placeholder="Nombre del negocio">
+                      </mat-form-field>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="username">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header> Nombre de usuario </th>
+                  <td mat-cell *matCellDef="let element" class="m-card-sub-title" data-label="Nombre de usuario">
+                    <div *ngIf="!isUserInEditMode(element)" [matTooltip]="element.username || 'No asignado'" matTooltipShowDelay="300">
+                      <span class="truncate-text">{{ element.username || 'No asignado' }}</span>
+                    </div>
+                    <div *ngIf="isUserInEditMode(element)" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5px">
+                      <mat-form-field appearance="outline" style="width: 90%; padding-bottom: 0;">
+                        <mat-label>Nombre de usuario</mat-label>
+                        <input matInput [value]="element.username" 
+                               (input)="tempEditValue = $event.target.value"
+                               (keyup.enter)="startEdit(element, 'username'); saveAllChanges()" 
+                               (keyup.escape)="cancelEdit()"
+                               placeholder="Nombre de usuario">
+                      </mat-form-field>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="email">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header> Email </th>
+                  <td mat-cell *matCellDef="let element" class="m-card-sub-title" data-label="Email">
+                    <div *ngIf="!isUserInEditMode(element)" [matTooltip]="element.email" matTooltipShowDelay="300">
+                      <span class="truncate-text">{{ element.email }}</span>
+                    </div>
+                    <div *ngIf="isUserInEditMode(element)" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5px">
+                      <mat-form-field appearance="outline" style="width: 90%; padding-bottom: 0;">
+                        <mat-label>Email</mat-label>
+                        <input matInput [value]="element.email" 
+                               (input)="tempEditValue = $event.target.value"
+                               type="email" 
+                               (keyup.enter)="startEdit(element, 'email'); saveAllChanges()" 
+                               (keyup.escape)="cancelEdit()"
+                               placeholder="Correo electrónico">
+                      </mat-form-field>
+                    </div>
                   </td>
                 </ng-container>
 
 
-                <!-- Cuil column -->
                 <ng-container matColumnDef="cuil">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header> CUIL </th>
                   <td mat-cell *matCellDef="let element" class="m-card-sub-title" data-label="Cuil">
@@ -49,7 +106,6 @@
                   </td>
                 </ng-container>
 
-                <!-- Enrollment column -->
                 <ng-container matColumnDef="enrollment">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header> Matricula </th>
                   <td mat-cell *matCellDef="let element" class="m-card-sub-title" data-label="Matricula">
@@ -57,18 +113,61 @@
                   </td>
                 </ng-container>
 
-                <!--- Status column -->
-                <ng-container matColumnDef="isActive">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header></th>
-                  <td mat-cell *matCellDef="let element"  data-label="Estado">
-                    <button mat-raised-button color="primary" *ngIf="element.isActive === false"
-                      (click)="activateUser(element)">Activar</button>
-                    <button mat-raised-button color="warn" *ngIf="element.isActive === true"
-                      (click)="deactivateUser(element)">Desactivar</button>
+                <ng-container matColumnDef="roles">
+                  <th mat-header-cell *matHeaderCellDef> Roles </th>
+                  <td mat-cell *matCellDef="let element" class="m-card-sub-title" data-label="Roles">
+                    <div *ngIf="!isUserInEditMode(element)" [matTooltip]="getUserRolesTooltip(element)">
+                      <span *ngIf="element.roles && element.roles.length > 0" 
+                            [style.color]="getRoleColor(element.roles[0].role)"
+                            [style.font-weight]="'500'">
+                        {{ translateRole(element.roles[0].role) }}
+                      </span>
+                      <span *ngIf="element.roles && element.roles.length > 1"
+                            style="color: #666; font-size: 0.9em; margin-left: 5px;">
+                        (+{{ element.roles.length - 1 }} más)
+                      </span>
+                      <span *ngIf="!element.roles || element.roles.length === 0"
+                            style="color: #999; font-style: italic;">
+                        Sin roles asignados
+                      </span>
+                    </div>
+                    <div *ngIf="isUserInEditMode(element)" fxLayout="column" fxLayoutGap="10px">
+                      <mat-form-field appearance="outline" style="width: 90%; padding-bottom: 0;">
+                        <mat-label>Roles del usuario</mat-label>
+                        <mat-select #roleSelect
+                                   [(value)]="tempSelectedRoles" 
+                                   (selectionChange)="onRoleSelectionChange($event)"
+                                   [compareWith]="compareRoles"
+                                   multiple>
+                          <mat-option *ngFor="let role of availableRoleOptions" 
+                                     [value]="role"
+                                     (click)="onRoleOptionClick($event, role)"
+                                     [disabled]="isRoleDisabled(role)">
+                            <div class="role-option">
+                              <span class="role-name">{{ role.displayName || role.name || role.role }}</span>
+                            </div>
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
                   </td>
                 </ng-container>
 
-                <!--- Last login column -->
+                <ng-container matColumnDef="isActive">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
+                  <td mat-cell *matCellDef="let element"  data-label="Estado">
+                    <button mat-icon-button color="primary" *ngIf="element.isActive === false"
+                      matTooltip="Activar Usuario" (click)="activateUser(element)">
+                      <mat-icon>person_add</mat-icon>
+                    </button>
+                    <button mat-icon-button *ngIf="element.isActive === true"
+                      matTooltip="Desactivar Usuario" (click)="deactivateUser(element)"
+                      class="deactivate-button">
+                      <mat-icon color="warn">person_remove</mat-icon>
+                    </button>
+                  </td>
+                </ng-container>
+
                 <ng-container matColumnDef="lastLogin">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header> Ultimo inicio de sesión </th>
                   <td mat-cell *matCellDef="let element" class="m-card-sub-title" data-label="Ultimo inicio de sesión">
@@ -76,23 +175,54 @@
                   </td>
                 </ng-container>
 
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                  <td mat-cell *matCellDef="let element" data-label="Acciones">
+                    <div *ngIf="!isUserInEditMode(element)" class="action-buttons" fxLayout="row" fxLayoutGap="5px">
+                      <button mat-icon-button color="primary" matTooltip="Editar Usuario" (click)="startEditMode(element)">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                    </div>
+                    
+                    <div *ngIf="isUserInEditMode(element)" class="action-buttons" fxLayout="row" fxLayoutGap="5px">
+                      <button mat-icon-button color="primary" matTooltip="Guardar Cambios" (click)="saveAllChanges()">
+                        <mat-icon>check</mat-icon>
+                      </button>
+                      <button mat-icon-button color="warn" matTooltip="Cancelar Edición" (click)="cancelEdit()">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    </div>
+                  </td>
+                </ng-container>
+
                 <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="element-row">
-                  <!-- 
-                [class.expanded-row]="expandedElement === row"
-                (click)="expandedElement = expandedElement === row ? null : row">
-                 -->
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
+                    [class]="'element-row' + (isUserInEditMode(row) ? ' editing-row' : '')">
                 </tr>
 
               </table>
+                </div>
+                <div fxLayout="row" fxLayoutAlign="center" class="loading-users" *ngIf="loadingUsers">
+                  <mat-spinner matSuffix color="primary" [diameter]="40"></mat-spinner>
+                </div>
+                <mat-paginator #paginator 
+                               [length]="totalUsers" 
+                               [pageSize]="usersPageSize"
+                               [pageIndex]="usersPageIndex" 
+                               [pageSizeOptions]="pageSizeOptions"
+                               (page)="onUsersPageChange($event)" 
+                               showFirstLastButtons>
+                </mat-paginator>
+              </div>
             </div>
-            <div fxLayout="row" fxLayoutAlign="center" class="loading-users" *ngIf="loadingUsers">
-              <mat-spinner matSuffix color="primary" [diameter]="40"></mat-spinner>
-            </div>
-            <mat-paginator [pageSizeOptions]="[10, 20, 30]"></mat-paginator>
           </div>
 
-
+          <div *ngIf="showCreateForm">
+            <app-user-create 
+              (cancelCreate)="onCancelCreateUser()"
+              (userCreated)="onUserCreated()">
+            </app-user-create>
+          </div>
 
         </mat-card-content>
       </mat-card>
