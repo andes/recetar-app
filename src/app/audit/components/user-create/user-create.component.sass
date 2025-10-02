@@ -1,0 +1,339 @@
+.user-create-container
+  padding: 24px
+  max-width: 800px
+  margin: 0 auto
+  min-height: calc(100vh - 200px)
+
+  .create-user-card
+    border-radius: 16px
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1)
+    overflow: hidden
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)
+
+    .card-header
+      background: #3f51b5
+      color: white
+      padding: 24px
+      display: flex
+      align-items: center
+      
+      .header-avatar
+        background: rgba(255, 255, 255, 0.2)
+        border-radius: 50%
+        width: 56px
+        height: 56px
+        display: flex
+        align-items: center
+        justify-content: center
+        
+        mat-icon
+          font-size: 28px
+          width: 28px
+          height: 28px
+
+      .header-title
+        font-size: 24px
+        margin: 0
+        color: white
+
+      .header-subtitle
+        font-size: 14px
+        opacity: 0.9
+        margin: 4px 0 0 0
+        color: white
+
+    .card-content
+      padding: 32px
+
+      .user-form
+        .form-section
+          margin-bottom: 24px
+
+          .section-title
+            display: flex
+            align-items: center
+            font-size: 15px
+            font-weight: 500
+            color: #2c3e50
+            margin-bottom: 20px
+            padding-bottom: 8px
+            border-bottom: 2px solid #e9ecef
+            
+            .section-icon
+              margin-right: 12px
+              color: #667eea
+              font-size: 22px
+              width: 22px
+              height: 22px
+
+          .form-row
+            display: flex
+            gap: 16px
+            
+            &.two-columns
+              mat-form-field
+                flex: 1
+
+            .full-width
+              width: 100%
+
+            mat-form-field
+              margin-bottom: 8px
+              
+              ::ng-deep
+                .mat-form-field-outline
+                  border-radius: 12px
+                  
+                .mat-form-field-outline-thick
+                  border-width: 2px
+                  
+                .mat-form-field-label
+                  font-weight: 500
+                  
+                .mat-icon
+                  color: #667eea
+
+              .validation-icon
+                &.success
+                  color: #4caf50
+
+                &.error
+                  color: #f44336
+
+              .success-hint
+                color: #4caf50 !important
+
+              .error-hint
+                color: #f44336 !important
+
+        // Estilos para datos encontrados
+        .found-data-card
+          background: #f4fff4
+          border: 2px solid #52ea58
+          border-radius: 12px
+          padding: 20px
+          margin-top: 16px
+          position: relative
+          
+          .professional-info,
+          .pharmacy-info
+            .info-row
+              display: flex
+              margin-bottom: 8px
+              font-size: 14px
+              
+              strong
+                min-width: 140px
+                color: #2c3e50
+                font-weight: 600
+                
+              .activo
+                color: #4caf50
+                font-weight: 600
+                
+              .inactivo
+                color: #f44336
+                font-weight: 600
+
+          .professions-section
+            margin-top: 20px
+            
+            mat-form-field
+              width: 100%
+              
+              .profession-option
+                padding: 8px 0
+                  
+                .profession-details
+                  display: flex
+                  gap: 12px
+                  font-size: 12px
+                    
+                  .status
+                    font-weight: 600
+                    
+                    &.vigente
+                      color: #4caf50
+                      
+                    &.vencida
+                      color: #f44336
+
+          .clear-data-button
+            position: absolute
+            top: 8px
+            right: 8px
+            color: #6c757d
+            transition: all 0.3s ease
+
+            &:hover
+              background: #6c757d
+              color: white
+              transform: translateY(-1px)
+
+        .selected-roles-preview
+          margin-top: 20px
+          padding: 20px
+          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)
+          border-radius: 12px
+          border: 1px solid #dee2e6
+          
+          .preview-header
+            display: flex
+            align-items: center
+            margin-bottom: 12px
+            
+            .preview-icon
+              color: #667eea
+              margin-right: 8px
+              font-size: 20px
+              width: 20px
+              height: 20px
+              
+            .preview-label
+              font-weight: 600
+              color: #2c3e50
+              font-size: 14px
+
+          .roles-chips
+            mat-chip-list
+              mat-chip.role-chip
+                margin-right: 8px
+                margin-bottom: 8px
+                border-radius: 20px
+                font-weight: 500
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15)
+                transition: transform 0.2s ease
+                
+                &:hover
+                  transform: translateY(-1px)
+                  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2)
+
+    .card-actions
+      padding: 24px 32px
+      background: #f8f9fa
+      
+      .actions-container
+        display: flex
+        justify-content: flex-end
+        gap: 16px
+        
+        .cancel-button
+          min-width: 120px
+          height: 44px
+          border-radius: 22px
+          font-weight: 500
+          border: 2px solid #6c757d
+          color: #6c757d
+          transition: all 0.3s ease
+          
+          &:hover:not([disabled])
+            background: #6c757d
+            color: white
+            transform: translateY(-1px)
+            
+        .save-button
+          min-width: 140px
+          height: 44px
+          border-radius: 22px
+          background: #3f51b5
+          box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3)
+          transition: all 0.3s ease
+          
+          &:hover:not([disabled])
+            transform: translateY(-2px)
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4)
+          
+          .button
+            display: flex
+            align-items: center
+            justify-content: center
+            gap: 8px
+
+// Role option styling
+::ng-deep .mat-option
+  .role-option
+    display: flex
+    align-items: center
+    width: 100%
+
+  // Estilos para opciones deshabilitadas
+  &[disabled]
+    opacity: 0.5
+    cursor: not-allowed
+    
+    .role-option
+      opacity: 0.6
+        
+      .role-name
+        color: #999
+
+// Responsive design
+@media (max-width: 768px)
+  .user-create-container
+    padding: 16px
+    
+    .create-user-card
+      .card-header
+        padding: 20px
+        
+        .header-title
+          font-size: 20px
+          
+      .card-content
+        padding: 24px 20px
+        
+        .user-form
+          .form-section
+            margin-bottom: 24px
+            display: inline-block
+            
+            .form-row
+              &.two-columns
+                flex-direction: column
+                gap: 0
+                
+      .card-actions
+        padding: 20px
+        
+        .actions-container
+          flex-direction: column
+          gap: 12px
+          
+          button
+            width: 100%
+
+// Estilos para campo deshabilitado
+.disabled-field
+  ::ng-deep
+    .mat-form-field-outline
+      background-color: #f8f9fa !important
+      
+    .mat-form-field-outline-start,
+    .mat-form-field-outline-gap,
+    .mat-form-field-outline-end
+      border-color: #dee2e6 !important
+      
+    .mat-form-field-label
+      color: #6c757d !important
+      
+    .mat-form-field-prefix .mat-icon
+      color: #adb5bd !important
+      
+    input[disabled]
+      background-color: #f8f9fa !important
+      color: #6c757d !important
+      cursor: not-allowed !important
+      
+    .mat-form-field-appearance-outline .mat-form-field-outline-thick
+      border-color: #dee2e6 !important
+
+@media (max-width: 480px)
+  .user-create-container
+    padding: 12px
+    
+    .create-user-card
+      .card-header
+        padding: 16px
+        
+      .card-content
+        padding: 20px 16px
