@@ -25,6 +25,10 @@ export class Prescriptions {
         indication?: string;
         duplicate?: boolean;
         triplicate?: boolean;
+        triplicateData?: {
+            serie: string;
+            numero: number;
+        };
     }>;
     status: string;
     date: Date;
