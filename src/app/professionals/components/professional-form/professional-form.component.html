@@ -1,12 +1,14 @@
-<div class="custom-tab-link-bar">
+<div class="custom-tab-link-bar" [class.two-elements]="isAmbitoPublico()">
     <button mat-flat-button (click)="showForm()">Medicamentos</button>
-    <button mat-flat-button (click)="showCertificados()">Certificados</button>
-    <button mat-flat-button (click)="showPractices()">Prácticas</button>
+    <button mat-flat-button (click)="showCertificados()" *ngIf="!isAmbitoPublico()">Certificados</button>
+    <button mat-flat-button (click)="showPractices()" *ngIf="!isAmbitoPublico()">Prácticas</button>
     <button mat-flat-button (click)="showList()">Mis documentos</button>
 </div>
 <div class="link-bar-indicator-container">
     <div class="indicator"
-        [@stepLink]="currentTab === 'form' ? 'left' : currentTab === 'certificates' ? 'center-left' : currentTab === 'practices' ? 'center-right' : 'right'">
+        [@stepLink]="isAmbitoPublico() ?
+            (currentTab === 'form' ? 'left-2' : 'right-2') :
+            (currentTab === 'form' ? 'left' : currentTab === 'certificates' ? 'center-left' : currentTab === 'practices' ? 'center-right' : 'right')">
     </div>
 </div>
 <div class="pf-container">

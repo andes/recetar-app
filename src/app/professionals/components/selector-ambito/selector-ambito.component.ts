@@ -22,7 +22,6 @@ export class SelectorAmbitoComponent implements OnInit {
 
     seleccionarAmbito(ambito: 'publico' | 'privado') {
         this.ambito = ambito;
-        console.log('Ambito seleccionado:', this.ambito);
         this.ambitoService.setAmbito(ambito);
         this.router.navigate(['/profesionales/recetas/nueva']);
     }

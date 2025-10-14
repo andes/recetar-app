@@ -176,7 +176,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         // Suscribirse a los cambios del ámbito
         const ambitoSubscription = this.ambitoService.getAmbitoSeleccionado.subscribe(ambito => {
             this.ambito = ambito;
-            this.showFechaNac = this.ambito === 'publico';
+            this.showFechaNac = this.isAmbitoPublico();
             // Actualizar el formulario si ya está inicializado
             if (this.professionalForm) {
                 this.updateFechaNacValidators();
@@ -280,7 +280,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
             this.ambito = currentAmbito;
         }
 
-        this.showFechaNac = this.ambito === 'publico';
+        this.showFechaNac = this.isAmbitoPublico();
 
         this.professionalForm = this.fBuilder.group({
             _id: [''],
@@ -306,7 +306,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
                     codigoPuco: [''],
                     numeroAfiliado: [{ value: '', disabled: true }, [Validators.required, Validators.pattern('^[0-9]*$')]]
                 }),
-                fechaNac: ['', this.ambito === 'publico' ? [
+                fechaNac: ['', this.isAmbitoPublico() ? [
                     Validators.required,
                     validDateValidator()
                 ] : [validDateValidator()]]
@@ -350,7 +350,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
                         this.patientOtraOS.setValue(false);
                         this.patientFechaNac.setValue('');
                         // Resetear showFechaNac cuando no se encuentra paciente
-                        this.showFechaNac = this.ambito === 'publico';
+                        this.showFechaNac = this.isAmbitoPublico();
                         // Deshabilitar el checkbox otraOS cuando no se encuentra un paciente
                         this.patientOtraOS.disable();
                     }
@@ -391,7 +391,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         this.patientLastName.setValue(patient.lastName);
         this.patientFirstName.setValue(patient.firstName);
         this.patientSex.setValue(patient.sex);
-        this.showFechaNac = this.ambito === 'publico' && !patient.idMPI;
+        this.showFechaNac = this.isAmbitoPublico() && !patient.idMPI;
         this.updateFechaNacValidators();
         this.patientFechaNac.setValue(patient.fechaNac);
     }
@@ -736,5 +736,8 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     showPractices(): void {
         this.isFormShown = false;
         this.currentTab = 'practices';
+    }
+    isAmbitoPublico(): boolean {
+        return this.ambito === 'publico';
     }
 }
