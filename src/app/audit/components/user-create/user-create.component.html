@@ -1,0 +1,168 @@
+<div class="user-create-container">
+  <mat-card class="create-user-card">
+    <mat-card-header class="card-header">
+      <div mat-card-avatar class="header-avatar">
+        <mat-icon>person_add</mat-icon>
+      </div>
+      <mat-card-title class="header-title">Crear Nuevo Usuario</mat-card-title>
+      <mat-card-subtitle class="header-subtitle">Complete la información del nuevo usuario</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-divider></mat-divider>
+
+    <mat-card-content class="card-content">
+      <form [formGroup]="userForm" (ngSubmit)="onSave()" class="user-form">
+        
+        <div class="form-section">
+          <h3 class="section-title">
+            Información básica
+          </h3>
+          
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Nombre</mat-label>
+              <mat-icon matPrefix>store</mat-icon>
+              <input matInput 
+                     formControlName="businessName"
+                     placeholder="Ingrese el nombre del negocio">
+              <mat-error *ngIf="isFieldInvalid('businessName')">
+                {{ getFieldError('businessName') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width" [class.disabled-field]="isUsernameDisabled()">
+              <mat-label>Nombre de usuario</mat-label>
+              <mat-icon matPrefix>account_circle</mat-icon>
+              <input matInput 
+                     formControlName="username"
+                     placeholder="Ingrese el nombre de usuario"
+                     [attr.disabled]="isUsernameDisabled() ? true : null">
+              <mat-hint *ngIf="isUsernameDisabled()">
+                El nombre de usuario se sincroniza automáticamente con el email para roles de farmacia
+              </mat-hint>
+              <mat-error *ngIf="isFieldInvalid('username')">
+                {{ getFieldError('username') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3 class="section-title">
+            Información de Contacto
+          </h3>
+          
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Email</mat-label>
+              <mat-icon matPrefix>email</mat-icon>
+              <input matInput 
+                     type="email"
+                     formControlName="email"
+                     placeholder="usuario@ejemplo.com">
+              <mat-error *ngIf="isFieldInvalid('email')">
+                {{ getFieldError('email') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Contraseña</mat-label>
+              <mat-icon matPrefix>lock</mat-icon>
+              <input matInput 
+                     type="password"
+                     formControlName="password"
+                     placeholder="Ingrese la contraseña">
+              <mat-hint>Mínimo 6 caracteres</mat-hint>
+              <mat-error *ngIf="isFieldInvalid('password')">
+                {{ getFieldError('password') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3 class="section-title">
+            Información Profesional
+          </h3>
+          
+          <div class="form-row two-columns">
+            <mat-form-field appearance="outline">
+              <mat-label>CUIL</mat-label>
+              <mat-icon matPrefix>fingerprint</mat-icon>
+              <input matInput 
+                     formControlName="cuil"
+                     placeholder="12345678901"
+                     maxlength="11">
+              <mat-hint>11 dígitos sin guiones</mat-hint>
+              <mat-error *ngIf="isFieldInvalid('cuil')">
+                {{ getFieldError('cuil') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Matrícula</mat-label>
+              <mat-icon matPrefix>card_membership</mat-icon>
+              <input matInput 
+                     formControlName="enrollment"
+                     placeholder="Número de matrícula">
+            </mat-form-field>
+
+          </div>
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-icon matPrefix>admin_panel_settings</mat-icon>
+              <mat-select formControlName="roles" multiple (selectionChange)="onRoleSelectionChange($event)">
+                <mat-option 
+                  *ngFor="let role of getAvailableRoleOptions()" 
+                  [value]="role.role"
+                  [disabled]="isRoleDisabled(role)"
+                  (click)="onRoleOptionClick($event, role)">
+                  <div class="role-option">
+                    <span class="role-indicator" [style.background-color]="role.color"></span>
+                    <span>{{ role.displayName || role.name || role.role }}</span>
+                  </div>
+                </mat-option>
+              </mat-select>
+              <mat-hint>Puede seleccionar múltiples roles</mat-hint>
+              <mat-error *ngIf="isFieldInvalid('roles')">
+                {{ getFieldError('roles') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+      </form>
+    </mat-card-content>
+
+    <mat-divider></mat-divider>
+
+    <mat-card-actions class="card-actions">
+      <div class="actions-container">
+        <button mat-stroked-button 
+                type="button"
+                (click)="onCancel()"
+                [disabled]="isLoading"
+                class="cancel-button">
+          <mat-icon>close</mat-icon>
+          Cancelar
+        </button>
+        
+        <button mat-raised-button 
+                type="button"
+                (click)="onSave()"
+                [disabled]="isLoading || userForm.invalid"
+                class="save-button"
+                [style.background-color]="(isLoading || userForm.invalid) ? '#969696' : '#3f51b5'"
+                [style.color]="'white'">
+          <mat-icon *ngIf="!isLoading">save</mat-icon>
+          <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+          {{ isLoading ? 'Guardando...' : 'Crear Usuario' }}
+        </button>
+      </div>
+    </mat-card-actions>
+  </mat-card>
+</div>
