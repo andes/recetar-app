@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { User } from '@interfaces/users';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { Direccion } from '@interfaces/organizaciones';
 
 @Injectable({
     providedIn: 'root'
@@ -56,5 +57,8 @@ export class UserService {
     // Legacy methods for backward compatibility (now using the unified method)
     updateIsActive(_id: string, isActive: boolean): Observable<User> {
         return this.updateUser(_id, { isActive });
+    }
+    updateUserEfectores(_id: string, efectores: Array<{ _id?: string; nombre: string; direccion: Direccion }>): Observable<User> {
+        return this.http.post<User>(`${environment.API_END_POINT}/users/update`, { _id, efectores });
     }
 }
