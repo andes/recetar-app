@@ -114,6 +114,14 @@
                         </div>
                     </div>
 
+                    <!-- Selector de Efector -->
+                    <div fxLayout="column" fxLayoutGap="10px" class="efector-section">
+                        <app-efectores-selector 
+                            [efectorControl]="efectorControl"
+                            (efectorSelected)="onEfectorSelected($event)">
+                        </app-efectores-selector>
+                    </div>
+
                     <!-- Detalle del certificado - Fuera del grupo patient según FormBuilder -->
                     <div fxLayout="column" fxLayoutAlign="start">
                         <label style="margin-bottom: 5px;">Descripción*</label>

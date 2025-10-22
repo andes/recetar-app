@@ -40,6 +40,7 @@ export default class AndesPrescriptions {
         profesion: string;
         especialidad: string;
         matricula: number;
+        efector?: { _id: string; nombre: string; direccion: string };
     };
     diagnostico: {
         descripcion?: string;
@@ -150,6 +151,7 @@ export default class AndesPrescriptions {
             valor: number;
             unidad: string;
         };
+        cuil: string;
     };
     createdAt: Date;
     createdBy: {

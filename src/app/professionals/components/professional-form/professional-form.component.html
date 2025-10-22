@@ -53,30 +53,31 @@
                                         </div>
                                     </div>
 
+                                    
                                     <div formGroupName="patient">
                                         <div class="patient-container" fxLayout="row wrap" fxLayout.xs="column"
-                                            fxLayoutGap="10px" fxLayoutGap.xs="0">
-                                            <!-- DNI paciente -->
-                                            <mat-form-field appearance="fill" fxFlex="48" fxFlex.xs="100">
-                                                <mat-label>DNI paciente</mat-label>
-                                                <input type="text" tabIndex="1" #dni placeholder="DNI"
-                                                    aria-label="Number" matInput required maxlength="8"
-                                                    formControlName="dni" [matAutocomplete]="auto">
+                                        fxLayoutGap="10px" fxLayoutGap.xs="0">
+                                        <!-- DNI paciente -->
+                                        <mat-form-field appearance="fill" fxFlex="48" fxFlex.xs="100">
+                                            <mat-label>DNI paciente</mat-label>
+                                            <input type="text" tabIndex="1" #dni placeholder="DNI"
+                                            aria-label="Number" matInput required maxlength="8"
+                                            formControlName="dni" [matAutocomplete]="auto">
 
                                                 <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20"
                                                     *ngIf="dniShowSpinner">
                                                 </mat-spinner>
-
+                                                
                                                 <mat-autocomplete #auto="matAutocomplete">
                                                     <mat-option *ngFor="let patient of patientSearch"
-                                                        (onSelectionChange)="completePatientInputs(patient)"
-                                                        [value]="patient.dni">
-                                                        {{patient.lastName}} {{patient.firstName}} DNI {{patient.dni}}
-                                                    </mat-option>
+                                                    (onSelectionChange)="completePatientInputs(patient)"
+                                                    [value]="patient.dni">
+                                                    {{patient.lastName}} {{patient.firstName}} DNI {{patient.dni}}
+                                                </mat-option>
                                                 </mat-autocomplete>
-
+                                                
                                                 <mat-hint align="end">{{dni.value.length}} / 8</mat-hint>
-
+                                                
                                                 <mat-error *ngIf="patientDni.errors?.required">
                                                     Debe ingresar el dni del paciente
                                                 </mat-error>
@@ -111,7 +112,7 @@
                                                 <input type="text" tabIndex="3" placeholder="Apellido" matInput required
                                                     formControlName="lastName">
 
-                                                <mat-error *ngIf="patientLastName.errors?.required">
+                                                    <mat-error *ngIf="patientLastName.errors?.required">
                                                     Debe ingresar el apellido del paciente
                                                 </mat-error>
                                             </mat-form-field>
@@ -121,7 +122,7 @@
                                                 <mat-label>Nombre paciente</mat-label>
                                                 <input type="text" tabIndex="4" placeholder="Nombre" matInput required
                                                     formControlName="firstName">
-
+                                                    
                                                 <mat-error *ngIf="patientFirstName.errors?.required">
                                                     Debe ingresar el nombre del paciente
                                                 </mat-error>
@@ -131,15 +132,15 @@
                                             <mat-form-field appearance="fill" fxFlex="48" fxFlex.xs="100" *ngIf="showFechaNac">
                                                 <mat-label>Fecha de nacimiento</mat-label>
                                                 <input matInput [matDatepicker]="fechaNacPicker"
-                                                    formControlName="fechaNac" placeholder="DD/MM/AAAA" required
+                                                formControlName="fechaNac" placeholder="DD/MM/AAAA" required
                                                     tabIndex="5" readonly [min]="minDate" [max]="maxDate">
-                                                <mat-datepicker-toggle matSuffix
+                                                    <mat-datepicker-toggle matSuffix
                                                     [for]="fechaNacPicker"></mat-datepicker-toggle>
-                                                <mat-datepicker #fechaNacPicker [startAt]="null" [touchUi]="false"
+                                                    <mat-datepicker #fechaNacPicker [startAt]="null" [touchUi]="false"
                                                     [startView]="'multi-year'"></mat-datepicker>
-
-                                                <mat-error *ngIf="patientFechaNac.errors?.required">
-                                                    Debe ingresar la fecha de nacimiento
+                                                    
+                                                    <mat-error *ngIf="patientFechaNac.errors?.required">
+                                                        Debe ingresar la fecha de nacimiento
                                                 </mat-error>
                                                 <mat-error *ngIf="patientFechaNac.errors?.invalidDate">
                                                     Fecha inválida
@@ -156,18 +157,18 @@
                                             cobertura
                                             social</mat-checkbox>
                                         <div formGroupName="os" fxLayout="row" fxLayout.sm="column" fxLayoutGap="10px"
-                                            fxLayoutAlign="start center" fxLayoutAlign.sm="start" fxLayoutGap.sm="0"
+                                        fxLayoutAlign="start center" fxLayoutAlign.sm="start" fxLayoutGap.sm="0"
                                             fxLayout.xs="column" fxLayoutAlign.xs="start">
 
-
+                                            
                                             <mat-form-field appearance="fill"
                                                 *ngIf="!professionalForm.get('patient')?.get('otraOS')?.value"
                                                 fxFlex="80">
                                                 <mat-label>Obra Social</mat-label>
                                                 <mat-select [disabled]="!this.professionalForm.get('patient.dni').valid"
                                                             (selectionChange)="onOsSelected($event.value)">
-                                                    <mat-option *ngIf="!existenObrasSociales(obraSocial)" [disabled]="true">
-                                                        Sin obras sociales del paciente
+                                                            <mat-option *ngIf="!existenObrasSociales(obraSocial)" [disabled]="true">
+                                                                Sin obras sociales del paciente
                                                     </mat-option>
                                                     <ng-container *ngIf="existenObrasSociales(obraSocial)">
                                                         <mat-option *ngFor="let os of obraSocial" [value]="os">
@@ -178,7 +179,7 @@
                                             </mat-form-field>
 
                                             <mat-form-field
-                                                *ngIf="professionalForm.get('patient')?.get('otraOS')?.value"
+                                            *ngIf="professionalForm.get('patient')?.get('otraOS')?.value"
                                                 appearance="fill" fxFlex="80" fxFlex.md="100">
                                                 <mat-label>Obra Social</mat-label>
                                                 <input type="text" matInput [formControl]="obraSocialControl"
@@ -186,14 +187,14 @@
                                                     [disabled]="!this.professionalForm.get('patient.dni').valid"
                                                     placeholder="Buscar obra social">
                                                 <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayOs"
-                                                                  (optionSelected)="onOsSelected($event.option.value)">
+                                                (optionSelected)="onOsSelected($event.option.value)">
                                                     <mat-option *ngIf="!existenObrasSociales((filteredObrasSociales | async) || [])" [disabled]="true">
                                                         Sin obras sociales 
                                                     </mat-option>
                                                     <ng-container *ngIf="existenObrasSociales((filteredObrasSociales | async) || [])">
                                                         <mat-option *ngFor="let os of filteredObrasSociales | async"
                                                                     [value]="os">
-                                                            {{ os?.nombre }}
+                                                                    {{ os?.nombre }}
                                                         </mat-option>
                                                     </ng-container>
                                                 </mat-autocomplete>
@@ -218,6 +219,15 @@
                                             </mat-form-field>
                                         </div>
                                     </div>
+                                    
+                                    <!-- Selector de Efector -->
+                                    <div fxLayout="column" fxLayoutGap="10px" class="efector-section">
+                                        <app-efectores-selector 
+                                            [efectorControl]="efectorControl"
+                                            (efectorSelected)="onEfectorSelected($event)">
+                                        </app-efectores-selector>
+                                    </div>
+                                    
                                 </div>
                                 <div formArrayName="supplies" class="nested-supplies">
                                     <div class="custom-error-container">
