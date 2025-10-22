@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormGroup, FormGroupDirective, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, FormGroupDirective, Validators, ValidatorFn, FormControl } from '@angular/forms';
 import { ThemePalette } from '@angular/material/core';
 import { MatDialog } from '@angular/material/dialog';
 import { step, stepLink } from '@animations/animations.template';
@@ -14,8 +14,69 @@ import { CertificatesService } from '@services/certificates.service';
 import { PrescriptionsService } from '@services/prescriptions.service';
 import { SnomedSuppliesService } from '@services/snomedSupplies.service';
 import { PatientFormComponent } from '@shared/components/patient-form/patient-form.component';
-import { of, Subject, Subscription } from 'rxjs';
-import { catchError, debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
+import { of, Subject, Subscription, Observable } from 'rxjs';
+import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
+
+// Validador personalizado para fechas
+function validDateValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+        if (!control.value) {
+            return null; // Si no hay valor, no validamos (required se encarga)
+        }
+
+        const date = new Date(control.value);
+        const isValidDate = date instanceof Date && !isNaN(date.getTime());
+
+        if (!isValidDate) {
+            return { 'invalidDate': { value: control.value } };
+        }
+
+        // Validar que la fecha no sea futura para fecha de nacimiento
+        const today = new Date();
+        if (date > today) {
+            return { 'futureDate': { value: control.value } };
+        }
+
+        // Validar que la fecha sea razonable (no muy antigua)
+        const minDate = new Date('1900-01-01');
+        if (date < minDate) {
+            return { 'tooOldDate': { value: control.value } };
+        }
+
+        return null;
+    };
+}
+
+function medicationSelectedValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+        if (!control.value) {
+            return null;
+        }
+
+        const supplyGroup = control.parent;
+        if (!supplyGroup) {
+            return null;
+        }
+
+        const snomedConcept = supplyGroup.get('snomedConcept');
+        if (!snomedConcept || !snomedConcept.value || !snomedConcept.value.conceptId) {
+            return { 'medicationNotSelected': { value: control.value } };
+        }
+
+        return null;
+    };
+}
+
+function noWhitespaceValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+        if (!control.value) {
+            return null;
+        }
+
+        const isWhitespace = (control.value || '').trim().length === 0;
+        return isWhitespace ? { 'whitespace': { value: control.value } } : null;
+    };
+}
 
 @Component({
     selector: 'app-professional-form',
@@ -27,10 +88,28 @@ import { catchError, debounceTime, distinctUntilChanged, filter, switchMap, take
     ]
 })
 export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewInit {
+    obraSocialControl = new FormControl('');
+    filteredObrasSociales: Observable<any[]>;
+    efectorControl = new FormControl('', Validators.required);
+
     // Suscripciones
     private subscriptions: Subscription = new Subscription();
 
-    // Método removido - funcionalidad manejada por patient-form component
+    onOsSelected(selectedOs: any): void {
+        const osGroup = this.professionalForm.get('patient.os') as FormGroup;
+        if (osGroup && selectedOs) {
+            osGroup.patchValue({
+                nombre: selectedOs.nombre,
+                codigoPuco: selectedOs.codigoPuco
+            });
+            const numeroAfiliadoControl = osGroup.get('numeroAfiliado');
+            if (numeroAfiliadoControl) {
+                numeroAfiliadoControl.enable();
+            }
+        }
+    }
+
+
     existenObrasSociales(array: any[]): boolean {
         if (!array || array.length === 0) {
             return false;
@@ -165,7 +244,33 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         this.professionalForm = this.fBuilder.group({
             _id: [''],
             professional: [this.professionalData],
-            patient: [null, [Validators.required]],
+            efector: this.efectorControl,
+            patient: this.fBuilder.group({
+                dni: ['', [
+                    Validators.required,
+                    Validators.minLength(7),
+                    Validators.pattern('^[0-9]*$')
+                ]],
+                lastName: ['', [
+                    Validators.required
+                ]],
+                firstName: ['', [
+                    Validators.required
+                ]],
+                sex: ['', [
+                    Validators.required
+                ]],
+                otraOS: [{ value: false, disabled: true }],
+                os: this.fBuilder.group({
+                    nombre: [''],
+                    codigoPuco: [''],
+                    numeroAfiliado: [{ value: '', disabled: true }, [Validators.required, Validators.pattern('^[0-9]*$')]]
+                }),
+                fechaNac: ['', this.isAmbitoPublico() ? [
+                    Validators.required,
+                    validDateValidator()
+                ] : [validDateValidator()]]
+            }),
             date: [this.today, [
                 Validators.required
             ]],
@@ -432,11 +537,13 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
 
     // reset the form as intial values
     clearForm(professionalNgForm: FormGroupDirective) {
+        const efector = this.efectorControl.value;
         professionalNgForm.resetForm();
         const currentAmbito = this.ambitoService.getAmbito();
         this.professionalForm.reset({
             _id: '',
             professional: this.professionalData,
+            efector: efector,
             date: this.today,
             patient: null,
             ambito: currentAmbito

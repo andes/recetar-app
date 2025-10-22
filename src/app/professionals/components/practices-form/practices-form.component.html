@@ -31,6 +31,13 @@
                 <!-- Componente reutilizable de paciente -->
                 <app-patient-form #patientForm [showObraSocial]="true" [appearance]="'fill'" [layout]="'row'" formControlName="patient"></app-patient-form>
 
+                <!-- Selector de Efector -->
+                <div fxLayout="column" fxLayoutGap="10px" class="efector-section">
+                  <app-efectores-selector 
+                      [efectorControl]="efectorControl">
+                  </app-efectores-selector>
+                </div>
+
                 <!-- Campos de práctica -->
                 <div fxLayout="column" fxLayoutGap="10px">
                   <mat-form-field appearance="fill">
