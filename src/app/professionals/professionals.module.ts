@@ -26,6 +26,7 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialogModule } from '@angular/material/dialog';
 
 import { PharmacistsModule } from '@pharmacists/pharmacists.module';
 
@@ -39,6 +40,8 @@ import { EditUserInfoComponent } from './components/edit-user-info/edit-user-inf
 import { PatientFormComponent } from '@shared/components/patient-form/patient-form.component';
 import { SharedModule } from '@shared/shared.module';
 import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
+import { EfectoresSelectorComponent } from './components/efectores-selector/efectores-selector.component';
+import { EfectorDialogComponent } from './components/efector-dialog/efector-dialog.component';
 
 @NgModule({
     declarations: [
@@ -50,12 +53,9 @@ import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
         CertificatePracticePrinterComponent,
         SelectorAmbitoComponent,
         EditUserInfoComponent,
-        CertificateFormComponent,
-        SupplyListComponent,
-        PracticesFormComponent,
-        CertificatePracticePrinterComponent,
+        EfectoresSelectorComponent,
+        EfectorDialogComponent,
         PatientFormComponent,
-        SelectorAmbitoComponent
     ],
     imports: [
         CommonModule,
@@ -84,9 +84,11 @@ import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
         MatCheckboxModule,
         MatSnackBarModule,
         PharmacistsModule,
-        SharedModule
+        SharedModule,
+        MatDialogModule,
     ],
     providers: [PatientNamePipe],
     exports: [PatientFormComponent]
 })
 export class ProfessionalsModule { }
+
