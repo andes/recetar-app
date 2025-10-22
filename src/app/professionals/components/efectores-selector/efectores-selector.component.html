@@ -1,0 +1,22 @@
+<div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center">
+    <mat-form-field appearance="fill" fxFlex="80">
+        <mat-label>Efector</mat-label>
+        <mat-select [formControl]="efectorControl" [disabled]="disabled" [compareWith]="compareEfectores">
+            <mat-option *ngFor="let efector of efectores" [value]="efector">
+                {{ efector.nombre }} - {{ efector.direccion }}
+            </mat-option>
+        </mat-select>
+        <mat-error *ngIf="efectorControl.hasError('required')">
+            Debe seleccionar un efector
+        </mat-error>
+    </mat-form-field>
+    
+    <button mat-raised-button color="primary" type="button" 
+            (click)="openEfectorDialog()" 
+            [disabled]="disabled || isAddingEfector">
+        <mat-spinner *ngIf="isAddingEfector" diameter="20" color="primary"></mat-spinner>
+        <mat-icon *ngIf="!isAddingEfector">add</mat-icon>
+        <span *ngIf="!isAddingEfector">Agregar Efector</span>
+        <span *ngIf="isAddingEfector">Guardando...</span>
+    </button>
+</div>

@@ -17,6 +17,7 @@ export class PracticesFormComponent implements OnInit {
     practiceDate = new FormControl(new Date(), [Validators.required]);
     isSubmitPractice = false;
     professionalData: any;
+    efectorControl = new FormControl('', Validators.required);
 
     constructor(
         private fBuilder: FormBuilder,

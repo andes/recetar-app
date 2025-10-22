@@ -1,0 +1,42 @@
+<h2 mat-dialog-title>Agregar Nuevo Efector</h2>
+
+<mat-dialog-content>
+    <form [formGroup]="efectorForm" fxLayout="column" fxLayoutGap="20px">
+        <mat-form-field appearance="fill">
+            <mat-label>Nombre del Efector</mat-label>
+            <input matInput formControlName="nombre" placeholder="Ej: Hospital Municipal">
+            <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20"
+                *ngIf="spinnerLoading"></mat-spinner>
+            <mat-autocomplete ></mat-autocomplete>
+            <mat-error *ngIf="nombre?.hasError('required')">
+                El nombre es requerido
+            </mat-error>
+            <mat-error *ngIf="nombre?.hasError('minlength')">
+                El nombre debe tener al menos 3 caracteres
+            </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+            <mat-label>Dirección Completa</mat-label>
+            <textarea matInput 
+                      formControlName="direccion" 
+                      placeholder="Ej: Av. Libertador 1234, Ciudad, Provincia"
+                      rows="3"
+                      cdkTextareaAutosize>
+            </textarea>
+            <mat-error *ngIf="direccion?.hasError('required')">
+                La dirección es requerida
+            </mat-error>
+            <mat-error *ngIf="direccion?.hasError('minlength')">
+                La dirección debe tener al menos 5 caracteres
+            </mat-error>
+        </mat-form-field>
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="onCancel()">Cancelar</button>
+    <button mat-raised-button color="primary" type="button" (click)="onSubmit()" [disabled]="efectorForm.invalid">
+        Guardar
+    </button>
+</mat-dialog-actions>
