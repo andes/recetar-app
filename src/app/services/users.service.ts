@@ -6,19 +6,35 @@ import { Observable, of } from 'rxjs';
 import { User } from '@interfaces/users';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class UserService {
 
-  constructor(
-    private http: HttpClient
-  ) { }
+    constructor(
+        private http: HttpClient
+    ) { }
 
-  getUsers(): Observable<User[]>{
-    return this.http.get<User[]>(`${environment.API_END_POINT}/users/index`);
-  }
+    getUsers(): Observable<User[]> {
+        return this.http.get<User[]>(`${environment.API_END_POINT}/users/index`);
+    }
 
-  updateIsActive(_id: string, isActive: boolean): Observable<User> {
-    return this.http.post<User>(`${environment.API_END_POINT}/users/update`, {_id: _id, isActive: isActive})
-  }
+    getUserById(userId: string): Observable<User> {
+        return this.http.get<User>(`${environment.API_END_POINT}/users/${userId}`);
+    }
+
+    updateIsActive(_id: string, isActive: boolean): Observable<User> {
+        return this.http.post<User>(`${environment.API_END_POINT}/users/update`, { _id: _id, isActive: isActive });
+    }
+
+    // Unified update method that can handle multiple fields in a single request
+    updateUser(_id: string, updateData: {
+        email?: string;
+        // username?: string;
+        // businessName?: string;
+        // roles?: Array<{ _id: string; role: string }>;
+        // isActive?: boolean;
+    }): Observable<User> {
+        const payload = { _id, ...updateData };
+        return this.http.post<User>(`${environment.API_END_POINT}/users/update`, payload);
+    }
 }

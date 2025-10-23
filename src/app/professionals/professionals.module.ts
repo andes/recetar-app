@@ -25,6 +25,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { PharmacistsModule } from '@pharmacists/pharmacists.module';
 
@@ -34,43 +35,45 @@ import { SupplyListComponent } from './components/supply-list/supply-list.compon
 import { PracticesFormComponent } from './components/practices-form/practices-form.component';
 import { CertificatePracticePrinterComponent } from './components/certificate-practice-printer/certificate-practice-printer.component';
 import { SelectorAmbitoComponent } from './components/selector-ambito/selector-ambito.component';
+import { EditUserInfoComponent } from './components/edit-user-info/edit-user-info.component';
 
 @NgModule({
-  declarations: [
-    routingComponents,
-    PrescriptionsListComponent,
-    SupplyListComponent,
-    PracticesFormComponent,
-    CertificateFormComponent,
-    CertificatePracticePrinterComponent,
-    SelectorAmbitoComponent,
-  ],
-  imports: [
-    CommonModule,
-    BrowserModule,
-    HttpClientModule,
-    ReactiveFormsModule,
-    FormsModule,
-    ProfessionalsRoutingModule,
-    FlexLayoutModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatSelectModule,
-    MatAutocompleteModule,
-    MatMenuModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatTableModule,
-    MatChipsModule,
-    MatPaginatorModule,
-    MatSortModule,
-    MatTooltipModule,
-    MatCheckboxModule,
-    PharmacistsModule
-  ]
+    declarations: [
+        routingComponents,
+        PrescriptionsListComponent,
+        SupplyListComponent,
+        PracticesFormComponent,
+        CertificateFormComponent,
+        CertificatePracticePrinterComponent,
+        SelectorAmbitoComponent,
+        EditUserInfoComponent,
+    ],
+    imports: [
+        CommonModule,
+        BrowserModule,
+        HttpClientModule,
+        ReactiveFormsModule,
+        FormsModule,
+        ProfessionalsRoutingModule,
+        FlexLayoutModule,
+        MatCardModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatSelectModule,
+        MatAutocompleteModule,
+        MatMenuModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatIconModule,
+        MatProgressSpinnerModule,
+        MatTableModule,
+        MatChipsModule,
+        MatPaginatorModule,
+        MatSortModule,
+        MatTooltipModule,
+        MatCheckboxModule,
+        MatSnackBarModule
+    ]
 })
 export class ProfessionalsModule { }
