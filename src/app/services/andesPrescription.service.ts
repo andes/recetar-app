@@ -113,14 +113,14 @@ export class AndesPrescriptionsService {
     }
 
     private removePrescription(removedPrescription: string) {
-        const removeIndex = this.andesPrescriptionsArray.findIndex((prescription: AndesPrescriptions) => prescription.idAndes === removedPrescription);
+        const removeIndex = this.andesPrescriptionsArray.findIndex((prescription: AndesPrescriptions) => prescription._id === removedPrescription);
 
         this.andesPrescriptionsArray.splice(removeIndex, 1);
         this.myAndesPrescriptions.next(this.andesPrescriptionsArray);
     }
 
     private updatePrescription(updatedPrescription: AndesPrescriptions) {
-        const updateIndex = this.andesPrescriptionsArray.findIndex((prescription: AndesPrescriptions) => prescription.idAndes === updatedPrescription.idAndes);
+        const updateIndex = this.andesPrescriptionsArray.findIndex((prescription: AndesPrescriptions) => prescription._id === updatedPrescription._id);
         this.andesPrescriptionsArray.splice(updateIndex, 1, updatedPrescription);
         this.myAndesPrescriptions.next(this.andesPrescriptionsArray);
     }
