@@ -170,11 +170,6 @@ export class AndesPrescriptionPrinterComponent implements OnInit {
         pdf.add(new Txt('Duración tratamiento: ' + (prescription.medicamento.dosisDiaria.dias ? prescription.medicamento.dosisDiaria.dias + ' dia/s' : 'No informado')).end);
         pdf.add(new Txt('\n').end);
         pdf.add(new Txt('\n').end);
-        pdf.add(new Txt('\n').end);
-        pdf.add(new Txt('\n').end);
-        pdf.add(new Txt('\n').end);
-        pdf.add(new Txt('\n').end);
-        pdf.add(new Txt('\n').end);
 
         // Códigos de barras - mostrar ambos en la misma fila si existe idReceta
         if (barcodeRecetaImg) {
