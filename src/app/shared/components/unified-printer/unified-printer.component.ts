@@ -12,7 +12,6 @@ import { PracticesService } from '@services/practices.service';
 import { PatientsService } from '@services/patients.service';
 import * as QRCode from 'qrcode';
 import { environment } from '../../../../environments/environment';
-import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 
 PdfMakeWrapper.setFonts(pdfFontsX);
 
@@ -23,7 +22,6 @@ export class UnifiedPrinterComponent {
 
     constructor(
         private datePipe: DatePipe,
-        private patientNamePipe: PatientNamePipe,
         private barcodeService: BarcodeService,
         private certificatesService: CertificatesService,
         private practicesService: PracticesService,
