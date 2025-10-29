@@ -1,11 +1,9 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map, mapTo, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
-import AndesPrescriptions from "../interfaces/andesPrescriptions";
-import { tap, mapTo, map } from 'rxjs/operators';
-import { saveAs } from 'file-saver';
-import * as moment from 'moment';
+import AndesPrescriptions from '../interfaces/andesPrescriptions';
 
 @Injectable({
     providedIn: 'root'
@@ -19,7 +17,8 @@ export class AndesPrescriptionsService {
         this.myAndesPrescriptions = new BehaviorSubject<AndesPrescriptions[]>(this.andesPrescriptionsArray);
     }
 
-    getPrescriptionsFromAndes(params: { patient_dni: string, patient_sex: string }): Observable<boolean> {
+
+    getPrescriptionsFromAndes(params: { patient_dni: string; patient_sex: string }): Observable<boolean> {
         return this.http.get(`${environment.API_END_POINT}/andes-prescriptions/from-andes/?dni=${params.patient_dni}&sexo=${params.patient_sex}`).pipe(
             tap((prescriptions: AndesPrescriptions[]) => this.setPrescriptions(prescriptions)),
             map((prescriptions: AndesPrescriptions[]) => prescriptions.length > 0)
@@ -61,7 +60,7 @@ export class AndesPrescriptionsService {
         );
     }
 
-    getFromDniAndDate(params: { patient_dni: string, dateFilter: string }): Observable<boolean> {
+    getFromDniAndDate(params: { patient_dni: string; dateFilter: string }): Observable<boolean> {
         return this.http.get<AndesPrescriptions[]>(`${environment.API_END_POINT}/prescriptions/find/${params.patient_dni}&${params.dateFilter}`).pipe(
             tap((prescriptions: AndesPrescriptions[]) => this.setPrescriptions(prescriptions)),
             map((prescriptions: AndesPrescriptions[]) => prescriptions.length > 0)
@@ -93,6 +92,41 @@ export class AndesPrescriptionsService {
         return this.http.delete<AndesPrescriptions>(`${environment.API_END_POINT}/prescriptions/${prescriptionId}`).pipe(
             tap(() => this.removePrescription(prescriptionId)),
             mapTo(true)
+        );
+    }
+
+    // Nuevo método para obtener prescripciones con filtros
+    getPrescriptionsWithFilters(patient_dni: string, filters?: { status?: string; dateFrom?: string; dateTo?: string; patient_sex?: string }): Observable<boolean> {
+        let url = `${environment.API_END_POINT}/andes-prescriptions/from-andes/`;
+        const queryParams: string[] = [];
+
+        // Agregar el DNI del paciente (requerido)
+        queryParams.push(`dni=${patient_dni}`);
+
+        // Agregar el sexo del paciente (requerido para el endpoint from-andes)
+        if (filters?.patient_sex) {
+            queryParams.push(`sexo=${filters.patient_sex}`);
+        }
+
+        if (filters) {
+            if (filters.status) {
+                queryParams.push(`status=${filters.status}`);
+            }
+            if (filters.dateFrom) {
+                queryParams.push(`dateFrom=${filters.dateFrom}`);
+            }
+            if (filters.dateTo) {
+                queryParams.push(`dateTo=${filters.dateTo}`);
+            }
+        }
+
+        if (queryParams.length > 0) {
+            url += `?${queryParams.join('&')}`;
+        }
+
+        return this.http.get<AndesPrescriptions[]>(url).pipe(
+            tap((prescriptions: AndesPrescriptions[]) => this.setPrescriptions(prescriptions)),
+            map((prescriptions: AndesPrescriptions[]) => prescriptions.length > 0)
         );
     }
 
