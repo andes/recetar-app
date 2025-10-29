@@ -7,6 +7,7 @@ import { CertificatesService } from '@services/certificates.service';
 import { PracticesService } from '@services/practices.service';
 import * as QRCode from 'qrcode';
 import { environment } from '@root/environments/environment';
+import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 
 @Component({
     selector: 'app-certificate-practice-printer',
@@ -17,7 +18,8 @@ export class CertificatePracticePrinterComponent implements OnInit {
     constructor(
         private datePipe: DatePipe,
         private certificatesService: CertificatesService,
-        private practicesService: PracticesService
+        private practicesService: PracticesService,
+        private patientNamePipe: PatientNamePipe
     ) { }
 
     ngOnInit(): void {
@@ -65,7 +67,7 @@ export class CertificatePracticePrinterComponent implements OnInit {
         // Patient information
         pdf.add(new Txt([
             { text: 'Paciente: ' },
-            { text: `${certificate.patient.lastName.toUpperCase()} ${certificate.patient.firstName.toUpperCase()}`, bold: true }
+            { text: `${certificate.patient.lastName.toUpperCase()} ${this.patientNamePipe.transform(certificate.patient).toUpperCase()}`, bold: true }
         ]).end);
         pdf.add(new Txt('\n').end);
 
@@ -201,7 +203,7 @@ export class CertificatePracticePrinterComponent implements OnInit {
         // Patient information
         pdf.add(new Txt([
             { text: 'Paciente: ' },
-            { text: `${practice.patient.lastName.toUpperCase()} ${practice.patient.firstName.toUpperCase()}`, bold: true }
+            { text: `${practice.patient.lastName.toUpperCase()} ${this.patientNamePipe.transform(practice.patient).toUpperCase()}`, bold: true }
         ]).end);
         pdf.add(new Txt('\n').end);
 
@@ -220,7 +222,6 @@ export class CertificatePracticePrinterComponent implements OnInit {
         // Obra Social information
         let obraSocial = '';
         let numeroAfiliado = '';
-        console.log(practice);
 
         if (practice.patient.obraSocial?.nombre) {
             obraSocial = practice.patient.obraSocial.nombre;

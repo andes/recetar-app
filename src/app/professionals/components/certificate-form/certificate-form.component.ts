@@ -1,31 +1,20 @@
 import { Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
-import { FormBuilder, FormGroup, AbstractControl, Validators, FormGroupDirective, FormControl, ValidatorFn } from '@angular/forms';
-import { PatientsService } from '@root/app/services/patients.service';
-import { AuthService } from '@auth/services/auth.service';
-import { Patient } from '@interfaces/patients';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, FormGroupDirective, Validators } from '@angular/forms';
 import { ThemePalette } from '@angular/material/core';
-import { Prescriptions } from '@interfaces/prescriptions';
-import { ProfessionalDialogComponent } from '@professionals/components/professional-dialog/professional-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { step, stepLink } from '@animations/animations.template';
-import { debounce, debounceTime, map, startWith } from 'rxjs/operators';
-import { CertificatesService } from '@services/certificates.service';
-import { Certificate } from '@interfaces/certificate';
-import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-
-function noWhitespaceValidator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } | null => {
-        if (!control.value) {
-            return null; 
-        }
-
-        const isWhitespace = (control.value || '').trim().length === 0;
-        return isWhitespace ? { 'whitespace': { value: control.value } } : null;
-    };
-}
+import { MatTableDataSource } from '@angular/material/table';
+import { step, stepLink } from '@animations/animations.template';
+import { AuthService } from '@auth/services/auth.service';
+import { Certificate } from '@interfaces/certificate';
+import { Prescriptions } from '@interfaces/prescriptions';
+import { ProfessionalDialogComponent } from '@professionals/components/professional-dialog/professional-dialog.component';
+import { PatientsService } from '@root/app/services/patients.service';
+import { CertificatesService } from '@services/certificates.service';
+import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
+import { Subscription } from 'rxjs';
+import { PatientFormComponent } from '@shared/components/patient-form/patient-form.component';
 
 @Component({
     selector: 'app-certificate-form',
@@ -61,17 +50,12 @@ export class CertificateFormComponent implements OnInit {
 
         return null;
     }
-    
-    @ViewChild('dni', { static: true }) dni: any;
-
     certificateForm: FormGroup;
     loadingCertificates: boolean;
-    patientSearch: Patient[];
     today = new Date();
     professionalData: any;
     readonly spinnerColor: ThemePalette = 'primary';
     isSubmit = false;
-    dniShowSpinner = false;
     isFormShown = true;
     isCertificateShown = false;
     anulateCertificate = false;
@@ -83,13 +67,15 @@ export class CertificateFormComponent implements OnInit {
 
     @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
     @ViewChild(MatSort, { static: true }) sort: MatSort;
+    @ViewChild('patientForm') patientFormComponent: PatientFormComponent;
 
     constructor(
         private fBuilder: FormBuilder,
         private apiPatients: PatientsService,
         private certificateService: CertificatesService,
         private authService: AuthService,
-        public dialog: MatDialog
+        public dialog: MatDialog,
+        private patientNamePipe: PatientNamePipe
     ) { }
 
     ngOnInit(): void {
@@ -98,7 +84,7 @@ export class CertificateFormComponent implements OnInit {
             this.dataCertificates = new MatTableDataSource<Certificate>(certificates);
             this.dataCertificates.sortingDataAccessor = (item, property) => {
                 switch (property) {
-                    case 'patient': return item.patient.lastName + item.patient.firstName;
+                    case 'patient': return item.patient.lastName + this.patientNamePipe.transform(item.patient);
                     case 'prescription_date': return new Date(item.createdAt).getTime();
                     default: return item[property];
                 }
@@ -109,26 +95,12 @@ export class CertificateFormComponent implements OnInit {
         });
         this.initProfessionalForm();
 
-        // on DNI changes
-        this.patientDni.valueChanges.pipe(
-            debounceTime(1000)
-        ).subscribe(
-            dniValue => {
-                this.getPatientByDni(dniValue);
-            }
-        );
-
         this.certificateService.certificate$.subscribe(
             certificate => {
                 if (certificate) {
                     this.certificateForm.reset({
                         date: { value: certificate.createdAt, disabled: true },
-                        patient: {
-                            dni: { value: certificate.patient.dni, disabled: true },
-                            sex: { value: certificate.patient.sex, disabled: true },
-                            lastName: { value: certificate.patient.lastName, disabled: true },
-                            firstName: { value: certificate.patient.firstName, disabled: true }
-                        },
+                        patient: certificate.patient,
                         certificate: { value: certificate.certificate, disabled: true },
                     });
                     this.anulateCertificate = true;
@@ -153,23 +125,8 @@ export class CertificateFormComponent implements OnInit {
         this.certificateForm = this.fBuilder.group({
             _id: [''],
             professional: [this.professionalData],
-            patient: this.fBuilder.group({
-                dni: ['', [
-                    Validators.required,
-                    Validators.minLength(7),
-                    Validators.pattern('^[0-9]*$')
-                ]],
-                lastName: ['', [
-                    Validators.required
-                ]],
-                firstName: ['', [
-                    Validators.required
-                ]],
-                sex: ['', [
-                    Validators.required
-                ]],
-            }),
-            certificate: ['', [Validators.required, noWhitespaceValidator()]],
+            patient: ['', [Validators.required]],
+            certificate: ['', [Validators.required]],
             anulateReason: [''],
             startDate: [this.today, [
                 Validators.required,
@@ -180,31 +137,7 @@ export class CertificateFormComponent implements OnInit {
 
     }
 
-    getPatientByDni(dniValue: string | null): void {
-        if (dniValue !== null && ( dniValue.length === 7 || dniValue.length === 8)) {
-            this.dniShowSpinner = true;
-            this.apiPatients.getPatientByDni(dniValue).subscribe(
-                res => {
-                    if (res.length) {
-                        this.patientSearch = res;
-                    } else {
-                        this.patientSearch = [];
-                        this.patientLastName.setValue('');
-                        this.patientFirstName.setValue('');
-                        this.patientSex.setValue('');
-                    }
-                    this.dniShowSpinner = false;
-                });
-        } else {
-            this.dniShowSpinner = false;
-        }
-    }
 
-    completePatientInputs(patient: Patient): void {// TODO: REC-38
-        this.patientLastName.setValue(patient.lastName);
-        this.patientFirstName.setValue(patient.firstName);
-        this.patientSex.setValue(patient.sex);
-    }
 
     onSubmitCertificateForm(professionalNgForm: FormGroupDirective): void {
         if (!this.anulateCertificate) {
@@ -221,6 +154,14 @@ export class CertificateFormComponent implements OnInit {
                     success => {
                         if (success) { this.formReset(professionalNgForm); }
                     });
+            } else {
+                // Marcar todos los campos como touched para mostrar errores
+                this.markFormGroupTouched(this.certificateForm);
+                this.cantDias.markAsTouched();
+                // También marcar los campos del patient-form como touched
+                if (this.patientFormComponent) {
+                    this.patientFormComponent.markAllFieldsTouched();
+                }
             }
         } else {
             this.certificate['anulateReason'] = this.certificateForm.value.anulateReason;
@@ -266,29 +207,11 @@ export class CertificateFormComponent implements OnInit {
         return this.certificateForm.get('startDate');
     }
 
-    
-        get cantDiasControl(): AbstractControl {
-            return this.cantDias;
-        }
-    get patientDni(): AbstractControl {
-        const patient = this.certificateForm.get('patient');
-        return patient.get('dni');
+
+    get cantDiasControl(): AbstractControl {
+        return this.cantDias;
     }
 
-    get patientLastName(): AbstractControl {
-        const patient = this.certificateForm.get('patient');
-        return patient.get('lastName');
-    }
-
-    get patientFirstName(): AbstractControl {
-        const patient = this.certificateForm.get('patient');
-        return patient.get('firstName');
-    }
-
-    get patientSex(): AbstractControl {
-        const patient = this.certificateForm.get('patient');
-        return patient.get('sex');
-    }
 
     get patientCertificate(): AbstractControl {
         const patient = this.certificateForm.get('certificate');
@@ -321,18 +244,12 @@ export class CertificateFormComponent implements OnInit {
     // reset the form as intial values
     clearForm(professionalNgForm: FormGroupDirective) {
         professionalNgForm.resetForm();
-        this.patientSearch = [];
         this.certificateForm.reset({
             _id: '',
             professional: this.professionalData,
             startDate: this.today,
             cantDias: '',
-            patient: {
-                dni: { value: '', disabled: false },
-                sex: { value: '', disabled: false },
-                lastName: { value: '', disabled: false },
-                firstName: { value: '', disabled: false },
-            },
+            patient: null,
             certificate: '',
             anulateReason: ''
         });
@@ -353,5 +270,16 @@ export class CertificateFormComponent implements OnInit {
     showCertificados(): void {
         this.isFormShown = false;
         this.isCertificateShown = true;
+    }
+
+    private markFormGroupTouched(formGroup: FormGroup): void {
+        Object.keys(formGroup.controls).forEach(key => {
+            const control = formGroup.get(key);
+            control?.markAsTouched();
+
+            if (control instanceof FormGroup) {
+                this.markFormGroupTouched(control);
+            }
+        });
     }
 }

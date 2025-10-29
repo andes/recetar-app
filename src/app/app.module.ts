@@ -26,52 +26,54 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
-import {MAT_MOMENT_DATE_FORMATS, MomentDateAdapter} from '@angular/material-moment-adapter';
-import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
+import { MAT_MOMENT_DATE_FORMATS, MomentDateAdapter } from '@angular/material-moment-adapter';
+import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 
 // component
 import { HeaderComponent } from '@shared/layouts/header/header.component';
 import { FooterComponent } from './shared/layouts/footer/footer.component';
 import { DatePipe } from '@angular/common';
+import { SharedModule } from '@shared/shared.module';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    routingComponents,
-    HeaderComponent,
-    FooterComponent
-  ],
-  imports: [
-    BrowserModule,
-    AuthModule,
-    PharmacistsModule,
-    ProfessionalsModule,
-    AuditModule,
-    AppRoutingModule,
-    HttpClientModule,
-    BrowserAnimationsModule,
-    ReactiveFormsModule,
-    FlexLayoutModule,
-    MatToolbarModule,
-    MatButtonModule,
-    MatMenuModule,
-    MatProgressSpinnerModule,
-    MatIconModule,
-    MatChipsModule,
-  ],
-  providers: [
-    {
-      provide: APP_INITIALIZER,
-      useFactory: servicesOnRun,
-      multi: true,
-      deps: [AuthService]
-    },
-    PatientsService,
-    DatePipe,
-    {provide: MAT_DATE_LOCALE, useValue: 'es-AR'},
-    {provide: DateAdapter, useClass: MomentDateAdapter, deps: [MAT_DATE_LOCALE]},
-    {provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS},
-  ],
-  bootstrap: [AppComponent]
+    declarations: [
+        AppComponent,
+        routingComponents,
+        HeaderComponent,
+        FooterComponent
+    ],
+    imports: [
+        BrowserModule,
+        AuthModule,
+        PharmacistsModule,
+        ProfessionalsModule,
+        AuditModule,
+        AppRoutingModule,
+        HttpClientModule,
+        BrowserAnimationsModule,
+        ReactiveFormsModule,
+        FlexLayoutModule,
+        MatToolbarModule,
+        MatButtonModule,
+        MatMenuModule,
+        MatProgressSpinnerModule,
+        MatIconModule,
+        MatChipsModule,
+        SharedModule,
+    ],
+    providers: [
+        {
+            provide: APP_INITIALIZER,
+            useFactory: servicesOnRun,
+            multi: true,
+            deps: [AuthService]
+        },
+        PatientsService,
+        DatePipe,
+        { provide: MAT_DATE_LOCALE, useValue: 'es-AR' },
+        { provide: DateAdapter, useClass: MomentDateAdapter, deps: [MAT_DATE_LOCALE] },
+        { provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS },
+    ],
+    bootstrap: [AppComponent]
 })
 export class AppModule { }
