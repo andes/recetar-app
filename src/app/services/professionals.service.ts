@@ -26,6 +26,10 @@ export class ProfessionalsService {
     const url = `${environment.API_END_POINT}/auth/professionals-andes`
     return this.http.get(url, { params });
   }
+  getAuthorizedProfessions(): Observable<any> {
+    const url = `${environment.API_END_POINT}/auth/authorizedProfessions`
+    return this.http.get(url);
+  }
 
   // getProfessionalByEnrollment(enrollment: string): Observable<Professionals> {
   //   const url = `${environment.ANDES_API}/core/tm/profesionales/guia?formacionGrado=%5Bobject%20Object%5D&numeroMatricula=${enrollment}&codigoProfesion=1`
