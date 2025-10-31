@@ -17,6 +17,15 @@
             <input matInput [(ngModel)]="currentSearchTerm" (keyup)="applyFilter($event.target.value)"
                    placeholder="Filtrar por nombre o documento">
         </mat-form-field>
+        
+        <!-- filtro por estado de receta -->
+        <mat-form-field *ngIf="selectedType === 'receta'">
+            <mat-select placeholder="Filtrar por estado" [(value)]="selectedStatusFilter">
+                <mat-option value="">Todos</mat-option>
+                <mat-option value="Vigente">Vigente</mat-option>
+                <mat-option value="Vencida">Vencida</mat-option>
+            </mat-select>
+        </mat-form-field>
 
         <!-- Mensaje cuando no hay selección -->
         <div *ngIf="!selectedType" class="no-selection-message">
