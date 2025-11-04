@@ -46,7 +46,7 @@
     <div *ngSwitchCase="'delete'">
         <h3 mat-dialog-title><mat-icon>delete</mat-icon> Desea eliminar la receta?</h3>
         <div mat-dialog-content>
-            <p>Receta de {{data.item.patient.lastName}}, {{data.item.patient?.firstName}}</p>
+            <p>Receta de {{getPatientName()}}</p>
             <p>Una vez eliminada no se podrá recuperar</p>
         </div>
         <div mat-dialog-actions fxLayoutAlign="space-around" align="end">
@@ -88,6 +88,40 @@
                     (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div> <!-- End case practiceError -->
+
+    <div *ngSwitchCase="'suspend_andes'">
+        <h3 mat-dialog-title><mat-icon>block</mat-icon> ¿Desea suspender la receta?</h3>
+        <div mat-dialog-content>
+            <p>Receta de {{getPatientName()}}</p>
+            <p>Una vez suspendida, la receta no podrá dispensarse</p>
+        </div>
+        <div mat-dialog-actions fxLayoutAlign="space-around" align="end">
+            <button mat-button (click)="onNoClick()" cdkFocusInitial>Cancelar</button>
+            <button mat-raised-button color="warn" (click)="confirmSuspendAndes()">Suspender</button>
+        </div>
+    </div>
+
+    <div *ngSwitchCase="'suspend_andes_success'">
+        <h3 mat-dialog-title><mat-icon>check</mat-icon> Suspendida</h3>
+        <div mat-dialog-content>
+            <p>La receta se ha suspendido correctamente!</p>
+        </div>
+        <div mat-dialog-actions align="end">
+            <button mat-raised-button color="primary" style="background-color: green; color: white;"
+                    (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
+        </div>
+    </div>
+
+    <div *ngSwitchCase="'suspend_andes_error'">
+        <h3 mat-dialog-title><mat-icon>error</mat-icon> Error</h3>
+        <div mat-dialog-content>
+            <p>Hubo un error al suspender la receta. Por favor, inténtelo nuevamente.</p>
+        </div>
+        <div mat-dialog-actions align="end">
+            <button mat-raised-button color="primary" style="background-color: green; color: white;"
+                    (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
+        </div>
+    </div>
 
     <div *ngSwitchDefault>
         <h3 mat-dialog-title><mat-icon>error</mat-icon> Error</h3>

@@ -41,10 +41,11 @@ export default class AndesPrescriptions {
         matricula: number;
     };
     diagnostico: {
-        term: string;
-        fsn: string;
-        conceptId: string;
-        semanticTag: string;
+        descripcion?: string;
+        term?: string;
+        fsn?: string;
+        conceptId?: string;
+        semanticTag?: string;
     };
     fechaRegistro: Date;
     fechaPrestacion: Date;

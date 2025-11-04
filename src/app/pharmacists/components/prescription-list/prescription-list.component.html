@@ -162,7 +162,8 @@
                                     </div>
                                     <div class="element-description" *ngIf="element.diagnostico"> <span
                                               class="description-title">
-                                            Diagnóstico:</span> {{element.diagnostico?.term}}
+                                            Diagnóstico:</span> {{element.diagnostico?.term||
+                                        element.diagnostico.descripcion}}
                                     </div>
                                     <div class="element-description"
                                          *ngIf="element.medicamento?.dosisDiaria?.notaMedica"> <span

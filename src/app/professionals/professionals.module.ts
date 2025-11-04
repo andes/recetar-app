@@ -26,6 +26,8 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
+import { PharmacistsModule } from '@pharmacists/pharmacists.module';
+
 import { PrescriptionsListComponent } from './components/prescriptions-list/prescriptions-list.component';
 import { CertificateFormComponent } from './components/certificate-form/certificate-form.component';
 import { SupplyListComponent } from './components/supply-list/supply-list.component';
@@ -67,7 +69,8 @@ import { SelectorAmbitoComponent } from './components/selector-ambito/selector-a
     MatPaginatorModule,
     MatSortModule,
     MatTooltipModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    PharmacistsModule
   ]
 })
 export class ProfessionalsModule { }
