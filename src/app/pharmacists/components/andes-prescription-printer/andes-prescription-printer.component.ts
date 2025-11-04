@@ -63,7 +63,7 @@ export class AndesPrescriptionPrinterComponent implements OnInit {
             author: 'Andes'
         });
         // Header
-        const fecha = prescription.fechaRegistro ? this.datePipe.transform(prescription.fechaRegistro, 'dd/MM/yyyy') : this.datePipe.transform(prescription.fechaPrestacion, 'dd/MM/yyyy')
+        const fecha = prescription.fechaRegistro ? this.datePipe.transform(prescription.fechaRegistro, 'dd/MM/yyyy') : this.datePipe.transform(prescription.fechaPrestacion, 'dd/MM/yyyy');
 
         pdf.add(new Columns(
             [
@@ -139,7 +139,7 @@ export class AndesPrescriptionPrinterComponent implements OnInit {
         if (prescription.diagnostico) {
             pdf.add(new Txt('\n').end);
             pdf.add(new Txt('Diagnóstico').bold().end);
-            pdf.add(new Txt('' + prescription.diagnostico.term).end);
+            pdf.add(new Txt('' + (prescription.diagnostico.term ? prescription.diagnostico.term : prescription.diagnostico.descripcion)).end);
         }
         if (prescription.medicamento.dosisDiaria.notaMedica) {
             pdf.add(new Txt('\n').end);
