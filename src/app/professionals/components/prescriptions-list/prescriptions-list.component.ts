@@ -89,13 +89,13 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     ngOnInit() {
         this.initDataSource();
         // No cargar datos inicialmente
-        
+
         this.ambitoService.getAmbitoSeleccionado
             .pipe(takeUntil(this.destroy$))
             .subscribe(ambito => {
                 this.ambito = ambito;
             });
-        
+
         // Suscribirse a eventos de eliminación de prescripciones
         this.interactionService.deletePrescription$
             .pipe(takeUntil(this.destroy$))
@@ -435,13 +435,45 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         this.destroy$.complete();
     }
 
+    getStatus(prescription: Prescriptions): string {
+        if (!prescription) {
+            return '';
+        }
+
+        const status = (prescription.status || '').toLowerCase();
+
+        switch (status) {
+            case 'pendiente':
+                return 'Vigente';
+            case 'finalizada':
+                return 'Dispensada';
+            default:
+                if (prescription.dispensedBy || prescription.dispensedAt) {
+                    return 'Dispensada';
+                }
+
+                return prescription.status || '';
+        }
+    }
+
+    getStatusColor(prescription: Prescriptions): string {
+        const status = this.getStatus(prescription);
+
+        switch (status) {
+            case 'Vencida':
+                return 'red';
+            default:
+                return '#000000';
+        }
+    }
+
     getCertificateStatus(certificate: Certificate): string {
-        if (certificate.anulateDate ) {
+        if (certificate.anulateDate) {
             return 'anulado';
         }
         const currentDate = new Date();
         const endDate = new Date(certificate.endDate);
-        
+
         if (currentDate > endDate) {
             return 'expirado';
         }
@@ -450,14 +482,14 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
 
     getCertificateStatusColor(certificate: Certificate): string {
         const status = this.getCertificateStatus(certificate);
-        
+
         switch (status) {
             case 'vigente':
-                return 'green'; 
+                return 'green';
             case 'expirado':
-                return 'orange'; 
+                return 'orange';
             case 'anulado':
-                return 'red'; 
+                return 'red';
             default:
                 return '#000000de';
         }
