@@ -615,6 +615,38 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         this.destroy$.complete();
     }
 
+    getStatus(prescription: Prescriptions): string {
+        if (!prescription) {
+            return '';
+        }
+
+        const status = (prescription.status || '').toLowerCase();
+
+        switch (status) {
+            case 'pendiente':
+                return 'Vigente';
+            case 'finalizada':
+                return 'Dispensada';
+            default:
+                if (prescription.dispensedBy || prescription.dispensedAt) {
+                    return 'Dispensada';
+                }
+
+                return prescription.status || '';
+        }
+    }
+
+    getStatusColor(prescription: Prescriptions): string {
+        const status = this.getStatus(prescription);
+
+        switch (status) {
+            case 'Vencida':
+                return 'red';
+            default:
+                return '#000000';
+        }
+    }
+
     getCertificateStatus(certificate: Certificate): string {
         if (certificate.anulateDate) {
             return 'anulado';
