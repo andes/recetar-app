@@ -56,8 +56,18 @@ export class AndesPrescriptionPrinterComponent implements OnInit {
             });
         }
 
+        // Generar código de barras principal usando _id o idAndes
         const barcodeBase64 = await this.barcodeService.generateBarcodeBase64(prescription._id || prescription.idAndes);
         const barcodeImg = await new Img(barcodeBase64).fit([230, 60]).alignment('center').margin([0, 20]).build();
+
+        // Generar código de barras adicional usando idReceta para prescripciones de Andes
+        let barcodeRecetaImg = null;
+        let barcodeRecetaLabel = null;
+        if (prescription.idReceta) {
+            const barcodeRecetaBase64 = await this.barcodeService.generateBarcodeBase64(prescription.idReceta);
+            barcodeRecetaLabel = new Txt('Número de receta:').fontSize(9).bold().alignment('center').margin([0, 5, 0, 0]).end;
+            barcodeRecetaImg = await new Img(barcodeRecetaBase64).fit([230, 60]).alignment('center').margin([0, 5]).build();
+        }
         pdf.info({
             title: 'Receta digital ' + prescription.profesional.nombre + ', ' + prescription.profesional.apellido,
             author: 'Andes'
@@ -160,22 +170,24 @@ export class AndesPrescriptionPrinterComponent implements OnInit {
         pdf.add(new Txt('Duración tratamiento: ' + (prescription.medicamento.dosisDiaria.dias ? prescription.medicamento.dosisDiaria.dias + ' dia/s' : 'No informado')).end);
         pdf.add(new Txt('\n').end);
         pdf.add(new Txt('\n').end);
-        pdf.add(new Txt('\n').end);
-        pdf.add(new Txt('\n').end);
-        pdf.add(new Txt('\n').end);
-        pdf.add(new Txt('\n').end);
-        pdf.add(new Txt('\n').end);
 
+        // Códigos de barras - mostrar ambos en la misma fila si existe idReceta
+        if (barcodeRecetaImg) {
+            pdf.add(new Columns([
+                { width: '50%', stack: [barcodeImg] },
+                { width: '50%', stack: [barcodeRecetaLabel, barcodeRecetaImg], alignment: 'right' }
+            ]).end);
+        } else {
+            pdf.add(new Columns([barcodeImg]).end);
+        }
 
-        // Barcode
-        pdf.add(new Columns([
-            barcodeImg,
-            new Txt([
-                { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
-                { text: '\n', fontSize: 3 },
-                { text: `\n ${prescription.profesional.apellido}`, fontSize: 14, bold: true },
-                { text: `\n MP ${prescription.profesional.matricula}`, bold: true, fontSize: 10 }
-            ]).alignment('center').end]).end);
+        // Firma del profesional en una nueva fila debajo de los códigos de barras
+        pdf.add(new Txt([
+            { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
+            { text: '\n', fontSize: 3 },
+            { text: `\n ${prescription.profesional.apellido}`, fontSize: 14, bold: true },
+            { text: `\n MP ${prescription.profesional.matricula}`, bold: true, fontSize: 10 }
+        ]).alignment('center').end);
 
         // Pharmacy
         if (prescription.estadoActual.tipo === 'dispensada' && prescription.estadoDispensaActual.fecha) {

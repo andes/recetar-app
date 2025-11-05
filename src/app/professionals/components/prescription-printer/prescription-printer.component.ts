@@ -57,6 +57,7 @@ export class PrescriptionPrinterComponent implements OnInit {
         }
 
 
+        // Generar código de barras principal usando _id
         const barcodeBase64 = await this.barcodeService.generateBarcodeBase64(prescription._id);
         const barcodeImg = await new Img(barcodeBase64).fit([230, 60]).alignment('center').margin([0, 20]).build();
 
@@ -78,7 +79,7 @@ export class PrescriptionPrinterComponent implements OnInit {
             new Txt('RECETA').bold().fontSize(20).alignment('center').end,
             new Txt(label ? `${label}` : '').bold().italics().fontSize(20).alignment('right').opacity(0.6).end]).end);
         pdf.add(new Txt('\n').end);
-        pdf.add(new Columns([new Txt('RecetAR').bold().alignment('left').fontSize(15).end, new Txt(`Fecha prescripción: ${this.datePipe.transform(prescription.date, 'dd/MM/yyyy')}`).alignment('right').end]).end);
+        pdf.add(new Columns([new Txt('RecetAR').bold().alignment('left').fontSize(15).end, new Txt(`3 - Fecha prescripción: ${this.datePipe.transform(prescription.date, 'dd/MM/yyyy')}`).alignment('right').end]).end);
         pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
         pdf.add(new Txt('\n').end);
 
