@@ -67,6 +67,7 @@ export class CertificateFormComponent implements OnInit {
     certificateForm: FormGroup;
     loadingCertificates: boolean;
     patientSearch: Patient[];
+    efectorControl = new FormControl('', Validators.required);
     today = new Date();
     professionalData: any;
     readonly spinnerColor: ThemePalette = 'primary';
@@ -153,6 +154,7 @@ export class CertificateFormComponent implements OnInit {
         this.certificateForm = this.fBuilder.group({
             _id: [''],
             professional: [this.professionalData],
+            efector: this.efectorControl,
             patient: this.fBuilder.group({
                 dni: ['', [
                     Validators.required,
@@ -301,17 +303,18 @@ export class CertificateFormComponent implements OnInit {
     }
 
     getEndDateHint(): string {
-        const startDate = this.certificateForm.get('startDate')?.value;
-        const cantDias = this.cantDias.value;
-
-        if (!startDate || !cantDias) {
-            return '';
+        if (this.cantDias.value && this.startDate.value) {
+            const startDate = new Date(this.startDate.value);
+            const endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + parseInt(this.cantDias.value, 10) - 1);
+            return `Vigente hasta: ${endDate.toLocaleDateString('es-ES')}`;
         }
+        return '';
+    }
 
-        const endDate = new Date(startDate);
-        endDate.setDate(endDate.getDate() + cantDias - 1);
-        endDate.setHours(23, 59, 59, 999);
-        return `Fecha de fin: ${endDate.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}`;
+    onEfectorSelected(efector: any): void {
+        // El efector ya se actualiza automáticamente a través del FormControl
+        // Aquí puedes agregar lógica adicional si es necesaria
     }
 
     displayFn(supply): string {

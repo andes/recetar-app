@@ -150,6 +150,7 @@ export default class AndesPrescriptions {
             valor: number;
             unidad: string;
         };
+        cuil: string;
     };
     createdAt: Date;
     createdBy: {
