@@ -4,7 +4,7 @@ import { fadeInOnEnterAnimation, fadeOutOnLeaveAnimation } from 'angular-animati
 import { Prescriptions } from '@interfaces/prescriptions';
 import {MatIconModule} from '@angular/material/icon';
 import { animate, state, style, transition, trigger } from '@angular/animations';
-import { PrescriptionPrinterComponent } from '../prescription-printer/prescription-printer.component';
+import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unified-printer.component';
 
 
 @Component({
@@ -14,15 +14,14 @@ import { PrescriptionPrinterComponent } from '../prescription-printer/prescripti
   animations: [
     fadeInOnEnterAnimation(), 
     fadeOutOnLeaveAnimation()
-  ],
-  providers: [PrescriptionPrinterComponent]
+  ]
 })
 export class DialogComponent implements OnInit {
 
   constructor(
     public dialogRef: MatDialogRef<DialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: DialogData,
-    private prescriptionPrinter: PrescriptionPrinterComponent
+    private unifiedPrinter: UnifiedPrinterComponent
   ) {}
   
   ngOnInit(): void {
@@ -32,8 +31,8 @@ export class DialogComponent implements OnInit {
     this.dialogRef.close();
   }
 
-  printPrescription(prescription: Prescriptions){
-    this.prescriptionPrinter.print(prescription);
+  async printPrescription(prescription: Prescriptions){
+    await this.unifiedPrinter.printPrescription(prescription);
   }
 }
 
