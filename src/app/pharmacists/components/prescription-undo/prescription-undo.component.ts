@@ -29,7 +29,7 @@ export class PrescriptionUndoComponent implements OnInit, OnDestroy {
     @Input() lapseTime: number;
     subscriptions: Subscription = new Subscription();
     tick = 1000;
-    maxCounter = 7200;
+    maxCounter: number;
     progress = 100;
     typeTime: string;
     counter: number;
@@ -39,6 +39,7 @@ export class PrescriptionUndoComponent implements OnInit, OnDestroy {
     constructor(private counterDownService: CounterDownService, private authService: AuthService) {}
 
     ngOnInit() {
+        this.maxCounter = this.lapseTime * 3600;
         this.counter = this.getTimeeDiffInSeconds();
 
         this.subscriptions.add(this.counterDownService
@@ -65,7 +66,6 @@ export class PrescriptionUndoComponent implements OnInit, OnDestroy {
     getTimeeDiffInSeconds(): number {
         const dispensedAt = moment(this.dispensedAt);
         dispensedAt.add(this.lapseTime, 'hours');
-        // dispensedAt.add(10, 'seconds');
         const now = moment();
         const diff = dispensedAt.diff((now), 'seconds');
         return diff;
