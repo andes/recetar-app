@@ -16,9 +16,14 @@ export class Practice {
     };
     professional: {
         userId: string;
-        enrollment: string;
+        enrollment?: string;
         cuil: string;
         businessName: string;
+        profesionGrado?: [{
+            profesion:string ,
+            codigoProfesion: string ,
+            numeroMatricula: string 
+        }]
     };
     practice: string;
     diagnostic: string;

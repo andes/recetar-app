@@ -497,19 +497,38 @@ export class UnifiedPrinterComponent {
             pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
             pdf.add(new Txt('\n').end);
 
-            if (qrCodeImage) {
-                pdf.add(new Txt('Verificar autenticidad:').bold().alignment('center').end);
-                pdf.add(new Txt('\n').end);
-                pdf.add(await new Img(qrCodeImage)
-                    .fit([100, 100])
-                    .alignment('center')
-                    .link(qrUrl)
-                    .build());
-                pdf.add(new Txt('\n').end);
-            }
-
-            pdf.add(new Txt('Este certificado fue emitido digitalmente a través de RecetAR').italics().alignment('center').end);
-            pdf.add(new Txt(`Fecha de emisión: ${this.datePipe.transform(certificate.createdAt, 'dd/MM/yyyy HH:mm')}`).italics().alignment('center').end);
+            pdf.add(new Columns([
+                {
+                    stack: [
+                        new Txt([
+                            { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
+                            { text: '\n', fontSize: 3 },
+                            { text: `\n ${certificate.professional.businessName}`, fontSize: 14, bold: true },
+                            { text: `\n ${certificate.professional?.profesionGrado?.length ?
+                                certificate.professional.profesionGrado
+                                    .map(g => `${g.profesion} MP ${g.numeroMatricula}`)
+                                    .join('\n')
+                                : (certificate.professional?.enrollment ? `MP ${certificate.professional.enrollment}\n` : '')
+                            }`, bold: true, fontSize: 9 }
+                        ]).alignment('center').margin([0, 25, 0, 0]).end
+                    ],
+                    alignment: 'center',
+                    width: '50%'
+                },
+                {
+                    stack: qrCodeImage ? [
+                        new Txt('Verificar autenticidad:').bold().alignment('center').end,
+                        new Txt('\n').end,
+                        await new Img(qrCodeImage).fit([100, 100]).alignment('center').link(qrUrl).build()
+                    ] : [],
+                    alignment: 'center',
+                    width: '50%'
+                }
+            ]).alignment('center').width('100%').end);
+            pdf.footer(new Txt([
+            { text:'Este certificado fue emitido digitalmente a través de RecetAR - ', italics: true },
+            { text:`Fecha de emisión: ${this.datePipe.transform(certificate.createdAt, 'dd/MM/yyyy HH:mm')}`, bold: true }
+            ]).fontSize(11).alignment('center').end);
         });
     }
 
@@ -606,22 +625,66 @@ export class UnifiedPrinterComponent {
             pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
             pdf.add(new Txt('\n').end);
 
-            if (qrCodeImage) {
-                pdf.add(new Txt('Verificar autenticidad:').bold().alignment('center').end);
-                pdf.add(new Txt('\n').end);
-                pdf.add(await new Img(qrCodeImage)
-                    .fit([100, 100])
-                    .alignment('center')
-                    .link(qrUrl)
-                    .build());
-                pdf.add(new Txt('\n').end);
-            }
-
+            pdf.add(new Columns([
+                {
+                    stack: [
+                        new Txt([
+                            { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
+                            { text: '\n', fontSize: 3 },
+                            { text: `\n ${practice.professional.businessName}`, fontSize: 14, bold: true },
+                            { text: `\n ${practice.professional?.profesionGrado?.length ?
+                                practice.professional.profesionGrado
+                                    .map(g => `${g.profesion} MP ${g.numeroMatricula}`)
+                                    .join('\n')
+                                : (practice.professional?.enrollment ? `MP ${practice.professional.enrollment}\n` : '')
+                            }`, bold: true, fontSize: 9 }
+                        ]).alignment('center').margin([0, 25, 0, 0]).end
+                    ],
+                    alignment: 'center',
+                    width: '50%'
+                },
+                {
+                    stack: qrCodeImage ? [
+                        new Txt('Verificar autenticidad:').bold().alignment('center').end,
+                        new Txt('\n').end,
+                        await new Img(qrCodeImage).fit([100, 100]).alignment('center').link(qrUrl).build()
+                    ] : [],
+                    alignment: 'center',
+                    width: '50%'
+                }
+            ]).alignment('center').width('100%').end);
             pdf.footer(new Txt([
                 { text: 'Esta receta fue creada por emisor inscripto y valido en el Registro de Recetarios Electrónicos \n del Ministerio de Salud de la Nación - ', italics: true },
                 { text: 'RL-2025-63212094-APN-SSVEIYES#MS', bold: true }
             ]).fontSize(11).alignment('center').end);
         });
+    }
+
+    private addProfessionalSignature(pdf: PdfMakeWrapper, professional: any) {
+        pdf.add(new Columns([
+            {
+                stack: [],
+                alignment: 'center',
+                width: '50%'
+            },
+            {
+                stack: [
+                    new Txt([
+                        { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
+                        { text: '\n', fontSize: 3 },
+                        { text: `\n ${professional.businessName}`, fontSize: 14, bold: true },
+                        { text: `\n ${professional?.profesionGrado?.length ?
+                            professional.profesionGrado
+                                .map(g => `${g.profesion} MP ${g.numeroMatricula}`)
+                                .join('\n')
+                            : (professional?.enrollment ? `MP ${professional.enrollment}\n` : '')
+                        }`, bold: true, fontSize: 9 }
+                    ]).alignment('center').margin([0, 25, 0, 0]).end
+                ],
+                alignment: 'center',
+                width: '50%'
+            }
+        ]).alignment('center').width('100%').end);
     }
 
     private async generateQRCode(url: string): Promise<string> {
