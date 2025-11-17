@@ -123,6 +123,17 @@
         </div>
     </div>
 
+    <div *ngSwitchCase="'andes_warning'">
+        <h3 mat-dialog-title><mat-icon>warning</mat-icon> Atención</h3>
+        <div mat-dialog-content>
+            <p>El paciente ya tiene una receta para uno o más de los medicamentos prescriptos en el ámbito público. Esta receta no se mostrará en Andes</p>
+        </div>
+        <div mat-dialog-actions align="end">
+            <button mat-raised-button color="primary" style="background-color: green; color: white;"
+                    (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
+        </div>
+    </div>
+
     <div *ngSwitchDefault>
         <h3 mat-dialog-title><mat-icon>error</mat-icon> Error</h3>
         <div mat-dialog-content>
