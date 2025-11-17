@@ -8,11 +8,11 @@
     <mat-card-content>
         <form [formGroup]="certificateForm" #professionalNgForm="ngForm" fxLayout="column"
               (ngSubmit)="onSubmitCertificateForm(professionalNgForm)">
-            <div class="sub-container" fxLayout="column" fxLayoutAlign="center" fxLayoutGap="0" fxLayoutGap.xs="0">
-                <div class="first-block" fxLayout="column" fxLayoutGap="0px" fxLayoutGap.xs="0">
+            <div class="sub-container" fxLayout="column" fxLayoutAlign="center" fxLayoutGap="10px" fxLayoutGap.xs="10px">
+                <div class="first-block" fxLayout="column" fxLayoutGap="10px" fxLayoutGap.xs="10px">
                     <div *ngIf="!anulateCertificate" fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center"
                          fxLayoutAlign.xs="center center">
-                        <mat-form-field appearance="fill" fxFlex="48">
+                        <mat-form-field appearance="fill" fxFlex="50" fxFlex.xs="100">
                             <mat-label>Fecha inicio</mat-label>
                             <input matInput [matDatepicker]="picker2" [formControl]="startDate" autocomplete="off" required
                                    tabIndex="-1">
@@ -25,8 +25,8 @@
                                 La fecha de inicio no puede ser superior a 15 días antes de hoy
                             </mat-error>
                         </mat-form-field>
-
-                        <mat-form-field appearance="fill" fxFlex="48">
+                    
+                        <mat-form-field appearance="fill" fxFlex="50" fxFlex.xs="100">
                             <mat-label>Cantidad de días de vigencia</mat-label>
                             <input matInput type="number" [formControl]="cantDias" autocomplete="off" required
                                    tabIndex="-1" min="1">
@@ -40,99 +40,21 @@
                         </mat-form-field>
                     </div>
 
-                    <div formGroupName="patient">
-                        <div class="patient-container" fxLayout="row wrap" fxLayout.xs="column" fxLayoutGap="10px"
-                             fxLayoutGap.xs="0">
-                            <!-- DNI paciente -->
-                            <mat-form-field appearance="fill" fxFlex="48" fxFlex.xs="100">
-                                <mat-label>DNI paciente</mat-label>
-                                <input type="text" tabIndex="1" #dni placeholder="DNI" aria-label="Number" matInput
-                                       required maxlength="8" formControlName="dni" [matAutocomplete]="auto">
-
-                                <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20" *ngIf="dniShowSpinner">
-                                </mat-spinner>
-
-                                <mat-autocomplete #auto="matAutocomplete">
-                                    <mat-option *ngFor="let patient of patientSearch"
-                                                (onSelectionChange)="completePatientInputs(patient)"
-                                                [value]="patient.dni">
-                                        {{patient.lastName}} {{patient.firstName}} DNI {{patient.dni}}
-                                    </mat-option>
-                                </mat-autocomplete>
-
-                                <mat-hint align="end">{{dni.value.length}} / 8</mat-hint>
-
-                                <mat-error *ngIf="patientDni.errors?.required">
-                                    Debe ingresar el dni del paciente
-                                </mat-error>
-
-                                <mat-error *ngIf="patientDni.errors?.minlength">
-                                    El dni debe contener {{patientDni.errors?.minlength.requiredLength}}
-                                    digitos
-                                </mat-error>
-
-                                <mat-error *ngIf="patientDni.errors?.pattern">
-                                    El dni debe contener solo números.
-                                </mat-error>
-                            </mat-form-field>
-
-                            <!-- Sexo -->
-                            <mat-form-field appearance="fill" fxFlex="48" fxFlex.xs="100">
-                                <mat-label>Sexo</mat-label>
-                                <mat-select formControlName="sex" required tabIndex="2">
-                                    <mat-option value="Femenino">Femenino</mat-option>
-                                    <mat-option value="Masculino">Masculino</mat-option>
-                                    <mat-option value="Otro">Otro</mat-option>
-                                </mat-select>
-
-                                <mat-error *ngIf="patientSex.errors?.required">
-                                    Debe seleccionar el tipo de sexo
-                                </mat-error>
-                            </mat-form-field>
-
-                            <!-- Apellido paciente -->
-                            <mat-form-field appearance="fill" fxFlex="48" fxFlex.xs="100">
-                                <mat-label>Apellido paciente</mat-label>
-                                <input type="text" tabIndex="3" placeholder="Apellido" matInput required
-                                       formControlName="lastName">
-
-                                <mat-error *ngIf="patientLastName.errors?.required">
-                                    Debe ingresar el apellido del paciente
-                                </mat-error>
-                            </mat-form-field>
-
-                            <!-- Nombre paciente -->
-                            <mat-form-field appearance="fill" fxFlex="48" fxFlex.xs="100">
-                                <mat-label>Nombre paciente</mat-label>
-                                <input type="text" tabIndex="4" placeholder="Nombre" matInput required
-                                       formControlName="firstName">
-
-                                <mat-error *ngIf="patientFirstName.errors?.required">
-                                    Debe ingresar el nombre del paciente
-                                </mat-error>
-                            </mat-form-field>
-                        </div>
-                    </div>
+                    <!-- Componente reutilizable de paciente -->
+                    <app-patient-form #patientForm formControlName="patient"></app-patient-form>
 
                     <!-- Detalle del certificado - Fuera del grupo patient según FormBuilder -->
-                    <div fxLayout="column" fxLayoutAlign="start">
-                        <label style="margin-bottom: 5px;">Descripción*</label>
-                        <mat-form-field appearance="fill" fxFlex="96.5">
+                    <div fxLayout="column" fxLayoutGap="10px">
+                        <mat-form-field appearance="fill">
+                            <mat-label>Descripción</mat-label>
                             <textarea matInput required rows="5" formControlName="certificate"></textarea>
-                            <mat-error *ngIf="certificateForm.get('certificate').hasError('required')">
-                                Debe ingresar una descripción
-                            </mat-error>
-                            <mat-error *ngIf="certificateForm.get('certificate').hasError('whitespace')">
-                                La descripción no puede contener sólo espacios en blanco
-                            </mat-error>
                         </mat-form-field>
-                          
                     </div>
 
                     <!-- Motivo de anulación - Fuera del grupo patient según FormBuilder -->
-                    <div *ngIf="anulateCertificate" fxLayout="column" fxLayoutAlign="start">
-                        <label style="margin-bottom: 5px;">Motivo de anulación *</label>
-                        <mat-form-field appearance="fill" fxFlex="96.5">
+                    <div *ngIf="anulateCertificate" fxLayout="column" fxLayoutGap="10px">
+                        <mat-form-field appearance="fill">
+                            <mat-label>Motivo de anulación</mat-label>
                             <textarea matInput required rows="5" formControlName="anulateReason"></textarea>
                         </mat-form-field>
                     </div>
