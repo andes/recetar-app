@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
-import AndesPrescriptions from "../interfaces/andesPrescriptions";
+import AndesPrescriptions from '../interfaces/andesPrescriptions';
 import { tap, mapTo, map } from 'rxjs/operators';
 import { saveAs } from 'file-saver';
 import * as moment from 'moment';
@@ -19,8 +19,8 @@ export class AndesPrescriptionsService {
         this.myAndesPrescriptions = new BehaviorSubject<AndesPrescriptions[]>(this.andesPrescriptionsArray);
     }
 
-    getPrescriptionsFromAndes(params: { patient_dni: string, patient_sex: string }): Observable<boolean> {
-        return this.http.get(`${environment.API_END_POINT}/andes-prescriptions/from-andes/?dni=${params.patient_dni}&sexo=${params.patient_sex}`).pipe(
+    getPrescriptionsFromAndes(params: { patient_dni: string; patient_sex: string }): Observable<boolean> {
+        return this.http.get(`${environment.API_END_POINT}/andes-prescriptions/from-andes/?dni=${params.patient_dni}&sexo=${params.patient_sex.toLowerCase()}`).pipe(
             tap((prescriptions: AndesPrescriptions[]) => this.setPrescriptions(prescriptions)),
             map((prescriptions: AndesPrescriptions[]) => prescriptions.length > 0)
         );
@@ -61,7 +61,7 @@ export class AndesPrescriptionsService {
         );
     }
 
-    getFromDniAndDate(params: { patient_dni: string, dateFilter: string }): Observable<boolean> {
+    getFromDniAndDate(params: { patient_dni: string; dateFilter: string }): Observable<boolean> {
         return this.http.get<AndesPrescriptions[]>(`${environment.API_END_POINT}/prescriptions/find/${params.patient_dni}&${params.dateFilter}`).pipe(
             tap((prescriptions: AndesPrescriptions[]) => this.setPrescriptions(prescriptions)),
             map((prescriptions: AndesPrescriptions[]) => prescriptions.length > 0)
