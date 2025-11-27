@@ -18,6 +18,7 @@ import { CertificatesService } from '@services/certificates.service';
 import { PracticesService } from '@services/practices.service';
 import { Certificate } from '@interfaces/certificate';
 import { Practice } from '@interfaces/practices';
+import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { InteractionService } from '@professionals/interaction.service';
@@ -91,7 +92,9 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         private certificatePracticePrinter: CertificatePracticePrinterComponent,
         public dialog: MatDialog,
         private interactionService: InteractionService,
-        private ambitoService: AmbitoService) { }
+        private ambitoService: AmbitoService,
+        private patientNamePipe: PatientNamePipe
+    ) { }
 
 
     ngOnInit() {
@@ -296,7 +299,7 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         this.dataCertificates = new MatTableDataSource<Certificate>([]);
         this.dataCertificates.sortingDataAccessor = (item, property) => {
             switch (property) {
-                case 'patient': return item.patient.lastName + item.patient.firstName;
+                case 'patient': return item.patient.lastName + this.patientNamePipe.transform(item.patient);
                 case 'certificate_date': return new Date(item.createdAt).getTime();
                 default: return item[property];
             }
@@ -306,7 +309,7 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         this.dataPractices = new MatTableDataSource<Practice>([]);
         this.dataPractices.sortingDataAccessor = (item, property) => {
             switch (property) {
-                case 'patient': return item.patient.lastName + item.patient.firstName;
+                case 'patient': return item.patient.lastName + this.patientNamePipe.transform(item.patient);
                 case 'practice_date': return new Date(item.date).getTime();
                 default: return item[property];
             }
@@ -327,7 +330,7 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         if (this.isAndesPrescription(item)) {
             return `${item.paciente.apellido} ${item.paciente.nombre}`;
         } else {
-            return `${item.patient.lastName} ${item.patient.firstName}`;
+            return `${item.patient.lastName} ${this.patientNamePipe.transform(item.patient)}`;
         }
     }
 

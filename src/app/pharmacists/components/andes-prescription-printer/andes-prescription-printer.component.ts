@@ -3,6 +3,7 @@ import { PdfMakeWrapper, Txt, Canvas, Line, Img, Columns } from 'pdfmake-wrapper
 import { DatePipe } from '@angular/common';
 import AndesPrescriptions from '@interfaces/andesPrescriptions';
 import { BarcodeService } from '@services/barcode.service';
+import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 
 @Component({
     selector: 'app-prescription-printer',
@@ -13,11 +14,23 @@ export class AndesPrescriptionPrinterComponent implements OnInit {
 
     constructor(
         private datePipe: DatePipe,
-        private barcodeService: BarcodeService
-
+        private barcodeService: BarcodeService,
+        private patientNamePipe: PatientNamePipe
     ) { }
 
     ngOnInit(): void {
+    }
+
+    /**
+     * Adapta el objeto paciente de Andes a la estructura Patient que espera el PatientNamePipe
+     */
+    private adaptPatientForPipe(paciente: any): any {
+        return {
+            firstName: paciente.nombre,
+            lastName: paciente.apellido,
+            sex: paciente.sexo,
+            nombreAutopercibido: paciente.nombreAutopercibido
+        };
     }
 
     // Print a prescription as PDF
@@ -86,9 +99,10 @@ export class AndesPrescriptionPrinterComponent implements OnInit {
         pdf.add(new Txt('\n').end);
 
         // paciente
+        const adaptedPatient = this.adaptPatientForPipe(prescription.paciente);
         pdf.add(new Txt([
             { text: 'Paciente:   ' },
-            { text: `${prescription.paciente.apellido.toUpperCase()} ${prescription.paciente.nombre.toUpperCase()}`, bold: true }
+            { text: `${prescription.paciente.apellido.toUpperCase()} ${this.patientNamePipe.transform(adaptedPatient).toUpperCase()}`, bold: true }
         ]).end);
         pdf.add(new Txt('\n').end);
 
