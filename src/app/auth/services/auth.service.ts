@@ -10,222 +10,226 @@ import { Tokens } from '@auth/models/tokens';
 import { PrescriptionsService } from '@services/prescriptions.service';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class AuthService {
 
-  private readonly JWT_TOKEN = 'JWT_TOKEN';
-  private readonly REFRESH_TOKEN = 'REFRESH_TOKEN';
-  private readonly apiEndPoint = environment.API_END_POINT;
-  private loggedIn: BehaviorSubject<boolean>;
-  private businessName: BehaviorSubject<string>;
-  private isAudit: BehaviorSubject<boolean>;
-  private isProfessionalBothRolesO: BehaviorSubject<boolean>;
+    private readonly JWT_TOKEN = 'JWT_TOKEN';
+    private readonly REFRESH_TOKEN = 'REFRESH_TOKEN';
+    private readonly apiEndPoint = environment.API_END_POINT;
+    private loggedIn: BehaviorSubject<boolean>;
+    private businessName: BehaviorSubject<string>;
+    private isAudit: BehaviorSubject<boolean>;
+    private isProfessionalBothRolesO: BehaviorSubject<boolean>;
 
 
-  constructor(
-    private http: HttpClient,
-    private router: Router,
-    private prescriptionsService: PrescriptionsService) {
+    constructor(
+        private http: HttpClient,
+        private router: Router,
+        private prescriptionsService: PrescriptionsService) {
 
-    this.loggedIn = new BehaviorSubject<boolean>(this.tokensExists());
-    this.businessName = new BehaviorSubject<string>(this.getLoggedBusinessName());
-    this.isAudit = new BehaviorSubject<boolean>(this.isAuditRole());
-    this.isProfessionalBothRolesO = new BehaviorSubject<boolean>(this.isProfessionalBothRoles());
-  }
-
-
-
-  async load(): Promise<void> {
-    if (this.tokensExists()) {
-      const resp = await this.http.get<any>(`${this.apiEndPoint}/auth/jwt-login`).pipe(
-        tap(tokens => this.doLoginUser(tokens)),
-        mapTo(true),
-        catchError(async (error) => {
-          const success = await this.logout().toPromise();
-          if (success) this.router.navigate(['/auth/login']);
-          return of(false);
-        })
-      ).toPromise();
+        this.loggedIn = new BehaviorSubject<boolean>(this.tokensExists());
+        this.businessName = new BehaviorSubject<string>(this.getLoggedBusinessName());
+        this.isAudit = new BehaviorSubject<boolean>(this.isAuditRole());
+        this.isProfessionalBothRolesO = new BehaviorSubject<boolean>(this.isProfessionalBothRoles());
     }
-  }
 
-  login(user: { username: string, password: string }): Observable<boolean | HttpErrorResponse> {
-    return this.http.post<any>(`${this.apiEndPoint}/auth/login`, user).pipe(
-      tap(tokens => this.doLoginUser(tokens)),
-      mapTo(true)
-    );
-  }
 
-  logout() {
-    return this.http.post<any>(`${this.apiEndPoint}/auth/logout`, {
-      'refreshToken': this.getRefreshToken()
-    }).pipe(
-      tap(() => this.doLogoutUser()),
-      mapTo(true),
-      catchError(error => {
-        console.log(error.error);
-        return of(false);
-      })
-    );
-  }
 
-  resetPassword(passwords: { oldPassword: string, newPassword: string }) {
-    return this.http.post<any>(`${this.apiEndPoint}/auth/reset-password`, passwords);
-  }
+    async load(): Promise<void> {
+        if (this.tokensExists()) {
+            const resp = await this.http.get<any>(`${this.apiEndPoint}/auth/jwt-login`).pipe(
+                tap(tokens => this.doLoginUser(tokens)),
+                mapTo(true),
+                catchError(async (error) => {
+                    const success = await this.logout().toPromise();
+                    if (success) { this.router.navigate(['/auth/login']); }
+                    return of(false);
+                })
+            ).toPromise();
+        }
+    }
 
-  recoverPassword(data) {
-    return this.http.post<any>(`${this.apiEndPoint}/auth/recovery-password`, data);
-  }
+    login(user: { username: string; password: string }): Observable<boolean | HttpErrorResponse> {
+        return this.http.post<any>(`${this.apiEndPoint}/auth/login`, user).pipe(
+            tap(tokens => this.doLoginUser(tokens)),
+            mapTo(true)
+        );
+    }
 
-  register(data) {
-    return this.http.post<any>(`${this.apiEndPoint}/auth/register`, data);
-  }
+    logout() {
+        return this.http.post<any>(`${this.apiEndPoint}/auth/logout`, {
+            'refreshToken': this.getRefreshToken()
+        }).pipe(
+            tap(() => this.doLogoutUser()),
+            mapTo(true),
+            catchError(() => {
+                return of(false);
+            })
+        );
+    }
 
-  get isLoggedIn() {
-    return this.loggedIn.asObservable();
-  }
+    resetPassword(passwords: { oldPassword: string; newPassword: string }) {
+        return this.http.post<any>(`${this.apiEndPoint}/auth/reset-password`, passwords);
+    }
 
-  get getBusinessName() {
-    return this.businessName.asObservable();
-  }
+    recoverPassword(data) {
+        return this.http.post<any>(`${this.apiEndPoint}/auth/recovery-password`, data);
+    }
 
-  get getIsAudit() {
-    return this.isAudit.asObservable();
-  }
-  
-  get getIsProfessionalBothRoles() {
-    return this.isProfessionalBothRolesO.asObservable();
-  }
+    register(data) {
+        return this.http.post<any>(`${this.apiEndPoint}/auth/register`, data);
+    }
 
-  refreshToken() {
-    return this.http.post<any>(`${this.apiEndPoint}/auth/refresh`, {
-      'refreshToken': this.getRefreshToken()
-    }).pipe(
-      tap((tokens: Tokens) => {
+    get isLoggedIn() {
+        return this.loggedIn.asObservable();
+    }
+
+    get getBusinessName() {
+        return this.businessName.asObservable();
+    }
+
+    get getIsAudit() {
+        return this.isAudit.asObservable();
+    }
+
+    get getIsProfessionalBothRoles() {
+        return this.isProfessionalBothRolesO.asObservable();
+    }
+
+    refreshToken() {
+        return this.http.post<any>(`${this.apiEndPoint}/auth/refresh`, {
+            'refreshToken': this.getRefreshToken()
+        }).pipe(
+            tap((tokens: Tokens) => {
+                this.storeTokens(tokens);
+            })
+        );
+    }
+
+    getJwtToken() {
+        return localStorage.getItem(this.JWT_TOKEN);
+    }
+
+    getLoggedUsername(): string {
+        const payLoadJwt: any = this.getDecodeJwt();
+        return payLoadJwt.usrn;
+    }
+
+    getLoggedUserId(): string {
+        const payLoadJwt: any = this.getDecodeJwt();
+        return payLoadJwt.sub;
+    }
+
+    getLoggedBusinessName(): string {
+        const payLoadJwt: any = this.getDecodeJwt();
+        return payLoadJwt.bsname;
+    }
+
+    getLoggedUserEmail(): string | null {
+        const payLoadJwt: any = this.getDecodeJwt();
+        return payLoadJwt && payLoadJwt.email ? payLoadJwt.email : null;
+    }
+
+    isPharmacistsRole(): boolean {
+        const roles: string[] = this.getLoggedRole();
+        if (!roles?.length) {
+            return false;
+        }
+        return roles.some((role: string) => role === 'pharmacist');
+    }
+
+    isPharmacistsPublicRole(): boolean {
+        const roles: string[] = this.getLoggedRole();
+        if (!roles?.length) {
+            return false;
+        }
+        return roles.some((role: string) => role === 'pharmacist-public');
+    }
+
+    isProfessionalRole(): boolean {
+        const roles: string[] = this.getLoggedRole();
+        if (!roles?.length) {
+            return false;
+        }
+        return roles.some((role: string) => role === 'professional');
+    }
+
+    isProfessionalPublicRole(): boolean {
+        const roles: string[] = this.getLoggedRole();
+        if (!roles?.length) {
+            return false;
+        }
+        return roles.some((role: string) => role === 'professional-public');
+    }
+
+    isProfessionalBothRoles(): boolean {
+        return this.isProfessionalRole() && this.isProfessionalPublicRole();
+    }
+
+    isAuditRole(): boolean {
+        const roles: string[] = this.getLoggedRole();
+        if (!roles?.length) {
+            return false;
+        }
+        return roles.some((role: string) => role === 'auditor');
+    }
+
+    isAdminRole(): boolean {
+        const roles: string[] = this.getLoggedRole();
+        if (!roles?.length) {
+            return false;
+        }
+        return roles.some((role: string) => role === 'admin');
+    }
+    getLoggedRole(): string[] {
+        const payLoadJwt: any = this.getDecodeJwt();
+        return payLoadJwt.rl;
+    }
+
+    // Metodo que invoca a la api para realizar el recovering de la password
+    setValidationTokenAndNotify(usuario: Number): Observable<any> {
+        return this.http.post<any>(`${this.apiEndPoint}/auth/setValidationTokenAndNotify`, usuario);
+    }
+
+    private getDecodeJwt() {
+        if (!!this.getJwtToken()) {
+            const token = this.getJwtToken();
+            const tokenPayload = decode(token);
+            return tokenPayload;
+        }
+        return false;
+    }
+
+    private doLoginUser(tokens: Tokens) {
         this.storeTokens(tokens);
-      })
-    );
-  }
-
-  getJwtToken() {
-    return localStorage.getItem(this.JWT_TOKEN);
-  }
-
-  getLoggedUsername(): string {
-    const payLoadJwt: any = this.getDecodeJwt();
-    return payLoadJwt.usrn;
-  }
-
-  getLoggedUserId(): string {
-    const payLoadJwt: any = this.getDecodeJwt();
-    return payLoadJwt.sub;
-  }
-
-  getLoggedBusinessName(): string {
-    const payLoadJwt: any = this.getDecodeJwt();
-    return payLoadJwt.bsname;
-  }
-
-  isPharmacistsRole(): boolean {
-    const roles: string[] = this.getLoggedRole();
-    if (!roles?.length) {
-      return false;
+        this.businessName.next(this.getLoggedBusinessName());
+        this.loggedIn.next(this.tokensExists());
+        this.isAudit.next(this.isAuditRole());
     }
-    return roles.some((role: string) => role === 'pharmacist');
-  }
 
-  isPharmacistsPublicRole(): boolean {
-    const roles: string[] = this.getLoggedRole();
-    if (!roles?.length) {
-      return false;
+    private doLogoutUser() {
+        this.prescriptionsService.cleanPrescriptions();
+        this.removeTokens();
+        this.loggedIn.next(this.tokensExists());
+        this.isAudit.next(this.isAuditRole());
     }
-    return roles.some((role: string) => role === 'pharmacist-public');
-  }
 
-  isProfessionalRole(): boolean {
-    const roles: string[] = this.getLoggedRole();
-    if (!roles?.length) {
-      return false;
+    private getRefreshToken() {
+        return localStorage.getItem(this.REFRESH_TOKEN);
     }
-    return roles.some((role: string) => role === 'professional');
-  }
 
-  isProfessionalPublicRole(): boolean {
-    const roles: string[] = this.getLoggedRole();
-    if (!roles?.length) {
-      return false;
+    private tokensExists(): boolean {
+        return (!!this.getJwtToken() && !!this.getRefreshToken());
     }
-    return roles.some((role: string) => role === 'professional-public');
-  }
 
-  isProfessionalBothRoles(): boolean {
-    return this.isProfessionalRole() && this.isProfessionalPublicRole();
-  }
-
-  isAuditRole(): boolean {
-    const roles: string[] = this.getLoggedRole();
-    if (!roles?.length){
-      return false;
+    private storeTokens(tokens: Tokens) {
+        localStorage.setItem(this.JWT_TOKEN, tokens.jwt);
+        localStorage.setItem(this.REFRESH_TOKEN, tokens.refreshToken);
     }
-    return roles.some((role: string) => role === 'auditor');
-  }
 
-  isAdminRole(): boolean {
-    const roles: string[] = this.getLoggedRole();
-    if (!roles?.length) {
-      return false;
+    private removeTokens() {
+        localStorage.removeItem(this.JWT_TOKEN);
+        localStorage.removeItem(this.REFRESH_TOKEN);
     }
-    return roles.some((role: string) => role === 'admin');
-  }
-  getLoggedRole(): string[] {
-    const payLoadJwt: any = this.getDecodeJwt();
-    return payLoadJwt.rl;
-  }
-
-  // Metodo que invoca a la api para realizar el recovering de la password
-  setValidationTokenAndNotify(usuario: Number): Observable<any> {
-    return this.http.post<any>(`${this.apiEndPoint}/auth/setValidationTokenAndNotify`, usuario);
-  }
-
-  private getDecodeJwt() {
-    if (!!this.getJwtToken()) {
-      const token = this.getJwtToken();
-      const tokenPayload = decode(token);
-      return tokenPayload;
-    }
-    return false;
-  }
-
-  private doLoginUser(tokens: Tokens) {
-    this.storeTokens(tokens);
-    this.businessName.next(this.getLoggedBusinessName());
-    this.loggedIn.next(this.tokensExists());
-    this.isAudit.next(this.isAuditRole());
-  }
-
-  private doLogoutUser() {
-    this.prescriptionsService.cleanPrescriptions();
-    this.removeTokens();
-    this.loggedIn.next(this.tokensExists());
-    this.isAudit.next(this.isAuditRole());
-  }
-
-  private getRefreshToken() {
-    return localStorage.getItem(this.REFRESH_TOKEN);
-  }
-
-  private tokensExists(): boolean {
-    return (!!this.getJwtToken() && !!this.getRefreshToken());
-  }
-
-  private storeTokens(tokens: Tokens) {
-    localStorage.setItem(this.JWT_TOKEN, tokens.jwt);
-    localStorage.setItem(this.REFRESH_TOKEN, tokens.refreshToken);
-  }
-
-  private removeTokens() {
-    localStorage.removeItem(this.JWT_TOKEN);
-    localStorage.removeItem(this.REFRESH_TOKEN);
-  }
 }
