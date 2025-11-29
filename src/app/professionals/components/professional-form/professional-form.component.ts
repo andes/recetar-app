@@ -93,6 +93,7 @@ function noWhitespaceValidator(): ValidatorFn {
 export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewInit {
     obraSocialControl = new FormControl('');
     filteredObrasSociales: Observable<any[]>;
+    efectorControl = new FormControl('', Validators.required);
 
     // Suscripciones
     private subscriptions: Subscription = new Subscription();
@@ -109,6 +110,11 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
                 numeroAfiliadoControl.enable();
             }
         }
+    }
+
+    onEfectorSelected(efector: any): void {
+        // El efector ya se actualiza automáticamente a través del FormControl
+        // Aquí puedes agregar lógica adicional si es necesaria
     }
     existenObrasSociales(array: any[]): boolean {
         if (!array || array.length === 0) {
@@ -285,6 +291,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         this.professionalForm = this.fBuilder.group({
             _id: [''],
             professional: [this.professionalData],
+            efector: this.efectorControl,
             patient: this.fBuilder.group({
                 dni: ['', [
                     Validators.required,

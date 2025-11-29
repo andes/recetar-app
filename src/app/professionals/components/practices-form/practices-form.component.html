@@ -39,7 +39,7 @@
 
                       <mat-autocomplete #autoDni="matAutocomplete">
                         <mat-option *ngFor="let patient of patientSearch"
-                                    (onSelectionChange)="completePatientInputsPractices(patient)" [value]="patient.dni">
+                                    (onSelectionChange)="completePatientInputs(patient)" [value]="patient.dni">
                           {{patient.lastName}} {{patient.firstName}} DNI {{patient.dni}}
                         </mat-option>
                       </mat-autocomplete>
@@ -145,6 +145,14 @@
                       </mat-error>
                     </mat-form-field>
                   </div>
+                </div>
+
+                <!-- Selector de Efector -->
+                <div fxLayout="column" fxLayoutGap="10px" class="efector-section">
+                  <app-efectores-selector 
+                      [efectorControl]="efectorControl"
+                      (efectorSelected)="onEfectorSelected($event)">
+                  </app-efectores-selector>
                 </div>
 
                 <!-- Campos de práctica -->

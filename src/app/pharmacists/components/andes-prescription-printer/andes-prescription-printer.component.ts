@@ -108,6 +108,13 @@ export class AndesPrescriptionPrinterComponent implements OnInit {
             { text: 'Sexo:    ' },
             { text: `${prescription.paciente.sexo}`, bold: true }
         ]).end);
+        if (prescription.paciente.cuil) {
+            pdf.add(new Txt('\n').end);
+            pdf.add(new Txt([
+                { text: 'CUIL:    ' },
+                { text: `${prescription.paciente.cuil}`, bold: true }
+            ]).end);
+        }
         pdf.add(new Txt('\n').end);
 
         let obraSocial = 'No informado';
