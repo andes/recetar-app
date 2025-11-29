@@ -10,4 +10,9 @@ export class User {
   lastLogin?: Date;
   createdAt?: Date;
   updatedAt?: Date;
+  profesionGrado?: Array<{
+      profesion: string;
+      codigoProfesion: string;
+      numeroMatricula: string;
+  }>;
 }
