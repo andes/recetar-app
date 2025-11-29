@@ -9,8 +9,7 @@ import AndesPrescriptions from '@interfaces/andesPrescriptions';
 import { AndesPrescriptionPrinterComponent } from '@pharmacists/components/andes-prescription-printer/andes-prescription-printer.component';
 import * as moment from 'moment';
 import { AuthService } from '@auth/services/auth.service';
-import { PrescriptionPrinterComponent } from '@professionals/components/prescription-printer/prescription-printer.component';
-import { CertificatePracticePrinterComponent } from '@professionals/components/certificate-practice-printer/certificate-practice-printer.component';
+import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unified-printer.component';
 import { ProfessionalDialogComponent } from '@professionals/components/professional-dialog/professional-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { rowsAnimation, detailExpand, arrowDirection } from '@animations/animations.template';
@@ -36,7 +35,7 @@ type MixedPrescription = Prescriptions | AndesPrescriptions;
         detailExpand,
         arrowDirection
     ],
-    providers: [PrescriptionPrinterComponent, CertificatePracticePrinterComponent, AndesPrescriptionPrinterComponent]
+
 })
 export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnDestroy {
     private destroy$ = new Subject<void>();
@@ -86,9 +85,7 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         private certificateService: CertificatesService,
         private practicesService: PracticesService,
         private authService: AuthService,
-        private prescriptionPrinter: PrescriptionPrinterComponent,
-        private andesPrescriptionPrinter: AndesPrescriptionPrinterComponent,
-        private certificatePracticePrinter: CertificatePracticePrinterComponent,
+        private unifiedPrinter: UnifiedPrinterComponent,
         public dialog: MatDialog,
         private interactionService: InteractionService,
         private ambitoService: AmbitoService) { }
@@ -438,11 +435,11 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         return isVigente;
     }
 
-    printPrescription(prescription: MixedPrescription) {
+    async printPrescription(prescription: MixedPrescription) {
         if (this.isLocalPrescription(prescription)) {
-            this.prescriptionPrinter.print(prescription);
+            await this.unifiedPrinter.printPrescription(prescription);
         } else if (this.isAndesPrescription(prescription)) {
-            this.andesPrescriptionPrinter.print(prescription);
+            await this.unifiedPrinter.printAndesPrescription(prescription);
         }
     }
     anulateCertificate(certificate: Certificate) {
@@ -494,12 +491,12 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         this.openDialog('delete_practice', practice);
     }
 
-    printCertificate(certificate: Certificate) {
-        this.certificatePracticePrinter.printCertificate(certificate);
+    async printCertificate(certificate: Certificate) {
+        await this.unifiedPrinter.printCertificate(certificate);
     }
 
-    printPractice(practice: Practice) {
-        this.certificatePracticePrinter.printPractice(practice);
+    async printPractice(practice: Practice) {
+        await this.unifiedPrinter.printPractice(practice);
     }
 
     // Show a dialog

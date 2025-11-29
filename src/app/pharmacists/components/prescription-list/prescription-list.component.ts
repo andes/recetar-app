@@ -10,12 +10,11 @@ import { MatSort } from '@angular/material/sort';
 import * as moment from 'moment';
 import { DialogComponent } from '@pharmacists/components/dialog/dialog.component';
 import { AuthService } from '@auth/services/auth.service';
-import { PrescriptionPrinterComponent } from '@pharmacists/components/prescription-printer/prescription-printer.component';
 import { detailExpand, arrowDirection } from '@animations/animations.template';
 import { DialogReportComponent } from '../dialog-report/dialog-report.component';
 import { combineLatest, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { AndesPrescriptionPrinterComponent } from '@pharmacists/components/andes-prescription-printer/andes-prescription-printer.component';
+import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unified-printer.component';
 
 @Component({
     selector: 'app-prescription-list',
@@ -25,7 +24,7 @@ import { AndesPrescriptionPrinterComponent } from '@pharmacists/components/andes
         detailExpand,
         arrowDirection
     ],
-    providers: [PrescriptionPrinterComponent, AndesPrescriptionPrinterComponent]
+
 })
 export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDestroy {
     private destroy$ = new Subject<void>();
@@ -51,8 +50,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         private authService: AuthService,
         private prescriptionService: PrescriptionsService,
         private andesPrescriptionService: AndesPrescriptionsService,
-        private prescriptionPrinter: PrescriptionPrinterComponent,
-        private andesPrescriptionPrinter: AndesPrescriptionPrinterComponent,
+        private unifiedPrinter: UnifiedPrinterComponent,
         public dialog: MatDialog) { };
 
     ngOnInit(): void {
@@ -236,11 +234,11 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         return this.calculateCanDispense(prescription);
     }
 
-    printPrescription(prescription: Prescriptions | AndesPrescriptions) {
+    async printPrescription(prescription: Prescriptions | AndesPrescriptions) {
         if ('status' in prescription) {
-            this.prescriptionPrinter.print(prescription);
+            await this.unifiedPrinter.printPrescription(prescription);
         } else if ('estadoActual' in prescription) {
-            this.andesPrescriptionPrinter.print(prescription);
+            await this.unifiedPrinter.printAndesPrescription(prescription);
         }
     }
 

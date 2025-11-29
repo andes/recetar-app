@@ -23,6 +23,11 @@ export class Prescriptions {
         enrollment: string;
         cuil: string;
         businessName: string;
+        profesionGrado: [{
+            profesion:string ,
+            codigoProfesion: string ,
+            numeroMatricula: string 
+        }]
     };
     dispensedBy?: {
         userId: string;
