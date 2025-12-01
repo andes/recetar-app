@@ -6,7 +6,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { arrowDirection, detailExpand } from '@animations/animations.template';
 import { AuthService } from '@auth/services/auth.service';
 import { Prescriptions } from '@interfaces/prescriptions';
-import { PrescriptionPrinterComponent } from '@pharmacists/components/prescription-printer/prescription-printer.component';
+import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unified-printer.component';
 import { PrescriptionsService } from '@services/prescriptions.service';
 import * as moment from 'moment';
 import { DialogReportComponent } from '../dialog-report/dialog-report.component';
@@ -19,7 +19,7 @@ import { DialogReportComponent } from '../dialog-report/dialog-report.component'
         detailExpand,
         arrowDirection
     ],
-    providers: [PrescriptionPrinterComponent]
+
 })
 export class PrescriptionListComponent implements OnInit, AfterContentInit {
 
@@ -42,7 +42,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
     constructor(
         private authService: AuthService,
         private prescriptionService: PrescriptionsService,
-        private prescriptionPrinter: PrescriptionPrinterComponent,
+        private unifiedPrinter: UnifiedPrinterComponent,
         public dialog: MatDialog) { };
 
     ngOnInit(): void {
@@ -105,8 +105,8 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
         return (prescription.status === 'Dispensada') && (prescription.dispensedBy?.userId === this.authService.getLoggedUserId());
     }
 
-    printPrescription(prescription: Prescriptions) {
-        this.prescriptionPrinter.print(prescription);
+    async printPrescription(prescription: Prescriptions) {
+        await this.unifiedPrinter.printPrescription(prescription);
     }
 
     isStatus(prescritpion: Prescriptions, status: string): boolean {
