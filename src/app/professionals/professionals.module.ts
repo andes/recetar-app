@@ -25,6 +25,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 import { PharmacistsModule } from '@pharmacists/pharmacists.module';
 
@@ -70,6 +71,7 @@ import { SelectorAmbitoComponent } from './components/selector-ambito/selector-a
     MatSortModule,
     MatTooltipModule,
     MatCheckboxModule,
+    MatSlideToggleModule,
     PharmacistsModule
   ]
 })

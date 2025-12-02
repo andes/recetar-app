@@ -53,7 +53,7 @@ function validDateValidator(): ValidatorFn {
 function medicationSelectedValidator(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
         if (!control.value) {
-            return null; 
+            return null;
         }
 
         const supplyGroup = control.parent;
@@ -73,7 +73,7 @@ function medicationSelectedValidator(): ValidatorFn {
 function noWhitespaceValidator(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
         if (!control.value) {
-            return null; 
+            return null;
         }
 
         const isWhitespace = (control.value || '').trim().length === 0;
@@ -221,6 +221,8 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
                 });
             }
         });
+
+
 
         const otraOSSub = this.professionalForm.get('patient.otraOS')?.valueChanges.subscribe(() => {
             const osGroup = this.professionalForm.get('patient.os') as FormGroup;
@@ -496,6 +498,8 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         return patient.get('otraOS');
     }
 
+
+
     displayOs(os: any): string {
         return os && os.nombre ? os.nombre : '';
     }
@@ -525,13 +529,17 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         supplyControl.get('name').updateValueAndValidity();
     }
 
+
+
     addSupply() {
         const supplies = this.fBuilder.group({
+            isMagistral: [false],
             supply: this.fBuilder.group({
                 name: ['', [
                     Validators.required,
                     medicationSelectedValidator()
                 ]],
+                description: [''],
                 snomedConcept:
                     this.fBuilder.group({
                         term: [''],
@@ -548,6 +556,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
                 Validators.required,
                 Validators.min(1)
             ]],
+            packageQuantity: [''],
             diagnostic: ['', [Validators.required, noWhitespaceValidator()]],
             indication: [''],
             duplicate: [false],
@@ -565,9 +574,52 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
 
         this.suppliesForm.push(supplies);
         this.supplySpinner.push({ show: false });
+
+        this.subscribeToMagistralChanges(supplies, this.suppliesForm.length - 1);
         this.subscribeToSupplyChanges(supplies, this.suppliesForm.length - 1);
         this.subscribeToTriplicateChanges(supplies, this.suppliesForm.length - 1);
         this.subscribeToDuplicateChanges(supplies, this.suppliesForm.length - 1);
+    }
+
+    subscribeToMagistralChanges(control: FormGroup, index: number) {
+        const magistralControl = control.get('isMagistral');
+        if (magistralControl) {
+            magistralControl.valueChanges.subscribe(isMagistral => {
+                this.updateSupplyValidators(control, isMagistral);
+            });
+        }
+    }
+
+    updateSupplyValidators(control: FormGroup, isMagistral: boolean) {
+        const nameControl = control.get('supply.name');
+        const descriptionControl = control.get('supply.description');
+        const quantityPresentationControl = control.get('quantityPresentation');
+        const packageQuantityControl = control.get('packageQuantity');
+
+        if (isMagistral) {
+            nameControl?.setValidators([Validators.required]);
+            descriptionControl?.setValidators([Validators.required]);
+            quantityPresentationControl?.clearValidators();
+            packageQuantityControl?.setValidators([Validators.required, Validators.min(1)]);
+        } else {
+            nameControl?.setValidators([Validators.required, medicationSelectedValidator()]);
+            descriptionControl?.clearValidators();
+            quantityPresentationControl?.setValidators([Validators.required, Validators.min(1)]);
+            packageQuantityControl?.clearValidators();
+        }
+
+        nameControl?.updateValueAndValidity();
+        descriptionControl?.updateValueAndValidity();
+        quantityPresentationControl?.updateValueAndValidity();
+        packageQuantityControl?.updateValueAndValidity();
+
+        if (isMagistral) {
+            control.get('supply.snomedConcept')?.reset();
+            quantityPresentationControl?.reset();
+        } else {
+            descriptionControl?.reset();
+            packageQuantityControl?.reset();
+        }
     }
 
     subscribeToSupplyChanges(control: FormGroup, index: number) {
@@ -575,15 +627,16 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
             debounceTime(300),
             distinctUntilChanged()
         ).subscribe((supply: string) => {
-            if (typeof supply === 'string') {
+            const isMagistral = control.get('isMagistral')?.value;
+            if (!isMagistral && typeof supply === 'string') {
                 const snomedConcept = control.get('supply.snomedConcept');
                 const currentConceptId = snomedConcept?.get('conceptId')?.value;
-                
+
                 if (currentConceptId && supply !== snomedConcept?.get('term')?.value) {
                     snomedConcept.reset();
                     control.get('supply.name').updateValueAndValidity();
                 }
-                
+
                 if (supply.length > 3) {
                     this.supplySpinner[index] = { show: true };
                     this.snomedSuppliesService.get(supply).pipe(
