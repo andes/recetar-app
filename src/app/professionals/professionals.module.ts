@@ -27,9 +27,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
-
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { PharmacistsModule } from '@pharmacists/pharmacists.module';
-
 import { PrescriptionsListComponent } from './components/prescriptions-list/prescriptions-list.component';
 import { CertificateFormComponent } from './components/certificate-form/certificate-form.component';
 import { SupplyListComponent } from './components/supply-list/supply-list.component';
@@ -37,58 +36,55 @@ import { PracticesFormComponent } from './components/practices-form/practices-fo
 import { CertificatePracticePrinterComponent } from './components/certificate-practice-printer/certificate-practice-printer.component';
 import { SelectorAmbitoComponent } from './components/selector-ambito/selector-ambito.component';
 import { EditUserInfoComponent } from './components/edit-user-info/edit-user-info.component';
-import { PatientFormComponent } from '@shared/components/patient-form/patient-form.component';
 import { SharedModule } from '@shared/shared.module';
 import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 import { OrganizacionesSelectorComponent } from './components/organizaciones-selector/organizaciones-selector.component';
 import { OrganizacionDialogComponent } from './components/organizacion-dialog/organizacion-dialog.component';
 
 @NgModule({
-    declarations: [
-        routingComponents,
-        PrescriptionsListComponent,
-        SupplyListComponent,
-        PracticesFormComponent,
-        CertificateFormComponent,
-        CertificatePracticePrinterComponent,
-        SelectorAmbitoComponent,
-        EditUserInfoComponent,
-        OrganizacionesSelectorComponent,
-        OrganizacionDialogComponent,
-        PatientFormComponent,
-    ],
-    imports: [
-        CommonModule,
-        BrowserModule,
-        HttpClientModule,
-        ReactiveFormsModule,
-        FormsModule,
-        ProfessionalsRoutingModule,
-        FlexLayoutModule,
-        MatCardModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatButtonModule,
-        MatSelectModule,
-        MatAutocompleteModule,
-        MatMenuModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        MatIconModule,
-        MatProgressSpinnerModule,
-        MatTableModule,
-        MatChipsModule,
-        MatPaginatorModule,
-        MatSortModule,
-        MatTooltipModule,
-        MatCheckboxModule,
-        MatSnackBarModule,
-        PharmacistsModule,
-        SharedModule,
-        MatDialogModule,
-    ],
-    providers: [PatientNamePipe],
-    exports: [PatientFormComponent]
+  declarations: [
+    routingComponents,
+    PrescriptionsListComponent,
+    SupplyListComponent,
+    PracticesFormComponent,
+    CertificateFormComponent,
+    CertificatePracticePrinterComponent,
+    SelectorAmbitoComponent,
+    EditUserInfoComponent,
+    OrganizacionesSelectorComponent,
+    OrganizacionDialogComponent,
+  ],
+  imports: [
+    CommonModule,
+    BrowserModule,
+    HttpClientModule,
+    ReactiveFormsModule,
+    FormsModule,
+    ProfessionalsRoutingModule,
+    FlexLayoutModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatSelectModule,
+    MatAutocompleteModule,
+    MatMenuModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatTableModule,
+    MatChipsModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatTooltipModule,
+    MatCheckboxModule,
+    MatSnackBarModule,
+    MatSlideToggleModule,
+    PharmacistsModule,
+    SharedModule,
+    MatDialogModule,
+  ],
+  providers: [PatientNamePipe],
 })
 export class ProfessionalsModule { }
-
