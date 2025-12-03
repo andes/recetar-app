@@ -1,28 +1,28 @@
-import { Component, OnInit, ViewChild, Output, EventEmitter, OnDestroy, AfterContentInit, Input } from '@angular/core';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
-import { Patient } from '@interfaces/patients';
-import { MatSort } from '@angular/material/sort';
-import { PrescriptionsService } from '@services/prescriptions.service';
-import { AndesPrescriptionsService } from '@services/andesPrescription.service';
-import { Prescriptions } from '@interfaces/prescriptions';
-import AndesPrescriptions from '@interfaces/andesPrescriptions';
-import { AuthService } from '@auth/services/auth.service';
-import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unified-printer.component';
-import { ProfessionalDialogComponent } from '@professionals/components/professional-dialog/professional-dialog.component';
+import { AfterContentInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { rowsAnimation, detailExpand, arrowDirection } from '@animations/animations.template';
-import { CertificatesService } from '@services/certificates.service';
-import { PracticesService } from '@services/practices.service';
-import { Certificate } from '@interfaces/certificate';
-import { Practice } from '@interfaces/practices';
-import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
-import { Subject } from 'rxjs';
-import { takeUntil, catchError } from 'rxjs/operators';
-import { InteractionService } from '@professionals/interaction.service';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
+import { arrowDirection, detailExpand, rowsAnimation } from '@animations/animations.template';
 import { AmbitoService } from '@auth/services/ambito.service';
+import { AuthService } from '@auth/services/auth.service';
+import AndesPrescriptions from '@interfaces/andesPrescriptions';
+import { Certificate } from '@interfaces/certificate';
+import { Patient } from '@interfaces/patients';
+import { Practice } from '@interfaces/practices';
+import { Prescriptions } from '@interfaces/prescriptions';
+import { ProfessionalDialogComponent } from '@professionals/components/professional-dialog/professional-dialog.component';
+import { InteractionService } from '@professionals/interaction.service';
+import { AndesPrescriptionsService } from '@services/andesPrescription.service';
+import { CertificatesService } from '@services/certificates.service';
 import { PatientsService } from '@services/patients.service';
-import { forkJoin, Observable, of } from 'rxjs';
+import { PracticesService } from '@services/practices.service';
+import { PrescriptionsService } from '@services/prescriptions.service';
+import { formatTipoInsumo } from '@services/stock.service';
+import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unified-printer.component';
+import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
+import { forkJoin, of, Subject } from 'rxjs';
+import { catchError, takeUntil } from 'rxjs/operators';
 
 // Tipo union para manejar prescripciones mixtas
 type MixedPrescription = Prescriptions | AndesPrescriptions;
@@ -73,6 +73,10 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     patientsData: { [key: string]: Patient } = {};
 
     private paginatorsInitialized = false;
+
+    formatType(type: string | undefined): string {
+        return formatTipoInsumo(type);
+    }
 
     @ViewChild('prescriptionsPaginator') prescriptionsPaginator: MatPaginator;
     @ViewChild('certificatesPaginator') certificatesPaginator: MatPaginator;
@@ -127,6 +131,9 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
                 break;
             case 'practicas':
                 this.loadPractices();
+                break;
+            case 'insumos':
+                // Handled by child component
                 break;
         }
     }
