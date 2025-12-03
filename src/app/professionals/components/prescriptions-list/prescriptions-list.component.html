@@ -6,8 +6,9 @@
     <mat-card-content>
         <mat-form-field>
             <mat-select placeholder="Seleccione un tipo de registro" [(value)]="selectedType"
-                        (selectionChange)="onSelectedTypeChange()" class="select-type">
+                (selectionChange)="onSelectedTypeChange()" class="select-type">
                 <mat-option value="receta">Medicamentos</mat-option>
+                <mat-option value="insumos" *ngIf="ambito !== 'publico'">Insumos</mat-option>
                 <mat-option value="practicas" *ngIf="ambito !== 'publico'">Prácticas</mat-option>
                 <mat-option value="certificados" *ngIf="ambito !== 'publico'">Certificados</mat-option>
             </mat-select>
@@ -15,7 +16,7 @@
 
         <mat-form-field *ngIf="selectedType">
             <input matInput [(ngModel)]="currentSearchTerm" (keyup)="applyFilter($event.target.value)"
-                   placeholder="Filtrar por nombre o documento">
+                placeholder="Filtrar por nombre o documento">
         </mat-form-field>
 
         <!-- Mensaje cuando no hay selección -->
@@ -24,7 +25,7 @@
                 <mat-card-content>
                     <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="10px">
                         <mat-icon
-                                  style="color: #757575; font-size: 24px; display: flex; justify-content: center; margin: 0;">info</mat-icon>
+                            style="color: #757575; font-size: 24px; display: flex; justify-content: center; margin: 0;">info</mat-icon>
                         <h5 style="color: #757575; margin: 0;">Seleccione una tipo de registro para mostrar resultados
                         </h5>
                     </div>
@@ -94,18 +95,18 @@
                             <td mat-cell *matCellDef="let element" (click)="$event.stopPropagation()"
                                 class="actions-cell">
                                 <button mat-menu-item [matMenuTriggerFor]="menu" class="menu-collapse"
-                                        *ngIf="!isStatus(element, 'VENCIDA')">
+                                    *ngIf="!isStatus(element, 'VENCIDA')">
                                     <mat-icon>more_vert</mat-icon>
                                 </button>
                                 <mat-menu #menu="matMenu">
 
                                     <button mat-menu-item type="button" *ngIf="canPrint(element)"
-                                            (click)="printPrescription(element)">
+                                        (click)="printPrescription(element)">
                                         <mat-icon>print</mat-icon>
                                         <span>Imprimir receta</span>
                                     </button>
                                     <button mat-menu-item type="button" *ngIf="canDelete(element)"
-                                            (click)="deleteDialogPrescription(element)">
+                                        (click)="deleteDialogPrescription(element)">
                                         <mat-icon>delete</mat-icon>
                                         <span>{{ isAndesPrescription(element) ? 'Suspender receta' : 'Eliminar receta'
                                             }}</span>
@@ -114,14 +115,14 @@
 
                                 <div fxLayout="row" class="action-buttons">
                                     <button mat-menu-item type="button" *ngIf="canPrint(element)"
-                                            (click)="printPrescription(element)" matTooltip="Imprimir"
-                                            matTooltipPosition="above">
+                                        (click)="printPrescription(element)" matTooltip="Imprimir"
+                                        matTooltipPosition="above">
                                         <mat-icon>print</mat-icon>
                                     </button>
                                     <button mat-menu-item type="button" *ngIf="canDelete(element)"
-                                            (click)="deleteDialogPrescription(element)"
-                                            [matTooltip]="isAndesPrescription(element) ? 'Suspender' : 'Eliminar'"
-                                            matTooltipPosition="above">
+                                        (click)="deleteDialogPrescription(element)"
+                                        [matTooltip]="isAndesPrescription(element) ? 'Suspender' : 'Eliminar'"
+                                        matTooltipPosition="above">
                                         <mat-icon>delete</mat-icon>
                                     </button>
                                 </div>
@@ -133,7 +134,7 @@
                             <td mat-cell *matCellDef="let element">
                                 <button mat-menu-item type="button">
                                     <mat-icon
-                                              [@arrowDirection]="isExpanded(element) ? 'up' : 'down'">expand_more</mat-icon>
+                                        [@arrowDirection]="isExpanded(element) ? 'up' : 'down'">expand_more</mat-icon>
                                 </button>
                             </td>
                         </ng-container>
@@ -142,28 +143,44 @@
                         <ng-container matColumnDef="expandedDetail">
                             <td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumns.length">
                                 <div class="element-detail"
-                                     [@detailExpand]="isExpanded(element) ? 'expanded' : 'collapsed'">
+                                    [@detailExpand]="isExpanded(element) ? 'expanded' : 'collapsed'">
                                     <div class="element-diagram">
                                         <!-- Para prescripciones locales -->
                                         <div *ngIf="isLocalPrescription(element)">
                                             <div class="supplies-list">
-                                                <div class="supply-description" *ngFor="let supp of element.supplies">
-                                                    <span *ngIf="supp.quantityPresentation">
-                                                        {{ supp.supply.name }} x {{supp.quantityPresentation}}
-                                                    </span>
-                                                    <span *ngIf="!supp.quantityPresentation">{{ supp.supply.name }} x
-                                                        {{supp.quantity}}</span>
-                                                </div>
+                                                <ng-container *ngFor="let supp of element.supplies">
+                                                    <div class="supply-description">
+                                                        <span *ngIf="supp.quantityPresentation">
+                                                            {{ supp.supply.name }} x {{supp.quantityPresentation}}
+                                                        </span>
+                                                        <span *ngIf="!supp.quantityPresentation">{{ supp.supply.name }}
+                                                            x
+                                                            {{supp.quantity}}</span>
+                                                    </div>
+                                                    <div class="element-description" *ngIf="supp.supply.type">
+                                                        <span class="description-title">
+                                                            Tipo:
+                                                        </span>
+                                                        {{ tipoInsumo[supp.supply.type] || 'Sin definir' }}
+                                                    </div>
+                                                    <div class="element-description" *ngIf="supp.supply.specification">
+                                                        <span class="description-title">
+                                                            Especificación:
+                                                        </span>
+                                                        {{ supp.supply.specification }}
+                                                    </div>
+                                                </ng-container>
                                             </div>
+
                                             <div class="element-description" *ngFor="let supp of element.supplies">
                                                 <span *ngIf="supp.quantityPresentation"><span class="description-title">
                                                         Cantidad de envases:</span> {{supp.quantity}}</span>
                                             </div>
                                             <div class="element-description" *ngIf="element.diagnostic"> <span
-                                                      class="description-title">
+                                                    class="description-title">
                                                     Diagnóstico:</span> {{element.diagnostic}} </div>
                                             <div class="element-description" *ngIf="element.observation"> <span
-                                                      class="description-title">Observaciones:</span>
+                                                    class="description-title">Observaciones:</span>
                                                 {{element.observation}}
                                             </div>
                                         </div>
@@ -221,8 +238,8 @@
                     <mat-spinner matSuffix color="primary" [diameter]="40"></mat-spinner>
                 </div>
                 <mat-paginator #prescriptionsPaginator [length]="totalPrescriptions" [pageSize]="prescriptionsPageSize"
-                               [pageIndex]="prescriptionsPageIndex" [pageSizeOptions]="pageSizeOptions"
-                               (page)="onPrescriptionsPageChange($event)" showFirstLastButtons></mat-paginator>
+                    [pageIndex]="prescriptionsPageIndex" [pageSizeOptions]="pageSizeOptions"
+                    (page)="onPrescriptionsPageChange($event)" showFirstLastButtons></mat-paginator>
             </div>
         </div>
 
@@ -285,8 +302,8 @@
 
                                 <mat-menu #menu="matMenu">
                                     <button mat-menu-item type="button" matTooltip="Anular" matTooltipPosition="above"
-                                            (click)="anulateCertificate(element)"
-                                            [disabled]="element?.status === 'anulado'">
+                                        (click)="anulateCertificate(element)"
+                                        [disabled]="element?.status === 'anulado'">
                                         <mat-icon>block</mat-icon>
                                         <span>Anular certificado</span>
                                     </button>
@@ -294,23 +311,17 @@
                                         <mat-icon>print</mat-icon>
                                         <span>Imprimir certificado</span>
                                     </button>
-                                    <!-- <button mat-menu-item type="button" matTooltip="Eliminar" matTooltipPosition="above"
-                                            (click)="deleteDialogCertificate(element)">
-                                        <mat-icon>delete</mat-icon>
-                                        <span>Eliminar certificado</span>
-                                    </button> -->
                                 </mat-menu>
 
                                 <div fxLayout="row" fxLayoutAlign="center center" class="action-buttons">
                                     <button mat-menu-item type="button" (click)="printCertificate(element)"
-                                            matTooltip="Imprimir" matTooltipPosition="above" [disabled]="element.status"
-                                            [style.opacity]="element.status ? 0.5 : 1">
+                                        matTooltip="Imprimir" matTooltipPosition="above" [disabled]="element.status"
+                                        [style.opacity]="element.status ? 0.5 : 1">
                                         <mat-icon>print</mat-icon>
                                     </button>
                                     <button mat-menu-item type="button" matTooltip="Anular" matTooltipPosition="above"
-                                            (click)="anulateCertificate(element)"
-                                            [disabled]="element?.status === 'anulado'"
-                                            [style.opacity]="element?.status === 'anulado' ? 0.5 : 1">
+                                        (click)="anulateCertificate(element)" [disabled]="element?.status === 'anulado'"
+                                        [style.opacity]="element?.status === 'anulado' ? 0.5 : 1">
                                         <mat-icon>block</mat-icon>
                                     </button>
                                 </div>
@@ -322,7 +333,7 @@
                             <td mat-cell *matCellDef="let element">
                                 <button mat-menu-item type="button">
                                     <mat-icon
-                                              [@arrowDirection]="element._id == expandedElement?._id ? 'up' : 'down'">expand_more</mat-icon>
+                                        [@arrowDirection]="element._id == expandedElement?._id ? 'up' : 'down'">expand_more</mat-icon>
                                 </button>
                             </td>
                         </ng-container>
@@ -331,10 +342,10 @@
                         <ng-container matColumnDef="expandedDetail">
                             <td mat-cell *matCellDef="let element" [attr.colspan]="certificatesColumns.length">
                                 <div class="element-detail"
-                                     [@detailExpand]="element._id == expandedElement?._id ? 'expanded' : 'collapsed'">
+                                    [@detailExpand]="element._id == expandedElement?._id ? 'expanded' : 'collapsed'">
                                     <div class="element-diagram">
                                         <div class="element-description"
-                                             *ngIf="element.certificate  && !element.status">
+                                            *ngIf="element.certificate  && !element.status">
                                             <span>Descripción:</span> {{ element.certificate }}
                                         </div>
                                         <div class="element-description" *ngIf="element.cantDias">
@@ -361,8 +372,8 @@
                     <mat-spinner matSuffix color="primary" [diameter]="40"></mat-spinner>
                 </div>
                 <mat-paginator #certificatesPaginator [length]="totalCertificates" [pageSize]="certificatesPageSize"
-                               [pageIndex]="certificatesPageIndex" [pageSizeOptions]="pageSizeOptions"
-                               (page)="onCertificatesPageChange($event)" showFirstLastButtons></mat-paginator>
+                    [pageIndex]="certificatesPageIndex" [pageSizeOptions]="pageSizeOptions"
+                    (page)="onCertificatesPageChange($event)" showFirstLastButtons></mat-paginator>
             </div>
         </div>
 
@@ -413,7 +424,7 @@
                                         <span>Imprimir práctica</span>
                                     </button>
                                     <button mat-menu-item type="button" matTooltip="Eliminar" matTooltipPosition="above"
-                                            (click)="deleteDialogPractice(element)">
+                                        (click)="deleteDialogPractice(element)">
                                         <mat-icon>delete</mat-icon>
                                         <span>Eliminar práctica</span>
                                     </button>
@@ -421,7 +432,7 @@
 
                                 <div fxLayout="row" fxLayoutAlign="center center" class="action-buttons">
                                     <button mat-menu-item type="button" (click)="printPractice(element)"
-                                            matTooltip="Imprimir" matTooltipPosition="above">
+                                        matTooltip="Imprimir" matTooltipPosition="above">
                                         <mat-icon>print</mat-icon>
                                     </button>
                                 </div>
@@ -433,7 +444,7 @@
                             <td mat-cell *matCellDef="let element">
                                 <button mat-menu-item type="button">
                                     <mat-icon
-                                              [@arrowDirection]="element._id == expandedElement?._id ? 'up' : 'down'">expand_more</mat-icon>
+                                        [@arrowDirection]="element._id == expandedElement?._id ? 'up' : 'down'">expand_more</mat-icon>
                                 </button>
                             </td>
                         </ng-container>
@@ -442,22 +453,22 @@
                         <ng-container matColumnDef="expandedDetail">
                             <td mat-cell *matCellDef="let element" [attr.colspan]="practicesColumns.length">
                                 <div class="element-detail"
-                                     [@detailExpand]="element._id == expandedElement?._id ? 'expanded' : 'collapsed'">
+                                    [@detailExpand]="element._id == expandedElement?._id ? 'expanded' : 'collapsed'">
                                     <div class="element-diagram">
                                         <div class="supplies-list">
                                             <div class="supply-description">
                                                 <span style="display: inline-block; text-align: left;"
-                                                      *ngIf="element.practice">
+                                                    *ngIf="element.practice">
                                                     <strong>Práctica:</strong> {{ element.practice }}
                                                 </span>
                                                 <br *ngIf="element.practice && element.diagnostic">
                                                 <span style="display: inline-block; text-align: left;"
-                                                      *ngIf="element.diagnostic">
+                                                    *ngIf="element.diagnostic">
                                                     <strong>Diagnóstico:</strong> {{ element.diagnostic }}
                                                 </span>
                                                 <br *ngIf="element.diagnostic && element.indications">
                                                 <span style="display: inline-block; text-align: left;"
-                                                      *ngIf="element.indications">
+                                                    *ngIf="element.indications">
                                                     <strong>Indicaciones:</strong> {{ element.indications }}
                                                 </span>
                                             </div>
@@ -479,9 +490,16 @@
                     <mat-spinner matSuffix color="primary" [diameter]="40"></mat-spinner>
                 </div>
                 <mat-paginator #practicesPaginator [length]="totalPractices" [pageSize]="practicesPageSize"
-                               [pageIndex]="practicesPageIndex" [pageSizeOptions]="pageSizeOptions"
-                               (page)="onPracticesPageChange($event)" showFirstLastButtons></mat-paginator>
+                    [pageIndex]="practicesPageIndex" [pageSizeOptions]="pageSizeOptions"
+                    (page)="onPracticesPageChange($event)" showFirstLastButtons></mat-paginator>
             </div>
+        </div>
+
+        <div *ngIf="selectedType === 'insumos'">
+            <h3 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"><mat-icon>list_alt</mat-icon>
+                <span>Insumos</span>
+            </h3>
+            <app-stock-list [searchTerm]="currentSearchTerm"></app-stock-list>
         </div>
 
     </mat-card-content>

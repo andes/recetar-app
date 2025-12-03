@@ -1,21 +1,83 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormGroup, FormGroupDirective, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, AbstractControl, Validators, FormArray, FormGroupDirective, ValidatorFn } from '@angular/forms';
+import { Subject, of, Subscription } from 'rxjs';
+import { SuppliesService } from '@services/supplies.service';
+import { SnomedSuppliesService } from '@services/snomedSupplies.service';
+import { PatientsService } from '@root/app/services/patients.service';
+import { PrescriptionsService } from '@services/prescriptions.service';
+import { AuthService } from '@auth/services/auth.service';
 import { ThemePalette } from '@angular/material/core';
 import { MatDialog } from '@angular/material/dialog';
 import { step, stepLink } from '@animations/animations.template';
 import { AmbitoService } from '@auth/services/ambito.service';
-import { AuthService } from '@auth/services/auth.service';
 import { Prescriptions } from '@interfaces/prescriptions';
 import { PrescriptionsListComponent } from '@professionals/components/prescriptions-list/prescriptions-list.component';
 import { ProfessionalDialogComponent } from '@professionals/components/professional-dialog/professional-dialog.component';
 import { InteractionService } from '@professionals/interaction.service';
-import { PatientsService } from '@root/app/services/patients.service';
 import { CertificatesService } from '@services/certificates.service';
-import { PrescriptionsService } from '@services/prescriptions.service';
-import { SnomedSuppliesService } from '@services/snomedSupplies.service';
 import { PatientFormComponent } from '@shared/components/patient-form/patient-form.component';
-import { of, Subject, Subscription } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
+
+// Validador personalizado para fechas
+function validDateValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+        if (!control.value) {
+            return null; // Si no hay valor, no validamos (required se encarga)
+        }
+
+        const date = new Date(control.value);
+        const isValidDate = date instanceof Date && !isNaN(date.getTime());
+
+        if (!isValidDate) {
+            return { 'invalidDate': { value: control.value } };
+        }
+
+        // Validar que la fecha no sea futura para fecha de nacimiento
+        const today = new Date();
+        if (date > today) {
+            return { 'futureDate': { value: control.value } };
+        }
+
+        // Validar que la fecha sea razonable (no muy antigua)
+        const minDate = new Date('1900-01-01');
+        if (date < minDate) {
+            return { 'tooOldDate': { value: control.value } };
+        }
+
+        return null;
+    };
+}
+
+function medicationSelectedValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+        if (!control.value) {
+            return null;
+        }
+
+        const supplyGroup = control.parent;
+        if (!supplyGroup) {
+            return null;
+        }
+
+        const snomedConcept = supplyGroup.get('snomedConcept');
+        if (!snomedConcept || !snomedConcept.value || !snomedConcept.value.conceptId) {
+            return { 'medicationNotSelected': { value: control.value } };
+        }
+
+        return null;
+    };
+}
+
+function noWhitespaceValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+        if (!control.value) {
+            return null;
+        }
+
+        const isWhitespace = (control.value || '').trim().length === 0;
+        return isWhitespace ? { 'whitespace': { value: control.value } } : null;
+    };
+}
 
 @Component({
     selector: 'app-professional-form',
@@ -44,6 +106,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     professionalForm: FormGroup;
 
     filteredSupplies = [];
+    filteredInsumos = [];
     request;
     storedSupplies = [];
     today = new Date();
@@ -55,6 +118,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     maxDate = new Date(new Date().setMonth(new Date().getMonth() + 1));
     isSubmit = false;
     supplySpinner: { show: boolean }[] = [{ show: false }, { show: false }];
+    insumoSpinner: { show: boolean }[] = [];
     myPrescriptions: Prescriptions[] = [];
     isEditCertificate = false;
     isEdit = false;
@@ -73,7 +137,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     ambito: 'publico' | 'privado';
 
     constructor(
-        // private suppliesService: SuppliesService,
+        private suppliesService: SuppliesService,
         private snomedSuppliesService: SnomedSuppliesService,
         private fBuilder: FormBuilder,
         private apiPatients: PatientsService,
@@ -171,6 +235,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
             ]],
             trimestral: [false],
             supplies: this.fBuilder.array([]),
+            insumos: this.fBuilder.array([]),
             ambito: [this.ambito]
         });
         this.addSupply();
@@ -197,7 +262,18 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
 
     onSubmitProfessionalForm(professionalNgForm: FormGroupDirective): void {
         if (this.professionalForm.valid) {
-            const newPrescription = this.professionalForm.value;
+            const formValue = this.professionalForm.value;
+            const combinedSupplies = [
+                ...formValue.supplies,
+                ...formValue.insumos.map((ins: any) => ({
+                    supply: ins.supply,
+                    type: ins.type,
+                    requiresSpecification: ins.requiresSpecification,
+                    description: ins.description
+                }))
+            ];
+            const newPrescription = { ...formValue, supplies: combinedSupplies } as any;
+            delete (newPrescription as any).insumos;
             this.isSubmit = true;
             if (!this.isEdit) {
                 this.apiPrescriptions.newPrescription(newPrescription).subscribe(
@@ -269,6 +345,14 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     }
 
     // Getters removidos - funcionalidad manejada por patient-form component
+    get insumosForm(): FormArray {
+        return this.professionalForm.get('insumos') as FormArray;
+    }
+
+    get patientDni(): AbstractControl {
+        const patient = this.professionalForm.get('patient');
+        return patient.get('dni');
+    }
 
     // Método removido - funcionalidad manejada por patient-form component
 
@@ -293,6 +377,20 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
                 semanticTag: supply.semanticTag
             }
         });
+    }
+
+    onInsumoSelected(item, index: number) {
+        const control = this.insumosForm.at(index);
+        const supplyControl = control.get('supply') as FormGroup;
+        supplyControl.patchValue({
+            _id: item._id,
+            name: item.name || item.term || ''
+        });
+        const typeControl = control.get('type');
+        if (item.type && typeControl) {
+            typeControl.setValue(item.type);
+        }
+        supplyControl.updateValueAndValidity();
     }
 
     addSupply() {
@@ -339,6 +437,33 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         this.subscribeToDuplicateChanges(supplies, this.suppliesForm.length - 1);
     }
 
+    addInsumo() {
+        const insumo = this.fBuilder.group({
+            supply: this.fBuilder.group({
+                _id: [''],
+                name: ['', [Validators.required]]
+            }),
+            type: ['', [Validators.required]],
+            requiresSpecification: [false],
+            description: ['']
+        });
+
+        const requiresCtrl = insumo.get('requiresSpecification');
+        const descriptionCtrl = insumo.get('description');
+        requiresCtrl?.valueChanges.subscribe((val: boolean) => {
+            if (val) {
+                descriptionCtrl?.setValidators([Validators.required]);
+            } else {
+                descriptionCtrl?.clearValidators();
+            }
+            descriptionCtrl?.updateValueAndValidity();
+        });
+
+        this.insumosForm.push(insumo);
+        this.insumoSpinner.push({ show: false });
+        this.subscribeToInsumoChanges(insumo, this.insumosForm.length - 1);
+    }
+
     subscribeToSupplyChanges(control: FormGroup, index: number) {
         control.get('supply.name').valueChanges.pipe(
             debounceTime(300),
@@ -356,6 +481,26 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         ).subscribe((res) => {
             this.supplySpinner[index] = { show: false };
             this.filteredSupplies = [...res];
+        });
+    }
+
+    subscribeToInsumoChanges(control: FormGroup, index: number) {
+        control.get('supply.name').valueChanges.pipe(
+            debounceTime(300),
+            distinctUntilChanged()
+        ).subscribe((term: string) => {
+            if (typeof term === 'string' && term.length > 2) {
+                this.insumoSpinner[index] = { show: true };
+                this.suppliesService.get(term).pipe(
+                    catchError(() => {
+                        this.insumoSpinner[index] = { show: false };
+                        return of([]);
+                    })
+                ).subscribe((res) => {
+                    this.insumoSpinner[index] = { show: false };
+                    this.filteredInsumos = [...res];
+                });
+            }
         });
     }
 
@@ -408,6 +553,11 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     deleteSupply(index: number) {
         this.suppliesForm.removeAt(index);
         this.supplySpinner.splice(index, 1);
+    }
+
+    deleteInsumo(index: number) {
+        this.insumosForm.removeAt(index);
+        this.insumoSpinner.splice(index, 1);
     }
 
     // set form with prescriptions values and disabled npt editable fields
@@ -482,6 +632,10 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         this.currentTab = 'practices';
     }
 
+    showInsumos(): void {
+        this.isFormShown = false;
+        this.currentTab = 'insumos';
+    }
     isAmbitoPublico(): boolean {
         return this.ambito === 'publico';
     }
