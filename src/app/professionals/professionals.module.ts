@@ -25,6 +25,8 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatListModule } from '@angular/material/list';
 
 import { PharmacistsModule } from '@pharmacists/pharmacists.module';
 
@@ -34,6 +36,8 @@ import { SupplyListComponent } from './components/supply-list/supply-list.compon
 import { PracticesFormComponent } from './components/practices-form/practices-form.component';
 import { CertificatePracticePrinterComponent } from './components/certificate-practice-printer/certificate-practice-printer.component';
 import { SelectorAmbitoComponent } from './components/selector-ambito/selector-ambito.component';
+import { StockComponent } from './components/stock/stock.component';
+import { StockDialogComponent } from './components/stock/stock-dialog/stock-dialog.component';
 
 @NgModule({
   declarations: [
@@ -44,6 +48,8 @@ import { SelectorAmbitoComponent } from './components/selector-ambito/selector-a
     CertificateFormComponent,
     CertificatePracticePrinterComponent,
     SelectorAmbitoComponent,
+    StockComponent,
+    StockDialogComponent,
   ],
   imports: [
     CommonModule,
@@ -70,6 +76,8 @@ import { SelectorAmbitoComponent } from './components/selector-ambito/selector-a
     MatSortModule,
     MatTooltipModule,
     MatCheckboxModule,
+    MatTabsModule,
+    MatListModule,
     PharmacistsModule
   ]
 })
