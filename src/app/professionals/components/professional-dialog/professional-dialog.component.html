@@ -7,7 +7,7 @@
         </div>
         <div mat-dialog-actions align="end">
             <button mat-raised-button color="primary" style="background-color: green; color: white;"
-                    (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
+                (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div> <!-- End case noPrescriptions -->
 
@@ -18,7 +18,7 @@
         </div>
         <div mat-dialog-actions align="end">
             <button mat-raised-button color="primary" style="background-color: green; color: white;"
-                    (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
+                (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div>
 
@@ -39,7 +39,7 @@
         </div>
         <div mat-dialog-actions align="end">
             <button mat-raised-button color="primary" style="background-color: green; color: white;"
-                    (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
+                (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div> <!-- End case deleted -->
 
@@ -55,16 +55,27 @@
         </div>
     </div> <!-- End case noPrescriptions -->
 
+    <div *ngSwitchCase="'delete_insumo'">
+        <h3 mat-dialog-title><mat-icon>delete</mat-icon> ¿Desea eliminar el insumo?</h3>
+        <div mat-dialog-content>
+            <p>Una vez eliminado no se podrá recuperar</p>
+        </div>
+        <div mat-dialog-actions fxLayoutAlign="space-around" align="end">
+            <button mat-button (click)="onNoClick()" cdkFocusInitial>Cancelar</button>
+            <button mat-raised-button color="warn" mat-dialog-close="delete_insumo">Confirmar</button>
+        </div>
+    </div> <!-- End case delete_insumo -->
+
     <div *ngSwitchCase="'anulate_certificate'">
         <h3 mat-dialog-title><mat-icon>check</mat-icon> Anulado</h3>
         <div mat-dialog-content>
             <p>¡El certificado se ha anulado correctamente!</p>
             <p>Recuerde que, a partir de este momento, pierde toda validez.</p>
-           
-    </div>
-     <div mat-dialog-actions align="end">
+
+        </div>
+        <div mat-dialog-actions align="end">
             <button mat-raised-button color="primary" style="background-color: green; color: white;"
-                    (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
+                (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div>
     <div *ngSwitchCase="'practiceSuccess'">
@@ -74,7 +85,7 @@
         </div>
         <div mat-dialog-actions align="end">
             <button mat-button style="background-color: green; color: white;" (click)="onNoClick()"
-                    cdkFocusInitial>Aceptar</button>
+                cdkFocusInitial>Aceptar</button>
         </div>
     </div> <!-- End case practiceSuccess -->
 
@@ -85,7 +96,7 @@
         </div>
         <div mat-dialog-actions align="end">
             <button mat-raised-button color="primary" style="background-color: green; color: white;"
-                    (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
+                (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div> <!-- End case practiceError -->
 
@@ -108,7 +119,7 @@
         </div>
         <div mat-dialog-actions align="end">
             <button mat-raised-button color="primary" style="background-color: green; color: white;"
-                    (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
+                (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div>
 
@@ -119,7 +130,7 @@
         </div>
         <div mat-dialog-actions align="end">
             <button mat-raised-button color="primary" style="background-color: green; color: white;"
-                    (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
+                (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div>
 
