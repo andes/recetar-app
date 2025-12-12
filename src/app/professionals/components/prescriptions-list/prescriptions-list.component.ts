@@ -72,6 +72,11 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     currentSearchTerm = '';
     ambito: 'publico' | 'privado' | null = null;
 
+    public tipoInsumo = {
+        nutrition: "Nutrición",
+        device: "Dispositivo",
+    }
+
     private paginatorsInitialized = false;
 
     @ViewChild('prescriptionsPaginator') prescriptionsPaginator: MatPaginator;

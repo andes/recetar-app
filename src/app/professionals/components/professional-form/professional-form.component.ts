@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, AbstractControl, Validators, FormArray, FormGroupDirective, FormControl, ValidatorFn } from '@angular/forms';
 import { Observable, of, Subscription } from 'rxjs';
-// import { SuppliesService } from '@services/supplies.service';
+import { SuppliesService } from '@services/supplies.service';
 import { SnomedSuppliesService } from '@services/snomedSupplies.service';
 import { PatientsService } from '@root/app/services/patients.service';
 import { PrescriptionsService } from '@services/prescriptions.service';
@@ -53,7 +53,7 @@ function validDateValidator(): ValidatorFn {
 function medicationSelectedValidator(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
         if (!control.value) {
-            return null; 
+            return null;
         }
 
         const supplyGroup = control.parent;
@@ -73,7 +73,7 @@ function medicationSelectedValidator(): ValidatorFn {
 function noWhitespaceValidator(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
         if (!control.value) {
-            return null; 
+            return null;
         }
 
         const isWhitespace = (control.value || '').trim().length === 0;
@@ -123,6 +123,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     professionalForm: FormGroup;
 
     filteredSupplies = [];
+    filteredInsumos = [];
     request;
     storedSupplies = [];
     patientSearch: Patient[];
@@ -138,6 +139,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     isSubmit = false;
     dniShowSpinner = false;
     supplySpinner: { show: boolean }[] = [{ show: false }, { show: false }];
+    insumoSpinner: { show: boolean }[] = [];
     myPrescriptions: Prescriptions[] = [];
     isEditCertificate = false;
     isEdit = false;
@@ -160,7 +162,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     showFechaNac = false;
 
     constructor(
-        // private suppliesService: SuppliesService,
+        private suppliesService: SuppliesService,
         private snomedSuppliesService: SnomedSuppliesService,
         private fBuilder: FormBuilder,
         private apiPatients: PatientsService,
@@ -316,6 +318,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
             ]],
             trimestral: [false],
             supplies: this.fBuilder.array([]),
+            insumos: this.fBuilder.array([]),
             ambito: [this.ambito]
         });
         this.addSupply();
@@ -398,7 +401,18 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
 
     onSubmitProfessionalForm(professionalNgForm: FormGroupDirective): void {
         if (this.professionalForm.valid) {
-            const newPrescription = this.professionalForm.value;
+            const formValue = this.professionalForm.value;
+            const combinedSupplies = [
+                ...formValue.supplies,
+                ...formValue.insumos.map((ins: any) => ({
+                    supply: ins.supply,
+                    type: ins.type,
+                    requiresSpecification: ins.requiresSpecification,
+                    description: ins.description
+                }))
+            ];
+            const newPrescription = { ...formValue, supplies: combinedSupplies } as any;
+            delete (newPrescription as any).insumos;
             this.isSubmit = true;
             if (!this.isEdit) {
                 this.apiPrescriptions.newPrescription(newPrescription).subscribe(
@@ -466,6 +480,10 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         return this.professionalForm.get('supplies') as FormArray;
     }
 
+    get insumosForm(): FormArray {
+        return this.professionalForm.get('insumos') as FormArray;
+    }
+
     get patientDni(): AbstractControl {
         const patient = this.professionalForm.get('patient');
         return patient.get('dni');
@@ -525,6 +543,20 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         supplyControl.get('name').updateValueAndValidity();
     }
 
+    onInsumoSelected(item, index: number) {
+        const control = this.insumosForm.at(index);
+        const supplyControl = control.get('supply') as FormGroup;
+        supplyControl.patchValue({
+            _id: item._id,
+            name: item.name || item.term || ''
+        });
+        const typeControl = control.get('type');
+        if (item.type && typeControl) {
+            typeControl.setValue(item.type);
+        }
+        supplyControl.updateValueAndValidity();
+    }
+
     addSupply() {
         const supplies = this.fBuilder.group({
             supply: this.fBuilder.group({
@@ -570,6 +602,33 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         this.subscribeToDuplicateChanges(supplies, this.suppliesForm.length - 1);
     }
 
+    addInsumo() {
+        const insumo = this.fBuilder.group({
+            supply: this.fBuilder.group({
+                _id: [''],
+                name: ['', [Validators.required]]
+            }),
+            type: ['', [Validators.required]],
+            requiresSpecification: [false],
+            description: ['']
+        });
+
+        const requiresCtrl = insumo.get('requiresSpecification');
+        const descriptionCtrl = insumo.get('description');
+        requiresCtrl?.valueChanges.subscribe((val: boolean) => {
+            if (val) {
+                descriptionCtrl?.setValidators([Validators.required]);
+            } else {
+                descriptionCtrl?.clearValidators();
+            }
+            descriptionCtrl?.updateValueAndValidity();
+        });
+
+        this.insumosForm.push(insumo);
+        this.insumoSpinner.push({ show: false });
+        this.subscribeToInsumoChanges(insumo, this.insumosForm.length - 1);
+    }
+
     subscribeToSupplyChanges(control: FormGroup, index: number) {
         control.get('supply.name').valueChanges.pipe(
             debounceTime(300),
@@ -578,12 +637,12 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
             if (typeof supply === 'string') {
                 const snomedConcept = control.get('supply.snomedConcept');
                 const currentConceptId = snomedConcept?.get('conceptId')?.value;
-                
+
                 if (currentConceptId && supply !== snomedConcept?.get('term')?.value) {
                     snomedConcept.reset();
                     control.get('supply.name').updateValueAndValidity();
                 }
-                
+
                 if (supply.length > 3) {
                     this.supplySpinner[index] = { show: true };
                     this.snomedSuppliesService.get(supply).pipe(
@@ -596,6 +655,26 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
                         this.filteredSupplies = [...res];
                     });
                 }
+            }
+        });
+    }
+
+    subscribeToInsumoChanges(control: FormGroup, index: number) {
+        control.get('supply.name').valueChanges.pipe(
+            debounceTime(300),
+            distinctUntilChanged()
+        ).subscribe((term: string) => {
+            if (typeof term === 'string' && term.length > 2) {
+                this.insumoSpinner[index] = { show: true };
+                this.suppliesService.get(term).pipe(
+                    catchError(() => {
+                        this.insumoSpinner[index] = { show: false };
+                        return of([]);
+                    })
+                ).subscribe((res) => {
+                    this.insumoSpinner[index] = { show: false };
+                    this.filteredInsumos = [...res];
+                });
             }
         });
     }
@@ -649,6 +728,11 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     deleteSupply(index: number) {
         this.suppliesForm.removeAt(index);
         this.supplySpinner.splice(index, 1);
+    }
+
+    deleteInsumo(index: number) {
+        this.insumosForm.removeAt(index);
+        this.insumoSpinner.splice(index, 1);
     }
 
     // set form with prescriptions values and disabled npt editable fields
@@ -736,6 +820,10 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     showPractices(): void {
         this.isFormShown = false;
         this.currentTab = 'practices';
+    }
+    showInsumos(): void {
+        this.isFormShown = false;
+        this.currentTab = 'insumos';
     }
     isAmbitoPublico(): boolean {
         return this.ambito === 'publico';
