@@ -93,7 +93,7 @@
                                     <mat-icon>done_outline</mat-icon>
                                 </button>
                                 <app-prescription-undo *ngIf="canCounterMap.get(element._id)"
-                                                       [dispensedAt]="element.dispensedAt || element.estadoActual?.createdAt"
+                                                       [dispensedAt]="element.dispensedAt || element.estadoDispensaActual?.fecha"
                                                        [prescription]="element" [lapseTime]="lapseTime"
                                                        (cancelDispenseEvent)="cancelDispense($event)">
                                 </app-prescription-undo>
@@ -162,7 +162,8 @@
                                     </div>
                                     <div class="element-description" *ngIf="element.diagnostico"> <span
                                               class="description-title">
-                                            Diagnóstico:</span> {{element.diagnostico?.term}}
+                                            Diagnóstico:</span> {{element.diagnostico?.term||
+                                        element.diagnostico.descripcion}}
                                     </div>
                                     <div class="element-description"
                                          *ngIf="element.medicamento?.dosisDiaria?.notaMedica"> <span

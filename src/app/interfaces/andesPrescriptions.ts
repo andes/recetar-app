@@ -27,6 +27,7 @@ export class Dispensa {
 export default class AndesPrescriptions {
     _id: string;
     idAndes: string;
+    idReceta?: string;
     organizacion: {
         id: string;
         nombre: string;
@@ -41,10 +42,11 @@ export default class AndesPrescriptions {
         matricula: number;
     };
     diagnostico: {
-        term: string;
-        fsn: string;
-        conceptId: string;
-        semanticTag: string;
+        descripcion?: string;
+        term?: string;
+        fsn?: string;
+        conceptId?: string;
+        semanticTag?: string;
     };
     fechaRegistro: Date;
     fechaPrestacion: Date;

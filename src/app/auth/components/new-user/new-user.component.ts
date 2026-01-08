@@ -22,6 +22,7 @@ export class NewUserComponent implements OnInit {
     public regexEmail = '^[a-z0-9._%+-]+@[a-z0-9.-]+[\.]{1}[a-z]{2,4}$';
     public siteKey = '0x4AAAAAAAhL2mZAyxFj63Dw';
     public minDate = new Date();
+    public authorizedProfessions: any[] = [];
 
     constructor(
         private fBuilder: FormBuilder,
@@ -33,6 +34,11 @@ export class NewUserComponent implements OnInit {
 
     ngOnInit(): void {
         this.initNewUserForm();
+        this.professionalsService.getAuthorizedProfessions().subscribe(
+            res => { 
+                this.authorizedProfessions = res; 
+            }
+        );
     }
 
     initNewUserForm(): void {
@@ -45,6 +51,7 @@ export class NewUserComponent implements OnInit {
             businessName: [''],
             password: ['', Validators.required],
             roleType: ['professional', Validators.required],
+            profesion: ['', Validators.required], 
             fechaEgreso: ['', [Validators.required, fechaValida]],
             fechaMatVencimiento: ['', [Validators.required, fechaValida]],
             captcha: ['', Validators.required]
@@ -58,55 +65,40 @@ export class NewUserComponent implements OnInit {
     onSubmitEvent(newUserForm: FormGroup, newUserNgForm: FormGroupDirective) {
         if (this.newUserForm.valid) {
             this.checkUser();
+            const selectedProf = newUserForm.get('profesion').value;
             const params = {
                 documento: newUserForm.get('dni').value,
                 email: newUserForm.get('email').value,
                 matricula: newUserForm.get('enrollment').value,
+                profesionCodigo: selectedProf ? selectedProf.codigoProfesion : null,
                 cuil: newUserForm.get('cuil').value,
                 fechaEgreso: moment(newUserForm.get('fechaEgreso').value).format('DD-MM-YYYY'),
                 fechaMatVencimiento: moment(newUserForm.get('fechaMatVencimiento').value).format('DD-MM-YYYY')
             };
-            this.professionalsService.getProfessionalByDni(params).subscribe(res => {
-                if (res.length) {
-                    const profesional = res[0];
-                    const { profesiones } = profesional;
-                    if (this.checkPersona(profesional) && this.checkMatricula(profesiones)) {
-                        this.userRegister(newUserForm, newUserNgForm);
-                    } else {
-                        this._snackBar.open('El número de matricula o el número de cuil no es correcto', 'cerrar', {
-                            duration: 5000
-                        });
-                    }
-                } else {
-                    this._snackBar.open('Profesional no se encuentra registrado, contáctese con fiscalización para corroborar sus datos', 'cerrar', {
-                        duration: 5000
-                    });
-                }
-            },
-                err => {
-                    if (err.status === 404) {
-                        this._snackBar.open('No se encuentra el profesional.', 'cerrar', {
-                            duration: 5000
-                        });
-                    } else {
-                        this._snackBar.open('Profesional no se encuentra registrado, corrobore los datos ingresados', 'cerrar', {
-                            duration: 5000
-                        });
-                    }
-                });
+           this.userRegister(newUserForm, newUserNgForm);
         } else {
             this._snackBar.open('Los campos deben estar completos y ser válidos', 'cerrar', {
                 duration: 5000
             });
         }
+        this.newUserForm.get('captcha')?.reset();
+
     }
 
     userRegister(newUserForm: FormGroup, newUserNgForm: FormGroupDirective) {
         this.authService.register(this.newUserForm.value).subscribe
-            (() => {
+            (user => {
                 this.cancelar();
-                this._snackBar.open('La cuenta ha sido creada exitosamente', 'cerrar', {
-                    duration: 5000
+                const selectedProf = this.newUserForm.get('profesion').value;
+                const mensaje = `La cuenta ha sido creada exitosamente
+                Nombre: ${user.newUser.businessName}
+                Usuario: ${this.newUserForm.get('username').value}
+                Profesión: ${selectedProf?.profesion || 'No especificada'}
+                Matrícula: ${this.newUserForm.get('enrollment').value}`;
+                this._snackBar.open(mensaje, 'cerrar', {
+                    duration: 12000,
+                    panelClass: ['success-snackbar']
+
                 });
                 newUserNgForm.resetForm();
                 newUserForm.reset();
@@ -125,19 +117,8 @@ export class NewUserComponent implements OnInit {
         return salida;
     }
 
-    checkMatricula(profesiones) {
-        const lastProfesion = profesiones.find(p => p.profesion.codigo == '1' || p.profesion.codigo == '23' || p.profesion.codigo == '2');
-        const lastMatriculacion = lastProfesion.matriculacion[lastProfesion.matriculacion.length - 1];
-        if (lastMatriculacion) {
-            const res = ((moment(lastMatriculacion.fin)) > moment() && (lastMatriculacion.matriculaNumero).toString() === this.newUserForm.get('enrollment').value);
-            return res;
-        } else {
-            return false;
-        }
-    }
-
     cancelar() {
         this.router.navigate(['/auth/login']);
     }
-
+  
 }

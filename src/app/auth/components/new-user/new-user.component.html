@@ -16,14 +16,19 @@
       </mat-card-title>
       <div fxLayout.lg="row" fxLayout.md="column" fxLayout.sm="column" fxLayout.xs="column" fxLayoutGap="0.5rem">
         <mat-form-field appearance="fill" fxFlex>
-          <mat-label>Rol</mat-label>
+           <mat-label>Rol</mat-label>
           <mat-select formControlName="roleType" required>
             <mat-option value="professional">Profesional</mat-option>
           </mat-select>
+      
         </mat-form-field>
         <mat-form-field appearance="fill" fxFlex>
-          <mat-label>Nombre</mat-label>
-          <input matInput formControlName="businessName" required>
+              <mat-label>Profesión</mat-label>
+          <mat-select formControlName="profesion" required>
+            <mat-option *ngFor="let prof of authorizedProfessions" [value]="prof">
+              {{ prof.profesion }}
+            </mat-option>
+          </mat-select>
         </mat-form-field>
       </div>
       <div fxLayout.lg="row" fxLayout.md="column" fxLayout.sm="column" fxLayout.xs="column" fxLayoutGap="0.5rem">
