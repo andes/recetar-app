@@ -10,12 +10,11 @@ import { MatSort } from '@angular/material/sort';
 import * as moment from 'moment';
 import { DialogComponent } from '@pharmacists/components/dialog/dialog.component';
 import { AuthService } from '@auth/services/auth.service';
-import { PrescriptionPrinterComponent } from '@pharmacists/components/prescription-printer/prescription-printer.component';
 import { detailExpand, arrowDirection } from '@animations/animations.template';
 import { DialogReportComponent } from '../dialog-report/dialog-report.component';
 import { combineLatest, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { AndesPrescriptionPrinterComponent } from '@pharmacists/components/andes-prescription-printer/andes-prescription-printer.component';
+import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unified-printer.component';
 
 @Component({
     selector: 'app-prescription-list',
@@ -25,7 +24,7 @@ import { AndesPrescriptionPrinterComponent } from '@pharmacists/components/andes
         detailExpand,
         arrowDirection
     ],
-    providers: [PrescriptionPrinterComponent, AndesPrescriptionPrinterComponent]
+
 })
 export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDestroy {
     private destroy$ = new Subject<void>();
@@ -34,7 +33,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
     dataSource = new MatTableDataSource<any>([]);
     expandedElement: Prescriptions | null;
     loadingPrescriptions: boolean;
-    lapseTime = 2; // lapse of time that a dispensed prescription can been undo action, and put it back as "pendiente"
+    lapseTime = 2;
     pharmacistId: string;
     isAdmin = false;
     fechaDesde: Date;
@@ -51,8 +50,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         private authService: AuthService,
         private prescriptionService: PrescriptionsService,
         private andesPrescriptionService: AndesPrescriptionsService,
-        private prescriptionPrinter: PrescriptionPrinterComponent,
-        private andesPrescriptionPrinter: AndesPrescriptionPrinterComponent,
+        private unifiedPrinter: UnifiedPrinterComponent,
         public dialog: MatDialog) { };
 
     ngOnInit(): void {
@@ -76,8 +74,6 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
     private loadPrescriptions(offset: number = 0, limit: number = 10): void {
         this.loadingPrescriptions = true;
 
-        // Para farmacéuticos, necesitamos cargar todas las prescripciones disponibles
-        // no solo las del usuario actual como en el caso de profesionales
         combineLatest([
             this.andesPrescriptionService.prescriptions,
             this.prescriptionService.prescriptions
@@ -86,22 +82,17 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         ).subscribe(([andesPrescriptions, prescriptions]) => {
             const previousDataLength = this.dataSource.data.length;
             const newData = [...andesPrescriptions, ...prescriptions];
-            
+
             this.dataSource.data = newData;
             this.updateMaps();
 
-            // Si hay cambios en la cantidad de datos o es la primera carga,
-            // actualizar la paginación
             if (previousDataLength !== newData.length || previousDataLength === 0) {
                 setTimeout(() => {
                     if (this.paginator) {
                         this.dataSource.paginator = this.paginator;
-                        // Configurar eventos de paginación si es necesario
                         this.paginator.page.pipe(
                             takeUntil(this.destroy$)
                         ).subscribe((pageEvent) => {
-                            // La paginación aquí es local ya que se cargan todas las prescripciones
-                            // Si se requiere paginación del servidor, se necesitaría modificar los servicios
                         });
                     }
                 });
@@ -118,14 +109,9 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
 
     /**
      * Refresca las prescripciones desde los servicios
-     * Útil para asegurar que los datos estén sincronizados
      */
     refreshPrescriptions(): void {
         this.loadingPrescriptions = true;
-        
-        // Refrescar ambos tipos de prescripciones
-        // Nota: Esto podría necesitar ajustes según la implementación específica de los servicios
-        // Por ahora, simplemente forzamos la actualización de los mapas
         this.updateMaps();
         this.loadingPrescriptions = false;
     }
@@ -165,7 +151,6 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         }
     }
 
-    // Dispense prescription, but if was, update table with the correct status.
     dispense(prescription: Prescriptions | AndesPrescriptions) {
         if ('status' in prescription) {
             this.prescriptionService.dispense(prescription._id, this.pharmacistId).subscribe(
@@ -196,13 +181,11 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         }
     }
 
-    // Cancel dispense prescription, but if was, update table with the correct status.
     cancelDispense(prescription: Prescriptions | AndesPrescriptions) {
         if ('status' in prescription) {
             this.prescriptionService.cancelDispense(prescription._id, this.pharmacistId).subscribe(
                 success => {
                     if (success) {
-                        // Actualizar los mapas después de la operación exitosa
                         this.updateMaps();
                         this.openDialog('cancel-dispensed', prescription);
                     }
@@ -215,7 +198,6 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
             this.andesPrescriptionService.cancelDispense(prescription._id, this.pharmacistId).subscribe(
                 success => {
                     if (success) {
-                        // Actualizar los mapas después de la operación exitosa
                         this.updateMaps();
                         this.openDialog('cancel-dispensed', prescription);
                     }
@@ -240,52 +222,41 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         });
     }
 
-    // Return true if was dispensed and is seeing who dispensed the prescription
     canPrint(prescription: Prescriptions): boolean {
         return (prescription.status === 'Dispensada') && (prescription.dispensedBy?.userId === this.authService.getLoggedUserId());
     }
 
     canDispense(prescription: Prescriptions | AndesPrescriptions): boolean {
-        // Usar el mapa calculado para mejor rendimiento
         const canDispenseFromMap = this.canDispenseMap.get(prescription._id);
         if (canDispenseFromMap !== undefined) {
             return canDispenseFromMap;
         }
-
-        // Fallback al cálculo directo si no está en el mapa
         return this.calculateCanDispense(prescription);
     }
 
-    printPrescription(prescription: Prescriptions | AndesPrescriptions) {
+    async printPrescription(prescription: Prescriptions | AndesPrescriptions) {
         if ('status' in prescription) {
-            this.prescriptionPrinter.print(prescription);
+            await this.unifiedPrinter.printPrescription(prescription);
         } else if ('estadoActual' in prescription) {
-            this.andesPrescriptionPrinter.print(prescription);
+            await this.unifiedPrinter.printAndesPrescription(prescription);
         }
     }
 
     isStatus(prescription: Prescriptions | AndesPrescriptions, status: string): boolean {
-        // Para casos específicos como 'Vencida', usar el mapa
         if (status === 'Vencida') {
             const isExpiredFromMap = this.isStatusMap.get(prescription._id);
             if (isExpiredFromMap !== undefined) {
                 return isExpiredFromMap;
             }
         }
-
-        // Para otros estados, cálculo directo
         return this.calculateIsStatus(prescription, status);
     }
 
-    // Return boolean, according with dispensed time plus 2 hours is greater than now
     canCounter(prescription: Prescriptions | AndesPrescriptions): boolean {
-        // Usar el mapa calculado para mejor rendimiento
         const canCounterFromMap = this.canCounterMap.get(prescription._id);
         if (canCounterFromMap !== undefined) {
             return canCounterFromMap;
         }
-
-        // Fallback al cálculo directo si no está en el mapa
         return this.calculateCanCounter(prescription);
     }
 
@@ -304,15 +275,15 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
 
     updateMaps() {
         // Limpiar mapas existentes
-        this.canDispenseMap.clear();
         this.isStatusMap.clear();
+        this.canDispenseMap.clear();
         this.canCounterMap.clear();
-        
+
         // Recalcular todos los valores para las prescripciones actuales
         this.dataSource.data.forEach(prescription => {
             if (prescription && prescription._id) {
-                this.canDispenseMap.set(prescription._id, this.calculateCanDispense(prescription));
                 this.isStatusMap.set(prescription._id, this.calculateIsStatus(prescription, 'Vencida'));
+                this.canDispenseMap.set(prescription._id, this.calculateCanDispense(prescription));
                 this.canCounterMap.set(prescription._id, this.calculateCanCounter(prescription));
             }
         });
@@ -338,7 +309,6 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
 
     calculateCanCounter(prescription: Prescriptions | AndesPrescriptions): boolean {
         if ('status' in prescription) {
-            // Prescripción regular
             if (prescription.status === 'Dispensada' &&
                 typeof prescription.dispensedAt !== 'undefined' &&
                 prescription.dispensedBy?.userId === this.pharmacistId) {
@@ -349,13 +319,11 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
                 return dispensedAt.isAfter(now);
             }
         } else if ('estadoActual' in prescription) {
-            // Prescripción de Andes
-            if (prescription.estadoActual.tipo === 'finalizada' &&
-                typeof prescription.estadoActual.createdAt !== 'undefined' &&
-                prescription.dispensa && prescription.dispensa.length > 0 &&
+            if (prescription.estadoActual.tipo === 'finalizada' && prescription.estadoDispensaActual.tipo === 'dispensada' &&
+                typeof prescription.estadoDispensaActual.fecha !== 'undefined' &&
                 prescription.dispensa[0].organizacion.id === this.pharmacistId) {
 
-                const dispensedAt = moment(prescription.estadoActual.createdAt);
+                const dispensedAt = moment(prescription.estadoDispensaActual.fecha);
                 const now = moment();
                 dispensedAt.add(this.lapseTime, 'hours');
                 return dispensedAt.isAfter(now);

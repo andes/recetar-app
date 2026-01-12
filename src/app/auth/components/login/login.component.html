@@ -12,12 +12,15 @@
         <h2 class="text-center">¡Bienvenidos a RecetAr, la página web de Receta Electrónica de Neuquén!</h2>
       </mat-card-title>
       <mat-card-content>
-        <p>En el marco de la nueva Ley Nacional de Receta Electrónica, el Decreto 345/2024 establece un cambio fundamental: las prescripciones médicas dejarán de ser en papel para adoptarse a plataformas digitales. En este contexto, el Ministerio de Salud de la Provincia de Neuquén pone en funcionamiento el sistema RectAr, accesible para profesionales de la salud y farmacias, tanto públicas como privadas.</p>
+        <p>En el marco de la nueva Ley Nacional de Receta Electrónica, el Decreto 345/2024 establece un cambio
+          fundamental: las prescripciones médicas dejarán de ser en papel para adoptarse a plataformas digitales. En
+          este contexto, el Ministerio de Salud de la Provincia de Neuquén pone en funcionamiento el sistema RecetAr,
+          accesible para profesionales de la salud y farmacias, tanto públicas como privadas.</p>
         <p>¡Acompañanos en este avance hacia una práctica más eficiente y moderna en el cuidado de la salud!</p>
       </mat-card-content>
       <mat-card-actions fxLayout="column" fxLayoutGap="10px">
-        <a mat-raised-button href="https://www.boletinoficial.gob.ar/detalleAviso/primera/306098/20240422" target="_blank"
-           fxFlex="50%" class="btn-link">
+        <a mat-raised-button href="https://www.boletinoficial.gob.ar/detalleAviso/primera/306098/20240422"
+           target="_blank" fxFlex="50%" class="btn-link">
           <mat-icon>remove_red_eye</mat-icon> Ver resolución
         </a>
         <!--  
@@ -38,10 +41,13 @@
 
       <mat-card-content>
         <form [formGroup]="loginForm" #loginNgForm="ngForm" class="form-container"
-              (ngSubmit)="onSubmitEvent(loginForm, loginNgForm)">
+              (ngSubmit)="onSubmitEvent(loginForm, loginNgForm)" autocomplete="off" novalidate>
+
           <div fxLayout fxLayout="column" fxLayoutAlign="center" class="container" fxLayoutGap="20px">
             <mat-form-field>
-              <input matInput placeholder="Usuario" formControlName="identifier" autocomplete="off">
+              <input matInput placeholder="Usuario" formControlName="identifier" autocomplete="new-password"
+                     appPasswordType autocorrect="off" autocapitalize="off" spellcheck="false" readonly
+                     onfocus="this.removeAttribute('readonly');" data-form-type="other">
               <mat-error *ngIf="identifier.errors?.required ">
                 Usuario es requerido
               </mat-error>
@@ -49,9 +55,10 @@
 
             <mat-form-field>
               <mat-label>Contraseña</mat-label>
-              <input matInput formControlName="password" [type]="hide ? 'password' : 'text'" autocomplete="off">
-              <button type="button" mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'"
-                      [attr.aria-pressed]="hide">
+              <input #passwordInput matInput formControlName="password" name="password" type="text"
+                     (focus)="updateInputType(passwordInput)" (input)="updateInputType(passwordInput)">
+              <button type="button" mat-icon-button matSuffix (click)="toggleVisibility(passwordInput)"
+                      [attr.aria-label]="hide ? 'Ocultar contraseña' : 'Mostrar contraseña'" [attr.aria-pressed]="hide">
                 <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
               </button>
               <mat-error *ngIf="password.errors?.required">
@@ -77,8 +84,8 @@
                       fxFlex.sm="100%">
                 Registrarse Profesional
               </button>
-              <button mat-raised-button color="primary" (click)="newUserPharmacist()" *ngIf="!showSubmit" fxFlex.lg="50%"
-                      fxFlex.sm="100%">
+              <button mat-raised-button color="primary" (click)="newUserPharmacist()" *ngIf="!showSubmit"
+                      fxFlex.lg="50%" fxFlex.sm="100%">
                 Registrarse Farmacia
               </button>
             </div>
@@ -90,5 +97,5 @@
     </mat-card>
   </div>
 
-  
+
 </div>

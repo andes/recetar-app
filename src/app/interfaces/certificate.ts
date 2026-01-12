@@ -11,6 +11,17 @@ export class Certificate {
     status?: string;
     anulateDate?: Date;
     anulateReason?:string;
+    professional: {
+        userId: string;
+        enrollment?: string;
+        cuil: string;
+        businessName: string;
+        profesionGrado?: [{
+            profesion:string ,
+            codigoProfesion: string ,
+            numeroMatricula: string 
+        }]
+    };
 
     get endDate(): Date {
         if (!this.startDate || !this.cantDias) {
