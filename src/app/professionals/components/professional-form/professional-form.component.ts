@@ -133,8 +133,8 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     readonly maxQSupplies: number = 10;
     readonly spinnerColor: ThemePalette = 'primary';
     readonly spinnerDiameter: number = 30;
-    minDate = new Date('1900-01-01');
-    maxDate = new Date();
+    minDate = new Date();
+    maxDate = new Date(new Date().setMonth(new Date().getMonth() + 1));
     isSubmit = false;
     dniShowSpinner = false;
     supplySpinner: { show: boolean }[] = [{ show: false }, { show: false }];
@@ -272,6 +272,8 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
 
     initProfessionalForm() {
         this.today = new Date((new Date()));
+        this.minDate = new Date();
+        this.maxDate = new Date(new Date().setMonth(new Date().getMonth() + 1));
         this.professionalData = this.authService.getLoggedUserId();
 
         // Obtener el ámbito actual del servicio
