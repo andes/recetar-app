@@ -9,11 +9,12 @@ import { AuthService } from '@auth/services/auth.service';
 import { Patient } from '@interfaces/patients';
 import { ThemePalette } from '@angular/material/core';
 import { Prescriptions } from '@interfaces/prescriptions';
+import { AndesPrescriptionsService } from '@services/andesPrescription.service';
 import { ProfessionalDialogComponent } from '@professionals/components/professional-dialog/professional-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { InteractionService } from '@professionals/interaction.service';
 import { step, stepLink } from '@animations/animations.template';
-import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
+import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap, takeUntil, take } from 'rxjs/operators';
 import { fadeOutCollapseOnLeaveAnimation } from 'angular-animations';
 import { CertificatesService } from '@services/certificates.service';
 import { PrescriptionsListComponent } from '@professionals/components/prescriptions-list/prescriptions-list.component';
@@ -53,7 +54,7 @@ function validDateValidator(): ValidatorFn {
 function medicationSelectedValidator(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
         if (!control.value) {
-            return null; 
+            return null;
         }
 
         const supplyGroup = control.parent;
@@ -73,7 +74,7 @@ function medicationSelectedValidator(): ValidatorFn {
 function noWhitespaceValidator(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
         if (!control.value) {
-            return null; 
+            return null;
         }
 
         const isWhitespace = (control.value || '').trim().length === 0;
@@ -169,7 +170,8 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         public dialog: MatDialog,
         private _interactionService: InteractionService,
         private certificateService: CertificatesService,
-        private ambitoService: AmbitoService
+        private ambitoService: AmbitoService,
+        private andesService: AndesPrescriptionsService
     ) { }
 
     ngOnInit(): void {
@@ -399,28 +401,82 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     }
 
     onSubmitProfessionalForm(professionalNgForm: FormGroupDirective): void {
-        if (this.professionalForm.valid) {
-            const newPrescription = this.professionalForm.value;
-            this.isSubmit = true;
-            if (!this.isEdit) {
-                this.apiPrescriptions.newPrescription(newPrescription).subscribe(
-                    success => {
-                        if (success) { this.formReset(professionalNgForm); }
-                    },
-                    err => {
-                        this.handleSupplyError(err);
-                    });
+        if (!this.professionalForm.valid) { return; }
 
-            } else {
-                // edit
-                this.apiPrescriptions.editPrescription(newPrescription).subscribe(
-                    success => {
-                        if (success) { this.formReset(professionalNgForm); }
-                    },
-                    err => {
-                        this.handleSupplyError(err);
+        const newPrescription = this.professionalForm.value;
+        this.isSubmit = true;
+
+        // Sólo validar contra Andes cuando es ámbito público y es creación
+        if (!this.isEdit && this.isAmbitoPublico()) {
+            const patientDni = this.patientDni.value;
+            const patientSex = this.patientSex.value;
+            const supplyConceptIds: string[] = (this.suppliesForm.controls || [])
+                .map((ctrl: FormGroup) => ctrl.value?.supply.snomedConcept.conceptId);
+
+            this.andesService.getPrescriptionsFromAndes({ patient_dni: patientDni, patient_sex: patientSex }).subscribe({
+                next: () => {
+                    this.andesService.prescriptions.pipe(take(1)).subscribe((andesList) => {
+                        const hasDuplicate = (andesList || []).some((presc: any) => {
+                            const isVigente = presc?.estadoActual?.tipo === 'vigente';
+                            const dispensaTipo = presc?.estadoDispensaActual?.tipo;
+                            const dispensaValida = dispensaTipo === 'sin-dispensa' || dispensaTipo === 'dispensa-parcial';
+                            const andesConceptId = presc?.medicamento?.concepto?.conceptId;
+                            const matchesConcept = andesConceptId && supplyConceptIds.includes(andesConceptId);
+
+                            return isVigente && dispensaValida && matchesConcept;
+                        });
+
+                        const payload = { ...newPrescription };
+
+                        if (hasDuplicate) { payload.ambito = 'privado'; }
+
+                        if (hasDuplicate) {
+                            const dialogRef = this.dialog.open(ProfessionalDialogComponent, {
+                                width: '400px',
+                                data: { dialogType: 'andes_warning' }
+                            });
+
+                            dialogRef.afterClosed().pipe(take(1)).subscribe(() => {
+                                this.apiPrescriptions.newPrescription(payload).subscribe({
+                                    next: (success) => {
+                                        if (success) { this.formReset(professionalNgForm); }
+                                    },
+                                    error: (err) => this.handleSupplyError(err)
+                                });
+                            });
+                        } else {
+                            this.apiPrescriptions.newPrescription(payload).subscribe({
+                                next: (success) => {
+                                    if (success) { this.formReset(professionalNgForm); }
+                                },
+                                error: (err) => this.handleSupplyError(err)
+                            });
+                        }
                     });
-            }
+                },
+                error: () => {
+                    this.apiPrescriptions.newPrescription(newPrescription).subscribe({
+                        next: (success) => {
+                            if (success) { this.formReset(professionalNgForm); }
+                        },
+                        error: (e) => this.handleSupplyError(e)
+                    });
+                }
+            });
+            return;
+        }
+
+        // Editar o ámbito privado: flujo original
+        if (!this.isEdit) {
+            this.apiPrescriptions.newPrescription(newPrescription).subscribe({
+                next: (success) => { if (success) { this.formReset(professionalNgForm); } },
+                error: (err) => this.handleSupplyError(err)
+            });
+        } else {
+            this.apiPrescriptions.editPrescription(newPrescription).subscribe({
+                next: (success) => { if (success) { this.formReset(professionalNgForm); } },
+                error: (err) => this.handleSupplyError(err)
+            });
         }
     }
 
@@ -438,8 +494,12 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         this.isSubmit = false;
     }
 
-    private formReset(professionalNgForm: FormGroupDirective) {
-        this.isEdit ? this.openDialog('updated') : this.openDialog('created');
+    private formReset(professionalNgForm: FormGroupDirective, dialogTypeOverride?: string) {
+        if (dialogTypeOverride) {
+            this.openDialog(dialogTypeOverride);
+        } else {
+            this.isEdit ? this.openDialog('updated') : this.openDialog('created');
+        }
         this.clearForm(professionalNgForm);
         this.isSubmit = false;
     }
@@ -449,10 +509,6 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         const dialogRef = this.dialog.open(ProfessionalDialogComponent, {
             width: '400px',
             data: { dialogType: aDialogType, prescription: aPrescription, text: aText }
-        });
-
-        dialogRef.afterClosed().subscribe(result => {
-            // console.log('The dialog was closed');
         });
     }
 
@@ -580,12 +636,12 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
             if (typeof supply === 'string') {
                 const snomedConcept = control.get('supply.snomedConcept');
                 const currentConceptId = snomedConcept?.get('conceptId')?.value;
-                
+
                 if (currentConceptId && supply !== snomedConcept?.get('term')?.value) {
                     snomedConcept.reset();
                     control.get('supply.name').updateValueAndValidity();
                 }
-                
+
                 if (supply.length > 3) {
                     this.supplySpinner[index] = { show: true };
                     this.snomedSuppliesService.get(supply).pipe(
