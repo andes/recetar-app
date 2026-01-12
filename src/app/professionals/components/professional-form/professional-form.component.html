@@ -1,19 +1,21 @@
 <div class="custom-tab-link-bar" [class.two-elements]="isAmbitoPublico()">
     <button mat-flat-button (click)="showForm()">Medicamentos</button>
-    <button mat-flat-button (click)="showCertificados()" *ngIf="!isAmbitoPublico()">Certificados</button>
+    <button mat-flat-button (click)="showInsumos()" *ngIf="!isAmbitoPublico()">Insumos</button>
     <button mat-flat-button (click)="showPractices()" *ngIf="!isAmbitoPublico()">Prácticas</button>
+    <button mat-flat-button (click)="showCertificados()" *ngIf="!isAmbitoPublico()">Certificados</button>
     <button mat-flat-button (click)="showList()">Mis documentos</button>
 </div>
 <div class="link-bar-indicator-container">
-    <div class="indicator"
-        [@stepLink]="isAmbitoPublico() ?
+    <div class="indicator" [@stepLink]="isAmbitoPublico() ?
             (currentTab === 'form' ? 'left-2' : 'right-2') :
-            (currentTab === 'form' ? 'left' : currentTab === 'certificates' ? 'center-left' : currentTab === 'practices' ? 'center-right' : 'right')">
+            (currentTab === 'form' ? 'left-5' : 
+             currentTab === 'insumos' ? 'center-left-5' : 
+             currentTab === 'practices' ? 'center-5' : 
+             currentTab === 'certificates' ? 'center-right-5' : 'right-5')">
     </div>
 </div>
 <div class="pf-container">
-    <div fxLayout="row" fxLayoutAlign="space-evenly start" fxLayoutGap="20px" class="cards-container" fxFill
-        [@step]="currentTab === 'form' ? 'left' : currentTab === 'certificates' ? 'center-left' : currentTab === 'practices' ? 'center-right' : 'right'">
+    <div fxLayout="row" fxLayoutAlign="space-evenly start" fxLayoutGap="20px" class="cards-container" fxFill>
         <!-- panel "Formulario receta" -->
         <div class="prescription-panel" *ngIf="currentTab === 'form'">
             <mat-card fxLayout="column" fxLayoutAlign="space-between" class="new-prescription">
@@ -128,7 +130,8 @@
                                             </mat-form-field>
 
                                             <!-- Fecha de nacimiento -->
-                                            <mat-form-field appearance="fill" fxFlex="48" fxFlex.xs="100" *ngIf="showFechaNac">
+                                            <mat-form-field appearance="fill" fxFlex="48" fxFlex.xs="100"
+                                                *ngIf="showFechaNac">
                                                 <mat-label>Fecha de nacimiento</mat-label>
                                                 <input matInput [matDatepicker]="fechaNacPicker"
                                                     formControlName="fechaNac" placeholder="DD/MM/AAAA" required
@@ -165,8 +168,9 @@
                                                 fxFlex="80">
                                                 <mat-label>Obra Social</mat-label>
                                                 <mat-select [disabled]="!this.professionalForm.get('patient.dni').valid"
-                                                            (selectionChange)="onOsSelected($event.value)">
-                                                    <mat-option *ngIf="!existenObrasSociales(obraSocial)" [disabled]="true">
+                                                    (selectionChange)="onOsSelected($event.value)">
+                                                    <mat-option *ngIf="!existenObrasSociales(obraSocial)"
+                                                        [disabled]="true">
                                                         Sin obras sociales del paciente
                                                     </mat-option>
                                                     <ng-container *ngIf="existenObrasSociales(obraSocial)">
@@ -186,13 +190,16 @@
                                                     [disabled]="!this.professionalForm.get('patient.dni').valid"
                                                     placeholder="Buscar obra social">
                                                 <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayOs"
-                                                                  (optionSelected)="onOsSelected($event.option.value)">
-                                                    <mat-option *ngIf="!existenObrasSociales((filteredObrasSociales | async) || [])" [disabled]="true">
-                                                        Sin obras sociales 
+                                                    (optionSelected)="onOsSelected($event.option.value)">
+                                                    <mat-option
+                                                        *ngIf="!existenObrasSociales((filteredObrasSociales | async) || [])"
+                                                        [disabled]="true">
+                                                        Sin obras sociales
                                                     </mat-option>
-                                                    <ng-container *ngIf="existenObrasSociales((filteredObrasSociales | async) || [])">
+                                                    <ng-container
+                                                        *ngIf="existenObrasSociales((filteredObrasSociales | async) || [])">
                                                         <mat-option *ngFor="let os of filteredObrasSociales | async"
-                                                                    [value]="os">
+                                                            [value]="os">
                                                             {{ os?.nombre }}
                                                         </mat-option>
                                                     </ng-container>
@@ -201,18 +208,15 @@
 
                                             <mat-form-field appearance="fill" fxFlex="18">
                                                 <mat-label>Numero de Afiliado</mat-label>
-                                                <input
-                                                    type="text"
-                                                    matInput
-                                                    formControlName="numeroAfiliado"
+                                                <input type="text" matInput formControlName="numeroAfiliado"
                                                     [disabled]="!this.professionalForm.get('patient.os.nombre')"
-                                                    inputmode="numeric"
-                                                    pattern="[0-9]*"
-                                                    >
-                                                <mat-error *ngIf="professionalForm.get('patient')?.get('os')?.get('numeroAfiliado')?.errors?.required">
+                                                    inputmode="numeric" pattern="[0-9]*">
+                                                <mat-error
+                                                    *ngIf="professionalForm.get('patient')?.get('os')?.get('numeroAfiliado')?.errors?.required">
                                                     Debe ingresar el número de afiliado.
                                                 </mat-error>
-                                                <mat-error *ngIf="professionalForm.get('patient')?.get('os')?.get('numeroAfiliado')?.errors?.pattern">
+                                                <mat-error
+                                                    *ngIf="professionalForm.get('patient')?.get('os')?.get('numeroAfiliado')?.errors?.pattern">
                                                     Sólo se permiten números.
                                                 </mat-error>
                                             </mat-form-field>
@@ -226,7 +230,6 @@
                                             Debe seleccionar al menos un medicamento
                                         </mat-error>
                                     </div>
-                                    <!-- Medicamento -->
                                     <div *ngFor="let control of suppliesForm.controls; let i=index" [formGroupName]="i"
                                         fxLayout="row" fxLayoutGap="10px">
                                         <mat-card class="supply-card" fxFlex="100">
@@ -238,7 +241,6 @@
                                             <div fxLayout="row" fxLayoutGap="10px">
                                                 <mat-form-field appearance="fill">
                                                     <mat-label>Medicamento</mat-label>
-
                                                     <input type="text" [tabIndex]="4 + i" placeholder="Medicamento"
                                                         matInput [formControl]="control.get('supply.name')" required
                                                         [matAutocomplete]="supplyref">
@@ -250,22 +252,19 @@
                                                             {{sup.term}}
                                                         </mat-option>
                                                     </mat-autocomplete>
-
                                                     <mat-error *ngIf="control.get('supply.name').hasError('required')">
                                                         Debe seleccionar un insumo
                                                     </mat-error>
-                                                    <mat-error *ngIf="control.get('supply.name').hasError('medicationNotSelected')">
+                                                    <mat-error
+                                                        *ngIf="control.get('supply.name').hasError('medicationNotSelected')">
                                                         Debe seleccionar un medicamento de la lista desplegable
                                                     </mat-error>
                                                     <mat-error *ngIf="control.get('supply.name').hasError('invalid')">
                                                         {{ control.get('supply').getError('invalid') }}
                                                     </mat-error>
                                                 </mat-form-field>
-
                                             </div>
-
                                             <div fxLayout="row" fxLayoutGap="10px">
-                                                <!-- Cantidad por presentacion-->
                                                 <mat-form-field appearance="fill">
                                                     <mat-label>Cantidad</mat-label>
                                                     <input [tabIndex]="5 + i" type="number" matInput
@@ -281,9 +280,7 @@
                                                     </mat-error>
                                                 </mat-form-field>
                                             </div>
-
                                             <div fxLayout="row" fxLayoutGap="10px">
-                                                <!-- Cantidad de envase-->
                                                 <mat-form-field appearance="fill">
                                                     <mat-label>Cantidad de envases</mat-label>
                                                     <input [tabIndex]="5 + i" type="number" matInput
@@ -297,7 +294,6 @@
                                                     </mat-error>
                                                 </mat-form-field>
                                             </div>
-
                                             <div fxLayout="row" fxLayoutGap="10px">
                                                 <mat-checkbox fxFlex="50%" matInput formControlName="duplicate">Receta
                                                     por
@@ -313,17 +309,17 @@
                                                     <mat-form-field appearance="fill" fxFlex="50%">
                                                         <mat-label>Serie</mat-label>
                                                         <input type="text" matInput formControlName="serie"
-                                                               maxlength="1" placeholder="Ingrese una letra" required>
+                                                            maxlength="1" placeholder="Ingrese una letra" required>
                                                     </mat-form-field>
                                                     <mat-form-field appearance="fill" fxFlex="50%">
                                                         <mat-label>Número</mat-label>
                                                         <input type="number" matInput formControlName="numero"
-                                                               placeholder="Ingrese un número" required>
+                                                            placeholder="Ingrese un número" required>
                                                     </mat-form-field>
                                                 </div>
                                             </div>
                                             <span *ngIf="control.get('triplicate')?.value"
-                                                  style="position: relative; font-style: italic; bottom: 15px;">
+                                                style="position: relative; font-style: italic; bottom: 15px;">
                                                 Recuerde que sigue
                                                 siendo
                                                 obligatoria la
@@ -374,6 +370,11 @@
                     </mat-card-content>
                 </div>
             </mat-card>
+        </div>
+
+        <!-- panel "Insumos" -->
+        <div class="insumos-panel" *ngIf="currentTab === 'insumos'">
+            <app-stock></app-stock>
         </div>
 
         <!-- panel "Prácticas" -->
