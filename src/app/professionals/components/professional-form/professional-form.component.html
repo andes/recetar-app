@@ -38,6 +38,7 @@
                                         <mat-form-field appearance="fill" fxFlex="48" fxFlex.xs="100">
                                             <mat-label>Fecha receta</mat-label>
                                             <input matInput [matDatepicker]="picker1" [formControl]="date"
+                                                [min]="minDate" [max]="maxDate"
                                                 autocomplete="off" required tabIndex="-1" readonly="true">
                                             <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
                                             <mat-datepicker [startAt]="today" #picker1></mat-datepicker>
