@@ -1,0 +1,34 @@
+<div class="edit-user-info">
+    <mat-card>
+        <mat-card-header>
+            <mat-card-title>Editar información del usuario</mat-card-title>
+            <mat-card-subtitle>Actualiza tu dirección de correo electrónico</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+            <form [formGroup]="editUserForm" (ngSubmit)="onSubmit()" class="edit-form">
+                <mat-form-field appearance="fill" class="email-field">
+                    <mat-label>Correo electrónico</mat-label>
+                    <input matInput type="email" formControlName="email" placeholder="ejemplo@correo.com" required>
+                    <mat-error *ngIf="email?.hasError('required')">
+                        El correo electrónico es requerido
+                    </mat-error>
+                    <mat-error *ngIf="email?.hasError('email')">
+                        Ingrese un correo electrónico válido
+                    </mat-error>
+                </mat-form-field>
+
+                <div class="form-actions">
+                    <button mat-raised-button color="primary" type="submit"
+                            [disabled]="editUserForm.invalid || isLoading">
+                        <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+                        <span *ngIf="!isLoading">Actualizar</span>
+                        <span *ngIf="isLoading">Actualizando...</span>
+                    </button>
+                    <button mat-button type="button" (click)="cancelar()">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>

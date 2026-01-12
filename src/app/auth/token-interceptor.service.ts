@@ -36,7 +36,7 @@ export class TokenInterceptorService implements HttpInterceptor {
         if (err.status == 422) {
             return throwError(err);
         }
-        return throwError(err.error.message || 'Server Error');
+        return throwError(err.error.message || err.error || 'Server Error');
     }
 
     private addToken(request: HttpRequest<any>, token: string) {
