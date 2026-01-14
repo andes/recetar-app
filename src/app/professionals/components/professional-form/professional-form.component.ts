@@ -14,7 +14,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { InteractionService } from '@professionals/interaction.service';
 import { step, stepLink } from '@animations/animations.template';
 import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
-import { fadeOutCollapseOnLeaveAnimation } from 'angular-animations';
 import { CertificatesService } from '@services/certificates.service';
 import { PrescriptionsListComponent } from '@professionals/components/prescriptions-list/prescriptions-list.component';
 import { Subject } from 'rxjs';
@@ -53,7 +52,7 @@ function validDateValidator(): ValidatorFn {
 function medicationSelectedValidator(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
         if (!control.value) {
-            return null; 
+            return null;
         }
 
         const supplyGroup = control.parent;
@@ -73,7 +72,7 @@ function medicationSelectedValidator(): ValidatorFn {
 function noWhitespaceValidator(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
         if (!control.value) {
-            return null; 
+            return null;
         }
 
         const isWhitespace = (control.value || '').trim().length === 0;
@@ -93,6 +92,7 @@ function noWhitespaceValidator(): ValidatorFn {
 export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewInit {
     obraSocialControl = new FormControl('');
     filteredObrasSociales: Observable<any[]>;
+    efectorControl = new FormControl('', Validators.required);
 
     // Suscripciones
     private subscriptions: Subscription = new Subscription();
@@ -109,6 +109,9 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
                 numeroAfiliadoControl.enable();
             }
         }
+    }
+
+    onEfectorSelected(efector: any): void {
     }
     existenObrasSociales(array: any[]): boolean {
         if (!array || array.length === 0) {
@@ -287,6 +290,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         this.professionalForm = this.fBuilder.group({
             _id: [''],
             professional: [this.professionalData],
+            efector: this.efectorControl,
             patient: this.fBuilder.group({
                 dni: ['', [
                     Validators.required,
@@ -580,12 +584,10 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
             if (typeof supply === 'string') {
                 const snomedConcept = control.get('supply.snomedConcept');
                 const currentConceptId = snomedConcept?.get('conceptId')?.value;
-                
                 if (currentConceptId && supply !== snomedConcept?.get('term')?.value) {
                     snomedConcept.reset();
                     control.get('supply.name').updateValueAndValidity();
                 }
-                
                 if (supply.length > 3) {
                     this.supplySpinner[index] = { show: true };
                     this.snomedSuppliesService.get(supply).pipe(
@@ -675,6 +677,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
 
     // reset the form as intial values
     clearForm(professionalNgForm: FormGroupDirective) {
+        const efector = this.efectorControl.value;
         professionalNgForm.resetForm();
         const currentAmbito = this.ambitoService.getAmbito();
         this.patientSearch = [];
@@ -682,6 +685,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         this.professionalForm.reset({
             _id: '',
             professional: this.professionalData,
+            efector: efector,
             date: this.today,
             patient: {
                 dni: { value: '', disabled: false },

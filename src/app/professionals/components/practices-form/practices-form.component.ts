@@ -18,6 +18,7 @@ import { debounceTime, map, startWith } from 'rxjs/operators';
 export class PracticesFormComponent implements OnInit {
   obraSocialControl = new FormControl('');
   filteredObrasSociales: Observable<any[]>;
+  efectorControl = new FormControl('', Validators.required);
 
   practicesForm: FormGroup;
   practiceDate = new FormControl(new Date(), [Validators.required]);
@@ -77,6 +78,7 @@ export class PracticesFormComponent implements OnInit {
   initPracticesForm(): void {
     this.practicesForm = this.fBuilder.group({
       professional: [this.professionalData],
+      efector: this.efectorControl,
       date: [new Date(), [Validators.required]],
       patient: this.fBuilder.group({
         dni: ['', [Validators.required, Validators.minLength(7), Validators.pattern("^[0-9]*$")]],
@@ -134,10 +136,15 @@ export class PracticesFormComponent implements OnInit {
     }
   }
 
-  completePatientInputsPractices(patient: Patient): void {
-    this.practicePatientLastName.setValue(patient.lastName);
+  completePatientInputs(patient: Patient) {
     this.practicePatientFirstName.setValue(patient.firstName);
+    this.practicePatientLastName.setValue(patient.lastName);
     this.practicePatientSex.setValue(patient.sex);
+  }
+
+  onEfectorSelected(efector: any): void {
+    // El efector ya se actualiza automáticamente a través del FormControl
+    // Aquí puedes agregar lógica adicional si es necesaria
   }
 
   onOsSelected(selectedOs: any): void {

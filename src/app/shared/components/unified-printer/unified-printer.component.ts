@@ -103,6 +103,13 @@ export class UnifiedPrinterComponent {
             { text: `${prescription.patient.dni}`, bold: true }
         ]).end);
         pdf.add(new Txt('\n').end);
+        if (prescription.patient.cuil) {
+            pdf.add(new Txt([
+                { text: 'CUIL:    ' },
+                { text: `${prescription.patient.cuil}`, bold: true }
+            ]).end);
+            pdf.add(new Txt('\n').end);
+        }
         if (prescription.patient.fechaNac) {
             pdf.add(new Txt([
                 { text: 'Fecha Nacimiento:    ' },
@@ -187,13 +194,18 @@ export class UnifiedPrinterComponent {
                 { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
                 { text: '\n', fontSize: 3 },
                 { text: `\n ${prescription.professional.businessName}`, fontSize: 14, bold: true },
-                { text: `\n ${prescription.professional?.profesionGrado?.length ?
-                prescription.professional.profesionGrado
-                    .map(g => `${g.profesion} MP ${g.numeroMatricula}`)
-                    .join('\n')
-                : (prescription.professional?.enrollment ? `MP ${prescription.professional.enrollment}\n` : '')
-            }`, bold: true, fontSize: 9 }            
-        ]).alignment('center').margin([0, 25, 0, 0]).end);
+                { text: `${ prescription.professional.efector ?
+                    `\n Efector: ${prescription.professional.efector.nombre} - ${prescription.professional.efector.direccion}` :
+                    ''}`, fontSize: 9, bold: true },
+                {
+                    text: `\n ${prescription.professional?.profesionGrado?.length ?
+                        prescription.professional.profesionGrado
+                            .map(g => `${g.profesion} MP ${g.numeroMatricula}`)
+                            .join('\n')
+                        : (prescription.professional?.enrollment ? `MP ${prescription.professional.enrollment}\n` : '')
+                    }`, bold: true, fontSize: 9
+                }
+            ]).alignment('center').margin([0, 25, 0, 0]).end);
         } else {
             // Si no hay prescriptionId, mostrar código de barras y firma en columnas
             pdf.add(new Columns([
@@ -208,12 +220,17 @@ export class UnifiedPrinterComponent {
                             { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
                             { text: '\n', fontSize: 3 },
                             { text: `\n ${prescription.professional.businessName}`, fontSize: 14, bold: true },
-  { text: `\n ${prescription.professional?.profesionGrado?.length ?
-                prescription.professional.profesionGrado
-                    .map(g => `${g.profesion} MP ${g.numeroMatricula}`)
-                    .join('\n')
-                : (prescription.professional?.enrollment ? `MP ${prescription.professional.enrollment}\n` : '')
-            }`, bold: true, fontSize: 9 }                          ]).alignment('center').margin([0, 25, 0, 0]).end
+                            { text: `${ prescription.professional.efector ?
+                                `\n Efector: ${prescription.professional.efector.nombre} - ${prescription.professional.efector.direccion}` :
+                                ''}`, fontSize: 9, bold: true },
+                            {
+                                text: `\n ${prescription.professional?.profesionGrado?.length ?
+                                    prescription.professional.profesionGrado
+                                        .map(g => `${g.profesion} MP ${g.numeroMatricula}`)
+                                        .join('\n')
+                                    : (prescription.professional?.enrollment ? `MP ${prescription.professional.enrollment}\n` : '')
+                                }`, bold: true, fontSize: 9
+                            }]).alignment('center').margin([0, 25, 0, 0]).end
                     ],
                     alignment: 'center',
                     width: '50%'
@@ -315,6 +332,13 @@ export class UnifiedPrinterComponent {
             { text: 'Sexo:    ' },
             { text: `${prescription.paciente.sexo}`, bold: true }
         ]).end);
+        if (prescription.paciente.cuil) {
+            pdf.add(new Txt('\n').end);
+            pdf.add(new Txt([
+                { text: 'CUIL:    ' },
+                { text: `${prescription.paciente.cuil}`, bold: true }
+            ]).end);
+        }
         pdf.add(new Txt('\n').end);
 
         let obraSocial = 'No informado';
@@ -389,7 +413,8 @@ export class UnifiedPrinterComponent {
             { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
             { text: '\n', fontSize: 3 },
             { text: `\n ${prescription.profesional.apellido}`, fontSize: 14, bold: true },
-            { text: `\n MP ${prescription.profesional.matricula}`, bold: true, fontSize: 10 }
+            { text: `\n MP ${prescription.profesional.matricula}`, bold: true, fontSize: 10 },
+            { text: `\n ${prescription.profesional.efector ? `Efector: ${prescription.profesional.efector.nombre} - ${prescription.profesional.efector.direccion}` : ''}`, fontSize: 9, bold: true },
         ]).alignment('center').end);
 
         if (prescription.estadoActual.tipo === 'dispensada' && prescription.estadoDispensaActual.fecha) {
@@ -504,12 +529,14 @@ export class UnifiedPrinterComponent {
                             { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
                             { text: '\n', fontSize: 3 },
                             { text: `\n ${certificate.professional.businessName}`, fontSize: 14, bold: true },
-                            { text: `\n ${certificate.professional?.profesionGrado?.length ?
-                                certificate.professional.profesionGrado
-                                    .map(g => `${g.profesion} MP ${g.numeroMatricula}`)
-                                    .join('\n')
-                                : (certificate.professional?.enrollment ? `MP ${certificate.professional.enrollment}\n` : '')
-                            }`, bold: true, fontSize: 9 }
+                            {
+                                text: `\n ${certificate.professional?.profesionGrado?.length ?
+                                    certificate.professional.profesionGrado
+                                        .map(g => `${g.profesion} MP ${g.numeroMatricula}`)
+                                        .join('\n')
+                                    : (certificate.professional?.enrollment ? `MP ${certificate.professional.enrollment}\n` : '')
+                                    }`, bold: true, fontSize: 9
+                            }
                         ]).alignment('center').margin([0, 25, 0, 0]).end
                     ],
                     alignment: 'center',
@@ -526,8 +553,8 @@ export class UnifiedPrinterComponent {
                 }
             ]).alignment('center').width('100%').end);
             pdf.footer(new Txt([
-            { text:'Este certificado fue emitido digitalmente a través de RecetAR - ', italics: true },
-            { text:`Fecha de emisión: ${this.datePipe.transform(certificate.createdAt, 'dd/MM/yyyy HH:mm')}`, bold: true }
+                { text: 'Este certificado fue emitido digitalmente a través de RecetAR - ', italics: true },
+                { text: `Fecha de emisión: ${this.datePipe.transform(certificate.createdAt, 'dd/MM/yyyy HH:mm')}`, bold: true }
             ]).fontSize(11).alignment('center').end);
         });
     }
@@ -632,12 +659,14 @@ export class UnifiedPrinterComponent {
                             { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
                             { text: '\n', fontSize: 3 },
                             { text: `\n ${practice.professional.businessName}`, fontSize: 14, bold: true },
-                            { text: `\n ${practice.professional?.profesionGrado?.length ?
-                                practice.professional.profesionGrado
-                                    .map(g => `${g.profesion} MP ${g.numeroMatricula}`)
-                                    .join('\n')
-                                : (practice.professional?.enrollment ? `MP ${practice.professional.enrollment}\n` : '')
-                            }`, bold: true, fontSize: 9 }
+                            {
+                                text: `\n ${practice.professional?.profesionGrado?.length ?
+                                    practice.professional.profesionGrado
+                                        .map(g => `${g.profesion} MP ${g.numeroMatricula}`)
+                                        .join('\n')
+                                    : (practice.professional?.enrollment ? `MP ${practice.professional.enrollment}\n` : '')
+                                    }`, bold: true, fontSize: 9
+                            }
                         ]).alignment('center').margin([0, 25, 0, 0]).end
                     ],
                     alignment: 'center',
@@ -673,12 +702,14 @@ export class UnifiedPrinterComponent {
                         { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
                         { text: '\n', fontSize: 3 },
                         { text: `\n ${professional.businessName}`, fontSize: 14, bold: true },
-                        { text: `\n ${professional?.profesionGrado?.length ?
-                            professional.profesionGrado
-                                .map(g => `${g.profesion} MP ${g.numeroMatricula}`)
-                                .join('\n')
-                            : (professional?.enrollment ? `MP ${professional.enrollment}\n` : '')
-                        }`, bold: true, fontSize: 9 }
+                        {
+                            text: `\n ${professional?.profesionGrado?.length ?
+                                professional.profesionGrado
+                                    .map(g => `${g.profesion} MP ${g.numeroMatricula}`)
+                                    .join('\n')
+                                : (professional?.enrollment ? `MP ${professional.enrollment}\n` : '')
+                            }`, bold: true, fontSize: 9
+                        }
                     ]).alignment('center').margin([0, 25, 0, 0]).end
                 ],
                 alignment: 'center',
@@ -702,4 +733,4 @@ export class UnifiedPrinterComponent {
             return '';
         }
     }
-}
+};

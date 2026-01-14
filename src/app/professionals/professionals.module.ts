@@ -26,6 +26,7 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialogModule } from '@angular/material/dialog';
 
 import { PharmacistsModule } from '@pharmacists/pharmacists.module';
 
@@ -36,6 +37,8 @@ import { PracticesFormComponent } from './components/practices-form/practices-fo
 import { CertificatePracticePrinterComponent } from './components/certificate-practice-printer/certificate-practice-printer.component';
 import { SelectorAmbitoComponent } from './components/selector-ambito/selector-ambito.component';
 import { EditUserInfoComponent } from './components/edit-user-info/edit-user-info.component';
+import { EfectoresSelectorComponent } from './components/efectores-selector/efectores-selector.component';
+import { EfectorDialogComponent } from './components/efector-dialog/efector-dialog.component';
 
 @NgModule({
     declarations: [
@@ -47,6 +50,8 @@ import { EditUserInfoComponent } from './components/edit-user-info/edit-user-inf
         CertificatePracticePrinterComponent,
         SelectorAmbitoComponent,
         EditUserInfoComponent,
+        EfectoresSelectorComponent,
+        EfectorDialogComponent,
     ],
     imports: [
         CommonModule,
@@ -73,7 +78,9 @@ import { EditUserInfoComponent } from './components/edit-user-info/edit-user-inf
         MatSortModule,
         MatTooltipModule,
         MatCheckboxModule,
-        MatSnackBarModule
+        MatSnackBarModule,
+        MatDialogModule,
     ]
 })
 export class ProfessionalsModule { }
+
