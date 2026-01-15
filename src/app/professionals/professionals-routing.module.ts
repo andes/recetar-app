@@ -7,7 +7,6 @@ import { SupplyComponent } from '@professionals/supply.component';
 import { ProfessionalFormComponent } from '@professionals/components/professional-form/professional-form.component';
 import { RoleProfessionalGuard } from '@auth/guards/role-professional.guard';
 import { ProfessionalDialogComponent } from '@professionals/components/professional-dialog/professional-dialog.component';
-import { PrescriptionPrinterComponent } from '@professionals/components/prescription-printer/prescription-printer.component';
 import { SupplyDialogComponent } from './components/supply-dialog/supply-dialog.component';
 import { SelectorAmbitoComponent } from './components/selector-ambito/selector-ambito.component';
 import { EditUserInfoComponent } from './components/edit-user-info/edit-user-info.component';
@@ -49,6 +48,5 @@ export const routingComponents = [
     ProfessionalFormComponent,
     ProfessionalDialogComponent,
     SupplyDialogComponent,
-    PrescriptionPrinterComponent,
     SupplyComponent
 ];

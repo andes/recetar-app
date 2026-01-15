@@ -38,6 +38,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
     isAdmin = false;
     fechaDesde: Date;
     fechaHasta: Date;
+    selectedPatient: any = null; // Paciente seleccionado para mostrar en la vista
 
     canDispenseMap = new Map<string, boolean>();
     isStatusMap = new Map<string, boolean>();
@@ -86,6 +87,11 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
             this.dataSource.data = newData;
             this.updateMaps();
 
+            // Buscar paciente con nombreAutopercibido o usar el primero disponible
+            this.selectedPatient = this.findSelectedPatient(newData);
+
+            // Si hay cambios en la cantidad de datos o es la primera carga,
+            // actualizar la paginación
             if (previousDataLength !== newData.length || previousDataLength === 0) {
                 setTimeout(() => {
                     if (this.paginator) {
@@ -271,6 +277,34 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
                 this.prescriptionService.getCsv(result).subscribe();
             }
         });
+    }
+
+    private findSelectedPatient(prescriptions: any[]): any {
+        if (!prescriptions || prescriptions.length === 0) {
+            return null;
+        }
+
+        // Buscar paciente con nombreAutopercibido
+        const patientWithAutopercibido = prescriptions.find(prescription => {
+            // Para prescripciones de Andes
+            if (prescription.paciente && prescription.paciente.nombreAutopercibido) {
+                return true;
+            }
+            // Para prescripciones regulares
+            if (prescription.patient && prescription.patient.nombreAutopercibido) {
+                return true;
+            }
+            return false;
+        });
+
+        if (patientWithAutopercibido) {
+            // Retornar el paciente encontrado (puede ser .patient o .paciente)
+            return patientWithAutopercibido.patient || patientWithAutopercibido.paciente;
+        }
+
+        // Si no se encuentra, usar el primer paciente disponible
+        const firstPrescription = prescriptions[0];
+        return firstPrescription.patient || firstPrescription.paciente || null;
     }
 
     updateMaps() {

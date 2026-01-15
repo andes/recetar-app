@@ -36,6 +36,9 @@ import { PracticesFormComponent } from './components/practices-form/practices-fo
 import { CertificatePracticePrinterComponent } from './components/certificate-practice-printer/certificate-practice-printer.component';
 import { SelectorAmbitoComponent } from './components/selector-ambito/selector-ambito.component';
 import { EditUserInfoComponent } from './components/edit-user-info/edit-user-info.component';
+import { PatientFormComponent } from '@shared/components/patient-form/patient-form.component';
+import { SharedModule } from '@shared/shared.module';
+import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 
 @NgModule({
     declarations: [
@@ -47,6 +50,12 @@ import { EditUserInfoComponent } from './components/edit-user-info/edit-user-inf
         CertificatePracticePrinterComponent,
         SelectorAmbitoComponent,
         EditUserInfoComponent,
+        CertificateFormComponent,
+        SupplyListComponent,
+        PracticesFormComponent,
+        CertificatePracticePrinterComponent,
+        PatientFormComponent,
+        SelectorAmbitoComponent
     ],
     imports: [
         CommonModule,
@@ -73,7 +82,11 @@ import { EditUserInfoComponent } from './components/edit-user-info/edit-user-inf
         MatSortModule,
         MatTooltipModule,
         MatCheckboxModule,
-        MatSnackBarModule
-    ]
+        MatSnackBarModule,
+        PharmacistsModule,
+        SharedModule
+    ],
+    providers: [PatientNamePipe],
+    exports: [PatientFormComponent]
 })
 export class ProfessionalsModule { }
