@@ -1,9 +1,8 @@
-import { Injectable } from '@angular/core';
-import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { catchError, map, tap } from 'rxjs/operators';
-import { Observable, of } from 'rxjs';
+import { Injectable } from '@angular/core';
 import { User } from '@interfaces/users';
+import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
     providedIn: 'root'
@@ -14,27 +13,48 @@ export class UserService {
         private http: HttpClient
     ) { }
 
-    getUsers(): Observable<User[]> {
-        return this.http.get<User[]>(`${environment.API_END_POINT}/users/index`);
-    }
-
     getUserById(userId: string): Observable<User> {
         return this.http.get<User>(`${environment.API_END_POINT}/users/${userId}`);
     }
 
-    updateIsActive(_id: string, isActive: boolean): Observable<User> {
-        return this.http.post<User>(`${environment.API_END_POINT}/users/update`, { _id: _id, isActive: isActive });
+    getUsers(params?: { offset?: number; limit?: number }): Observable<{ users: User[]; total: number; offset: number; limit: number }> {
+        const queryParams = params || {};
+        return this.http.get<{ users: User[]; total: number; offset: number; limit: number }>(`${environment.API_END_POINT}/users/index`, { params: queryParams });
+    }
+
+    searchUsers(searchTerm: string, params?: { offset?: number; limit?: number }): Observable<{ users: User[]; total: number; offset: number; limit: number }> {
+        const queryParams = {
+            searchTerm,
+            ...(params || {})
+        };
+        return this.http.get<{ users: User[]; total: number; offset: number; limit: number }>(`${environment.API_END_POINT}/users/search`, { params: queryParams });
+    }
+
+    createUser(userData: {
+        businessName: string;
+        email: string;
+        username?: string;
+        cuil?: string;
+        enrollment?: string;
+        roles: Array<{ role: string }>;
+    }): Observable<User> {
+        return this.http.post<User>(`${environment.API_END_POINT}/users/create`, userData);
     }
 
     // Unified update method that can handle multiple fields in a single request
     updateUser(_id: string, updateData: {
         email?: string;
-        // username?: string;
-        // businessName?: string;
-        // roles?: Array<{ _id: string; role: string }>;
-        // isActive?: boolean;
+        username?: string;
+        businessName?: string;
+        roles?: Array<{ _id: string; role: string }>;
+        isActive?: boolean;
     }): Observable<User> {
         const payload = { _id, ...updateData };
         return this.http.post<User>(`${environment.API_END_POINT}/users/update`, payload);
+    }
+
+    // Legacy methods for backward compatibility (now using the unified method)
+    updateIsActive(_id: string, isActive: boolean): Observable<User> {
+        return this.updateUser(_id, { isActive });
     }
 }
