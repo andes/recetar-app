@@ -1,0 +1,88 @@
+name: Changes requested y Aprobado label
+
+on:
+  pull_request_review:
+    types: [submitted, edited, dismissed]
+
+jobs:
+  changes-requested:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+            const issue_number = pr.number;
+
+            const reviews = await github.rest.pulls.listReviews({
+              owner,
+              repo,
+              pull_number: issue_number
+            });
+
+            // última review por usuario
+            const latestByUser = {};
+            for (const r of reviews.data) {
+              latestByUser[r.user.login] = r.state;
+            }
+
+            const hasChangesRequested = Object.values(latestByUser)
+              .includes('CHANGES_REQUESTED');
+            
+            const approvals = new Set(
+              reviews.data
+                .filter(r => r.state === 'APPROVED')
+                .map(r => r.user.login)
+            );
+
+            const labels = pr.labels.map(l => l.name);
+
+            if (hasChangesRequested) {
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number,
+                labels: ['Cambio Requerido']
+              });
+               try {
+                await github.rest.issues.removeLabel({
+                  owner,
+                  repo,
+                  issue_number,
+                  name: 'Aprobado'
+                });
+              } catch (e) {
+                // label no existía
+              }
+            } else {
+              try {
+                await github.rest.issues.removeLabel({
+                  owner,
+                  repo,
+                  issue_number,
+                  name: 'Cambio Requerido'
+                });
+              } catch (e) {
+                // label no existía
+              }
+              if (approvals.size >= 2 && !labels.includes('En desarrollo')) {
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number,
+                labels: ['Aprobado']
+              });
+            } else {
+              try {
+                await github.rest.issues.removeLabel({
+                  owner,
+                  repo,
+                  issue_number,
+                  name: 'Aprobado'
+                });
+              } catch (e) {
+                // label no existía
+              }
+            }
+            }
