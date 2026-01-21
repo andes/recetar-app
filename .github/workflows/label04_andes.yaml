@@ -1,0 +1,40 @@
+name: Andes linked PR label
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  andes-linked:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const { owner, repo } = context.repo;
+            const issue_number = pr.number;
+
+            const body = pr.body || '';
+            const regex = /https:\/\/github\.com\/andes\/(app|api)\/pull\/\d+/g;
+            const linked = regex.test(body);
+
+            if (linked) {
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number,
+                labels: ['Andes']
+              });
+            } else {
+              try {
+                await github.rest.issues.removeLabel({
+                  owner,
+                  repo,
+                  issue_number,
+                  name: 'Andes'
+                });
+              } catch (e) {
+                // label no existía
+              }
+            }
