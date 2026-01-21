@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, AbstractControl, Validators, FormArray, FormGroupDirective, FormControl, ValidatorFn } from '@angular/forms';
 import { Observable, of, Subscription } from 'rxjs';
-// import { SuppliesService } from '@services/supplies.service';
 import { SnomedSuppliesService } from '@services/snomedSupplies.service';
 import { PatientsService } from '@root/app/services/patients.service';
 import { PrescriptionsService } from '@services/prescriptions.service';
@@ -13,8 +12,7 @@ import { ProfessionalDialogComponent } from '@professionals/components/professio
 import { MatDialog } from '@angular/material/dialog';
 import { InteractionService } from '@professionals/interaction.service';
 import { step, stepLink } from '@animations/animations.template';
-import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
-import { fadeOutCollapseOnLeaveAnimation } from 'angular-animations';
+import { map, startWith, catchError, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { CertificatesService } from '@services/certificates.service';
 import { PrescriptionsListComponent } from '@professionals/components/prescriptions-list/prescriptions-list.component';
 import { Subject } from 'rxjs';
@@ -53,7 +51,7 @@ function validDateValidator(): ValidatorFn {
 function medicationSelectedValidator(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
         if (!control.value) {
-            return null; 
+            return null;
         }
 
         const supplyGroup = control.parent;
@@ -73,7 +71,7 @@ function medicationSelectedValidator(): ValidatorFn {
 function noWhitespaceValidator(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
         if (!control.value) {
-            return null; 
+            return null;
         }
 
         const isWhitespace = (control.value || '').trim().length === 0;
@@ -93,7 +91,8 @@ function noWhitespaceValidator(): ValidatorFn {
 export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewInit {
     obraSocialControl = new FormControl('');
     filteredObrasSociales: Observable<any[]>;
-
+    dniMinLength = 6;
+    dniMaxLength = 8;
     // Suscripciones
     private subscriptions: Subscription = new Subscription();
 
@@ -290,7 +289,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
             patient: this.fBuilder.group({
                 dni: ['', [
                     Validators.required,
-                    Validators.minLength(7),
+                    Validators.minLength(this.dniMinLength),
                     Validators.pattern('^[0-9]*$')
                 ]],
                 lastName: ['', [
@@ -337,7 +336,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     }
 
     getPatientByDni(dniValue: string | null): void {
-        if (dniValue !== null && (dniValue.length === 7 || dniValue.length === 8)) {
+        if (dniValue !== null && (dniValue.length === this.dniMinLength || dniValue.length === this.dniMaxLength)) {
             this.dniShowSpinner = true;
             this.apiPatients.getPatientByDni(dniValue).subscribe(
                 res => {
@@ -389,7 +388,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         fechaNacControl.updateValueAndValidity();
     }
 
-    completePatientInputs(patient: Patient): void {// TODO: REC-38
+    completePatientInputs(patient: Patient): void {
         this.patientLastName.setValue(patient.lastName);
         this.patientFirstName.setValue(patient.firstName);
         this.patientSex.setValue(patient.sex);
@@ -580,12 +579,10 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
             if (typeof supply === 'string') {
                 const snomedConcept = control.get('supply.snomedConcept');
                 const currentConceptId = snomedConcept?.get('conceptId')?.value;
-                
                 if (currentConceptId && supply !== snomedConcept?.get('term')?.value) {
                     snomedConcept.reset();
                     control.get('supply.name').updateValueAndValidity();
                 }
-                
                 if (supply.length > 3) {
                     this.supplySpinner[index] = { show: true };
                     this.snomedSuppliesService.get(supply).pipe(

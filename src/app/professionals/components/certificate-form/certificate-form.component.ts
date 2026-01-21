@@ -19,7 +19,7 @@ import { MatSort } from '@angular/material/sort';
 function noWhitespaceValidator(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
         if (!control.value) {
-            return null; 
+            return null;
         }
 
         const isWhitespace = (control.value || '').trim().length === 0;
@@ -61,7 +61,7 @@ export class CertificateFormComponent implements OnInit {
 
         return null;
     }
-    
+
     @ViewChild('dni', { static: true }) dni: any;
 
     certificateForm: FormGroup;
@@ -80,6 +80,8 @@ export class CertificateFormComponent implements OnInit {
     private anulateCertificateSubscription: Subscription;
     public certificate: Certificate;
     cantDias = new FormControl('', [Validators.required, Validators.min(1)]);
+    dniMinLength = 6;
+    dniMaxLength = 8;
 
     @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
     @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -156,7 +158,7 @@ export class CertificateFormComponent implements OnInit {
             patient: this.fBuilder.group({
                 dni: ['', [
                     Validators.required,
-                    Validators.minLength(7),
+                    Validators.minLength(this.dniMinLength),
                     Validators.pattern('^[0-9]*$')
                 ]],
                 lastName: ['', [
@@ -181,7 +183,7 @@ export class CertificateFormComponent implements OnInit {
     }
 
     getPatientByDni(dniValue: string | null): void {
-        if (dniValue !== null && ( dniValue.length === 7 || dniValue.length === 8)) {
+        if (dniValue !== null && (dniValue.length === this.dniMinLength || dniValue.length === this.dniMaxLength)) {
             this.dniShowSpinner = true;
             this.apiPatients.getPatientByDni(dniValue).subscribe(
                 res => {
@@ -266,10 +268,9 @@ export class CertificateFormComponent implements OnInit {
         return this.certificateForm.get('startDate');
     }
 
-    
-        get cantDiasControl(): AbstractControl {
-            return this.cantDias;
-        }
+    get cantDiasControl(): AbstractControl {
+        return this.cantDias;
+    }
     get patientDni(): AbstractControl {
         const patient = this.certificateForm.get('patient');
         return patient.get('dni');
