@@ -97,7 +97,9 @@ export class UnifiedPrinterComponent {
 
         // Patient
         this.addPatientData(pdf, {
-            name: `${prescription.patient.lastName.toUpperCase()}, ${this.patientNamePipe.transform(prescription.patient).toUpperCase()}`,
+            firstname: `${prescription.patient.firstName}`,
+            lastname: `${prescription.patient.lastName}`,
+            autopercibido: `${prescription.patient.nombreAutopercibido || ''}`,
             dni: `${prescription.patient.dni}`,
             dob: prescription.patient.fechaNac,
             sex: `${prescription.patient.sex}`,
@@ -130,8 +132,6 @@ export class UnifiedPrinterComponent {
             pdf.add(new Txt('Observaciones').bold().end);
             pdf.add(new Txt('' + prescription.observation).end);
         }
-        pdf.add(new Txt('\n').end);
-        pdf.add(new Txt('\n').end);
         pdf.add(new Txt('\n').end);
         pdf.add(new Txt('\n').end);
         pdf.add(new Txt('\n').end);
@@ -250,8 +250,9 @@ export class UnifiedPrinterComponent {
         const patient = patients[0];
 
         this.addPatientData(pdf, {
-            name: `${prescription.paciente.apellido.toUpperCase()}, ${this.patientNamePipe.transform(patient).toUpperCase()}`,
-            dni: `${prescription.paciente.documento}`,
+            firstname: `${prescription.paciente.nombre}`,
+            lastname: `${prescription.paciente.apellido}`,
+            autopercibido: `${patient.nombreAutopercibido || ''}`, dni: `${prescription.paciente.documento}`,
             dob: prescription.paciente.fechaNacimiento,
             sex: `${prescription.paciente.sexo}`,
             obraSocial: prescription.paciente.obraSocial?.nombre,
@@ -346,7 +347,9 @@ export class UnifiedPrinterComponent {
             pdf.add(new Txt('\n').end);
 
             this.addPatientData(pdf, {
-                name: `${certificate.patient.lastName.toUpperCase()}, ${this.patientNamePipe.transform(certificate.patient).toUpperCase()}`,
+                firstname: `${certificate.patient.firstName}`,
+                lastname: `${certificate.patient.lastName}`,
+                autopercibido: `${certificate.patient.nombreAutopercibido || ''}`,
                 dni: `${certificate.patient.dni}`,
                 dob: certificate.patient.fechaNac,
                 sex: `${certificate.patient.sex}`,
@@ -434,7 +437,9 @@ export class UnifiedPrinterComponent {
             pdf.add(new Txt('\n').end);
 
             this.addPatientData(pdf, {
-                name: `${practice.patient.lastName.toUpperCase()}, ${this.patientNamePipe.transform(practice.patient as any).toUpperCase()}`,
+                firstname: `${practice.patient.firstName}`,
+                lastname: `${practice.patient.lastName}`,
+                autopercibido: `${practice.patient.nombreAutopercibido || ''}`,
                 dni: `${practice.patient.dni}`,
                 dob: null,
                 sex: `${practice.patient.sex}`,
@@ -496,8 +501,8 @@ export class UnifiedPrinterComponent {
                                 professional.profesionGrado
                                     .map((g: any) => `${g.profesion} MP ${g.numeroMatricula}`)
                                     .join('\n')
-                                : (professional?.enrollment ? `MP ${professional.enrollment}\n` : '')
-                                }`, bold: true, fontSize: 9
+                                : (professional?.enrollment ? `MP ${professional.enrollment}\n` : '')}`,
+                            bold: true, fontSize: 9
                         }
                     ]).alignment('center').margin([0, 25, 0, 0]).end
                 ],
@@ -507,11 +512,25 @@ export class UnifiedPrinterComponent {
         ]).alignment('center').width('100%').end);
     }
 
-    private addPatientData(pdf: PdfMakeWrapper, data: { name: string, dni: string, dob?: Date | string, sex: string, obraSocial?: string, affiliateNumber?: string }) {
+    private addPatientData(pdf: PdfMakeWrapper, data: { lastname: string; firstname: string; autopercibido: string; dni: string; dob?: Date | string; sex: string; obraSocial?: string; affiliateNumber?: string }) {
         pdf.add(new Txt([
-            { text: 'Paciente:   ' },
-            { text: data.name, bold: true }
-        ]).end);
+            { text: 'PACIENTE' }
+        ]).bold().end);
+        pdf.add(new Txt('\n').end);
+        if (data.autopercibido) {
+            pdf.add(new Txt([
+                { text: 'Apellido:   ' }, { text: data.lastname.toLocaleUpperCase(), bold: true }, { text: '           Nombre:   ' }, { text: data.firstname.toLocaleUpperCase() }
+            ]).end);
+            pdf.add(new Txt('\n').end);
+
+            pdf.add(new Txt([
+                { text: 'Identidad Autopercibida:   ' }, { text: data.autopercibido.toLocaleUpperCase(), bold: true }
+            ]).end);
+        } else {
+            pdf.add(new Txt([
+                { text: 'Apellido:   ' }, { text: data.lastname.toLocaleUpperCase(), bold: true }, { text: '           Nombre:   ' }, { text: data.firstname.toLocaleUpperCase(), bold: true }
+            ]).end);
+        }
         pdf.add(new Txt('\n').end);
 
         pdf.add(new Txt([
@@ -537,7 +556,10 @@ export class UnifiedPrinterComponent {
         pdf.add(new Txt([
             { text: 'Obra Social / Plan de salud :   ' }, { text: data.obraSocial || 'No informado', bold: true }
         ]).end);
+
         if (data.obraSocial) {
+            pdf.add(new Txt('\n').end);
+
             pdf.add(new Txt([
                 { text: 'Número de afiliado:   ' }, { text: data.affiliateNumber || 'No informado', bold: true }
             ]).end);

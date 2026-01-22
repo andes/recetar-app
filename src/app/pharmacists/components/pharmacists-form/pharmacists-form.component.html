@@ -1,115 +1,117 @@
 <div class="wrapper">
-  <div fxLayout="row" fxLayoutAlign="space-evenly start" fxLayoutGap="20px" class="cards-container" fxFill>
-    <div class="first-panel">
-      <div class="search-panel">
-        <mat-card fxLayout="column" fxLayoutAlign="space-between">
-          <mat-card-title>
-            <h2 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
-              <mat-icon >search</mat-icon>
-              <span>
-                Buscar receta
-              </span>
-            </h2>
-          </mat-card-title>
-          <mat-card-content>
-            <form [formGroup]="prescriptionForm" class="form-container">
-              <div fxLayout fxLayout="column" fxLayoutAlign="center" class="container" fxLayoutGap="20px">
-                <!-- Dni del paciente -->
-                <mat-form-field>
-                  <mat-label>DNI paciente</mat-label>
-                  <input type="text"
-                    cdkFocusInitial
-                    placeholder="DNI"
-                    aria-label="Number"
-                    matInput
-                    maxlength="8"
-                    formControlName="patient_dni">
-                  <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20" *ngIf="dniShowSpinner"></mat-spinner>
-                  <mat-hint align="end">{{ patient_dni.value.length }} / 8</mat-hint>
-                  <mat-error *ngIf="patient_dni.errors?.required && patient_dni.touched">
-                    Debe ingresar el dni del paciente
-                  </mat-error>
+    <div fxLayout="row" fxLayoutAlign="space-evenly start" fxLayoutGap="20px" class="cards-container" fxFill>
+        <div class="first-panel">
+            <div class="search-panel">
+                <mat-card fxLayout="column" fxLayoutAlign="space-between">
+                    <mat-card-title>
+                        <h2 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
+                            <mat-icon>search</mat-icon>
+                            <span>
+                                Buscar receta
+                            </span>
+                        </h2>
+                    </mat-card-title>
+                    <mat-card-content>
+                        <form [formGroup]="prescriptionForm" class="form-container">
+                            <div fxLayout fxLayout="column" fxLayoutAlign="center" class="container" fxLayoutGap="20px">
+                                <!-- Dni del paciente -->
+                                <mat-form-field>
+                                    <mat-label>DNI paciente</mat-label>
+                                    <input type="text" cdkFocusInitial placeholder="DNI" aria-label="Number" matInput
+                                           maxlength="8" formControlName="patient_dni">
+                                    <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20"
+                                                 *ngIf="dniShowSpinner"></mat-spinner>
+                                    <mat-hint align="end">{{ patient_dni.value.length }} / 8</mat-hint>
+                                    <mat-error *ngIf="patient_dni.errors?.required && patient_dni.touched">
+                                        Debe ingresar el dni del paciente
+                                    </mat-error>
 
-                  <mat-error *ngIf="patient_dni.errors?.minlength && patient_dni.touched">
-                    Debe ingresar al menos 7 dígitos
-                  </mat-error>
-                </mat-form-field>
+                                    <mat-error *ngIf="patient_dni.errors?.minlength && patient_dni.touched">
+                                        Debe ingresar al menos 6 dígitos
+                                    </mat-error>
+                                </mat-form-field>
 
-                <!-- Sexo del paciente -->
-                <mat-form-field>
-                  <mat-label>Sexo paciente</mat-label>
-                  <mat-select formControlName="patient_sexo" required>
-                    <mat-option value="masculino">Masculino</mat-option>
-                    <mat-option value="femenino">Femenino</mat-option>
-                  </mat-select>
-                  <mat-error *ngIf="prescriptionForm.get('patient_sexo')?.hasError('required') && prescriptionForm.get('patient_sexo')?.touched">
-                    Debe seleccionar el sexo del paciente
-                  </mat-error>
-                </mat-form-field>
+                                <!-- Sexo del paciente -->
+                                <mat-form-field>
+                                    <mat-label>Sexo paciente</mat-label>
+                                    <mat-select formControlName="patient_sexo" required>
+                                        <mat-option value="masculino">Masculino</mat-option>
+                                        <mat-option value="femenino">Femenino</mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                               *ngIf="prescriptionForm.get('patient_sexo')?.hasError('required') && prescriptionForm.get('patient_sexo')?.touched">
+                                        Debe seleccionar el sexo del paciente
+                                    </mat-error>
+                                </mat-form-field>
 
-                <!-- Fecha de receta -->
-                <mat-form-field>
-                  <mat-label>Fecha receta</mat-label>
-                  <input matInput [matDatepicker]="picker1" [formControl]="dateFilter" (click)="picker1.open()" readonly>
+                                <!-- Fecha de receta -->
+                                <mat-form-field>
+                                    <mat-label>Fecha receta</mat-label>
+                                    <input matInput [matDatepicker]="picker1" [formControl]="dateFilter"
+                                           (click)="picker1.open()" readonly>
 
-                  <div matSuffix *ngIf="!dateShowSpinner">
-                    <mat-datepicker-toggle  [for]="picker1" *ngIf="!dateFilter.value"></mat-datepicker-toggle>
-                    <button type="button" mat-icon-button *ngIf="dateFilter.value" (click)="cleanDateEvent()">
-                      <mat-icon>close</mat-icon>
-                    </button>
-                  </div>
+                                    <div matSuffix *ngIf="!dateShowSpinner">
+                                        <mat-datepicker-toggle [for]="picker1"
+                                                               *ngIf="!dateFilter.value"></mat-datepicker-toggle>
+                                        <button type="button" mat-icon-button *ngIf="dateFilter.value"
+                                                (click)="cleanDateEvent()">
+                                            <mat-icon>close</mat-icon>
+                                        </button>
+                                    </div>
 
-                  <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20" *ngIf="dateShowSpinner"></mat-spinner>
+                                    <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20"
+                                                 *ngIf="dateShowSpinner"></mat-spinner>
 
-                  <mat-datepicker #picker1></mat-datepicker>
-                </mat-form-field>
+                                    <mat-datepicker #picker1></mat-datepicker>
+                                </mat-form-field>
 
-                <!-- Botón de búsqueda -->
-                <button mat-raised-button color="primary" type="button" (click)="searchPrescriptions()" [disabled]="!prescriptionForm.valid">
-                  Buscar
-                </button>
-              </div>
-            </form>
-          </mat-card-content>
-        </mat-card>
-      </div>
-
-      <div class="insurance-panel">
-        <mat-card fxLayout="column" fxLayoutAlign="space-between">
-          <mat-card-title>
-            <h2 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
-              <mat-icon>policy</mat-icon>
-              <span>
-                Obras sociales
-              </span>
-            </h2>
-          </mat-card-title>
-          <mat-card-content>
-            <div class="insurances-container mat-elevation-z8">
-              <table mat-table *ngIf="insurances" [dataSource]="insurances">
-
-                <!-- Position Column -->
-                <ng-container matColumnDef="codigoPuco">
-                  <th mat-header-cell *matHeaderCellDef> Código </th>
-                  <td mat-cell *matCellDef="let insurnace"> {{insurnace.codigoPuco}} </td>
-                </ng-container>
-
-                <!-- Weight Column -->
-                <ng-container matColumnDef="financiador">
-                  <th mat-header-cell *matHeaderCellDef> Financiador </th>
-                  <td mat-cell *matCellDef="let insurnace"> {{insurnace.financiador}} </td>
-                </ng-container>
-
-                <tr mat-header-row *matHeaderRowDef="displayedInsColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedInsColumns;"></tr>
-              </table>
+                                <!-- Botón de búsqueda -->
+                                <button mat-raised-button color="primary" type="button" (click)="searchPrescriptions()"
+                                        [disabled]="!prescriptionForm.valid">
+                                    Buscar
+                                </button>
+                            </div>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
             </div>
-          </mat-card-content>
-        </mat-card>
-      </div>
+
+            <div class="insurance-panel">
+                <mat-card fxLayout="column" fxLayoutAlign="space-between">
+                    <mat-card-title>
+                        <h2 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
+                            <mat-icon>policy</mat-icon>
+                            <span>
+                                Obras sociales
+                            </span>
+                        </h2>
+                    </mat-card-title>
+                    <mat-card-content>
+                        <div class="insurances-container mat-elevation-z8">
+                            <table mat-table *ngIf="insurances" [dataSource]="insurances">
+
+                                <!-- Position Column -->
+                                <ng-container matColumnDef="codigoPuco">
+                                    <th mat-header-cell *matHeaderCellDef> Código </th>
+                                    <td mat-cell *matCellDef="let insurnace"> {{insurnace.codigoPuco}} </td>
+                                </ng-container>
+
+                                <!-- Weight Column -->
+                                <ng-container matColumnDef="financiador">
+                                    <th mat-header-cell *matHeaderCellDef> Financiador </th>
+                                    <td mat-cell *matCellDef="let insurnace"> {{insurnace.financiador}} </td>
+                                </ng-container>
+
+                                <tr mat-header-row *matHeaderRowDef="displayedInsColumns"></tr>
+                                <tr mat-row *matRowDef="let row; columns: displayedInsColumns;"></tr>
+                            </table>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </div>
+        <div class="prescription-panel">
+            <app-prescription-list></app-prescription-list>
+        </div>
     </div>
-    <div class="prescription-panel">
-      <app-prescription-list></app-prescription-list>
-    </div>
-  </div>
 </div>

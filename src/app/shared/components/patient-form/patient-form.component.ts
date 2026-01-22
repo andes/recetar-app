@@ -74,6 +74,8 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
     ambito: 'publico' | 'privado';
     minDate = new Date('1900-01-01');
     maxDate = new Date();
+    dniMinLength = 6;
+    dniMaxLength = 8;
 
     private onChange = (value: any) => { };
     private onTouched = () => { };
@@ -191,7 +193,7 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
         const baseForm = {
             dni: ['', [
                 Validators.required,
-                Validators.minLength(7),
+                Validators.minLength(this.dniMinLength),
                 Validators.pattern('^[0-9]*$')
             ]],
             lastName: ['', Validators.required],
@@ -228,7 +230,7 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
     }
 
     private getPatientByDni(dniValue: string | null): void {
-        if (dniValue !== null && (dniValue.length === 7 || dniValue.length === 8)) {
+        if (dniValue !== null && (dniValue.length === this.dniMinLength || dniValue.length === this.dniMaxLength)) {
             this.dniShowSpinner = true;
             this.apiPatients.getPatientByDni(dniValue).subscribe(
                 res => {
@@ -268,7 +270,7 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
         const dniValue = this.patientDni.value;
         const sexValue = this.patientSex.value;
 
-        if (dniValue && sexValue && dniValue.length >= 7 && dniValue.length <= 8) {
+        if (dniValue && sexValue && dniValue.length >= this.dniMinLength && dniValue.length <= this.dniMaxLength) {
             this.loadPatientOS(dniValue);
             // Habilitar el checkbox otraOS cuando se tienen DNI y sexo válidos
             if (this.showObraSocial) {
