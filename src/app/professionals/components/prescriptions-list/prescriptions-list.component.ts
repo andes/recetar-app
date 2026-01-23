@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, Output, EventEmitter, OnDestroy, AfterContentInit, Input } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
+import { Patient } from '@interfaces/patients';
 import { MatSort } from '@angular/material/sort';
 import { PrescriptionsService } from '@services/prescriptions.service';
 import { AndesPrescriptionsService } from '@services/andesPrescription.service';
@@ -17,10 +18,13 @@ import { CertificatesService } from '@services/certificates.service';
 import { PracticesService } from '@services/practices.service';
 import { Certificate } from '@interfaces/certificate';
 import { Practice } from '@interfaces/practices';
+import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, catchError } from 'rxjs/operators';
 import { InteractionService } from '@professionals/interaction.service';
 import { AmbitoService } from '@auth/services/ambito.service';
+import { PatientsService } from '@services/patients.service';
+import { forkJoin, Observable, of } from 'rxjs';
 
 // Tipo union para manejar prescripciones mixtas
 type MixedPrescription = Prescriptions | AndesPrescriptions;
@@ -71,6 +75,7 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     // Variable para almacenar el término de búsqueda
     currentSearchTerm = '';
     ambito: 'publico' | 'privado' | null = null;
+    patientsData: { [key: string]: Patient } = {};
 
     private paginatorsInitialized = false;
 
@@ -88,7 +93,10 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         private unifiedPrinter: UnifiedPrinterComponent,
         public dialog: MatDialog,
         private interactionService: InteractionService,
-        private ambitoService: AmbitoService) { }
+        private ambitoService: AmbitoService,
+        private patientNamePipe: PatientNamePipe,
+        private patientsService: PatientsService
+    ) { }
 
 
     ngOnInit() {
@@ -146,9 +154,38 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
             // Capturar el total de la respuesta del servidor
             this.totalPrescriptions = response.total || 0;
 
-            // Usar directamente los datos de la respuesta
-            this.dataSource.data = response.prescriptions;
+            const list = response.prescriptions;
+            this.dataSource.data = list;
             this.loadingPrescriptions = false;
+
+            const patientDnis: any = {};
+
+            list.forEach((p: any) => {
+                const dni = p.patient ? p.patient.dni : (p.paciente ? p.paciente.documento : null);
+                if (dni) {
+                    patientDnis[dni] = dni;
+                }
+            });
+
+            if (Object.keys(patientDnis).length > 0) {
+                const requests = [];
+                for (const key in patientDnis) {
+                    requests.push(this.patientsService.getPatientByDni(key).pipe(
+                        catchError(() => of([]))
+                    ));
+                }
+
+                forkJoin(requests).subscribe((results: any[]) => {
+                    results.forEach((patients: any[]) => {
+                        if (patients && patients.length > 0) {
+                            const patient = patients[0];
+                            if (patient.dni) {
+                                this.patientsData[patient.dni] = patient;
+                            }
+                        }
+                    });
+                });
+            }
 
             // Configurar paginator después de que los datos estén cargados
             setTimeout(() => {
@@ -293,7 +330,7 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         this.dataCertificates = new MatTableDataSource<Certificate>([]);
         this.dataCertificates.sortingDataAccessor = (item, property) => {
             switch (property) {
-                case 'patient': return item.patient.lastName + item.patient.firstName;
+                case 'patient': return item.patient.lastName + this.patientNamePipe.transform(item.patient);
                 case 'certificate_date': return new Date(item.createdAt).getTime();
                 default: return item[property];
             }
@@ -303,7 +340,7 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         this.dataPractices = new MatTableDataSource<Practice>([]);
         this.dataPractices.sortingDataAccessor = (item, property) => {
             switch (property) {
-                case 'patient': return item.patient.lastName + item.patient.firstName;
+                case 'patient': return item.patient.lastName + this.patientNamePipe.transform(item.patient);
                 case 'practice_date': return new Date(item.date).getTime();
                 default: return item[property];
             }
@@ -321,11 +358,17 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     }
 
     getPatientName(item: MixedPrescription): string {
+        const dni = this.getPatientDni(item);
+        if (dni && this.patientsData[dni]) {
+            return `${this.patientsData[dni].lastName} ${this.patientNamePipe.transform(this.patientsData[dni])}`;
+        }
+        if ((item as any).patient) {
+            return `${(item as any).patient.lastName} ${this.patientNamePipe.transform((item as any).patient)}`;
+        }
         if (this.isAndesPrescription(item)) {
             return `${item.paciente.apellido} ${item.paciente.nombre}`;
-        } else {
-            return `${item.patient.lastName} ${item.patient.firstName}`;
         }
+        return '';
     }
 
     getPatientDni(item: MixedPrescription): string {

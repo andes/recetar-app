@@ -7,6 +7,7 @@ export class Practice {
         sex: string;
         lastName: string;
         firstName: string;
+        nombreAutopercibido?: string;
         otraOS?: boolean;
         obraSocial?: {
             nombre: string;
@@ -20,10 +21,10 @@ export class Practice {
         cuil: string;
         businessName: string;
         profesionGrado?: [{
-            profesion:string ,
-            codigoProfesion: string ,
-            numeroMatricula: string 
-        }]
+            profesion: string;
+            codigoProfesion: string;
+            numeroMatricula: string;
+        }];
     };
     practice: string;
     diagnostic: string;

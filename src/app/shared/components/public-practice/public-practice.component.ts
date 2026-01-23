@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Practice } from '@interfaces/practices';
 import { PracticesService } from '@services/practices.service';
+import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 import { Observable, of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 
@@ -19,7 +20,8 @@ export class PublicPracticeComponent implements OnInit {
 
     constructor(
         private route: ActivatedRoute,
-        private practicesService: PracticesService
+        private practicesService: PracticesService,
+        public patientName: PatientNamePipe,
     ) { }
 
     ngOnInit(): void {
@@ -42,7 +44,7 @@ export class PublicPracticeComponent implements OnInit {
                     const decryptedId = this.practicesService.decryptId(encryptedId);
 
                     // Obtener la práctica
-                    return this.practicesService.getById(decryptedId,true).pipe(
+                    return this.practicesService.getById(decryptedId, true).pipe(
                         catchError(() => {
                             this.error = 'Práctica no encontrada o inválida';
                             this.loading = false;
@@ -65,7 +67,6 @@ export class PublicPracticeComponent implements OnInit {
     }
 
     formatDate(date: Date | string): string {
-        console.log('formatDate', this.practice$ );
         if (!date) {return '';}
         const dateObj = typeof date === 'string' ? new Date(date) : date;
         return dateObj.toLocaleDateString('es-ES', {

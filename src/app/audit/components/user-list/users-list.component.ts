@@ -1,34 +1,24 @@
-import { Component, OnInit, Input, AfterContentInit, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterContentInit, ViewChild } from '@angular/core';
 import { Prescriptions } from '@interfaces/prescriptions';
-import { PrescriptionsService } from '@services/prescriptions.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import * as moment from 'moment';
-import { DialogComponent } from '@pharmacists/components/dialog/dialog.component';
 import { AuthService } from '@auth/services/auth.service';
-import { PrescriptionPrinterComponent } from '@pharmacists/components/prescription-printer/prescription-printer.component';
-import { detailExpand, arrowDirection } from '@animations/animations.template';
-import { DialogReportComponent } from '../dialog-report/dialog-report.component';
 import { User } from '@interfaces/users';
 import { UserService } from '@services/users.service';
+import { DialogComponent } from '../dialog/dialog.component';
 
 @Component({
   selector: 'app-users-list',
   templateUrl: './users-list.component.html',
   styleUrls: ['./users-list.component.sass'],
-  animations: [
-    detailExpand,
-    arrowDirection
-  ],
-  providers: [PrescriptionPrinterComponent]
 })
 export class UsersListComponent implements OnInit, AfterContentInit {
 
 
   // displayedColumns: string[] = ['businessName', 'date', 'status', 'supplies', 'action', 'arrow'];
-  displayedColumns: string[] = ['businessName', 'cuil', 'enrollment', 'lastLogin', 'isActive' ];
+  displayedColumns: string[] = ['businessName', 'cuil', 'enrollment', 'lastLogin', 'isActive'];
   dataSource = new MatTableDataSource<User>([]);
   expandedElement: User | null;
   loadingUsers: boolean;
@@ -117,7 +107,7 @@ export class UsersListComponent implements OnInit, AfterContentInit {
     });
   }
 
-  activateUser(user: User){
+  activateUser(user: User) {
     this.loadingUsers = true;
     this.usersService.updateIsActive(user._id, true).subscribe((updatedUser: User) => {
       const data = this.dataSource.data.slice();
@@ -130,7 +120,7 @@ export class UsersListComponent implements OnInit, AfterContentInit {
     this.loadingUsers = false;
   };
 
-  deactivateUser(user: User){
+  deactivateUser(user: User) {
     this.loadingUsers = true;
     this.usersService.updateIsActive(user._id, false).subscribe((updatedUser: User) => {
       const data = this.dataSource.data.slice();
