@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { SubOrganizacion } from '@interfaces/organizaciones';
 import { User } from '@interfaces/users';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { SubOrganizacion } from '@interfaces/organizaciones';
 
 @Injectable({
     providedIn: 'root'
@@ -58,7 +58,16 @@ export class UserService {
     updateIsActive(_id: string, isActive: boolean): Observable<User> {
         return this.updateUser(_id, { isActive });
     }
+
     updateUserOrganizaciones(_id: string, organizaciones: SubOrganizacion[]): Observable<User> {
         return this.http.post<User>(`${environment.API_END_POINT}/users/update-own`, { _id, organizaciones });
+    }
+
+    requestUpdateUser(userId: string, updateData: { email: string, username?: string }): Observable<any> {
+        return this.http.post<any>(`${environment.API_END_POINT}/users/request-update`, { userId, ...updateData });
+    }
+
+    confirmUserUpdate(token: string): Observable<any> {
+        return this.http.post<any>(`${environment.API_END_POINT}/users/confirm-update`, { token });
     }
 }
