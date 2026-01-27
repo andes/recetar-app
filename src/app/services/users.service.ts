@@ -29,12 +29,20 @@ export class UserService {
     // Unified update method that can handle multiple fields in a single request
     updateUser(_id: string, updateData: {
         email?: string;
-        // username?: string;
+        username?: string;
         // businessName?: string;
         // roles?: Array<{ _id: string; role: string }>;
         // isActive?: boolean;
     }): Observable<User> {
         const payload = { _id, ...updateData };
         return this.http.post<User>(`${environment.API_END_POINT}/users/update`, payload);
+    }
+
+    requestUpdateUser(userId: string, updateData: { email: string, username?: string }): Observable<any> {
+        return this.http.post<any>(`${environment.API_END_POINT}/users/request-update`, { userId, ...updateData });
+    }
+
+    confirmUserUpdate(token: string): Observable<any> {
+        return this.http.post<any>(`${environment.API_END_POINT}/users/confirm-update`, { token });
     }
 }
