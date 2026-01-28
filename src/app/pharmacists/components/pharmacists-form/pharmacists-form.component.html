@@ -18,9 +18,9 @@
                                 <mat-form-field>
                                     <mat-label>DNI paciente</mat-label>
                                     <input type="text" cdkFocusInitial placeholder="DNI" aria-label="Number" matInput
-                                           maxlength="8" formControlName="patient_dni">
+                                        maxlength="8" formControlName="patient_dni">
                                     <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20"
-                                                 *ngIf="dniShowSpinner"></mat-spinner>
+                                        *ngIf="dniShowSpinner"></mat-spinner>
                                     <mat-hint align="end">{{ patient_dni.value.length }} / 8</mat-hint>
                                     <mat-error *ngIf="patient_dni.errors?.required && patient_dni.touched">
                                         Debe ingresar el dni del paciente
@@ -39,7 +39,7 @@
                                         <mat-option value="femenino">Femenino</mat-option>
                                     </mat-select>
                                     <mat-error
-                                               *ngIf="prescriptionForm.get('patient_sexo')?.hasError('required') && prescriptionForm.get('patient_sexo')?.touched">
+                                        *ngIf="prescriptionForm.get('patient_sexo')?.hasError('required') && prescriptionForm.get('patient_sexo')?.touched">
                                         Debe seleccionar el sexo del paciente
                                     </mat-error>
                                 </mat-form-field>
@@ -48,26 +48,26 @@
                                 <mat-form-field>
                                     <mat-label>Fecha receta</mat-label>
                                     <input matInput [matDatepicker]="picker1" [formControl]="dateFilter"
-                                           (click)="picker1.open()" readonly>
+                                        (click)="picker1.open()" readonly>
 
                                     <div matSuffix *ngIf="!dateShowSpinner">
                                         <mat-datepicker-toggle [for]="picker1"
-                                                               *ngIf="!dateFilter.value"></mat-datepicker-toggle>
+                                            *ngIf="!dateFilter.value"></mat-datepicker-toggle>
                                         <button type="button" mat-icon-button *ngIf="dateFilter.value"
-                                                (click)="cleanDateEvent()">
+                                            (click)="cleanDateEvent()">
                                             <mat-icon>close</mat-icon>
                                         </button>
                                     </div>
 
                                     <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20"
-                                                 *ngIf="dateShowSpinner"></mat-spinner>
+                                        *ngIf="dateShowSpinner"></mat-spinner>
 
                                     <mat-datepicker #picker1></mat-datepicker>
                                 </mat-form-field>
 
                                 <!-- Botón de búsqueda -->
                                 <button mat-raised-button color="primary" type="button" (click)="searchPrescriptions()"
-                                        [disabled]="!prescriptionForm.valid">
+                                    [disabled]="!prescriptionForm.valid">
                                     Buscar
                                 </button>
                             </div>
@@ -110,8 +110,9 @@
                 </mat-card>
             </div>
         </div>
+
         <div class="prescription-panel">
-            <app-prescription-list></app-prescription-list>
+            <app-prescription-list [filtersEnabled]="hasSearchedOnce"></app-prescription-list>
         </div>
     </div>
 </div>
