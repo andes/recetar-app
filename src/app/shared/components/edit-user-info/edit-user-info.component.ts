@@ -65,27 +65,47 @@ export class EditUserInfoComponent implements OnInit {
             this.isLoading = true;
             const newEmail = this.editUserForm.get('email')?.value;
 
-            this.userService.updateUser(this.currentUserId, { email: newEmail }).subscribe({
-                next: () => {
-                    this.isLoading = false;
-                    this.snackBar.open('Email actualizado exitosamente', 'Cerrar', {
-                        duration: 5000
-                    });
-                    this.updateError = null;
-                    this.router.navigate(['/']);
-                },
-                error: (error) => {
-                    this.isLoading = false;
-                    this.updateError = error.mensaje || 'Error al cargar la información del usuario';
-                    this.snackBar.open(
-                        `${this.updateError}`,
-                        'Cerrar',
-                        {
+            if (this.authService.isPharmacistsRole()) {
+                const updateData = { email: newEmail };
+
+                this.userService.requestUpdateUser(this.currentUserId, updateData).subscribe({
+                    next: () => {
+                        this.isLoading = false;
+                        this.snackBar.open('Se ha enviado un correo para confirmar los cambios', 'Cerrar', {
                             duration: 5000
-                        }
-                    );
-                }
-            });
+                        });
+                        this.updateError = null;
+                        this.router.navigate(['/']);
+                    },
+                    error: (error) => {
+                        this.isLoading = false;
+                        this.updateError = error.mensaje || 'Error al solicitar la actualización';
+                        this.snackBar.open(this.updateError, 'Cerrar', { duration: 5000 });
+                    }
+                });
+            } else {
+                this.userService.updateUser(this.currentUserId, { email: newEmail }).subscribe({
+                    next: () => {
+                        this.isLoading = false;
+                        this.snackBar.open('Email actualizado exitosamente', 'Cerrar', {
+                            duration: 5000
+                        });
+                        this.updateError = null;
+                        this.router.navigate(['/']);
+                    },
+                    error: (error) => {
+                        this.isLoading = false;
+                        this.updateError = error.mensaje || 'Error al cargar la información del usuario';
+                        this.snackBar.open(
+                            `${this.updateError}`,
+                            'Cerrar',
+                            {
+                                duration: 5000
+                            }
+                        );
+                    }
+                });
+            }
         }
     }
 
