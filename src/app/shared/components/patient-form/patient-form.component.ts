@@ -230,7 +230,9 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
     }
 
     private getPatientByDni(dniValue: string | null): void {
-        if (dniValue !== null && (dniValue.length === this.dniMinLength || dniValue.length === this.dniMaxLength)) {
+        const dni = dniValue ? Number(dniValue) : null;
+        const dniValido = dni ? (typeof (dni) === 'number') : false;
+        if (dniValido && this.dniMinLength <= dniValue.length && dniValue.length <= this.dniMaxLength) {
             this.dniShowSpinner = true;
             this.apiPatients.getPatientByDni(dniValue).subscribe(
                 res => {
