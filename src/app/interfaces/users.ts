@@ -11,8 +11,8 @@ export class User {
   createdAt?: Date;
   updatedAt?: Date;
   profesionGrado?: Array<{
-      profesion: string;
-      codigoProfesion: string;
-      numeroMatricula: string;
+    profesion: string;
+    codigoProfesion: string;
+    numeroMatricula: string;
   }>;
 }

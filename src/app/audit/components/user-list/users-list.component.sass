@@ -22,7 +22,8 @@ $panels-height-xl: 325px
             order: 3
 
     .user-panel
-        width: 65%
+        width: 95%
+        max-width: 1400px
         @media (min-width: $x-small-devices) and (max-width: $medium-devices)
             width: 100%
 
@@ -44,12 +45,88 @@ $panels-height-xl: 325px
                         max-width: 100%!important
                         margin: 10px 0!important
 
+// Header styles similar to user-create
+.card-header
+    align-items: center
+    margin-bottom: 16px
+
+    .header-avatar
+        background: linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%)
+        color: white
+        width: 56px
+        height: 56px
+        display: flex
+        align-items: center
+        justify-content: center
+        border-radius: 50%
+        
+        mat-icon
+            font-size: 28px
+            width: 28px
+            height: 28px
+    
+    .header-title
+        font-size: 24px
+        font-weight: 500
+        color: #333
+        margin: 0
+        line-height: 1.2
+    
+    .header-subtitle
+        font-size: 14px
+        color: #666
+        margin: 4px 0 0 0
+        line-height: 1.4
+    
+    .header-actions
+        position: absolute
+        top: 24px
+        right: 24px
+
+// Section titles
+.section-title
+    display: flex
+    align-items: center
+    gap: 8px
+    font-size: 18px
+    font-weight: 500
+    color: #333
+    margin: 0 0 16px 0
+    
+    mat-icon
+        color: #3f51b5
+        font-size: 20px
+        width: 20px
+        height: 20px
+
+// Filter section
+.filter-section
+    margin-bottom: 20px
+    
+    .filter-field
+        width: 100%
+        max-width: 400px
+
+// Table section
+.table-section
+    margin-top: 20px
+
+// Container with horizontal scroll
+.container
+    width: 100%
+    overflow-x: auto
+    
+    .table-container
+        min-width: 800px // Minimum width to ensure all columns are visible
+        overflow-x: auto
+
 
 
 
 .mat-table
-  overflow: auto
-  max-height: 500px
+  width: 100%
+  min-width: 800px // Ensure table has minimum width for all columns
+  table-layout: auto // Allow columns to size naturally
 
 
 .element-row
@@ -88,6 +165,48 @@ mat-card-content
 
 table
   width: 100%
+
+  // Column width specifications for better horizontal scrolling
+  .mat-column-businessName
+    min-width: 150px
+    
+  .mat-column-username
+    min-width: 120px
+    .truncate-text
+      display: inline-block
+      max-width: 120px
+      overflow: hidden
+      text-overflow: ellipsis
+      white-space: nowrap
+    
+  .mat-column-email
+    min-width: 180px
+    .truncate-text
+      display: inline-block
+      max-width: 160px
+      overflow: hidden
+      text-overflow: ellipsis
+      white-space: nowrap
+    
+  .mat-column-cuil
+    min-width: 120px
+    
+  .mat-column-enrollment
+    min-width: 100px
+    
+  .mat-column-roles
+    min-width: 180px
+    
+  .mat-column-lastLogin
+    min-width: 140px
+    
+  .mat-column-isActive
+    min-width: 64px
+    text-align: center
+    
+  .mat-column-actions
+    min-width: 96px
+    text-align: center
 
   tr.detail-row
     height: 0
@@ -171,7 +290,7 @@ table
         padding: 0px
         margin-right: 0px
   td.mat-column-action
-    width: 100px
+    width: 80px
     padding-right: 8px !important
     button
       width: auto
@@ -181,14 +300,18 @@ table
         margin-right: 0px
         color: #3e3e3e!important
 
+// Asegurar centrado en cabecera y celdas de Acciones e Estado
+th.mat-column-actions, td.mat-column-actions
+  text-align: center
 
-    .menu-collapse
+th.mat-column-isActive, td.mat-column-isActive
+  text-align: center
+
+// Centrar contenedor de botones en columna Acciones
+td.mat-column-actions .action-buttons
+  justify-content: center
+    .menu-collapse:
       display: none
-
-  .mat-icon
-    color: #3e75ff
-
-      // @media (min-width: $x-small-devices) and (max-width: $small-devices)
 
 .mat-form-field
   font-size: 14px
@@ -304,5 +427,108 @@ table
       right: 0
       &:before
         display: none
+
+// Action buttons styling
+.action-buttons
+  display: flex
+  align-items: center
+  gap: 8px
+  
+  button
+    font-size: 14px
+    
+    &.mat-raised-button
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2)
+      
+      &:hover
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3)
+        
+      mat-icon
+        margin-right: 4px
+        font-size: 18px
+
+// Table column widths for better layout
+.mat-column-businessName
+  min-width: 200px
+  
+.mat-column-email
+  min-width: 200px
+  
+.mat-column-roles
+  min-width: 180px
+  
+.mat-column-actions
+  text-align: center
+  justify: center
+
+// Edit mode styling
+.mat-cell
+  &:hover
+    .mat-icon
+      opacity: 0.7
+      
+  .mat-form-field
+    margin-bottom: 0
+
+// Specific styling for edit mode fields - only external padding
+:host ::ng-deep
+  .mat-cell
+    .mat-form-field.mat-form-field-appearance-outline
+      .mat-form-field-wrapper
+        padding-bottom: 0 !important
+        margin-bottom: 0 !important
+
+// Vertical spacing and background color for table rows in edit mode
+:host ::ng-deep
+  .mat-row.editing-row,
+  .mat-mdc-row.editing-row
+    background-color: #f8f9fa !important
+    
+  .mat-row.editing-row .mat-cell,
+  .mat-mdc-row.editing-row .mat-mdc-cell
+    padding-top: 15px !important
+    padding-bottom: 15px !important
+
+  // White background for input fields in edit mode
+  .mat-row.editing-row .mat-form-field .mat-form-field-flex,
+  .mat-mdc-row.editing-row .mat-mdc-form-field .mdc-text-field,
+  .mat-row.editing-row .mat-form-field-appearance-outline .mat-form-field-outline,
+  .mat-mdc-row.editing-row .mat-mdc-form-field .mdc-text-field--outlined .mdc-notched-outline
+    background-color: white !important
+
+  // Ensure input elements themselves have white background
+  .mat-row.editing-row input,
+  .mat-mdc-row.editing-row input,
+  .mat-row.editing-row .mat-input-element,
+  .mat-mdc-row.editing-row .mat-mdc-input-element
+    background-color: white !important
+
+// Responsive design for mobile devices
+@media (max-width: 768px)
+  .action-buttons
+    flex-direction: column
+    gap: 4px
+    
+    button
+      min-width: 80px
+      font-size: 12px
+      padding: 4px 8px
+      
+  .mat-column-actions
+    min-width: 120px
+    
+  .mat-column-businessName,
+  .mat-column-email
+    min-width: 150px
+    
+  .mat-column-roles
+    min-width: 120px
+
+// Tablet responsive design
+@media (min-width: 769px) and (max-width: 1024px)
+  .action-buttons
+    button
+      min-width: 90px
+      font-size: 13px
 
 

@@ -35,8 +35,8 @@ export class NewUserComponent implements OnInit {
     ngOnInit(): void {
         this.initNewUserForm();
         this.professionalsService.getAuthorizedProfessions().subscribe(
-            res => { 
-                this.authorizedProfessions = res; 
+            res => {
+                this.authorizedProfessions = res;
             }
         );
     }
@@ -51,7 +51,7 @@ export class NewUserComponent implements OnInit {
             businessName: [''],
             password: ['', Validators.required],
             roleType: ['professional', Validators.required],
-            profesion: ['', Validators.required], 
+            profesion: ['', Validators.required],
             fechaEgreso: ['', [Validators.required, fechaValida]],
             fechaMatVencimiento: ['', [Validators.required, fechaValida]],
             captcha: ['', Validators.required]
@@ -75,7 +75,7 @@ export class NewUserComponent implements OnInit {
                 fechaEgreso: moment(newUserForm.get('fechaEgreso').value).format('DD-MM-YYYY'),
                 fechaMatVencimiento: moment(newUserForm.get('fechaMatVencimiento').value).format('DD-MM-YYYY')
             };
-           this.userRegister(newUserForm, newUserNgForm);
+            this.userRegister(newUserForm, newUserNgForm);
         } else {
             this._snackBar.open('Los campos deben estar completos y ser válidos', 'cerrar', {
                 duration: 5000
@@ -120,5 +120,5 @@ export class NewUserComponent implements OnInit {
     cancelar() {
         this.router.navigate(['/auth/login']);
     }
-  
+
 }

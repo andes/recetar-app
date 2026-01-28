@@ -47,7 +47,7 @@ export class EditUserInfoComponent implements OnInit {
                 }
             },
             error: (error) => {
-                this.updateError = error.mensaje || 'Error al cargar la información del usuario';
+                this.updateError = error.error.mensaje || 'Error al cargar la información del usuario';
                 this.snackBar.open(this.updateError, 'Cerrar', {
                     duration: 3000,
                     panelClass: ['error-snackbar']
@@ -75,8 +75,9 @@ export class EditUserInfoComponent implements OnInit {
                     this.router.navigate(['/']);
                 },
                 error: (error) => {
+                    console.log(error);
                     this.isLoading = false;
-                    this.updateError = error.mensaje || 'Error al cargar la información del usuario';
+                    this.updateError = error.error.mensaje || 'Error al cargar la información del usuario';
                     this.snackBar.open(
                         `${this.updateError}`,
                         'Cerrar',

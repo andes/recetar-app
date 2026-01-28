@@ -1,0 +1,65 @@
+/* Estilos para centrado vertical en modo de edición */
+.mat-mdc-row.editing-row .mat-mdc-cell {
+  vertical-align: middle;
+  align-items: center;
+  display: flex;
+  min-height: 56px;
+}
+
+/* Asegurar que los inputs y selects estén centrados */
+.mat-mdc-row.editing-row .mat-mdc-cell mat-form-field {
+  width: 100%;
+}
+
+.mat-mdc-row.editing-row .mat-mdc-cell mat-form-field .mat-mdc-form-field-wrapper {
+  padding-bottom: 0;
+}
+
+/* Centrar contenido de celdas normales también */
+.mat-mdc-cell {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+}
+
+/* Estilos específicos para el selector de roles */
+.role-select {
+  width: 100%;
+  min-width: 200px;
+}
+
+/* Estilos para los chips de roles */
+.mat-chip {
+  border-radius: 16px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  margin: 2px !important;
+  border: none !important;
+}
+
+.mat-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* Estilos para las opciones del selector */
+.mat-option {
+  font-size: 14px;
+}
+
+.mat-option .mat-option-text {
+  display: flex;
+  align-items: center;
+}
+
+/* Mejorar la apariencia del botón de desactivar */
+.deactivate-button {
+  background-color: #f44336 !important;
+  color: white !important;
+  border-radius: 50%;
+}
+
+.deactivate-button:hover {
+  background-color: #d32f2f !important;
+}
