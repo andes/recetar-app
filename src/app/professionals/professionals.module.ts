@@ -26,6 +26,8 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatListModule } from '@angular/material/list';
 
 import { PharmacistsModule } from '@pharmacists/pharmacists.module';
 
@@ -40,53 +42,62 @@ import { PatientFormComponent } from '@shared/components/patient-form/patient-fo
 import { SharedModule } from '@shared/shared.module';
 import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 
+import { StockComponent } from './components/stock/stock.component';
+import { StockDialogComponent } from './components/stock/stock-dialog/stock-dialog.component';
+import { StockListComponent } from './components/stock/list/stock-list.component';
+import { StockPrinterComponent } from './components/stock/printer/stock-printer.component';
+
 @NgModule({
-    declarations: [
-        routingComponents,
-        PrescriptionsListComponent,
-        SupplyListComponent,
-        PracticesFormComponent,
-        CertificateFormComponent,
-        CertificatePracticePrinterComponent,
-        SelectorAmbitoComponent,
-        EditUserInfoComponent,
-        CertificateFormComponent,
-        SupplyListComponent,
-        PracticesFormComponent,
-        CertificatePracticePrinterComponent,
-        PatientFormComponent,
-        SelectorAmbitoComponent
-    ],
-    imports: [
-        CommonModule,
-        BrowserModule,
-        HttpClientModule,
-        ReactiveFormsModule,
-        FormsModule,
-        ProfessionalsRoutingModule,
-        FlexLayoutModule,
-        MatCardModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatButtonModule,
-        MatSelectModule,
-        MatAutocompleteModule,
-        MatMenuModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        MatIconModule,
-        MatProgressSpinnerModule,
-        MatTableModule,
-        MatChipsModule,
-        MatPaginatorModule,
-        MatSortModule,
-        MatTooltipModule,
-        MatCheckboxModule,
-        MatSnackBarModule,
-        PharmacistsModule,
-        SharedModule
-    ],
-    providers: [PatientNamePipe],
-    exports: [PatientFormComponent]
+  declarations: [
+    routingComponents,
+    PrescriptionsListComponent,
+    SupplyListComponent,
+    PracticesFormComponent,
+    CertificateFormComponent,
+    CertificatePracticePrinterComponent,
+    SelectorAmbitoComponent,
+    EditUserInfoComponent,
+    CertificateFormComponent,
+    SupplyListComponent,
+    PracticesFormComponent,
+    PatientFormComponent,
+    StockComponent,
+    StockDialogComponent,
+    StockListComponent,
+  ],
+  imports: [
+    CommonModule,
+    BrowserModule,
+    HttpClientModule,
+    ReactiveFormsModule,
+    FormsModule,
+    ProfessionalsRoutingModule,
+    FlexLayoutModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatSelectModule,
+    MatAutocompleteModule,
+    MatMenuModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatTableModule,
+    MatChipsModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatTooltipModule,
+    MatCheckboxModule,
+    MatSnackBarModule,
+    MatTabsModule,
+    MatListModule,
+    PharmacistsModule,
+    SharedModule
+  ],
+  providers: [PatientNamePipe, StockPrinterComponent],
+  exports: [PatientFormComponent]
 })
+
 export class ProfessionalsModule { }

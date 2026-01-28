@@ -1,0 +1,116 @@
+<div class="container mat-elevation-z8">
+    <div class="table-container" *ngIf="!loadingStock">
+        <table mat-table [dataSource]="dataStock" matSort multiTemplateDataRows>
+
+            <!-- Patient Column -->
+            <ng-container matColumnDef="patient">
+                <th mat-header-cell *matHeaderCellDef> Paciente </th>
+                <td mat-cell *matCellDef="let element" class='title-cell' test data-label='Paciente'> {{
+                    getPatientName(element).toUpperCase() }}
+                </td>
+            </ng-container>
+
+            <!-- DNI Column -->
+            <ng-container matColumnDef="dni">
+                <th mat-header-cell *matHeaderCellDef> DNI </th>
+                <td mat-cell *matCellDef="let element" class='title-cell' data-label='DNI'> {{
+                    getPatientDni(element) }}
+                </td>
+            </ng-container>
+
+            <!-- Date Column -->
+            <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef> Fecha </th>
+                <td mat-cell *matCellDef="let element" class='m-card-sub-title' data-label='Fecha'>
+                    {{ getDate(element) | date : 'dd/MM/yyyy' }} </td>
+            </ng-container>
+
+            <!-- Status Column -->
+            <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef> Estado </th>
+                <td mat-cell *matCellDef="let element" class='has_label_on_mobile' data-label='Estado:'> {{
+                    getStatus(element) }}
+                </td>
+            </ng-container>
+
+            <!-- Action Column -->
+            <ng-container matColumnDef="action">
+                <th mat-header-cell *matHeaderCellDef> Acción </th>
+                <td mat-cell *matCellDef="let element" (click)="$event.stopPropagation()" class="actions-cell">
+                    <button mat-menu-item [matMenuTriggerFor]="menu" class="menu-collapse">
+                        <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #menu="matMenu">
+                        <button mat-menu-item type="button" (click)="printStock(element)">
+                            <mat-icon>print</mat-icon>
+                            <span>Imprimir</span>
+                        </button>
+                    </mat-menu>
+
+                    <div fxLayout="row" class="action-buttons">
+                        <button mat-menu-item type="button" (click)="printStock(element)" matTooltip="Imprimir"
+                            matTooltipPosition="above">
+                            <mat-icon>print</mat-icon>
+                        </button>
+                    </div>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="arrow">
+                <th mat-header-cell *matHeaderCellDef> </th>
+                <td mat-cell *matCellDef="let element">
+                    <button mat-menu-item type="button" (click)="toggleExpand(element); $event.stopPropagation()">
+                        <mat-icon [@arrowDirection]="isExpanded(element) ? 'up' : 'down'">expand_more</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+
+            <!-- Expanded Content Column -->
+            <ng-container matColumnDef="expandedDetail">
+                <td mat-cell *matCellDef="let element" [attr.colspan]="stockColumns.length">
+                    <div class="element-detail" [@detailExpand]="isExpanded(element) ? 'expanded' : 'collapsed'">
+                        <div class="element-diagram">
+                            <div class="supplies-list">
+                                <ng-container *ngFor="let supp of element.supplies">
+                                    <div class="supply-description">
+                                        <span *ngIf="supp.quantityPresentation">
+                                            {{ supp.supply.name }} x {{supp.quantityPresentation}}
+                                        </span>
+                                        <span *ngIf="!supp.quantityPresentation">{{ supp.supply.name }}
+                                            x
+                                            {{supp.quantity}}</span>
+                                    </div>
+                                    <div class="element-description" *ngIf="supp.supply.type">
+                                        <span class="description-title">
+                                            Tipo:
+                                        </span>
+                                        {{ tipoInsumo[supp.supply.type] || supp.supply.type }}
+                                    </div>
+                                    <div class="element-description" *ngIf="supp.supply.specification">
+                                        <span class="description-title">
+                                            Especificación:
+                                        </span>
+                                        {{ supp.supply.specification }}
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="stockColumns; sticky: true"></tr>
+            <tr mat-row [@rowsAnimation]="" *matRowDef="let row; columns: stockColumns;" class="element-row"
+                [class.expanded-row]="isExpanded(row)" (click)="toggleExpand(row)">
+            </tr>
+            <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
+
+        </table>
+    </div>
+
+    <div fxLayout="row" fxLayoutAlign="center" class="loading-prescriptions" *ngIf="loadingStock">
+        <mat-spinner matSuffix color="primary" [diameter]="40"></mat-spinner>
+    </div>
+    <mat-paginator #stockPaginator [length]="totalStock" [pageSize]="stockPageSize" [pageIndex]="stockPageIndex"
+        [pageSizeOptions]="pageSizeOptions" (page)="onStockPageChange($event)" showFirstLastButtons></mat-paginator>
+</div>
