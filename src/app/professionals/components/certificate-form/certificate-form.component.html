@@ -43,6 +43,14 @@
                     <!-- Componente reutilizable de paciente -->
                     <app-patient-form #patientForm formControlName="patient"></app-patient-form>
 
+                    <!-- Selector de Efector -->
+                    <div fxLayout="column" fxLayoutGap="10px" class="efector-section">
+                        <app-efectores-selector 
+                            [efectorControl]="efectorControl"
+                            (efectorSelected)="onEfectorSelected($event)">
+                        </app-efectores-selector>
+                    </div>
+
                     <!-- Detalle del certificado - Fuera del grupo patient según FormBuilder -->
                     <div fxLayout="column" fxLayoutGap="10px">
                         <mat-form-field appearance="fill">
