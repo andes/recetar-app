@@ -5,21 +5,23 @@
       RecetAR
     </button>
 
-    <mat-toolbar *ngIf="isAuditRole$|async"> 
+    <mat-toolbar *ngIf="isAuditRole$|async">
       <a mat-button [routerLink]="['/audit/users']">Usuarios</a>
-      <a mat-button [routerLink]="['/audit/recetas/auditar']">Recetas_farmacias</a> 
+      <a mat-button [routerLink]="['/audit/recetas/auditar']">Recetas_farmacias</a>
     </mat-toolbar>
-    
 
-   
 
-    <p *ngIf="ambito$ | async">Ámbito {{(ambito$ | async) === 'publico' ? 'público' : (ambito$ | async)}}</p>
+
+
+    <p *ngIf="(ambito$ | async) && !(isPharmacist$ | async)">Ámbito {{(ambito$ | async) === 'publico' ? 'público' :
+      (ambito$ | async)}}</p>
     <div>
       <button mat-button [matMenuTriggerFor]="menu">{{businessName$ | async}}</button>
       <mat-menu #menu="matMenu">
         <a mat-menu-item [routerLink]="['/auth/reset-password']">Cambiar contraseña</a>
-        <a mat-menu-item [routerLink]="['/profesionales/editar-usuario']">Editar información</a>
-        <a *ngIf="isProfessionalBothRoles$|async" mat-menu-item [routerLink]="['/profesionales/seleccionador-ambito']">Cambiar ámbito</a>
+        <a mat-menu-item [routerLink]="[editProfileLink$ | async]">Editar información</a>
+        <a *ngIf="isProfessionalBothRoles$|async" mat-menu-item
+          [routerLink]="['/profesionales/seleccionador-ambito']">Cambiar ámbito</a>
         <button mat-menu-item (click)="logout()">Salir</button>
       </mat-menu>
     </div>
