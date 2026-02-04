@@ -117,8 +117,8 @@ export class UnifiedPrinterComponent {
         prescription.supplies.forEach(supply => {
             const cant = supply.quantityPresentation ? `${supply.quantity} envase(s) de ${supply.quantityPresentation} unidades` : `x ${supply.quantity}`;
             pdf.add(new Columns([new Txt('' + supply.supply.name).bold().end,
-            new Txt(' ').end,
-            new Columns([new Txt(`${cant} `).bold().end]).end]).end);
+                                 new Txt(' ').end,
+                                 new Columns([new Txt(`${cant} `).bold().end]).end]).end);
             pdf.add(new Txt('\n').end);
 
             if (supply.diagnostic) {
@@ -160,6 +160,11 @@ export class UnifiedPrinterComponent {
                 { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
                 { text: '\n', fontSize: 3 },
                 { text: `\n ${prescription.professional.businessName}`, fontSize: 14, bold: true },
+                {
+                    text: `${prescription.professional.efector ?
+                        `\n Efector: ${prescription.professional.efector.nombre} - ${prescription.professional.efector.direccion}` :
+                        ''}`, fontSize: 9, bold: true
+                },
                 {
                     text: `\n ${prescription.professional?.profesionGrado?.length ?
                         prescription.professional.profesionGrado
@@ -315,7 +320,8 @@ export class UnifiedPrinterComponent {
             { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
             { text: '\n', fontSize: 3 },
             { text: `\n ${prescription.profesional.apellido}`, fontSize: 14, bold: true },
-            { text: `\n MP ${prescription.profesional.matricula}`, bold: true, fontSize: 10 }
+            { text: `\n MP ${prescription.profesional.matricula}`, bold: true, fontSize: 10 },
+            { text: `\n ${prescription.profesional.efector ? `Efector: ${prescription.profesional.efector.nombre} - ${prescription.profesional.efector.direccion}` : ''}`, fontSize: 9, bold: true },
         ]).alignment('center').end);
 
         if (prescription.estadoActual.tipo === 'dispensada' && prescription.estadoDispensaActual.fecha) {
