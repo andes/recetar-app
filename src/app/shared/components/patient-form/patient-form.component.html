@@ -37,8 +37,8 @@
     <mat-form-field [appearance]="appearance" fxFlex="50">
       <mat-label>Sexo</mat-label>
       <mat-select formControlName="sex" required tabIndex="2">
-        <mat-option *ngFor="let sex of sex_options" [value]="sex">
-          {{ sex }}
+        <mat-option *ngFor="let option of sex_options" [value]="option.key">
+          {{ option.label }}
         </mat-option>
       </mat-select>
 

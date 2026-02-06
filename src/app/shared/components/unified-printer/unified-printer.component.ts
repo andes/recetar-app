@@ -13,6 +13,7 @@ import { PatientsService } from '@services/patients.service';
 import * as QRCode from 'qrcode';
 import { environment } from '../../../../environments/environment';
 import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
+import { PatientSexPipe } from '@shared/pipes/patient-sex.pipe';
 
 PdfMakeWrapper.setFonts(pdfFontsX);
 
@@ -24,6 +25,7 @@ export class UnifiedPrinterComponent {
     constructor(
         private datePipe: DatePipe,
         private patientNamePipe: PatientNamePipe,
+        private patientSexPipe: PatientSexPipe,
         private barcodeService: BarcodeService,
         private certificatesService: CertificatesService,
         private practicesService: PracticesService,
@@ -102,7 +104,7 @@ export class UnifiedPrinterComponent {
             autopercibido: `${prescription.patient.nombreAutopercibido || ''}`,
             dni: `${prescription.patient.dni}`,
             dob: prescription.patient.fechaNac,
-            sex: `${prescription.patient.sex}`,
+            sex: `${this.patientSexPipe.transform(prescription.patient.sex)}`,
             obraSocial: prescription.patient.obraSocial?.nombre,
             affiliateNumber: prescription.patient.obraSocial?.numeroAfiliado
         });
@@ -254,7 +256,7 @@ export class UnifiedPrinterComponent {
             lastname: `${prescription.paciente.apellido}`,
             autopercibido: `${patient.nombreAutopercibido || ''}`, dni: `${prescription.paciente.documento}`,
             dob: prescription.paciente.fechaNacimiento,
-            sex: `${prescription.paciente.sexo}`,
+            sex: `${this.patientSexPipe.transform(prescription.paciente.sexo)}`,
             obraSocial: prescription.paciente.obraSocial?.nombre,
             affiliateNumber: prescription.paciente.obraSocial?.numeroAfiliado
         });
@@ -352,7 +354,7 @@ export class UnifiedPrinterComponent {
                 autopercibido: `${certificate.patient.nombreAutopercibido || ''}`,
                 dni: `${certificate.patient.dni}`,
                 dob: certificate.patient.fechaNac,
-                sex: `${certificate.patient.sex}`,
+                sex: `${this.patientSexPipe.transform(certificate.patient.sex)}`,
                 obraSocial: certificate.patient.obraSocial?.nombre,
                 affiliateNumber: certificate.patient.obraSocial?.numeroAfiliado
             });
@@ -442,7 +444,7 @@ export class UnifiedPrinterComponent {
                 autopercibido: `${practice.patient.nombreAutopercibido || ''}`,
                 dni: `${practice.patient.dni}`,
                 dob: null,
-                sex: `${practice.patient.sex}`,
+                sex: `${this.patientSexPipe.transform(practice.patient.sex)}`,
                 obraSocial: practice.patient.obraSocial?.nombre,
                 affiliateNumber: practice.patient.obraSocial?.numeroAfiliado
             });
