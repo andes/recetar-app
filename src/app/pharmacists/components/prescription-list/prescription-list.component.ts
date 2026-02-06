@@ -139,10 +139,10 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
             dateTo: this.dateToFilter ? moment(this.dateToFilter).format('DD-MM-YYYY') : undefined
         };
 
-        // Obtener el DNI y sexo del paciente de los datos existentes o usar los últimos conocidos
-        let patientDni = '';
-        let patientSex = '';
-        if (this.dataSource.data.length > 0) {
+        // Priorizar el contexto explícito de la última búsqueda del usuario.
+        let patientDni = this.lastPatientDni;
+        let patientSex = this.lastPatientSex;
+        if (!patientDni && this.dataSource.data.length > 0) {
             // Intentar obtener el DNI y sexo del primer elemento
             const firstElement = this.dataSource.data[0];
             patientDni = firstElement.patient?.dni || firstElement.paciente?.documento || '';
@@ -154,12 +154,6 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
             if (patientSex) {
                 this.lastPatientSex = patientSex;
             }
-        }
-
-        // Si no hay DNI en los datos actuales, usar el último DNI y sexo conocidos
-        if (!patientDni && this.lastPatientDni) {
-            patientDni = this.lastPatientDni;
-            patientSex = this.lastPatientSex;
         }
 
         // Si no hay DNI disponible, no hacer ninguna búsqueda
