@@ -1,0 +1,22 @@
+<ng-container [formGroup]="parentForm">
+    <mat-form-field appearance="fill" class="w-100">
+        <mat-label>Medicamento</mat-label>
+        <input type="text" placeholder="Medicamento" matInput formControlName="name" [matAutocomplete]="supplyref">
+        <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20" *ngIf="loading"></mat-spinner>
+        <mat-autocomplete #supplyref="matAutocomplete" (optionSelected)="onSupplySelected($event)">
+            <mat-option *ngFor="let sup of filteredSupplies" [value]="sup">
+                <div class="item-title">{{sup.display.name | titlecase}}</div>
+                <div class="item-subtitle" *ngIf="sup.display.brand">
+                    Marca sugerida: {{sup.display.brand | titlecase}}
+                </div>
+            </mat-option>
+        </mat-autocomplete>
+
+        <mat-error *ngIf="parentForm.get('name').hasError('required')">
+            Debe seleccionar un insumo
+        </mat-error>
+        <mat-error *ngIf="parentForm.get('name').hasError('invalid')">
+            {{ parentForm.getError('invalid') }}
+        </mat-error>
+    </mat-form-field>
+</ng-container>

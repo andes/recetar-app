@@ -12,10 +12,10 @@ import { InteractionService } from '@professionals/interaction.service';
 import { PatientsService } from '@root/app/services/patients.service';
 import { CertificatesService } from '@services/certificates.service';
 import { PrescriptionsService } from '@services/prescriptions.service';
-import { SnomedSuppliesService } from '@services/snomedSupplies.service';
+
 import { PatientFormComponent } from '@shared/components/patient-form/patient-form.component';
-import { of, Subject, Subscription } from 'rxjs';
-import { catchError, debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
+import { Subject, Subscription } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
     selector: 'app-professional-form',
@@ -26,7 +26,7 @@ import { catchError, debounceTime, distinctUntilChanged, filter, switchMap, take
         stepLink
     ]
 })
-export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewInit {
+export class ProfessionalFormComponent implements OnInit, OnDestroy {
     // Suscripciones
     private subscriptions: Subscription = new Subscription();
 
@@ -43,7 +43,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     private destroy$ = new Subject<void>();
     professionalForm: FormGroup;
 
-    filteredSupplies = [];
+
     request;
     storedSupplies = [];
     today = new Date();
@@ -54,7 +54,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     minDate = new Date();
     maxDate = new Date(new Date().setMonth(new Date().getMonth() + 1));
     isSubmit = false;
-    supplySpinner: { show: boolean }[] = [{ show: false }, { show: false }];
+
     myPrescriptions: Prescriptions[] = [];
     isEditCertificate = false;
     isEdit = false;
@@ -74,7 +74,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
 
     constructor(
         // private suppliesService: SuppliesService,
-        private snomedSuppliesService: SnomedSuppliesService,
+
         private fBuilder: FormBuilder,
         private apiPatients: PatientsService,
         private apiPrescriptions: PrescriptionsService, // privado
@@ -144,12 +144,6 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         }
     }
 
-    ngAfterViewInit() {
-        // Implementation not needed for this case
-    }
-
-    // Método removido - funcionalidad manejada por patient-form component
-
     initProfessionalForm() {
         this.today = new Date((new Date()));
         this.minDate = new Date();
@@ -188,12 +182,6 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         }
         quantity.updateValueAndValidity();
     }
-
-    // Método removido - funcionalidad manejada por patient-form component
-
-    // Método removido - funcionalidad manejada por patient-form component
-
-    // Método removido - funcionalidad manejada por patient-form component
 
     onSubmitProfessionalForm(professionalNgForm: FormGroupDirective): void {
         if (this.professionalForm.valid) {
@@ -268,33 +256,6 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         return this.professionalForm.get('supplies') as FormArray;
     }
 
-    // Getters removidos - funcionalidad manejada por patient-form component
-
-    // Método removido - funcionalidad manejada por patient-form component
-
-    displayFn(supply): string {
-        return supply ? supply : '';
-    }
-
-    onSupplySelected(supply, index: number) {
-        const control = this.suppliesForm.at(index); // Obtiene el FormGroup en la posición del array
-        const supplyControl = control.get('supply');
-
-        // Actualiza el valor del 'supply' con el 'term' en el 'name'
-        supplyControl.get('name').setValue(supply.term); // Actualiza solo el 'term' en 'name'
-
-        // También actualizamos el 'snomedConcept' completo con todos los campos
-        supplyControl.setValue({
-            name: supply.term, // Solo el 'term' va en 'name'
-            snomedConcept: {
-                term: supply.term,
-                fsn: supply.fsn,
-                conceptId: supply.conceptId,
-                semanticTag: supply.semanticTag
-            }
-        });
-    }
-
     addSupply() {
         const supplies = this.fBuilder.group({
             supply: this.fBuilder.group({
@@ -308,6 +269,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
                         conceptId: [''],
                         semanticTag: ['']
                     }),
+                brand: [null]
             }),
             quantity: ['', [
                 Validators.required,
@@ -333,30 +295,10 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         triplicateDataGroup.get('numero')?.disable();
 
         this.suppliesForm.push(supplies);
-        this.supplySpinner.push({ show: false });
-        this.subscribeToSupplyChanges(supplies, this.suppliesForm.length - 1);
+
+
         this.subscribeToTriplicateChanges(supplies, this.suppliesForm.length - 1);
         this.subscribeToDuplicateChanges(supplies, this.suppliesForm.length - 1);
-    }
-
-    subscribeToSupplyChanges(control: FormGroup, index: number) {
-        control.get('supply.name').valueChanges.pipe(
-            debounceTime(300),
-            distinctUntilChanged(),
-            filter((supply: string) => typeof supply === 'string' && supply.length > 3),
-            switchMap((supply: string) => {
-                this.supplySpinner[index] = { show: true };
-                return this.snomedSuppliesService.get(supply).pipe(
-                    catchError(() => {
-                        this.supplySpinner[index] = { show: false };
-                        return of([]);
-                    })
-                );
-            })
-        ).subscribe((res) => {
-            this.supplySpinner[index] = { show: false };
-            this.filteredSupplies = [...res];
-        });
     }
 
     subscribeToTriplicateChanges(control: FormGroup, index: number) {
@@ -407,7 +349,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
 
     deleteSupply(index: number) {
         this.suppliesForm.removeAt(index);
-        this.supplySpinner.splice(index, 1);
+
     }
 
     // set form with prescriptions values and disabled npt editable fields

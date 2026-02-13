@@ -38,8 +38,8 @@
                                         <mat-form-field appearance="fill" fxFlex="100">
                                             <mat-label>Fecha receta</mat-label>
                                             <input matInput [matDatepicker]="picker1" [formControl]="date"
-                                                [min]="minDate" [max]="maxDate"
-                                                autocomplete="off" required tabIndex="-1" readonly="true">
+                                                [min]="minDate" [max]="maxDate" autocomplete="off" required
+                                                tabIndex="-1" readonly="true">
                                             <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
                                             <mat-datepicker [startAt]="today" #picker1></mat-datepicker>
 
@@ -53,8 +53,8 @@
                                         </div>
                                     </div>
 
-                                    <app-patient-form #patientForm [showObraSocial]="true" [appearance]="'fill'" [layout]="'row'"
-                                                      formControlName="patient">
+                                    <app-patient-form #patientForm [showObraSocial]="true" [appearance]="'fill'"
+                                        [layout]="'row'" formControlName="patient">
                                     </app-patient-form>
                                 </div>
                                 <div formArrayName="supplies" class="nested-supplies">
@@ -74,28 +74,8 @@
                                                 </button>
                                             </div>
                                             <div fxLayout="row" fxLayoutGap="10px">
-                                                <mat-form-field appearance="fill">
-                                                    <mat-label>Medicamento</mat-label>
-
-                                                    <input type="text" [tabIndex]="4 + i" placeholder="Medicamento"
-                                                        matInput [formControl]="control.get('supply.name')" required
-                                                        [matAutocomplete]="supplyref">
-                                                    <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20"
-                                                        *ngIf="supplySpinner[i].show"></mat-spinner>
-                                                    <mat-autocomplete #supplyref="matAutocomplete"
-                                                        (optionSelected)="onSupplySelected($event.option.value, i)">
-                                                        <mat-option *ngFor="let sup of filteredSupplies" [value]="sup">
-                                                            {{sup.term}}
-                                                        </mat-option>
-                                                    </mat-autocomplete>
-
-                                                    <mat-error *ngIf="control.get('supply.name').hasError('required')">
-                                                        Debe seleccionar un insumo
-                                                    </mat-error>
-                                                    <mat-error *ngIf="control.get('supply.name').hasError('invalid')">
-                                                        {{ control.get('supply').getError('invalid') }}
-                                                    </mat-error>
-                                                </mat-form-field>
+                                                <app-supply-search fxFlex="100"
+                                                    [parentForm]="control.get('supply')"></app-supply-search>
 
                                             </div>
 
@@ -148,17 +128,17 @@
                                                     <mat-form-field appearance="fill" fxFlex="50%">
                                                         <mat-label>Serie</mat-label>
                                                         <input type="text" matInput formControlName="serie"
-                                                               maxlength="1" placeholder="Ingrese una letra" required>
+                                                            maxlength="1" placeholder="Ingrese una letra" required>
                                                     </mat-form-field>
                                                     <mat-form-field appearance="fill" fxFlex="50%">
                                                         <mat-label>Número</mat-label>
                                                         <input type="number" matInput formControlName="numero"
-                                                               placeholder="Ingrese un número" required>
+                                                            placeholder="Ingrese un número" required>
                                                     </mat-form-field>
                                                 </div>
                                             </div>
                                             <span *ngIf="control.get('triplicate')?.value"
-                                                  style="position: relative; font-style: italic; bottom: 15px;">
+                                                style="position: relative; font-style: italic; bottom: 15px;">
                                                 Recuerde que sigue
                                                 siendo
                                                 obligatoria la

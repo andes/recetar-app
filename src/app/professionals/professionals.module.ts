@@ -36,6 +36,7 @@ import { PracticesFormComponent } from './components/practices-form/practices-fo
 import { CertificatePracticePrinterComponent } from './components/certificate-practice-printer/certificate-practice-printer.component';
 import { SelectorAmbitoComponent } from './components/selector-ambito/selector-ambito.component';
 import { EditUserInfoComponent } from './components/edit-user-info/edit-user-info.component';
+import { SupplySearchComponent } from './components/supply-search/supply-search.component';
 import { PatientFormComponent } from '@shared/components/patient-form/patient-form.component';
 import { SharedModule } from '@shared/shared.module';
 import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
@@ -55,7 +56,8 @@ import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
         PracticesFormComponent,
         CertificatePracticePrinterComponent,
         PatientFormComponent,
-        SelectorAmbitoComponent
+        SelectorAmbitoComponent,
+        SupplySearchComponent
     ],
     imports: [
         CommonModule,
