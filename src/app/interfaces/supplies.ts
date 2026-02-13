@@ -5,4 +5,5 @@ export default interface Supplies {
   quantity: string;
   _id: string;
   name: string;
+  brand?: string;
 }
