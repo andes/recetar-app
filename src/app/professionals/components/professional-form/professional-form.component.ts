@@ -12,72 +12,11 @@ import { InteractionService } from '@professionals/interaction.service';
 import { PatientsService } from '@root/app/services/patients.service';
 import { CertificatesService } from '@services/certificates.service';
 import { PrescriptionsService } from '@services/prescriptions.service';
-import { SnomedSuppliesService } from '@services/snomedSupplies.service';
+
 import { PatientFormComponent } from '@shared/components/patient-form/patient-form.component';
 import { OrganizacionFormSessionService } from '@professionals/services/organizacion-form-session.service';
-import { of, Subject, Subscription, Observable } from 'rxjs';
-import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
-
-// Validador personalizado para fechas
-function validDateValidator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } | null => {
-        if (!control.value) {
-            return null; // Si no hay valor, no validamos (required se encarga)
-        }
-
-        const date = new Date(control.value);
-        const isValidDate = date instanceof Date && !isNaN(date.getTime());
-
-        if (!isValidDate) {
-            return { 'invalidDate': { value: control.value } };
-        }
-
-        // Validar que la fecha no sea futura para fecha de nacimiento
-        const today = new Date();
-        if (date > today) {
-            return { 'futureDate': { value: control.value } };
-        }
-
-        // Validar que la fecha sea razonable (no muy antigua)
-        const minDate = new Date('1900-01-01');
-        if (date < minDate) {
-            return { 'tooOldDate': { value: control.value } };
-        }
-
-        return null;
-    };
-}
-
-function medicationSelectedValidator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } | null => {
-        if (!control.value) {
-            return null;
-        }
-
-        const supplyGroup = control.parent;
-        if (!supplyGroup) {
-            return null;
-        }
-
-        const snomedConcept = supplyGroup.get('snomedConcept');
-        if (!snomedConcept || !snomedConcept.value || !snomedConcept.value.conceptId) {
-            return { 'medicationNotSelected': { value: control.value } };
-        }
-
-        return null;
-    };
-}
-
-function noWhitespaceValidator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } | null => {
-        if (!control.value) {
-            return null;
-        }
-
-        const isWhitespace = (control.value || '').trim().length === 0;
-        return isWhitespace ? { 'whitespace': { value: control.value } } : null;
-    };
-}
+import { Subject, Subscription, Observable, of } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 @Component({
     selector: 'app-professional-form',
@@ -88,12 +27,10 @@ function noWhitespaceValidator(): ValidatorFn {
         stepLink
     ]
 })
-
-export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewInit {
+export class ProfessionalFormComponent implements OnInit, OnDestroy {
     obraSocialControl = new FormControl('');
     filteredObrasSociales: Observable<any[]>;
     organizacionControl = new FormControl('');
-
     // Suscripciones
     private subscriptions: Subscription = new Subscription();
 
@@ -124,7 +61,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     private destroy$ = new Subject<void>();
     professionalForm: FormGroup;
 
-    filteredSupplies = [];
+
     request;
     storedSupplies = [];
     today = new Date();
@@ -135,7 +72,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     minDate = new Date();
     maxDate = new Date(new Date().setMonth(new Date().getMonth() + 1));
     isSubmit = false;
-    supplySpinner: { show: boolean }[] = [{ show: false }, { show: false }];
+
     myPrescriptions: Prescriptions[] = [];
     isEditCertificate = false;
     isEdit = false;
@@ -155,7 +92,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
 
     constructor(
         // private suppliesService: SuppliesService,
-        private snomedSuppliesService: SnomedSuppliesService,
+
         private fBuilder: FormBuilder,
         private apiPatients: PatientsService,
         private apiPrescriptions: PrescriptionsService, // privado
@@ -228,12 +165,6 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         }
     }
 
-    ngAfterViewInit() {
-        // Implementation not needed for this case
-    }
-
-    // Método removido - funcionalidad manejada por patient-form component
-
     initProfessionalForm() {
         this.today = new Date((new Date()));
         this.minDate = new Date();
@@ -274,12 +205,6 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         }
         quantity.updateValueAndValidity();
     }
-
-    // Método removido - funcionalidad manejada por patient-form component
-
-    // Método removido - funcionalidad manejada por patient-form component
-
-    // Método removido - funcionalidad manejada por patient-form component
 
     onSubmitProfessionalForm(professionalNgForm: FormGroupDirective): void {
         if (this.professionalForm.valid) {
@@ -377,33 +302,6 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         return this.professionalForm.get('supplies') as FormArray;
     }
 
-    // Getters removidos - funcionalidad manejada por patient-form component
-
-    // Método removido - funcionalidad manejada por patient-form component
-
-    displayFn(supply): string {
-        return supply ? supply : '';
-    }
-
-    onSupplySelected(supply, index: number) {
-        const control = this.suppliesForm.at(index); // Obtiene el FormGroup en la posición del array
-        const supplyControl = control.get('supply');
-
-        // Actualiza el valor del 'supply' con el 'term' en el 'name'
-        supplyControl.get('name').setValue(supply.term); // Actualiza solo el 'term' en 'name'
-
-        // También actualizamos el 'snomedConcept' completo con todos los campos
-        supplyControl.setValue({
-            name: supply.term, // Solo el 'term' va en 'name'
-            snomedConcept: {
-                term: supply.term,
-                fsn: supply.fsn,
-                conceptId: supply.conceptId,
-                semanticTag: supply.semanticTag
-            }
-        });
-        supplyControl.get('name').updateValueAndValidity();
-    }
 
     addSupply() {
         const supplies = this.fBuilder.group({
@@ -419,6 +317,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
                         conceptId: [''],
                         semanticTag: ['']
                     }),
+                brand: [null]
             }),
             quantity: ['', [
                 Validators.required,
@@ -443,40 +342,10 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         triplicateDataGroup.get('numero')?.disable();
 
         this.suppliesForm.push(supplies);
-        this.supplySpinner.push({ show: false });
-        this.subscribeToSupplyChanges(supplies, this.suppliesForm.length - 1);
+
+
         this.subscribeToTriplicateChanges(supplies, this.suppliesForm.length - 1);
         this.subscribeToDuplicateChanges(supplies, this.suppliesForm.length - 1);
-    }
-
-    subscribeToSupplyChanges(control: FormGroup, index: number) {
-        control.get('supply.name').valueChanges.pipe(
-            debounceTime(300),
-            distinctUntilChanged()
-        ).subscribe((supply: string) => {
-            if (typeof supply === 'string') {
-                const snomedConcept = control.get('supply.snomedConcept');
-                const currentConceptId = snomedConcept?.get('conceptId')?.value;
-
-                if (currentConceptId && supply !== snomedConcept?.get('term')?.value) {
-                    snomedConcept.reset();
-                    control.get('supply.name').updateValueAndValidity();
-                }
-
-                if (supply.length > 3) {
-                    this.supplySpinner[index] = { show: true };
-                    this.snomedSuppliesService.get(supply).pipe(
-                        catchError(() => {
-                            this.supplySpinner[index] = { show: false };
-                            return of([]);
-                        })
-                    ).subscribe((res) => {
-                        this.supplySpinner[index] = { show: false };
-                        this.filteredSupplies = [...res];
-                    });
-                }
-            }
-        });
     }
 
     medicationSelectedValidator(): ValidatorFn {
@@ -509,7 +378,6 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
             return isWhitespace ? { 'whitespace': { value: control.value } } : null;
         };
     }
-
     subscribeToTriplicateChanges(control: FormGroup, index: number) {
         const triplicateControl = control.get('triplicate');
         const triplicateDataGroup = control.get('triplicateData') as FormGroup;
@@ -558,7 +426,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
 
     deleteSupply(index: number) {
         this.suppliesForm.removeAt(index);
-        this.supplySpinner.splice(index, 1);
+
     }
 
     // set form with prescriptions values and disabled npt editable fields
