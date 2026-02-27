@@ -1,0 +1,21 @@
+<div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center">
+    <mat-form-field appearance="fill" fxFlex="80">
+        <mat-label>Organización</mat-label>
+        <mat-select [formControl]="organizacionControl" [disabled]="disabled" [compareWith]="compareOrganizaciones">
+            <mat-option *ngFor="let organizacion of organizaciones" [value]="organizacion">
+                {{ organizacion.nombre }}<span *ngIf="organizacion?.direccion"> - {{ organizacion.direccion }}</span>
+            </mat-option>
+        </mat-select>
+        <mat-error *ngIf="organizacionControl.hasError('required')">
+            Debe seleccionar una organización
+        </mat-error>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" type="button" (click)="openOrganizacionDialog()"
+            [disabled]="disabled || isAddingOrganizacion">
+        <mat-spinner *ngIf="isAddingOrganizacion" diameter="20" color="primary"></mat-spinner>
+        <mat-icon *ngIf="!isAddingOrganizacion">add</mat-icon>
+        <span *ngIf="!isAddingOrganizacion">Agregar Organización</span>
+        <span *ngIf="isAddingOrganizacion">Guardando...</span>
+    </button>
+</div>

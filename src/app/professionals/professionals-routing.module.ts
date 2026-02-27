@@ -10,7 +10,7 @@ import { ProfessionalDialogComponent } from '@professionals/components/professio
 import { SupplyDialogComponent } from './components/supply-dialog/supply-dialog.component';
 import { SelectorAmbitoComponent } from './components/selector-ambito/selector-ambito.component';
 import { EditUserInfoComponent } from './components/edit-user-info/edit-user-info.component';
-import { PendingEfectorChangesGuard } from './guards/pending-efector-changes.guard';
+import { PendingOrganizacionChangesGuard } from './guards/pending-organizacion-changes.guard';
 
 const routes: Routes = [
     {
@@ -21,7 +21,7 @@ const routes: Routes = [
             {
                 path: 'recetas/nueva',
                 component: ProfessionalFormComponent,
-                canDeactivate: [PendingEfectorChangesGuard]
+                canDeactivate: [PendingOrganizacionChangesGuard]
             },
             {
                 path: 'productos',

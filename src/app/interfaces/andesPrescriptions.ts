@@ -31,6 +31,7 @@ export default class AndesPrescriptions {
     organizacion: {
         id: string;
         nombre: string;
+        direccion: string;// ver si es necesario
     };
     profesional: {
         id: string;
@@ -40,7 +41,6 @@ export default class AndesPrescriptions {
         profesion: string;
         especialidad: string;
         matricula: number;
-        efector?: { _id: string; nombre: string; direccion: string };
     };
     diagnostico: {
         descripcion?: string;
@@ -128,7 +128,7 @@ export default class AndesPrescriptions {
         id: string;
     };
     paciente: {
-        carpetaEfectores: [];
+        carpetaOrganizaciones: [];
         id: string;
         nombre: string;
         apellido: string;

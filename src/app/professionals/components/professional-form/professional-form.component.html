@@ -56,8 +56,8 @@
                                     <app-patient-form #patientForm [showObraSocial]="true" [appearance]="'fill'" [layout]="'row'"
                                                       formControlName="patient">
                                     </app-patient-form>
-                                    <app-efectores-selector *ngIf="isAmbitoPublico()" [efectorControl]="efectorControl">
-                                    </app-efectores-selector>
+                                    <app-organizaciones-selector *ngIf="isAmbitoPublico()" [organizacionControl]="organizacionControl">
+                                    </app-organizaciones-selector>
                                 </div>
                                 <div formArrayName="supplies" class="nested-supplies">
                                     <div class="custom-error-container">
