@@ -14,7 +14,7 @@ import { CertificatesService } from '@services/certificates.service';
 import { PrescriptionsService } from '@services/prescriptions.service';
 import { SnomedSuppliesService } from '@services/snomedSupplies.service';
 import { PatientFormComponent } from '@shared/components/patient-form/patient-form.component';
-import { EfectorFormSessionService } from '@professionals/services/efector-form-session.service';
+import { OrganizacionFormSessionService } from '@professionals/services/organizacion-form-session.service';
 import { of, Subject, Subscription, Observable } from 'rxjs';
 import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
 
@@ -92,7 +92,7 @@ function noWhitespaceValidator(): ValidatorFn {
 export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewInit {
     obraSocialControl = new FormControl('');
     filteredObrasSociales: Observable<any[]>;
-    efectorControl = new FormControl('');
+    organizacionControl = new FormControl('');
 
     // Suscripciones
     private subscriptions: Subscription = new Subscription();
@@ -164,7 +164,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         private _interactionService: InteractionService,
         private certificateService: CertificatesService,
         private ambitoService: AmbitoService,
-        private efectorSessionService: EfectorFormSessionService
+        private organizacionSessionService: OrganizacionFormSessionService
     ) { }
 
     ngOnInit(): void {
@@ -174,7 +174,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
             // Actualizar el formulario si ya está inicializado
             if (this.professionalForm) {
                 this.professionalForm.patchValue({ ambito: this.ambito });
-                this.configureEfectorByAmbito();
+                this.configureOrganizacionByAmbito();
             }
         });
         this.subscriptions.add(ambitoSubscription);
@@ -219,7 +219,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     }
 
     ngOnDestroy(): void {
-        this.rollbackPendingEfectoresOnLeave();
+        this.rollbackPendingOrganizacionesOnLeave();
         this.destroy$.next();
         this.destroy$.complete();
         this.subscriptions.unsubscribe();
@@ -249,7 +249,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         this.professionalForm = this.fBuilder.group({
             _id: [''],
             professional: [this.professionalData],
-            efector: this.efectorControl,
+            organizacion: this.organizacionControl,
             patient: [null, Validators.required],
             date: [this.today, [
                 Validators.required
@@ -258,7 +258,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
             supplies: this.fBuilder.array([]),
             ambito: [this.ambito]
         });
-        this.configureEfectorByAmbito();
+        this.configureOrganizacionByAmbito();
         this.addSupply();
     }
 
@@ -284,9 +284,9 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     onSubmitProfessionalForm(professionalNgForm: FormGroupDirective): void {
         if (this.professionalForm.valid) {
             const newPrescription = { ...this.professionalForm.value };
-            const shouldPersistEfector = this.isAmbitoPublico();
-            if (!shouldPersistEfector) {
-                delete newPrescription.efector;
+            const shouldPersistOrganizacion = this.isAmbitoPublico();
+            if (!shouldPersistOrganizacion) {
+                delete newPrescription.organizacion;
             }
 
             this.isSubmit = true;
@@ -294,8 +294,8 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
                 this.apiPrescriptions.newPrescription(newPrescription).subscribe(
                     success => {
                         if (success) {
-                            if (shouldPersistEfector) {
-                                this.efectorSessionService.commitChanges().subscribe(
+                            if (shouldPersistOrganizacion) {
+                                this.organizacionSessionService.commitChanges().subscribe(
                                     () => this.formReset(professionalNgForm),
                                     () => this.formReset(professionalNgForm)
                                 );
@@ -313,8 +313,8 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
                 this.apiPrescriptions.editPrescription(newPrescription).subscribe(
                     success => {
                         if (success) {
-                            if (shouldPersistEfector) {
-                                this.efectorSessionService.commitChanges().subscribe(
+                            if (shouldPersistOrganizacion) {
+                                this.organizacionSessionService.commitChanges().subscribe(
                                     () => this.formReset(professionalNgForm),
                                     () => this.formReset(professionalNgForm)
                                 );
@@ -583,29 +583,29 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
 
     // reset the form as intial values
     clearForm(professionalNgForm: FormGroupDirective, shouldRollback = true) {
-        const efector = this.efectorControl.value;
+        const organizacion = this.organizacionControl.value;
         professionalNgForm.resetForm();
         const currentAmbito = this.ambitoService.getAmbito();
 
-        const applyReset = (efectorValue: any) => {
+        const applyReset = (organizacionValue: any) => {
             this.professionalForm.reset({
                 _id: '',
                 professional: this.professionalData,
-                efector: this.isAmbitoPublico() ? efectorValue : null,
+                organizacion: this.isAmbitoPublico() ? organizacionValue : null,
                 date: this.today,
                 patient: null,
                 ambito: currentAmbito
             });
-            this.configureEfectorByAmbito();
+            this.configureOrganizacionByAmbito();
         };
 
         if (shouldRollback) {
-            this.efectorSessionService.rollbackChanges().subscribe(
-                () => applyReset(this.efectorSessionService.getPreferredEfector()),
-                () => applyReset(efector)
+            this.organizacionSessionService.rollbackChanges().subscribe(
+                () => applyReset(this.organizacionSessionService.getPreferredOrganizacion()),
+                () => applyReset(organizacion)
             );
         } else {
-            applyReset(efector);
+            applyReset(organizacion);
         }
 
         // Resetear también el componente patient-form
@@ -615,12 +615,12 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         // Validaciones ahora manejadas por patient-form component
     }
 
-    rollbackPendingEfectoresOnLeave(): void {
-        if (!this.efectorSessionService.hasPendingChanges()) {
+    rollbackPendingOrganizacionesOnLeave(): void {
+        if (!this.organizacionSessionService.hasPendingChanges()) {
             return;
         }
 
-        const rollbackSub = this.efectorSessionService.rollbackChanges().subscribe();
+        const rollbackSub = this.organizacionSessionService.rollbackChanges().subscribe();
         this.subscriptions.add(rollbackSub);
     }
 
@@ -666,27 +666,27 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         return this.ambito === 'publico';
     }
 
-    private configureEfectorByAmbito(): void {
-        if (!this.efectorControl) {
+    private configureOrganizacionByAmbito(): void {
+        if (!this.organizacionControl) {
             return;
         }
 
         if (this.isAmbitoPublico()) {
-            this.efectorControl.enable({ emitEvent: false });
-            this.efectorControl.setValidators([Validators.required]);
-            this.efectorControl.updateValueAndValidity({ emitEvent: false });
+            this.organizacionControl.enable({ emitEvent: false });
+            this.organizacionControl.setValidators([Validators.required]);
+            this.organizacionControl.updateValueAndValidity({ emitEvent: false });
             return;
         }
 
-        if (this.efectorSessionService.hasPendingChanges()) {
-            const rollbackSub = this.efectorSessionService.rollbackChanges().subscribe();
+        if (this.organizacionSessionService.hasPendingChanges()) {
+            const rollbackSub = this.organizacionSessionService.rollbackChanges().subscribe();
             this.subscriptions.add(rollbackSub);
         }
 
-        this.efectorControl.setValue(null, { emitEvent: false });
-        this.efectorControl.clearValidators();
-        this.efectorControl.disable({ emitEvent: false });
-        this.efectorControl.updateValueAndValidity({ emitEvent: false });
+        this.organizacionControl.setValue(null, { emitEvent: false });
+        this.organizacionControl.clearValidators();
+        this.organizacionControl.disable({ emitEvent: false });
+        this.organizacionControl.updateValueAndValidity({ emitEvent: false });
     }
 
     private markFormGroupTouched(formGroup: FormGroup): void {

@@ -77,3 +77,9 @@ export interface Organizacion {
     trasladosEspeciales: any[];
     id: string;
 }
+
+export interface SubOrganizacion {
+    _id?: string;
+    nombre: string;
+    direccion: string;
+}

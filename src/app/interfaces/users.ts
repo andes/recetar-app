@@ -1,4 +1,4 @@
-import { Direccion } from './organizaciones';
+import { SubOrganizacion } from './organizaciones';
 export class User {
     _id: string;
     enrollment: string;
@@ -16,5 +16,5 @@ export class User {
         codigoProfesion: string;
         numeroMatricula: string;
     }>;
-    efectores?: Array<{ _id: string; nombre: string; direccion: Direccion }>;
+    organizaciones?: SubOrganizacion[];
 }

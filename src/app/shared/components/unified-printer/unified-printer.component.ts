@@ -116,9 +116,10 @@ export class UnifiedPrinterComponent {
 
         prescription.supplies.forEach(supply => {
             const cant = supply.quantityPresentation ? `${supply.quantity} envase(s) de ${supply.quantityPresentation} unidades` : `x ${supply.quantity}`;
-            pdf.add(new Columns([new Txt('' + supply.supply.name).bold().end,
-                                 new Txt(' ').end,
-                                 new Columns([new Txt(`${cant} `).bold().end]).end]).end);
+            pdf.add(new Columns([
+                new Txt('' + supply.supply.name).bold().end,
+                new Txt(' ').end,
+                new Columns([new Txt(`${cant} `).bold().end]).end]).end);
             pdf.add(new Txt('\n').end);
 
             if (supply.diagnostic) {
@@ -158,11 +159,10 @@ export class UnifiedPrinterComponent {
             // Firma del profesional debajo cuando hay prescriptionId
             pdf.add(new Txt([
                 { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
-                { text: '\n', fontSize: 3 },
                 { text: `\n ${prescription.professional.businessName}`, fontSize: 14, bold: true },
                 {
-                    text: `${prescription.professional.efector ?
-                        `\n Efector: ${prescription.professional.efector.nombre} - ${this.getEfectorDireccion(prescription.professional.efector.direccion)}` :
+                    text: `${prescription.organizacion ?
+                        `\n Organizacion: ${prescription.organizacion.nombre} - ${this.getOrganizacionDireccion(prescription.organizacion.direccion)}` :
                         ''}`, fontSize: 9, bold: true
                 },
                 {
@@ -170,8 +170,8 @@ export class UnifiedPrinterComponent {
                         prescription.professional.profesionGrado
                             .map(g => `${g.profesion} MP ${g.numeroMatricula}`)
                             .join('\n')
-                        : (prescription.professional?.enrollment ? `MP ${prescription.professional.enrollment}\n` : '')
-                        }`, bold: true, fontSize: 9
+                        : (prescription.professional?.enrollment ? `MP ${prescription.professional.enrollment}\n` : '')}`,
+                    bold: true, fontSize: 9
                 }
             ]).alignment('center').margin([0, 25, 0, 0]).end);
         } else {
@@ -318,10 +318,9 @@ export class UnifiedPrinterComponent {
 
         pdf.add(new Txt([
             { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
-            { text: '\n', fontSize: 3 },
             { text: `\n ${prescription.profesional.apellido}`, fontSize: 14, bold: true },
             { text: `\n MP ${prescription.profesional.matricula}`, bold: true, fontSize: 10 },
-            { text: `\n ${prescription.profesional.efector ? `Efector: ${prescription.profesional.efector.nombre} - ${this.getEfectorDireccion(prescription.profesional.efector.direccion)}` : ''}`, fontSize: 9, bold: true },
+            { text: `\n ${prescription.organizacion ? `Organización: ${prescription.organizacion.nombre} - ${this.getOrganizacionDireccion(prescription.organizacion.direccion)}` : ''}`, fontSize: 9, bold: true },
         ]).alignment('center').end);
 
         if (prescription.estadoActual.tipo === 'dispensada' && prescription.estadoDispensaActual.fecha) {
@@ -409,7 +408,7 @@ export class UnifiedPrinterComponent {
         });
     }
 
-    private getEfectorDireccion(direccion: any): string {
+    private getOrganizacionDireccion(direccion: any): string {
         if (!direccion) {
             return '';
         }
@@ -512,7 +511,6 @@ export class UnifiedPrinterComponent {
                 stack: [
                     new Txt([
                         { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
-                        { text: '\n', fontSize: 3 },
                         { text: `\n ${professional.businessName}`, fontSize: 14, bold: true },
                         {
                             text: `\n ${professional?.profesionGrado?.length ?
