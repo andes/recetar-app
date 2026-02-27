@@ -8,12 +8,12 @@ import { Observable } from 'rxjs';
 @Injectable({
     providedIn: 'root'
 })
-export class EfectoresAndesService {
+export class OrganizacionesAndesService {
 
 
     constructor(private http: HttpClient) { }
 
     get(nombre: string): Observable<Organizacion[]> {
-        return this.http.get<Organizacion[]>(`${environment.API_END_POINT}/efectores-andes?nombre=${nombre}`);
+        return this.http.get<Organizacion[]>(`${environment.API_END_POINT}/organizaciones-andes?nombre=${nombre}`);
     };
 }

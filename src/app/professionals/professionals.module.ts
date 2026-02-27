@@ -40,8 +40,8 @@ import { EditUserInfoComponent } from './components/edit-user-info/edit-user-inf
 import { PatientFormComponent } from '@shared/components/patient-form/patient-form.component';
 import { SharedModule } from '@shared/shared.module';
 import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
-import { EfectoresSelectorComponent } from './components/efectores-selector/efectores-selector.component';
-import { EfectorDialogComponent } from './components/efector-dialog/efector-dialog.component';
+import { OrganizacionesSelectorComponent } from './components/organizaciones-selector/organizaciones-selector.component';
+import { OrganizacionDialogComponent } from './components/organizacion-dialog/organizacion-dialog.component';
 
 @NgModule({
     declarations: [
@@ -53,8 +53,8 @@ import { EfectorDialogComponent } from './components/efector-dialog/efector-dial
         CertificatePracticePrinterComponent,
         SelectorAmbitoComponent,
         EditUserInfoComponent,
-        EfectoresSelectorComponent,
-        EfectorDialogComponent,
+        OrganizacionesSelectorComponent,
+        OrganizacionDialogComponent,
         PatientFormComponent,
     ],
     imports: [

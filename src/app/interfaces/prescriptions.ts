@@ -28,7 +28,11 @@ export class Prescriptions {
             codigoProfesion: string;
             numeroMatricula: string;
         }];
-        efector?: { _id: string; nombre: string; direccion: string };
+    };
+    organizacion?: {
+        _id: string;
+        nombre: string;
+        direccion: string;
     };
     dispensedBy?: {
         userId: string;
