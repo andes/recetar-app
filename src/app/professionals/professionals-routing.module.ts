@@ -9,7 +9,7 @@ import { RoleProfessionalGuard } from '@auth/guards/role-professional.guard';
 import { ProfessionalDialogComponent } from '@professionals/components/professional-dialog/professional-dialog.component';
 import { SupplyDialogComponent } from './components/supply-dialog/supply-dialog.component';
 import { SelectorAmbitoComponent } from './components/selector-ambito/selector-ambito.component';
-import { EditUserInfoComponent } from './components/edit-user-info/edit-user-info.component';
+import { EditUserInfoComponent } from '@shared/components/edit-user-info/edit-user-info.component';
 
 const routes: Routes = [
     {

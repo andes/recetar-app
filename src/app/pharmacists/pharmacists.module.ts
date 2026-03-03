@@ -35,47 +35,50 @@ import { FormatTimePipe } from './pipes/format-time.pipe';
 import { DialogReportComponent } from './components/dialog-report/dialog-report.component';
 import { SharedModule } from '@shared/shared.module';
 import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
+import { EditUserInfoModule } from '@shared/components/edit-user-info/edit-user-info.module';
+
 @NgModule({
-    declarations: [
-        routingComponent,
-        PrescriptionListComponent,
-        PrescriptionUndoComponent,
-        AndesPrescriptionPrinterComponent,
-        FormatTimePipe,
-        DialogReportComponent
-    ],
-    imports: [
-        BrowserModule,
-        CommonModule,
-        PharmacistsRoutingModule,
-        ReactiveFormsModule,
-        FormsModule,
-        HttpClientModule,
-        FlexLayoutModule,
-        MatCardModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatButtonModule,
-        MatSelectModule,
-        MatAutocompleteModule,
-        MatMenuModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        MatListModule,
-        MatTableModule,
-        MatIconModule,
-        MatTooltipModule,
-        MatChipsModule,
-        MatSnackBarModule,
-        MatDialogModule,
-        MatProgressSpinnerModule,
-        MatSortModule,
-        MatPaginatorModule,
-        SharedModule
-    ],
-    exports: [
-        AndesPrescriptionPrinterComponent
-    ],
-    providers: [PatientNamePipe],
+  declarations: [
+    routingComponent,
+    PrescriptionListComponent,
+    PrescriptionUndoComponent,
+    AndesPrescriptionPrinterComponent,
+    FormatTimePipe,
+    DialogReportComponent
+  ],
+  imports: [
+    BrowserModule,
+    CommonModule,
+    PharmacistsRoutingModule,
+    ReactiveFormsModule,
+    FormsModule,
+    HttpClientModule,
+    FlexLayoutModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatSelectModule,
+    MatAutocompleteModule,
+    MatMenuModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatListModule,
+    MatTableModule,
+    MatIconModule,
+    MatTooltipModule,
+    MatChipsModule,
+    MatSnackBarModule,
+    MatDialogModule,
+    MatProgressSpinnerModule,
+    MatSortModule,
+    MatPaginatorModule,
+    EditUserInfoModule,
+    SharedModule
+  ],
+  exports: [
+    AndesPrescriptionPrinterComponent
+  ],
+  providers: [PatientNamePipe],
 })
 export class PharmacistsModule { }
