@@ -255,26 +255,7 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         this.configurePaginatorLabels(this.prescriptionsPaginator);
         this.configurePaginatorLabels(this.certificatesPaginator);
         this.configurePaginatorLabels(this.practicesPaginator);
-        this.setupPaginationEvents();
-        this.assignPaginatorsToDataSources();
         this.paginatorsInitialized = true;
-    }
-
-    private setupPaginationEvents() {
-        // Los eventos de paginación ahora se manejan directamente desde el HTML
-        // Este método se mantiene para compatibilidad pero ya no es necesario
-    }
-
-    private assignPaginatorsToDataSources() {
-        if (this.dataSource.data.length > 0 && this.prescriptionsPaginator) {
-            this.dataSource.paginator = this.prescriptionsPaginator;
-        }
-        if (this.dataCertificates.data.length > 0 && this.certificatesPaginator) {
-            this.dataCertificates.paginator = this.certificatesPaginator;
-        }
-        if (this.dataPractices.data.length > 0 && this.practicesPaginator) {
-            this.dataPractices.paginator = this.practicesPaginator;
-        }
     }
 
     private setupPrescriptionsPaginator() {
