@@ -3,16 +3,17 @@
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
     "types": [
-      "jasmine",
+      "jest",
       "node"
-    ]
+    ],
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true
   },
   "files": [
-    "src/test.ts",
     "src/polyfills.ts"
   ],
   "include": [
-    "src/**/*.spec.ts",
+    "src/**/*.test.ts",
     "src/**/*.d.ts"
   ]
 }

@@ -3,17 +3,39 @@
   "compilerOptions": {
     "baseUrl": "src",
     "paths": {
-      "@dashboard/*": ["app/dashboard/*"],
-      "@auth/*": ["app/auth/*"],
-      "@services/*": ["app/services/*"],
-      "@interfaces/*": ["app/interfaces/*"],
-      "@shared/*": ["app/shared/*"],
-      "@utils/*": ["app/utils/*"],
-      "@professionals/*": ["app/professionals/*"],
-      "@pharmacists/*": ["app/pharmacists/*"],
-      "@animations/*": ["app/animations/*"],
-      "@root/*": ["./*"],
-      "@audit/*": ["app/audit/*"]
+      "@dashboard/*": [
+        "app/dashboard/*"
+      ],
+      "@auth/*": [
+        "app/auth/*"
+      ],
+      "@services/*": [
+        "app/services/*"
+      ],
+      "@interfaces/*": [
+        "app/interfaces/*"
+      ],
+      "@shared/*": [
+        "app/shared/*"
+      ],
+      "@utils/*": [
+        "app/utils/*"
+      ],
+      "@professionals/*": [
+        "app/professionals/*"
+      ],
+      "@pharmacists/*": [
+        "app/pharmacists/*"
+      ],
+      "@animations/*": [
+        "app/animations/*"
+      ],
+      "@root/*": [
+        "./*"
+      ],
+      "@audit/*": [
+        "app/audit/*"
+      ]
     },
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
@@ -23,6 +45,7 @@
     "module": "es2020",
     "moduleResolution": "node",
     "importHelpers": true,
+    "allowSyntheticDefaultImports": true,
     "target": "es2015",
     "lib": [
       "es2018",
