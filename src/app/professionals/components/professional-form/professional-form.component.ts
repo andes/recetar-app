@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormGroup, FormGroupDirective, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, FormGroupDirective, Validators, ValidatorFn } from '@angular/forms';
 import { ThemePalette } from '@angular/material/core';
 import { MatDialog } from '@angular/material/dialog';
 import { step, stepLink } from '@animations/animations.template';
@@ -26,6 +26,7 @@ import { catchError, debounceTime, distinctUntilChanged, filter, switchMap, take
         stepLink
     ]
 })
+
 export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewInit {
     // Suscripciones
     private subscriptions: Subscription = new Subscription();
@@ -293,13 +294,15 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
                 semanticTag: supply.semanticTag
             }
         });
+        supplyControl.get('name').updateValueAndValidity();
     }
 
     addSupply() {
         const supplies = this.fBuilder.group({
             supply: this.fBuilder.group({
                 name: ['', [
-                    Validators.required
+                    Validators.required,
+                    this.medicationSelectedValidator()
                 ]],
                 snomedConcept:
                     this.fBuilder.group({
@@ -317,8 +320,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
                 Validators.required,
                 Validators.min(1)
             ]],
-            diagnostic: ['', [Validators.required]],
-            indication: [''],
+            diagnostic: ['', [Validators.required, this.noWhitespaceValidator()]], indication: [''],
             duplicate: [false],
             trimestral: [false],
             triplicate: [false],
@@ -342,21 +344,62 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     subscribeToSupplyChanges(control: FormGroup, index: number) {
         control.get('supply.name').valueChanges.pipe(
             debounceTime(300),
-            distinctUntilChanged(),
-            filter((supply: string) => typeof supply === 'string' && supply.length > 3),
-            switchMap((supply: string) => {
-                this.supplySpinner[index] = { show: true };
-                return this.snomedSuppliesService.get(supply).pipe(
-                    catchError(() => {
+            distinctUntilChanged()
+        ).subscribe((supply: string) => {
+            if (typeof supply === 'string') {
+                const snomedConcept = control.get('supply.snomedConcept');
+                const currentConceptId = snomedConcept?.get('conceptId')?.value;
+
+                if (currentConceptId && supply !== snomedConcept?.get('term')?.value) {
+                    snomedConcept.reset();
+                    control.get('supply.name').updateValueAndValidity();
+                }
+
+                if (supply.length > 3) {
+                    this.supplySpinner[index] = { show: true };
+                    this.snomedSuppliesService.get(supply).pipe(
+                        catchError(() => {
+                            this.supplySpinner[index] = { show: false };
+                            return of([]);
+                        })
+                    ).subscribe((res) => {
                         this.supplySpinner[index] = { show: false };
-                        return of([]);
-                    })
-                );
-            })
-        ).subscribe((res) => {
-            this.supplySpinner[index] = { show: false };
-            this.filteredSupplies = [...res];
+                        this.filteredSupplies = [...res];
+                    });
+                }
+            }
         });
+    }
+
+    medicationSelectedValidator(): ValidatorFn {
+        return (control: AbstractControl): { [key: string]: any } | null => {
+            if (!control.value) {
+                return null;
+            }
+
+            const supplyGroup = control.parent;
+            if (!supplyGroup) {
+                return null;
+            }
+
+            const snomedConcept = supplyGroup.get('snomedConcept');
+            if (!snomedConcept || !snomedConcept.value || !snomedConcept.value.conceptId) {
+                return { 'medicationNotSelected': { value: control.value } };
+            }
+
+            return null;
+        };
+    }
+
+    noWhitespaceValidator(): ValidatorFn {
+        return (control: AbstractControl): { [key: string]: any } | null => {
+            if (!control.value) {
+                return null;
+            }
+
+            const isWhitespace = (control.value || '').trim().length === 0;
+            return isWhitespace ? { 'whitespace': { value: control.value } } : null;
+        };
     }
 
     subscribeToTriplicateChanges(control: FormGroup, index: number) {

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
-import { AbstractControl, FormBuilder, FormControl, FormGroup, FormGroupDirective, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, FormGroupDirective, Validators, ValidatorFn } from '@angular/forms';
 import { ThemePalette } from '@angular/material/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
@@ -126,7 +126,7 @@ export class CertificateFormComponent implements OnInit {
             _id: [''],
             professional: [this.professionalData],
             patient: ['', [Validators.required]],
-            certificate: ['', [Validators.required]],
+            certificate: ['', [Validators.required, this.noWhitespaceValidator()]],
             anulateReason: [''],
             startDate: [this.today, [
                 Validators.required,
@@ -134,10 +134,17 @@ export class CertificateFormComponent implements OnInit {
             ]],
             cantDias: [''],
         });
-
     }
 
-
+    noWhitespaceValidator(): ValidatorFn {
+        return (control: AbstractControl): { [key: string]: any } | null => {
+            if (!control.value) {
+                return null;
+            }
+            const isWhitespace = (control.value || '').trim().length === 0;
+            return isWhitespace ? { 'whitespace': { value: control.value } } : null;
+        };
+    }
 
     onSubmitCertificateForm(professionalNgForm: FormGroupDirective): void {
         if (!this.anulateCertificate) {

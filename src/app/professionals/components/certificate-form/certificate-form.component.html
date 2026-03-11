@@ -1,21 +1,22 @@
 <mat-card fxLayout="column" fxLayoutAlign="space-between">
     <mat-card-title>
         <h2 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
-<mat-icon>{{ "description" }}</mat-icon>
-                <span>{{ anulateCertificate ? "Anular certificado" : "Crear certificado" }}</span>
+            <mat-icon>{{ "description" }}</mat-icon>
+            <span>{{ anulateCertificate ? "Anular certificado" : "Crear certificado" }}</span>
         </h2>
     </mat-card-title>
     <mat-card-content>
         <form [formGroup]="certificateForm" #professionalNgForm="ngForm" fxLayout="column"
               (ngSubmit)="onSubmitCertificateForm(professionalNgForm)">
-            <div class="sub-container" fxLayout="column" fxLayoutAlign="center" fxLayoutGap="10px" fxLayoutGap.xs="10px">
+            <div class="sub-container" fxLayout="column" fxLayoutAlign="center" fxLayoutGap="10px"
+                 fxLayoutGap.xs="10px">
                 <div class="first-block" fxLayout="column" fxLayoutGap="10px" fxLayoutGap.xs="10px">
                     <div *ngIf="!anulateCertificate" fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center"
                          fxLayoutAlign.xs="center center">
                         <mat-form-field appearance="fill" fxFlex="50" fxFlex.xs="100">
                             <mat-label>Fecha inicio</mat-label>
-                            <input matInput [matDatepicker]="picker2" [formControl]="startDate" autocomplete="off" required
-                                   tabIndex="-1">
+                            <input matInput [matDatepicker]="picker2" [formControl]="startDate" autocomplete="off"
+                                   required tabIndex="-1">
                             <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
                             <mat-datepicker [startAt]="today" #picker2></mat-datepicker>
                             <mat-error *ngIf="startDate.errors?.required">
@@ -25,7 +26,7 @@
                                 La fecha de inicio no puede ser superior a 15 días antes de hoy
                             </mat-error>
                         </mat-form-field>
-                    
+
                         <mat-form-field appearance="fill" fxFlex="50" fxFlex.xs="100">
                             <mat-label>Cantidad de días de vigencia</mat-label>
                             <input matInput type="number" [formControl]="cantDias" autocomplete="off" required
@@ -48,6 +49,12 @@
                         <mat-form-field appearance="fill">
                             <mat-label>Descripción</mat-label>
                             <textarea matInput required rows="5" formControlName="certificate"></textarea>
+                            <mat-error *ngIf="certificateForm.get('certificate').hasError('required')">
+                                Debe ingresar una descripción
+                            </mat-error>
+                            <mat-error *ngIf="certificateForm.get('certificate').hasError('whitespace')">
+                                La descripción no puede contener sólo espacios en blanco
+                            </mat-error>
                         </mat-form-field>
                     </div>
 
@@ -63,9 +70,9 @@
                     <button *ngIf="!anulateCertificate" mat-raised-button color="primary" type="submit" fxFlex="100%">
                         Crear certificado
                     </button>
-                    <div fxLayout="row" fxLayoutAlign="center" fxLayoutGap="20px" *ngIf="anulateCertificate" fxFlex="100%">
-                        <button mat-raised-button type="submit" fxFlex="48%"
-                                (click)="clearForm(professionalNgForm)">
+                    <div fxLayout="row" fxLayoutAlign="center" fxLayoutGap="20px" *ngIf="anulateCertificate"
+                         fxFlex="100%">
+                        <button mat-raised-button type="submit" fxFlex="48%" (click)="clearForm(professionalNgForm)">
                             Cancelar
                         </button>
                         <button mat-raised-button color="primary" type="submit" fxFlex="48%"
