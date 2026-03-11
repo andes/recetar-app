@@ -6,14 +6,14 @@
 </div>
 <div class="link-bar-indicator-container">
     <div class="indicator"
-        [@stepLink]="isAmbitoPublico() ?
+         [@stepLink]="isAmbitoPublico() ?
             (currentTab === 'form' ? 'left-2' : 'right-2') :
             (currentTab === 'form' ? 'left' : currentTab === 'certificates' ? 'center-left' : currentTab === 'practices' ? 'center-right' : 'right')">
     </div>
 </div>
 <div class="pf-container">
     <div fxLayout="row" fxLayoutAlign="space-evenly start" fxLayoutGap="20px" class="cards-container" fxFill
-        [@step]="currentTab === 'form' ? 'left' : currentTab === 'certificates' ? 'center-left' : currentTab === 'practices' ? 'center-right' : 'right'">
+         [@step]="currentTab === 'form' ? 'left' : currentTab === 'certificates' ? 'center-left' : currentTab === 'practices' ? 'center-right' : 'right'">
         <!-- panel "Formulario receta" -->
         <div class="prescription-panel" *ngIf="currentTab === 'form'">
             <mat-card fxLayout="column" fxLayoutAlign="space-between" class="new-prescription">
@@ -27,19 +27,19 @@
 
                     <mat-card-content>
                         <form [formGroup]="professionalForm" #professionalNgForm="ngForm" fxLayout="column"
-                            (ngSubmit)="onSubmitProfessionalForm(professionalNgForm)">
+                              (ngSubmit)="onSubmitProfessionalForm(professionalNgForm)">
                             <div class="sub-container" fxLayout="column" fxLayoutAlign="center" fxLayoutGap="0"
-                                fxLayoutGap.xs="0">
+                                 fxLayoutGap.xs="0">
 
                                 <div class="first-block" fxLayout="column" fxLayoutGap="10px" fxLayoutGap.xs="0">
                                     <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center"
-                                        fxLayoutAlign.xs="center center">
+                                         fxLayoutAlign.xs="center center">
                                         <!-- Fecha de receta -->
                                         <mat-form-field appearance="fill" fxFlex="100">
                                             <mat-label>Fecha receta</mat-label>
                                             <input matInput [matDatepicker]="picker1" [formControl]="date"
-                                                [min]="minDate" [max]="maxDate"
-                                                autocomplete="off" required tabIndex="-1" readonly="true">
+                                                   [min]="minDate" [max]="maxDate" autocomplete="off" required
+                                                   tabIndex="-1" readonly="true">
                                             <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
                                             <mat-datepicker [startAt]="today" #picker1></mat-datepicker>
 
@@ -53,20 +53,20 @@
                                         </div>
                                     </div>
 
-                                    <app-patient-form #patientForm [showObraSocial]="true" [appearance]="'fill'" [layout]="'row'"
-                                                      formControlName="patient">
+                                    <app-patient-form #patientForm [showObraSocial]="true" [appearance]="'fill'"
+                                                      [layout]="'row'" formControlName="patient">
                                     </app-patient-form>
                                 </div>
                                 <div formArrayName="supplies" class="nested-supplies">
                                     <div class="custom-error-container">
                                         <mat-error
-                                            *ngIf="suppliesForm.errors?.minLengthFilled && suppliesForm.invalid && suppliesForm.touched">
+                                                   *ngIf="suppliesForm.errors?.minLengthFilled && suppliesForm.invalid && suppliesForm.touched">
                                             Debe seleccionar al menos un medicamento
                                         </mat-error>
                                     </div>
                                     <!-- Medicamento -->
                                     <div *ngFor="let control of suppliesForm.controls; let i=index" [formGroupName]="i"
-                                        fxLayout="row" fxLayoutGap="10px">
+                                         fxLayout="row" fxLayoutGap="10px">
                                         <mat-card class="supply-card" fxFlex="100">
                                             <div *ngIf="i>0" fxLayout="row" class="btnDelete">
                                                 <button mat-icon-button color="warn" (click)="deleteSupply(i)">
@@ -78,19 +78,23 @@
                                                     <mat-label>Medicamento</mat-label>
 
                                                     <input type="text" [tabIndex]="4 + i" placeholder="Medicamento"
-                                                        matInput [formControl]="control.get('supply.name')" required
-                                                        [matAutocomplete]="supplyref">
+                                                           matInput [formControl]="control.get('supply.name')" required
+                                                           [matAutocomplete]="supplyref">
                                                     <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20"
-                                                        *ngIf="supplySpinner[i].show"></mat-spinner>
+                                                                 *ngIf="supplySpinner[i].show"></mat-spinner>
                                                     <mat-autocomplete #supplyref="matAutocomplete"
-                                                        (optionSelected)="onSupplySelected($event.option.value, i)">
+                                                                      (optionSelected)="onSupplySelected($event.option.value, i)">
                                                         <mat-option *ngFor="let sup of filteredSupplies" [value]="sup">
                                                             {{sup.term}}
                                                         </mat-option>
                                                     </mat-autocomplete>
 
                                                     <mat-error *ngIf="control.get('supply.name').hasError('required')">
-                                                        Debe seleccionar un insumo
+                                                        Debe seleccionar un medicamento
+                                                    </mat-error>
+                                                    <mat-error
+                                                               *ngIf="control.get('supply.name').hasError('medicationNotSelected')">
+                                                        Debe seleccionar un medicamento del listado
                                                     </mat-error>
                                                     <mat-error *ngIf="control.get('supply.name').hasError('invalid')">
                                                         {{ control.get('supply').getError('invalid') }}
@@ -104,13 +108,13 @@
                                                 <mat-form-field appearance="fill">
                                                     <mat-label>Cantidad</mat-label>
                                                     <input [tabIndex]="5 + i" type="number" matInput
-                                                        formControlName="quantityPresentation" required>
+                                                           formControlName="quantityPresentation" required>
                                                     <mat-error
-                                                        *ngIf="control.get('quantityPresentation').hasError('required')">
+                                                               *ngIf="control.get('quantityPresentation').hasError('required')">
                                                         Debe ingresar una cantidad
                                                     </mat-error>
                                                     <mat-error
-                                                        *ngIf="control.get('quantityPresentation').hasError('min')">
+                                                               *ngIf="control.get('quantityPresentation').hasError('min')">
                                                         Debe ingresar un mínimo de
                                                         {{control.get('quantityPresentation').errors?.min.min}}
                                                     </mat-error>
@@ -122,7 +126,7 @@
                                                 <mat-form-field appearance="fill">
                                                     <mat-label>Cantidad de envases</mat-label>
                                                     <input [tabIndex]="5 + i" type="number" matInput
-                                                        formControlName="quantity" required>
+                                                           formControlName="quantity" required>
                                                     <mat-error *ngIf="control.get('quantity').hasError('required')">
                                                         Debe ingresar una cantidad
                                                     </mat-error>
@@ -167,30 +171,33 @@
                                             <mat-form-field appearance="fill">
                                                 <mat-label>Diagnóstico</mat-label>
                                                 <textarea matInput placeholder="Diagnóstico"
-                                                    formControlName="diagnostic" required></textarea>
+                                                          formControlName="diagnostic" required></textarea>
                                                 <mat-error *ngIf="control.get('diagnostic').hasError('required')">
                                                     Debe ingresar un diagnóstico
+                                                </mat-error>
+                                                <mat-error *ngIf="control.get('diagnostic').hasError('whitespace')">
+                                                    El diagnóstico no puede contener solo espacios en blanco
                                                 </mat-error>
                                             </mat-form-field>
                                             <mat-form-field appearance="fill">
                                                 <mat-label>Indicaciones</mat-label>
                                                 <textarea matInput placeholder="Indicaciones"
-                                                    formControlName="indication"></textarea>
+                                                          formControlName="indication"></textarea>
                                             </mat-form-field>
                                         </mat-card>
                                     </div>
                                 </div>
                                 <button mat-raised-button color="primary" type="button" (click)="addSupply()"
-                                    *ngIf="suppliesForm.controls.length < maxQSupplies">
+                                        *ngIf="suppliesForm.controls.length < maxQSupplies">
                                     Agregar medicamento
                                 </button>
                             </div>
 
                             <div fxLayout="row" fxLayoutAlign="center">
                                 <div fxLayout="row" fxLayoutAlign="center" fxLayoutGap="20px" *ngIf="!isSubmit"
-                                    fxFlex="100%">
+                                     fxFlex="100%">
                                     <button mat-raised-button type="button" *ngIf="isEdit" fxFlex="100%"
-                                        (click)="clearForm(professionalNgForm)">
+                                            (click)="clearForm(professionalNgForm)">
                                         Cancelar
                                     </button>
 
@@ -215,11 +222,11 @@
 
         <div class="my-prescriptions-panel" *ngIf="currentTab === 'list'">
             <app-prescriptions-list (editPrescriptionEvent)="editPrescription($event)"
-                (anulateCertificateEvent)="showCertificados()"></app-prescriptions-list>
+                                    (anulateCertificateEvent)="showCertificados()"></app-prescriptions-list>
         </div>
 
         <div class="certificates-panel" *ngIf="currentTab === 'certificates'">
             <app-certificate-form (anulateCertificateEvent)="anulateCertificate()"
-                (certificateCreatedEvent)="onCertificateCreated()"></app-certificate-form>
+                                  (certificateCreatedEvent)="onCertificateCreated()"></app-certificate-form>
         </div>
     </div>
