@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { catchError, map, tap } from 'rxjs/operators';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { User } from '@interfaces/users';
+import { SubOrganizacion } from '@interfaces/organizaciones';
 
 @Injectable({
     providedIn: 'root'
@@ -36,5 +36,9 @@ export class UserService {
     }): Observable<User> {
         const payload = { _id, ...updateData };
         return this.http.post<User>(`${environment.API_END_POINT}/users/update`, payload);
+    }
+
+    updateUserOrganizaciones(_id: string, organizaciones: SubOrganizacion[]): Observable<User> {
+        return this.http.post<User>(`${environment.API_END_POINT}/users/update`, { _id, organizaciones });
     }
 }

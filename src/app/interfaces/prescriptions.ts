@@ -24,10 +24,15 @@ export class Prescriptions {
         cuil: string;
         businessName: string;
         profesionGrado: [{
-            profesion:string ,
-            codigoProfesion: string ,
-            numeroMatricula: string 
-        }]
+            profesion: string;
+            codigoProfesion: string;
+            numeroMatricula: string;
+        }];
+    };
+    organizacion?: {
+        _id: string;
+        nombre: string;
+        direccion: string;
     };
     dispensedBy?: {
         userId: string;
