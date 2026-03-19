@@ -54,7 +54,8 @@
                                     </div>
 
                                     <app-patient-form #patientForm [showObraSocial]="true" [appearance]="'fill'"
-                                        [layout]="'row'" formControlName="patient">
+                                        [layout]="'row'" formControlName="patient"
+                                        (patientFound)="onPatientFound($event)">
                                     </app-patient-form>
                                     <app-organizaciones-selector *ngIf="isAmbitoPublico()"
                                         [organizacionControl]="organizacionControl">
