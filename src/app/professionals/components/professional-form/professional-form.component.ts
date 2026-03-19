@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormGroup, FormGroupDirective, Validators, ValidatorFn } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, FormGroupDirective, Validators, ValidatorFn, FormControl } from '@angular/forms';
 import { ThemePalette } from '@angular/material/core';
 import { MatDialog } from '@angular/material/dialog';
 import { step, stepLink } from '@animations/animations.template';
@@ -14,8 +14,70 @@ import { CertificatesService } from '@services/certificates.service';
 import { PrescriptionsService } from '@services/prescriptions.service';
 import { SnomedSuppliesService } from '@services/snomedSupplies.service';
 import { PatientFormComponent } from '@shared/components/patient-form/patient-form.component';
-import { of, Subject, Subscription } from 'rxjs';
-import { catchError, debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
+import { OrganizacionFormSessionService } from '@professionals/services/organizacion-form-session.service';
+import { of, Subject, Subscription, Observable } from 'rxjs';
+import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
+
+// Validador personalizado para fechas
+function validDateValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+        if (!control.value) {
+            return null; // Si no hay valor, no validamos (required se encarga)
+        }
+
+        const date = new Date(control.value);
+        const isValidDate = date instanceof Date && !isNaN(date.getTime());
+
+        if (!isValidDate) {
+            return { 'invalidDate': { value: control.value } };
+        }
+
+        // Validar que la fecha no sea futura para fecha de nacimiento
+        const today = new Date();
+        if (date > today) {
+            return { 'futureDate': { value: control.value } };
+        }
+
+        // Validar que la fecha sea razonable (no muy antigua)
+        const minDate = new Date('1900-01-01');
+        if (date < minDate) {
+            return { 'tooOldDate': { value: control.value } };
+        }
+
+        return null;
+    };
+}
+
+function medicationSelectedValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+        if (!control.value) {
+            return null;
+        }
+
+        const supplyGroup = control.parent;
+        if (!supplyGroup) {
+            return null;
+        }
+
+        const snomedConcept = supplyGroup.get('snomedConcept');
+        if (!snomedConcept || !snomedConcept.value || !snomedConcept.value.conceptId) {
+            return { 'medicationNotSelected': { value: control.value } };
+        }
+
+        return null;
+    };
+}
+
+function noWhitespaceValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+        if (!control.value) {
+            return null;
+        }
+
+        const isWhitespace = (control.value || '').trim().length === 0;
+        return isWhitespace ? { 'whitespace': { value: control.value } } : null;
+    };
+}
 
 @Component({
     selector: 'app-professional-form',
@@ -28,10 +90,28 @@ import { catchError, debounceTime, distinctUntilChanged, filter, switchMap, take
 })
 
 export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewInit {
+    obraSocialControl = new FormControl('');
+    filteredObrasSociales: Observable<any[]>;
+    organizacionControl = new FormControl('');
+
     // Suscripciones
     private subscriptions: Subscription = new Subscription();
 
-    // Método removido - funcionalidad manejada por patient-form component
+    onOsSelected(selectedOs: any): void {
+        const osGroup = this.professionalForm.get('patient.os') as FormGroup;
+        if (osGroup && selectedOs) {
+            osGroup.patchValue({
+                nombre: selectedOs.nombre,
+                codigoPuco: selectedOs.codigoPuco
+            });
+            const numeroAfiliadoControl = osGroup.get('numeroAfiliado');
+            if (numeroAfiliadoControl) {
+                numeroAfiliadoControl.enable();
+            }
+        }
+    }
+
+
     existenObrasSociales(array: any[]): boolean {
         if (!array || array.length === 0) {
             return false;
@@ -83,7 +163,8 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         public dialog: MatDialog,
         private _interactionService: InteractionService,
         private certificateService: CertificatesService,
-        private ambitoService: AmbitoService
+        private ambitoService: AmbitoService,
+        private organizacionSessionService: OrganizacionFormSessionService
     ) { }
 
     ngOnInit(): void {
@@ -93,6 +174,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
             // Actualizar el formulario si ya está inicializado
             if (this.professionalForm) {
                 this.professionalForm.patchValue({ ambito: this.ambito });
+                this.configureOrganizacionByAmbito();
             }
         });
         this.subscriptions.add(ambitoSubscription);
@@ -137,6 +219,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     }
 
     ngOnDestroy(): void {
+        this.rollbackPendingOrganizacionesOnLeave();
         this.destroy$.next();
         this.destroy$.complete();
         this.subscriptions.unsubscribe();
@@ -166,7 +249,8 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         this.professionalForm = this.fBuilder.group({
             _id: [''],
             professional: [this.professionalData],
-            patient: [null, [Validators.required]],
+            organizacion: this.organizacionControl,
+            patient: [null, Validators.required],
             date: [this.today, [
                 Validators.required
             ]],
@@ -174,6 +258,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
             supplies: this.fBuilder.array([]),
             ambito: [this.ambito]
         });
+        this.configureOrganizacionByAmbito();
         this.addSupply();
     }
 
@@ -198,12 +283,26 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
 
     onSubmitProfessionalForm(professionalNgForm: FormGroupDirective): void {
         if (this.professionalForm.valid) {
-            const newPrescription = this.professionalForm.value;
+            const newPrescription = { ...this.professionalForm.value };
+            const shouldPersistOrganizacion = this.isAmbitoPublico();
+            if (!shouldPersistOrganizacion) {
+                delete newPrescription.organizacion;
+            }
+
             this.isSubmit = true;
             if (!this.isEdit) {
                 this.apiPrescriptions.newPrescription(newPrescription).subscribe(
                     success => {
-                        if (success) { this.formReset(professionalNgForm); }
+                        if (success) {
+                            if (shouldPersistOrganizacion) {
+                                this.organizacionSessionService.commitChanges().subscribe(
+                                    () => this.formReset(professionalNgForm),
+                                    () => this.formReset(professionalNgForm)
+                                );
+                            } else {
+                                this.formReset(professionalNgForm);
+                            }
+                        }
                     },
                     err => {
                         this.handleSupplyError(err);
@@ -213,7 +312,16 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
                 // edit
                 this.apiPrescriptions.editPrescription(newPrescription).subscribe(
                     success => {
-                        if (success) { this.formReset(professionalNgForm); }
+                        if (success) {
+                            if (shouldPersistOrganizacion) {
+                                this.organizacionSessionService.commitChanges().subscribe(
+                                    () => this.formReset(professionalNgForm),
+                                    () => this.formReset(professionalNgForm)
+                                );
+                            } else {
+                                this.formReset(professionalNgForm);
+                            }
+                        }
                     },
                     err => {
                         this.handleSupplyError(err);
@@ -245,7 +353,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
 
     private formReset(professionalNgForm: FormGroupDirective) {
         this.isEdit ? this.openDialog('updated') : this.openDialog('created');
-        this.clearForm(professionalNgForm);
+        this.clearForm(professionalNgForm, false);
         this.isSubmit = false;
     }
 
@@ -474,17 +582,46 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     }
 
     // reset the form as intial values
-    clearForm(professionalNgForm: FormGroupDirective) {
+    clearForm(professionalNgForm: FormGroupDirective, shouldRollback = true) {
+        const organizacion = this.organizacionControl.value;
         professionalNgForm.resetForm();
         const currentAmbito = this.ambitoService.getAmbito();
-        this.professionalForm.reset({
-            _id: '',
-            professional: this.professionalData,
-            date: this.today,
-            patient: null,
-            ambito: currentAmbito
-        });
+
+        const applyReset = (organizacionValue: any) => {
+            this.professionalForm.reset({
+                _id: '',
+                professional: this.professionalData,
+                organizacion: this.isAmbitoPublico() ? organizacionValue : null,
+                date: this.today,
+                patient: null,
+                ambito: currentAmbito
+            });
+            this.configureOrganizacionByAmbito();
+        };
+
+        if (shouldRollback) {
+            this.organizacionSessionService.rollbackChanges().subscribe(
+                () => applyReset(this.organizacionSessionService.getPreferredOrganizacion()),
+                () => applyReset(organizacion)
+            );
+        } else {
+            applyReset(organizacion);
+        }
+
+        // Resetear también el componente patient-form
+        if (this.patientFormComponent) {
+            this.patientFormComponent.resetForm();
+        }
         // Validaciones ahora manejadas por patient-form component
+    }
+
+    rollbackPendingOrganizacionesOnLeave(): void {
+        if (!this.organizacionSessionService.hasPendingChanges()) {
+            return;
+        }
+
+        const rollbackSub = this.organizacionSessionService.rollbackChanges().subscribe();
+        this.subscriptions.add(rollbackSub);
     }
 
     anulateCertificate() {
@@ -527,6 +664,29 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
 
     isAmbitoPublico(): boolean {
         return this.ambito === 'publico';
+    }
+
+    private configureOrganizacionByAmbito(): void {
+        if (!this.organizacionControl) {
+            return;
+        }
+
+        if (this.isAmbitoPublico()) {
+            this.organizacionControl.enable({ emitEvent: false });
+            this.organizacionControl.setValidators([Validators.required]);
+            this.organizacionControl.updateValueAndValidity({ emitEvent: false });
+            return;
+        }
+
+        if (this.organizacionSessionService.hasPendingChanges()) {
+            const rollbackSub = this.organizacionSessionService.rollbackChanges().subscribe();
+            this.subscriptions.add(rollbackSub);
+        }
+
+        this.organizacionControl.setValue(null, { emitEvent: false });
+        this.organizacionControl.clearValidators();
+        this.organizacionControl.disable({ emitEvent: false });
+        this.organizacionControl.updateValueAndValidity({ emitEvent: false });
     }
 
     private markFormGroupTouched(formGroup: FormGroup): void {

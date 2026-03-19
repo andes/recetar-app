@@ -31,6 +31,7 @@ export default class AndesPrescriptions {
     organizacion: {
         id: string;
         nombre: string;
+        direccion: string;// ver si es necesario
     };
     profesional: {
         id: string;
@@ -127,7 +128,7 @@ export default class AndesPrescriptions {
         id: string;
     };
     paciente: {
-        carpetaEfectores: [];
+        carpetaOrganizaciones: [];
         id: string;
         nombre: string;
         apellido: string;
@@ -150,6 +151,7 @@ export default class AndesPrescriptions {
             valor: number;
             unidad: string;
         };
+        cuil: string;
     };
     createdAt: Date;
     createdBy: {

@@ -1,0 +1,35 @@
+<h2 mat-dialog-title>Agregar Nueva Organización</h2>
+
+<mat-dialog-content>
+    <form [formGroup]="organizacionForm" fxLayout="column" fxLayoutGap="20px">
+        <mat-form-field appearance="fill">
+            <mat-label>Nombre de la organización</mat-label>
+            <input matInput formControlName="nombre" placeholder="Escriba al menos 3 caracteres"
+                   [matAutocomplete]="organizacionAutocomplete" (input)="onNombreInput()">
+            <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20" *ngIf="spinnerLoading"></mat-spinner>
+            <mat-autocomplete #organizacionAutocomplete="matAutocomplete" [displayWith]="displayOrganizacion"
+                              (optionSelected)="onOrganizacionSelected($event)">
+                <mat-option *ngFor="let organizacion of filteredOrganizaciones" [value]="organizacion">
+                    {{ organizacion.nombre }}
+                    <span *ngIf="getDireccionTexto(organizacion)"> - {{ getDireccionTexto(organizacion) }}</span>
+                </mat-option>
+            </mat-autocomplete>
+            <mat-error *ngIf="nombre?.hasError('required')">
+                El nombre es requerido
+            </mat-error>
+            <mat-error *ngIf="nombre?.hasError('minlength')">
+                El nombre debe tener al menos 3 caracteres
+            </mat-error>
+            <mat-error *ngIf="nombre?.hasError('invalidSelection')">
+                Debe seleccionar una organización de la lista
+            </mat-error>
+        </mat-form-field>
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="onCancel()">Cancelar</button>
+    <button mat-raised-button color="primary" type="button" (click)="onSubmit()" [disabled]="organizacionForm.invalid">
+        Guardar
+    </button>
+</mat-dialog-actions>

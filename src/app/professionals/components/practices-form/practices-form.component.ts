@@ -49,11 +49,12 @@ export class PracticesFormComponent implements OnInit {
 
             this.practicesService.newPractice(practiceData).subscribe(
                 success => {
-                    this.isSubmitPractice = false;
-
                     if (success) {
+                        this.isSubmitPractice = false;
                         this.openDialog('practiceSuccess');
                         this.clearPracticesForm(practicesNgForm);
+                    } else {
+                        this.isSubmitPractice = false;
                     }
                 },
                 error => {
@@ -82,6 +83,7 @@ export class PracticesFormComponent implements OnInit {
             diagnostic: '',
             indications: ''
         });
+
         this.practiceDate.setValue(new Date());
     }
 
