@@ -3,6 +3,13 @@ name: PR conflict label
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  push:
+    branches: [master]
+
+permissions:
+  pull-requests: write
+  issues: write
+  contents: read
 
 jobs:
   conflicts:
@@ -12,26 +19,66 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const pr = context.payload.pull_request;
             const { owner, repo } = context.repo;
-            const issue_number = pr.number;
 
-            if (pr.mergeable_state === 'dirty') {
-              await github.rest.issues.addLabels({
-                owner,
-                repo,
-                issue_number,
-                labels: ['Conflictos']
-              });
-            } else {
-              try {
-                await github.rest.issues.removeLabel({
+            async function checkPR(pr) {
+              let data;
+              let retries = 5;
+              const issue_number = pr.number;
+
+              while (retries > 0) {
+                const response = await github.rest.pulls.get({
+                  owner,
+                  repo,
+                  pull_number: issue_number
+                });
+                data = response.data;
+                console.log(`PR #${issue_number} - mergeable: ${data.mergeable}, state: ${data.mergeable_state}`);
+                
+                // Si mergeable es null, GitHub aún está calculando
+                if (data.mergeable !== null) break;
+                
+                await new Promise(r => setTimeout(r, 5000));
+                retries--;
+              }
+
+              // Usamos mergeable === false para detectar conflictos reales
+              if (data.mergeable === false) {
+                console.log(`Adding "Conflictos" label to PR #${issue_number}`);
+                await github.rest.issues.addLabels({
                   owner,
                   repo,
                   issue_number,
-                  name: 'Conflictos'
+                  labels: ['Conflictos']
                 });
-              } catch (e) {
-                // label no existía
+              } else if (data.mergeable === true) {
+                console.log(`Removing "Conflictos" label from PR #${issue_number} (if exists)`);
+                try {
+                  await github.rest.issues.removeLabel({
+                    owner,
+                    repo,
+                    issue_number,
+                    name: 'Conflictos'
+                  });
+                } catch (e) {
+                  // label no existía
+                }
+              }
+            }
+
+            if (context.eventName === 'pull_request') {
+              await checkPR(context.payload.pull_request);
+            }
+
+            if (context.eventName === 'push') {
+              const { data: prs } = await github.rest.pulls.list({
+                owner,
+                repo,
+                state: 'open',
+                base: 'master'
+              });
+
+              for (const pr of prs) {
+                await checkPR(pr);
               }
             }
