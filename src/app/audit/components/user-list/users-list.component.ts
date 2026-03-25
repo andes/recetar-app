@@ -1,5 +1,5 @@
-
-import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator, MatPaginatorIntl } from '@angular/material/paginator';
 import { MatSelect } from '@angular/material/select';
@@ -65,13 +65,15 @@ export class UsersListComponent implements OnInit, AfterContentInit, OnDestroy {
     @ViewChild(MatSort, { static: true }) sort: MatSort;
     @ViewChild('roleSelect') roleSelect: MatSelect;
     @ViewChild('tbSort') tbSort = new MatSort();
+    @ViewChild('tableContainer') tableContainer: ElementRef;
 
     constructor(
         private authService: AuthService,
         private usersService: UserService,
         private rolesService: RolesService,
         public dialog: MatDialog,
-        private snackBar: MatSnackBar) { }
+        private snackBar: MatSnackBar,
+        private router: Router) { }
 
     ngOnInit(): void {
         this.loadUsers(0, this.usersPageSize);
@@ -323,6 +325,13 @@ export class UsersListComponent implements OnInit, AfterContentInit, OnDestroy {
         this.tempSelectedRoles = user.roles ? user.roles.map(userRole => {
             return this.apiRoles.find(apiRole => apiRole.role === userRole.role) || userRole;
         }) : [];
+
+        setTimeout(() => {
+            if (this.tableContainer && this.tableContainer.nativeElement) {
+                const el = this.tableContainer.nativeElement;
+                el.scrollLeft = el.scrollWidth;
+            }
+        });
     }
 
     saveAllChanges(): void {
@@ -423,6 +432,20 @@ export class UsersListComponent implements OnInit, AfterContentInit, OnDestroy {
         this.usersPageIndex = event.pageIndex;
         this.usersPageSize = event.pageSize;
         this.loadUsers(event.pageIndex * event.pageSize, event.pageSize, this.currentSearchTerm);
+    }
+
+    showVolverButton(): boolean {
+        return this.authService.isAuditRole() && !this.authService.isOnlyAuditRole();
+    }
+
+    goBackToOtherRole(): void {
+        if (this.authService.isProfessionalRole()) {
+            this.router.navigate(['/profesionales/recetas/nueva']);
+        } else if (this.authService.isPharmacistsRole()) {
+            this.router.navigate(['/farmacias/recetas/dispensar']);
+        } else {
+            this.router.navigate(['/']);
+        }
     }
 
 }
