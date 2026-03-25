@@ -10,6 +10,11 @@
           <mat-card-title class="header-title">Gestión de Usuarios</mat-card-title>
           <mat-card-subtitle class="header-subtitle">Administre los usuarios del sistema</mat-card-subtitle>
           <div class="header-actions">
+            <button *ngIf="showVolverButton() && !showCreateForm" mat-raised-button (click)="goBackToOtherRole()"
+              style="margin-right: 10px;">
+              <mat-icon>arrow_back</mat-icon>
+              Volver
+            </button>
             <button *ngIf="!showCreateForm" mat-raised-button (click)="showCreateUserForm()"
               style="background-color: #3f51b5; color: white;">
               <mat-icon>person_add</mat-icon>
@@ -36,7 +41,7 @@
               </div>
 
               <div class="container mat-elevation-z8">
-                <div class="table-container" *ngIf="!loadingUsers">
+                <div class="table-container" #tableContainer *ngIf="!loadingUsers">
                   <table mat-table [dataSource]="dataSource" matSort #tbSort="matSort" multiTemplateDataRows>
 
                     <ng-container matColumnDef="businessName">
