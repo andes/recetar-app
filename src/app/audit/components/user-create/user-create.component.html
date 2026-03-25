@@ -71,7 +71,7 @@
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>CUIL</mat-label>
               <mat-icon matPrefix>fingerprint</mat-icon>
-              <input matInput formControlName="cuil" placeholder="12345678901" maxlength="11"
+              <input matInput formControlName="cuil" placeholder="20-12345678-9" maxlength="13"
                 (input)="onCuilChange($event)">
               <mat-icon matSuffix *ngIf="isValidatingCuil" class="validation-icon">
                 <mat-spinner diameter="20"></mat-spinner>
@@ -89,6 +89,8 @@
               </mat-error>
             </mat-form-field>
           </div>
+
+
         </div>
 
         <!-- Información del profesional encontrado -->
@@ -104,7 +106,7 @@
                 <strong>Nombre:</strong> {{ foundProfessionalData.nombre }} {{ foundProfessionalData.apellido }}
               </div>
               <div class="info-row" *ngIf="foundProfessionalData.cuit">
-                <strong>CUIL:</strong> {{ foundProfessionalData.cuit }}
+                <strong>CUIL:</strong> {{ formatCuilString(foundProfessionalData.cuit) }}
               </div>
               <div class="info-row" *ngIf="foundProfessionalData.documento">
                 <strong>Documento:</strong> {{ foundProfessionalData.documento }}
@@ -144,7 +146,7 @@
                 <strong>Denominación:</strong> {{ foundPharmacyData.denominacion || foundPharmacyData.razonSocial }}
               </div>
               <div class="info-row" *ngIf="foundPharmacyData.cuit">
-                <strong>CUIT:</strong> {{ foundPharmacyData.cuit }}
+                <strong>CUIT:</strong> {{ formatCuilString(foundPharmacyData.cuit) }}
               </div>
               <div class="info-row" *ngIf="foundPharmacyData.DTResponsable">
                 <strong>Responsable:</strong> {{ foundPharmacyData.DTResponsable }}
