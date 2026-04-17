@@ -10,17 +10,17 @@ export class Certificate {
     updatedAt: Date;
     status?: string;
     anulateDate?: Date;
-    anulateReason?:string;
+    anulateReason?: string;
     professional: {
         userId: string;
         enrollment?: string;
         cuil: string;
         businessName: string;
         profesionGrado?: [{
-            profesion:string ,
-            codigoProfesion: string ,
-            numeroMatricula: string 
-        }]
+            profesion: string;
+            codigoProfesion: string;
+            numeroMatricula: string;
+        }];
     };
 
     get endDate(): Date {
@@ -28,8 +28,8 @@ export class Certificate {
             return null;
         }
         const endDate = new Date(this.startDate);
-        endDate.setDate(endDate.getDate() + this.cantDias - 1); 
-        endDate.setHours(23, 59, 59, 999); 
+        endDate.setDate(endDate.getDate() + this.cantDias - 1);
+        endDate.setUTCHours(23, 59, 59, 999);
         return endDate;
     }
 }
