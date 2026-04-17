@@ -122,6 +122,11 @@ export class UnifiedPrinterComponent {
                 new Columns([new Txt(`${cant} `).bold().end]).end]).end);
             pdf.add(new Txt('\n').end);
 
+            if (supply.supply.brand) {
+                pdf.add(new Txt('Marca sugerida: ' + supply.supply.brand).end);
+                pdf.add(new Txt('\n').end);
+            }
+
             if (supply.diagnostic) {
                 pdf.add(new Txt('\n').end);
                 pdf.add(new Txt('Diagnóstico').bold().end);
