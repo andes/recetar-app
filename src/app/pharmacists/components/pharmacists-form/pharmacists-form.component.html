@@ -37,6 +37,7 @@
                                     <mat-select formControlName="patient_sexo" required>
                                         <mat-option value="masculino">Masculino</mat-option>
                                         <mat-option value="femenino">Femenino</mat-option>
+                                        <mat-option value="otro">No binario</mat-option>
                                     </mat-select>
                                     <mat-error
                                                *ngIf="prescriptionForm.get('patient_sexo')?.hasError('required') && prescriptionForm.get('patient_sexo')?.touched">

@@ -62,7 +62,11 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
 
     patientForm: FormGroup;
     patientSearch: Patient[] = [];
-    sex_options: string[] = ['Femenino', 'Masculino', 'Otro'];
+    sex_options: Array<{ key: string; label: string }> = [
+        { key: 'Femenino', label: 'Femenino' },
+        { key: 'Masculino', label: 'Masculino' },
+        { key: 'Otro', label: 'No binario' }
+    ];
     readonly spinnerColor: ThemePalette = 'primary';
     dniShowSpinner = false;
     obraSocial: any[] = [];
