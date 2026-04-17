@@ -46,6 +46,7 @@ export class Prescriptions {
         quantityPresentation?: string;
         diagnostic?: string;
         indication?: string;
+        description?: string;
         duplicate?: boolean;
         triplicate?: boolean;
         triplicateData?: {
@@ -55,7 +56,6 @@ export class Prescriptions {
     }>;
     status: string;
     date: Date;
-
     diagnostic?: string;
     observation?: string;
     createdAt?: Date;
