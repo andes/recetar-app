@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormGroup, FormGroupDirective, Validators, ValidatorFn, FormControl } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, FormGroupDirective, ValidatorFn, Validators } from '@angular/forms';
 import { ThemePalette } from '@angular/material/core';
 import { MatDialog } from '@angular/material/dialog';
 import { step, stepLink } from '@animations/animations.template';
@@ -9,44 +9,13 @@ import { Prescriptions } from '@interfaces/prescriptions';
 import { PrescriptionsListComponent } from '@professionals/components/prescriptions-list/prescriptions-list.component';
 import { ProfessionalDialogComponent } from '@professionals/components/professional-dialog/professional-dialog.component';
 import { InteractionService } from '@professionals/interaction.service';
-import { PatientsService } from '@root/app/services/patients.service';
+import { OrganizacionFormSessionService } from '@professionals/services/organizacion-form-session.service';
 import { CertificatesService } from '@services/certificates.service';
 import { PrescriptionsService } from '@services/prescriptions.service';
 import { SnomedSuppliesService } from '@services/snomedSupplies.service';
 import { PatientFormComponent } from '@shared/components/patient-form/patient-form.component';
-import { OrganizacionFormSessionService } from '@professionals/services/organizacion-form-session.service';
-import { of, Subject, Subscription, Observable } from 'rxjs';
-import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
-
-// Validador personalizado para fechas
-function validDateValidator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } | null => {
-        if (!control.value) {
-            return null; // Si no hay valor, no validamos (required se encarga)
-        }
-
-        const date = new Date(control.value);
-        const isValidDate = date instanceof Date && !isNaN(date.getTime());
-
-        if (!isValidDate) {
-            return { 'invalidDate': { value: control.value } };
-        }
-
-        // Validar que la fecha no sea futura para fecha de nacimiento
-        const today = new Date();
-        if (date > today) {
-            return { 'futureDate': { value: control.value } };
-        }
-
-        // Validar que la fecha sea razonable (no muy antigua)
-        const minDate = new Date('1900-01-01');
-        if (date < minDate) {
-            return { 'tooOldDate': { value: control.value } };
-        }
-
-        return null;
-    };
-}
+import { Observable, of, Subject, Subscription } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 function medicationSelectedValidator(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
@@ -65,17 +34,6 @@ function medicationSelectedValidator(): ValidatorFn {
         }
 
         return null;
-    };
-}
-
-function noWhitespaceValidator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } | null => {
-        if (!control.value) {
-            return null;
-        }
-
-        const isWhitespace = (control.value || '').trim().length === 0;
-        return isWhitespace ? { 'whitespace': { value: control.value } } : null;
     };
 }
 
@@ -154,10 +112,8 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     ambito: 'publico' | 'privado';
 
     constructor(
-        // private suppliesService: SuppliesService,
         private snomedSuppliesService: SnomedSuppliesService,
         private fBuilder: FormBuilder,
-        private apiPatients: PatientsService,
         private apiPrescriptions: PrescriptionsService, // privado
         private authService: AuthService,
         public dialog: MatDialog,
@@ -205,8 +161,6 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
                 });
             }
         });
-
-        // Lógica de obras sociales y DNI removida - funcionalidad manejada por patient-form component
 
         // Suscribirse a cambios en editCertificate
         this.certificateSubscription = this.certificateService.certificate$.subscribe(
@@ -285,10 +239,16 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         if (this.professionalForm.valid) {
             const newPrescription = { ...this.professionalForm.value };
             const shouldPersistOrganizacion = this.isAmbitoPublico();
+
             if (!shouldPersistOrganizacion) {
                 delete newPrescription.organizacion;
             }
 
+            newPrescription.supplies.forEach(element => {
+                if (element.isMagistral) {
+                    element.supply.type = 'magistral';
+                }
+            });
             this.isSubmit = true;
             if (!this.isEdit) {
                 this.apiPrescriptions.newPrescription(newPrescription).subscribe(
@@ -377,10 +337,6 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         return this.professionalForm.get('supplies') as FormArray;
     }
 
-    // Getters removidos - funcionalidad manejada por patient-form component
-
-    // Método removido - funcionalidad manejada por patient-form component
-
     displayFn(supply): string {
         return supply ? supply : '';
     }
@@ -390,10 +346,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         const supplyControl = control.get('supply');
 
         // Actualiza el valor del 'supply' con el 'term' en el 'name'
-        supplyControl.get('name').setValue(supply.term); // Actualiza solo el 'term' en 'name'
-
-        // También actualizamos el 'snomedConcept' completo con todos los campos
-        supplyControl.setValue({
+        supplyControl.patchValue({
             name: supply.term, // Solo el 'term' va en 'name'
             snomedConcept: {
                 term: supply.term,
@@ -405,13 +358,17 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         supplyControl.get('name').updateValueAndValidity();
     }
 
+
+
     addSupply() {
         const supplies = this.fBuilder.group({
+            isMagistral: [false],
             supply: this.fBuilder.group({
                 name: ['', [
                     Validators.required,
                     this.medicationSelectedValidator()
                 ]],
+                description: [''],
                 snomedConcept:
                     this.fBuilder.group({
                         term: [''],
@@ -428,7 +385,9 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
                 Validators.required,
                 Validators.min(1)
             ]],
-            diagnostic: ['', [Validators.required, this.noWhitespaceValidator()]], indication: [''],
+            diagnostic: ['', [Validators.required, this.noWhitespaceValidator()]],
+            indication: [''],
+            packageQuantity: [''],
             duplicate: [false],
             trimestral: [false],
             triplicate: [false],
@@ -444,9 +403,52 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
 
         this.suppliesForm.push(supplies);
         this.supplySpinner.push({ show: false });
+
+        this.subscribeToMagistralChanges(supplies, this.suppliesForm.length - 1);
         this.subscribeToSupplyChanges(supplies, this.suppliesForm.length - 1);
         this.subscribeToTriplicateChanges(supplies, this.suppliesForm.length - 1);
         this.subscribeToDuplicateChanges(supplies, this.suppliesForm.length - 1);
+    }
+
+    subscribeToMagistralChanges(control: FormGroup, index: number) {
+        const magistralControl = control.get('isMagistral');
+        if (magistralControl) {
+            magistralControl.valueChanges.subscribe(isMagistral => {
+                this.updateSupplyValidators(control, isMagistral);
+            });
+        }
+    }
+
+    updateSupplyValidators(control: FormGroup, isMagistral: boolean) {
+        const nameControl = control.get('supply.name');
+        const descriptionControl = control.get('supply.description');
+        const quantityPresentationControl = control.get('quantityPresentation');
+        const packageQuantityControl = control.get('packageQuantity');
+
+        if (isMagistral) {
+            nameControl?.setValidators([Validators.required]);
+            descriptionControl?.setValidators([Validators.required]);
+            quantityPresentationControl?.clearValidators();
+            packageQuantityControl?.setValidators([Validators.required, Validators.min(1)]);
+        } else {
+            nameControl?.setValidators([Validators.required, medicationSelectedValidator()]);
+            descriptionControl?.clearValidators();
+            quantityPresentationControl?.setValidators([Validators.required, Validators.min(1)]);
+            packageQuantityControl?.clearValidators();
+        }
+
+        nameControl?.updateValueAndValidity();
+        descriptionControl?.updateValueAndValidity();
+        quantityPresentationControl?.updateValueAndValidity();
+        packageQuantityControl?.updateValueAndValidity();
+
+        if (isMagistral) {
+            control.get('supply.snomedConcept')?.reset();
+            quantityPresentationControl?.reset();
+        } else {
+            descriptionControl?.reset();
+            packageQuantityControl?.reset();
+        }
     }
 
     subscribeToSupplyChanges(control: FormGroup, index: number) {
@@ -454,7 +456,9 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
             debounceTime(300),
             distinctUntilChanged()
         ).subscribe((supply: string) => {
-            if (typeof supply === 'string') {
+            const isMagistral = control.get('isMagistral')?.value;
+
+            if (!isMagistral && typeof supply === 'string') {
                 const snomedConcept = control.get('supply.snomedConcept');
                 const currentConceptId = snomedConcept?.get('conceptId')?.value;
 

@@ -1,10 +1,9 @@
 <div [formGroup]="patientForm" class="patient-form-container">
-  <div [attr.fxLayout]="layout" [attr.fxLayoutGap]="layout === 'row' ? '10px' : '0'"
-    [attr.fxLayoutAlign]="layout === 'row' ? 'start center' : 'start'" [attr.fxLayoutAlign.xs]="'center center'"
-    class="patient-container">
+  <!-- Fila 1: DNI y Sexo -->
+  <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center" class="patient-container">
 
     <!-- DNI paciente -->
-    <mat-form-field [appearance]="appearance" fxFlex="50">
+    <mat-form-field appearance="fill" fxFlex>
       <mat-label>DNI paciente</mat-label>
       <input type="text" tabIndex="1" #dni placeholder="DNI" aria-label="Number" matInput required maxlength="8"
         formControlName="dni" [matAutocomplete]="auto">
@@ -34,7 +33,7 @@
     </mat-form-field>
 
     <!-- Sexo paciente -->
-    <mat-form-field [appearance]="appearance" fxFlex="50">
+    <mat-form-field appearance="fill" fxFlex>
       <mat-label>Sexo</mat-label>
       <mat-select formControlName="sex" required tabIndex="2">
         <mat-option *ngFor="let sex of sex_options" [value]="sex">
@@ -48,13 +47,11 @@
     </mat-form-field>
   </div>
 
-  <!-- Segunda fila: Apellido y Nombre -->
-  <div [attr.fxLayout]="layout" [attr.fxLayoutGap]="layout === 'row' ? '10px' : '0'"
-    [attr.fxLayoutAlign]="layout === 'row' ? 'start center' : 'start'" [attr.fxLayoutAlign.xs]="'center center'"
-    class="patient-container">
+  <!-- Fila 2: Apellido, Nombre y Nombre autopercibido -->
+  <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center" class="patient-container">
 
     <!-- Apellido paciente -->
-    <mat-form-field [appearance]="appearance" fxFlex="100">
+    <mat-form-field appearance="fill" fxFlex>
       <mat-label>Apellido paciente</mat-label>
       <input type="text" tabIndex="3" placeholder="Apellido" matInput required formControlName="lastName">
 
@@ -64,7 +61,7 @@
     </mat-form-field>
 
     <!-- Nombre paciente -->
-    <mat-form-field [appearance]="appearance" fxFlex="100">
+    <mat-form-field appearance="fill" fxFlex>
       <mat-label>Nombre paciente</mat-label>
       <input type="text" tabIndex="4" placeholder="Nombre" matInput required formControlName="firstName"
         [value]="displayPatientName">
@@ -75,37 +72,31 @@
     </mat-form-field>
 
     <!-- Nombre autopercibido -->
-    <mat-form-field [appearance]="appearance" fxFlex="100">
+    <mat-form-field appearance="fill" fxFlex>
       <mat-label>Nombre autopercibido</mat-label>
       <input type="text" tabIndex="5" placeholder="Nombre autopercibido" matInput formControlName="nombreAutopercibido">
     </mat-form-field>
-
-
   </div>
 
-  <!-- Segunda fila: Apellido y Nombre -->
-  <div [attr.fxLayout]="layout" [attr.fxLayoutGap]="layout === 'row' ? '10px' : '0'"
-    [attr.fxLayoutAlign]="layout === 'row' ? 'start center' : 'start'" [attr.fxLayoutAlign.xs]="'center center'"
-    class="patient-container">
-
-    <!-- Fecha de nacimiento -->
-    <mat-form-field appearance="fill" fxFlex="50" fxFlex.xs="100" *ngIf="showFechaNac">
+  <!-- Fila 3: Fecha de nacimiento -->
+  <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center" class="patient-container">
+    <mat-form-field appearance="fill" fxFlex="50" *ngIf="showFechaNac">
       <mat-label>Fecha de nacimiento</mat-label>
       <input matInput [matDatepicker]="fechaNacPicker" formControlName="fechaNac" placeholder="DD/MM/AAAA" required
         tabIndex="6" readonly [min]="minDate" [max]="maxDate">
       <mat-datepicker-toggle matSuffix [for]="fechaNacPicker"></mat-datepicker-toggle>
       <mat-datepicker #fechaNacPicker [startAt]="null" [touchUi]="false" [startView]="'multi-year'"></mat-datepicker>
 
-      <mat-error *ngIf="patientFechaNac.errors?.required">
+      <mat-error *ngIf="patientFechaNac.errors?.['required']">
         Debe ingresar la fecha de nacimiento
       </mat-error>
-      <mat-error *ngIf="patientFechaNac.errors?.invalidDate">
+      <mat-error *ngIf="patientFechaNac.errors?.['invalidDate']">
         Fecha inválida
       </mat-error>
-      <mat-error *ngIf="patientFechaNac.errors?.futureDate">
+      <mat-error *ngIf="patientFechaNac.errors?.['futureDate']">
         La fecha de nacimiento no puede ser futura
       </mat-error>
-      <mat-error *ngIf="patientFechaNac.errors?.tooOldDate">
+      <mat-error *ngIf="patientFechaNac.errors?.['tooOldDate']">
         La fecha de nacimiento debe ser posterior a 1900
       </mat-error>
     </mat-form-field>
@@ -115,12 +106,11 @@
   <div *ngIf="showObraSocial" class="obra-social-section">
     <mat-checkbox formControlName="otraOS">Elegir otra cobertura social</mat-checkbox>
 
-    <div formGroupName="os" [attr.fxLayout]="layout" [attr.fxLayoutGap]="layout === 'row' ? '10px' : '0'"
-      [attr.fxLayoutAlign]="layout === 'row' ? 'start center' : 'start'" [attr.fxLayoutAlign.xs]="'center center'"
+    <div formGroupName="os" fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center"
       class="obra-social-container">
 
       <!-- Obra Social - Select cuando hay paciente y checkbox no marcado -->
-      <mat-form-field appearance="fill" fxFlex="100" *ngIf="!patientForm.get('otraOS')?.value">
+      <mat-form-field appearance="fill" fxFlex *ngIf="!patientForm.get('otraOS')?.value">
         <mat-label>Obra Social</mat-label>
         <mat-select formControlName="nombre" (selectionChange)="onOsSelected($event.value)">
           <mat-option *ngIf="!obraSocial || obraSocial.length === 0" disabled>
@@ -133,7 +123,7 @@
       </mat-form-field>
 
       <!-- Obra Social - Autocomplete cuando checkbox está marcado -->
-      <mat-form-field appearance="fill" fxFlex="100" *ngIf="patientForm.get('otraOS')?.value">
+      <mat-form-field appearance="fill" fxFlex *ngIf="patientForm.get('otraOS')?.value">
         <mat-label>Obra Social</mat-label>
         <input type="text" matInput formControlName="nombre" [matAutocomplete]="autoOS"
           placeholder="Buscar obra social">
@@ -141,7 +131,6 @@
         <mat-autocomplete #autoOS="matAutocomplete" [displayWith]="displayOs"
           (optionSelected)="onOsSelected($event.option.value)">
           <mat-option *ngFor="let os of filteredObrasSociales | async" [value]="os">
-
             {{ os.nombre }}
           </mat-option>
         </mat-autocomplete>
@@ -150,15 +139,13 @@
       <!-- Número de Afiliado -->
       <mat-form-field appearance="fill" fxFlex="18">
         <mat-label>Numero de Afiliado</mat-label>
-        <input type="text" matInput formControlName="numeroAfiliado"
-          [disabled]="!this.patientForm.get('patient.os.nombre')" inputmode="numeric" pattern="[0-9]*">
-        <mat-error *ngIf="patientForm.get('patient')?.get('os')?.get('numeroAfiliado')?.errors?.required">
+        <input type="text" matInput formControlName="numeroAfiliado" [disabled]="!patientForm.get('os.nombre')?.value"
+          inputmode="numeric" pattern="[0-9]*">
+        <mat-error *ngIf="patientForm.get('os')?.get('numeroAfiliado')?.errors?.['required']">
           Debe ingresar el número de afiliado.
         </mat-error>
-        <mat-error *ngIf="patientForm.get('patient')?.get('os')?.get('numeroAfiliado')?.errors?.pattern">
-          Sólo
-          se permiten
-          números.
+        <mat-error *ngIf="patientForm.get('os')?.get('numeroAfiliado')?.errors?.['pattern']">
+          Sólo se permiten números.
         </mat-error>
       </mat-form-field>
     </div>
