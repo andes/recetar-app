@@ -59,6 +59,6 @@ export class UserService {
         return this.updateUser(_id, { isActive });
     }
     updateUserOrganizaciones(_id: string, organizaciones: SubOrganizacion[]): Observable<User> {
-        return this.http.post<User>(`${environment.API_END_POINT}/users/update`, { _id, organizaciones });
+        return this.http.post<User>(`${environment.API_END_POINT}/users/update-own`, { _id, organizaciones });
     }
 }
