@@ -354,7 +354,9 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
 
     getPrescriptionStatus(item: MixedPrescription): string {
         if (this.isAndesPrescription(item)) {
-            return this.normalizeStatus(item.estadoActual.tipo);
+            // Manejar tanto formato viejo de Andes como nuevo (status a nivel raiz)
+            const currentStatus = item.estadoActual?.tipo || (item as any).status;
+            return this.normalizeStatus(currentStatus);
         } else {
             return this.normalizeStatus(item.status);
         }
@@ -564,6 +566,38 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     ngOnDestroy() {
         this.destroy$.next();
         this.destroy$.complete();
+    }
+
+    getStatus(prescription: Prescriptions): string {
+        if (!prescription) {
+            return '';
+        }
+
+        const status = (prescription.status || '').toLowerCase();
+
+        switch (status) {
+            case 'pendiente':
+                return 'Vigente';
+            case 'finalizada':
+                return 'Dispensada';
+            default:
+                if (prescription.dispensedBy || prescription.dispensedAt) {
+                    return 'Dispensada';
+                }
+
+                return prescription.status || '';
+        }
+    }
+
+    getStatusColor(prescription: MixedPrescription): string {
+        const status = this.getPrescriptionStatus(prescription);
+
+        switch (status) {
+            case 'VENCIDA':
+                return 'red';
+            default:
+                return '#000000';
+        }
     }
 
     getCertificateStatus(certificate: Certificate): string {

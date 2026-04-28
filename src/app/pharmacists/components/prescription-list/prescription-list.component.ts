@@ -365,4 +365,38 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         }
         return false;
     }
+
+    getStatus(prescription: Prescriptions | AndesPrescriptions): string {
+        if ('estadoActual' in prescription) {
+            return this.normalizeStatus(prescription.estadoActual?.tipo);
+        } else if ('status' in prescription) {
+            return this.normalizeStatus(prescription.status);
+        }
+        return '';
+    }
+
+    getStatusColor(prescription: Prescriptions | AndesPrescriptions): string {
+        const status = this.getStatus(prescription);
+        if (status === 'VENCIDA') {
+            return 'red';
+        }
+        return '#000000de';
+    }
+
+    private normalizeStatus(status: string): string {
+        if (!status) {
+            return '';
+        }
+        const statusLower = status.toLowerCase();
+        const statusMap: { [key: string]: string } = {
+            'vigente': 'VIGENTE',
+            'finalizada': 'FINALIZADA',
+            'vencida': 'VENCIDA',
+            'suspendida': 'SUSPENDIDA',
+            'rechazada': 'RECHAZADA',
+            'pendiente': 'VIGENTE',
+            'dispensada': 'FINALIZADA'
+        };
+        return statusMap[statusLower] || status.toUpperCase();
+    }
 }
