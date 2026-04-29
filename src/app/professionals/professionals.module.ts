@@ -35,7 +35,6 @@ import { SupplyListComponent } from './components/supply-list/supply-list.compon
 import { PracticesFormComponent } from './components/practices-form/practices-form.component';
 import { CertificatePracticePrinterComponent } from './components/certificate-practice-printer/certificate-practice-printer.component';
 import { SelectorAmbitoComponent } from './components/selector-ambito/selector-ambito.component';
-import { EditUserInfoComponent } from './components/edit-user-info/edit-user-info.component';
 import { SharedModule } from '@shared/shared.module';
 import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 import { OrganizacionesSelectorComponent } from './components/organizaciones-selector/organizaciones-selector.component';
@@ -50,7 +49,8 @@ import { OrganizacionDialogComponent } from './components/organizacion-dialog/or
     CertificateFormComponent,
     CertificatePracticePrinterComponent,
     SelectorAmbitoComponent,
-    EditUserInfoComponent,
+    OrganizacionesSelectorComponent,
+    OrganizacionDialogComponent,
     OrganizacionesSelectorComponent,
     OrganizacionDialogComponent,
   ],

@@ -19,8 +19,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DialogComponent } from './components/dialog/dialog.component';
 import { NewUserComponent } from './components/new-user/new-user.component';
 import { NewUserPharmacistComponent } from './components/new-user-pharmacist/new-user-pharmacist.component';
+import { ConfirmUpdateComponent } from './components/confirm-update/confirm-update.component';
 import { MatSelectModule } from '@angular/material/select';
-import {MatDatepickerModule} from '@angular/material/datepicker';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { NgxTurnstileFormsModule } from '../shared/ngx-turnstile/ngx-turnstile-forms.module';
 
 
@@ -31,6 +32,7 @@ import { NgxTurnstileFormsModule } from '../shared/ngx-turnstile/ngx-turnstile-f
     routingComponents,
     NewUserComponent,
     NewUserPharmacistComponent,
+    ConfirmUpdateComponent
   ],
   imports: [
     CommonModule,
