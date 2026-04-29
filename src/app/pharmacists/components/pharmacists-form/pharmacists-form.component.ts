@@ -1,23 +1,24 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, AbstractControl, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Observable, forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { Observable, combineLatest, forkJoin, of } from 'rxjs';
 
 // Services
-import { PrescriptionsService } from '@services/prescriptions.service';
-import { InsurancesService } from '@services/insurance.service';
 import { AndesPrescriptionsService } from '@services/andesPrescription.service';
+import { InsurancesService } from '@services/insurance.service';
+import { PrescriptionsService } from '@services/prescriptions.service';
 
 // Interfaces
-import { Patient } from '@interfaces/patients';
-import { Prescriptions } from '@interfaces/prescriptions';
 import { Insurances } from '@interfaces/insurances';
+import { Patient } from '@interfaces/patients';
 
 // Material
-import { MatDialog } from '@angular/material/dialog';
-import { DialogComponent } from '@pharmacists/components/dialog/dialog.component';
 import { ThemePalette } from '@angular/material/core';
 import { PatientsService } from '@services/patients.service';
+import { MatDialog } from '@angular/material/dialog';
+import { PrescriptionListComponent } from '../prescription-list/prescription-list.component';
+import { DialogComponent } from '../dialog/dialog.component';
+import { Prescriptions } from '@interfaces/prescriptions';
 
 
 @Component({
@@ -29,6 +30,7 @@ import { PatientsService } from '@services/patients.service';
 export class PharmacistsFormComponent implements OnInit {
 
     @ViewChild('picker1') picker1;
+    @ViewChild(PrescriptionListComponent) prescriptionList: PrescriptionListComponent;
 
     title = 'Farmacia: ';
     prescriptionForm: FormGroup;
@@ -45,6 +47,8 @@ export class PharmacistsFormComponent implements OnInit {
     private lastSexo: string;
     private lastDate: string;
     dniMinLength = 6;
+    // Controla si ya se presionó "Buscar" al menos una vez
+    hasSearchedOnce = false;
 
     constructor(
         private fBuilder: FormBuilder,
@@ -76,11 +80,24 @@ export class PharmacistsFormComponent implements OnInit {
                 this.lastDate = digestDate;
                 this.dniShowSpinner = false;
                 this.dateShowSpinner = false;
+
                 if (!prescriptionsSuccess && !andesPrescriptionsSuccess) {
                     this.openDialog('noPrescriptions');
                 }
 
                 this.patient = patientSuccess[0];
+
+                // Establecer el contexto del paciente en la lista, habilitar filtros y resetearlos
+                if (this.prescriptionList) {
+                    this.prescriptionList.setPatientContext(values.patient_dni, values.patient_sexo);
+                    this.prescriptionList.resetFiltersToDefault();
+                    this.hasSearchedOnce = true;
+                    // Aplicar los filtros por defecto inmediatamente
+                    this.prescriptionList.applyFilters();
+                } else {
+                    // Habilitar igual por si el ViewChild no está disponible aún
+                    this.hasSearchedOnce = true;
+                }
             });
         }
     }

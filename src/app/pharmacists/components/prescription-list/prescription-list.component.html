@@ -16,9 +16,51 @@
     </mat-card-title>
     <mat-card-content>
 
-        <mat-form-field>
-            <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filtrar por fecha">
-        </mat-form-field>
+        <!-- Controles de filtro -->
+        <div fxLayout="row" fxLayout.xs="column" fxLayoutGap="20px" fxLayoutAlign="start center"
+            class="filter-container" style="margin-bottom: 20px;">
+            <div fxLayout="row" fxLayout.xs="column" fxLayoutGap="20px" fxFlex fxFlex.xs="100">
+                <!-- Filtro por estado -->
+                <mat-form-field fxFlex.xs="100">
+                    <mat-label>Estado de receta</mat-label>
+                    <mat-select [(value)]="statusFilter" (selectionChange)="onStatusFilterChange()"
+                        [disabled]="!filtersEnabled">
+                        <mat-option *ngFor="let option of statusOptions" [value]="option.value">
+                            {{option.label}}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <!-- Filtro por fecha desde -->
+                <mat-form-field fxFlex.xs="100">
+                    <mat-label>Fecha desde</mat-label>
+                    <input matInput [matDatepicker]="pickerFrom" [(ngModel)]="dateFromFilter"
+                        (dateChange)="onDateFilterChange()" [max]="dateToFilter" [disabled]="!filtersEnabled">
+                    <mat-datepicker-toggle matSuffix [for]="pickerFrom"
+                        [disabled]="!filtersEnabled"></mat-datepicker-toggle>
+                    <mat-datepicker #pickerFrom></mat-datepicker>
+                    <mat-error *ngIf="dateRangeInvalid">La fecha desde no puede ser mayor a la fecha hasta.</mat-error>
+                </mat-form-field>
+
+                <!-- Filtro por fecha hasta -->
+                <mat-form-field fxFlex.xs="100">
+                    <mat-label>Fecha hasta</mat-label>
+                    <input matInput [matDatepicker]="pickerTo" [(ngModel)]="dateToFilter"
+                        (dateChange)="onDateFilterChange()" [min]="dateFromFilter" [disabled]="!filtersEnabled">
+                    <mat-datepicker-toggle matSuffix [for]="pickerTo"
+                        [disabled]="!filtersEnabled"></mat-datepicker-toggle>
+                    <mat-datepicker #pickerTo></mat-datepicker>
+                    <mat-error *ngIf="dateRangeInvalid">La fecha hasta no puede ser menor a la fecha desde.</mat-error>
+                </mat-form-field>
+            </div>
+            <!-- Botón para aplicar filtros -->
+            <div fxFlex.xs="100">
+                <button mat-raised-button color="primary" (click)="applyFilters()"
+                    [disabled]="!filtersEnabled || dateRangeInvalid">
+                    Aplicar filtros
+                </button>
+            </div>
+        </div>
 
         <div class="container mat-elevation-z8">
             <div class="table-container" *ngIf="!loadingPrescriptions">
