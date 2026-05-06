@@ -53,7 +53,8 @@ function validDateValidator(): ValidatorFn {
             useExisting: forwardRef(() => PatientFormComponent),
             multi: true
         }
-    ]
+    ],
+    standalone: false
 })
 export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAccessor, Validator {
     @Input() showObraSocial = false;

@@ -27,7 +27,8 @@ import { PrescriptionPrinterComponent } from '../prescription-printer/prescripti
     providers: [
         PrescriptionPrinterComponent,
         { provide: MatPaginatorIntl, useClass: SpanishPaginatorIntl }
-    ]
+    ],
+    standalone: false
 })
 export class UsersListComponent implements OnInit, AfterContentInit, OnDestroy {
 

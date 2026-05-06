@@ -9,9 +9,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
-  selector: 'app-forgot',
-  templateUrl: './forgot.component.html',
-  styleUrls: ['./forgot.component.sass']
+    selector: 'app-forgot',
+    templateUrl: './forgot.component.html',
+    styleUrls: ['./forgot.component.sass'],
+    standalone: false
 })
 export class ForgotComponent implements OnInit {
 

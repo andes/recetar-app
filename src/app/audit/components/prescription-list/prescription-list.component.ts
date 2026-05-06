@@ -20,7 +20,7 @@ import { DialogReportComponent } from '../dialog-report/dialog-report.component'
         detailExpand,
         arrowDirection
     ],
-
+    standalone: false
 })
 export class PrescriptionListComponent implements OnInit, AfterContentInit {
 

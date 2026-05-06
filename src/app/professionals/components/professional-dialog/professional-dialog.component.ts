@@ -14,6 +14,7 @@ import { fadeInOnEnterAnimation, fadeOutOnLeaveAnimation } from 'angular-animati
         fadeInOnEnterAnimation(),
         fadeOutOnLeaveAnimation()
     ],
+    standalone: false
 })
 export class ProfessionalDialogComponent implements OnInit {
     prescription: Prescriptions;

@@ -12,7 +12,8 @@ import { ThemePalette } from '@angular/material/core';
 @Component({
     selector: 'app-organizacion-dialog',
     templateUrl: './organizacion-dialog.component.html',
-    styleUrls: ['./organizacion-dialog.component.sass']
+    styleUrls: ['./organizacion-dialog.component.sass'],
+    standalone: false
 })
 export class OrganizacionDialogComponent implements OnInit, OnDestroy {
     organizacionForm: FormGroup;

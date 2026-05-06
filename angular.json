@@ -115,20 +115,10 @@
               "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
               "src/styles.sass"
             ],
-            "scripts": []
-          }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "tsconfig.app.json",
-              "tsconfig.spec.json",
-              "e2e/tsconfig.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
+            "scripts": [],
+            "stylePreprocessorOptions": {
+              "includePaths": ["src/app/shared/", "src"]
+            }
           }
         },
         "e2e": {
@@ -146,7 +136,6 @@
       }
     }
   },
-  "defaultProject": "preinscriptions-control",
   "cli": {
     "analytics": false
   }

@@ -9,7 +9,8 @@ import { catchError, switchMap } from 'rxjs/operators';
 @Component({
     selector: 'app-public-practice',
     templateUrl: './public-practice.component.html',
-    styleUrls: ['./public-practice.component.sass']
+    styleUrls: ['./public-practice.component.sass'],
+    standalone: false
 })
 
 export class PublicPracticeComponent implements OnInit {

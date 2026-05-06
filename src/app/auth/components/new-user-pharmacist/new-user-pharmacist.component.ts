@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
     selector: 'app-new-user',
     templateUrl: './new-user-pharmacist.component.html',
     styleUrls: ['./new-user-pharmacist.component.sass'],
+    standalone: false
 })
 export class NewUserPharmacistComponent implements OnInit {
 

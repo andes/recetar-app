@@ -8,13 +8,14 @@ import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unif
 
 
 @Component({
-  selector: 'app-dialog',
-  templateUrl: './dialog.component.html',
-  styleUrls: ['./dialog.component.sass'],
-  animations: [
-    fadeInOnEnterAnimation(), 
-    fadeOutOnLeaveAnimation()
-  ]
+    selector: 'app-dialog',
+    templateUrl: './dialog.component.html',
+    styleUrls: ['./dialog.component.sass'],
+    animations: [
+        fadeInOnEnterAnimation(),
+        fadeOutOnLeaveAnimation()
+    ],
+    standalone: false
 })
 export class DialogComponent implements OnInit {
 
