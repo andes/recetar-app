@@ -6,7 +6,8 @@ import { AmbitoService } from "@auth/services/ambito.service";
 @Component({
     selector: 'app-selector-ambito',
     templateUrl: './selector-ambito.component.html',
-    styleUrls: ['./selector-ambito.component.sass']
+    styleUrls: ['./selector-ambito.component.sass'],
+    standalone: false
 })
 export class SelectorAmbitoComponent implements OnInit {
     ambito: 'publico' | 'privado';

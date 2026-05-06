@@ -5,7 +5,8 @@ import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unif
 
 @Component({
     selector: 'app-certificate-practice-printer',
-    templateUrl: './certificate-practice-printer.html'
+    templateUrl: './certificate-practice-printer.html',
+    standalone: false
 })
 export class CertificatePracticePrinterComponent implements OnInit {
 

@@ -10,7 +10,8 @@ import { debounceTime, distinctUntilChanged, switchMap, takeUntil, catchError } 
 @Component({
     selector: 'app-user-create',
     templateUrl: './user-create.component.html',
-    styleUrls: ['./user-create.component.sass']
+    styleUrls: ['./user-create.component.sass'],
+    standalone: false
 })
 export class UserCreateComponent implements OnInit, OnDestroy {
     @Output() cancelCreate = new EventEmitter<void>();

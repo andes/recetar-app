@@ -20,10 +20,10 @@ import { duration } from 'moment';
 
 
 @Component({
-  selector: 'app-pharmacists-form',
-  templateUrl: './audit-form.component.html',
-  styleUrls: ['./audit-form.component.sass'],
-
+    selector: 'app-pharmacists-form',
+    templateUrl: './audit-form.component.html',
+    styleUrls: ['./audit-form.component.sass'],
+    standalone: false
 })
 export class AuditFormComponent implements OnInit {
 

@@ -37,7 +37,7 @@ type MixedPrescription = Prescriptions | AndesPrescriptions;
         detailExpand,
         arrowDirection
     ],
-
+    standalone: false
 })
 export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnDestroy {
     private destroy$ = new Subject<void>();

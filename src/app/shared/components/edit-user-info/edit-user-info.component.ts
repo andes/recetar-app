@@ -8,7 +8,8 @@ import { UserService } from '@services/users.service';
 @Component({
     selector: 'app-edit-user-info',
     templateUrl: './edit-user-info.component.html',
-    styleUrls: ['./edit-user-info.component.sass']
+    styleUrls: ['./edit-user-info.component.sass'],
+    standalone: false
 })
 export class EditUserInfoComponent implements OnInit {
     editUserForm: FormGroup;

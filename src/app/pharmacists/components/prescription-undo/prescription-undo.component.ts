@@ -15,11 +15,12 @@ export class CounterDownService {
     selector: 'app-prescription-undo',
     templateUrl: './prescription-undo.component.html',
     styleUrls: ['./prescription-undo.component.sass'],
-    animations:[
+    animations: [
         showCancelDispense,
         hideTimer
     ],
-    providers: [CounterDownService]
+    providers: [CounterDownService],
+    standalone: false
 })
 export class PrescriptionUndoComponent implements OnInit, OnDestroy {
 

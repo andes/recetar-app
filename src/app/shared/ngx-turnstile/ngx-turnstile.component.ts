@@ -35,9 +35,10 @@ const CALLBACK_NAME = 'onloadTurnstileCallback';
 type SupportedVersion = '0';
 
 @Component({
-  selector: 'ngx-turnstile',
-  template: ``,
-  exportAs: 'ngx-turnstile',
+    selector: 'ngx-turnstile',
+    template: ``,
+    exportAs: 'ngx-turnstile',
+    standalone: false
 })
 export class NgxTurnstileComponent implements AfterViewInit, OnDestroy {
   @Input() siteKey!: string;
