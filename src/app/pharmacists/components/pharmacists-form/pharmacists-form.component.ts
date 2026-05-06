@@ -24,7 +24,7 @@ import { PatientsService } from '@services/patients.service';
     selector: 'app-pharmacists-form',
     templateUrl: './pharmacists-form.component.html',
     styleUrls: ['./pharmacists-form.component.sass'],
-
+    standalone: false
 })
 export class PharmacistsFormComponent implements OnInit {
 

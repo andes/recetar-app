@@ -44,7 +44,8 @@ function medicationSelectedValidator(): ValidatorFn {
     animations: [
         step,
         stepLink
-    ]
+    ],
+    standalone: false
 })
 
 export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewInit {

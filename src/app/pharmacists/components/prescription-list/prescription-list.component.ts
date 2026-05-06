@@ -24,7 +24,7 @@ import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unif
         detailExpand,
         arrowDirection
     ],
-
+    standalone: false
 })
 export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDestroy {
     private destroy$ = new Subject<void>();

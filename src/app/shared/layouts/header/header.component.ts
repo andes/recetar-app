@@ -5,9 +5,10 @@ import { Observable } from 'rxjs';
 import { AmbitoService } from '../../../auth/services/ambito.service';
 
 @Component({
-  selector: 'app-header',
-  templateUrl: './header.component.html',
-  styleUrls: ['./header.component.sass']
+    selector: 'app-header',
+    templateUrl: './header.component.html',
+    styleUrls: ['./header.component.sass'],
+    standalone: false
 })
 export class HeaderComponent implements OnInit {
 

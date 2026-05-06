@@ -11,7 +11,8 @@ import { Router } from '@angular/router';
 @Component({
     selector: 'app-new-user',
     templateUrl: './new-user.component.html',
-    styleUrls: ['./new-user.component.sass']
+    styleUrls: ['./new-user.component.sass'],
+    standalone: false
 })
 export class NewUserComponent implements OnInit {
 

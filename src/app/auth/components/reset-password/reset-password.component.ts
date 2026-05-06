@@ -3,13 +3,14 @@ import { FormBuilder, FormGroup, AbstractControl, FormGroupDirective, Validators
 import { AuthService } from '@auth/services/auth.service';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
-import { ThemePalette } from '@angular/material/core/common-behaviors/color';
+import { ThemePalette } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
-  selector: 'app-reset-password',
-  templateUrl: './reset-password.component.html',
-  styleUrls: ['./reset-password.component.sass']
+    selector: 'app-reset-password',
+    templateUrl: './reset-password.component.html',
+    styleUrls: ['./reset-password.component.sass'],
+    standalone: false
 })
 export class ResetPasswordComponent implements OnInit {
 

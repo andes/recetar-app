@@ -8,7 +8,8 @@ import { catchError, switchMap } from 'rxjs/operators';
 @Component({
     selector: 'app-public-certificate',
     templateUrl: './public-certificate.component.html',
-    styleUrls: ['./public-certificate.component.sass']
+    styleUrls: ['./public-certificate.component.sass'],
+    standalone: false
 })
 
 export class PublicCertificateComponent implements OnInit {

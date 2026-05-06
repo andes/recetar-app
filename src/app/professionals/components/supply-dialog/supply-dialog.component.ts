@@ -4,13 +4,14 @@ import { fadeInOnEnterAnimation, fadeOutOnLeaveAnimation } from 'angular-animati
 // import { InteractionService } from "@professionals/interaction.service";
 
 @Component({
-  selector: 'app-supply-dialog',
-  templateUrl: './supply-dialog.component.html',
-  styleUrls: ['./supply-dialog.component.sass'],
-  animations: [
-    fadeInOnEnterAnimation(), 
-    fadeOutOnLeaveAnimation()
-  ],
+    selector: 'app-supply-dialog',
+    templateUrl: './supply-dialog.component.html',
+    styleUrls: ['./supply-dialog.component.sass'],
+    animations: [
+        fadeInOnEnterAnimation(),
+        fadeOutOnLeaveAnimation()
+    ],
+    standalone: false
 })
 export class SupplyDialogComponent implements OnInit {
 

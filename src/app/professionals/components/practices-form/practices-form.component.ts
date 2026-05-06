@@ -9,7 +9,8 @@ import { PatientFormComponent } from '@shared/components/patient-form/patient-fo
 @Component({
     selector: 'app-practices-form',
     templateUrl: './practices-form.component.html',
-    styleUrls: ['./practices-form.component.sass']
+    styleUrls: ['./practices-form.component.sass'],
+    standalone: false
 })
 export class PracticesFormComponent implements OnInit {
     @ViewChild('patientForm') patientFormComponent: PatientFormComponent;

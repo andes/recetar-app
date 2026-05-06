@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'app-pharmacists',
-  templateUrl: './audit.component.html',
-  styleUrls: ['./audit.component.sass']
+    selector: 'app-pharmacists',
+    templateUrl: './audit.component.html',
+    styleUrls: ['./audit.component.sass'],
+    standalone: false
 })
 export class AuditComponent implements OnInit {
 

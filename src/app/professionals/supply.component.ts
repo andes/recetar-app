@@ -10,13 +10,14 @@ import { AuthService } from '@auth/services/auth.service';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-productos',
-  templateUrl: './supply.component.html',
-  styleUrls: ['./supply.component.sass'],
-  animations: [
-    step,
-    stepLink
-  ]
+    selector: 'app-productos',
+    templateUrl: './supply.component.html',
+    styleUrls: ['./supply.component.sass'],
+    animations: [
+        step,
+        stepLink
+    ],
+    standalone: false
 })
 export class SupplyComponent implements OnInit {
   constructor(

@@ -11,14 +11,15 @@ import { rowsAnimation, detailExpand, arrowDirection } from '@animations/animati
 
 
 @Component({
-  selector: 'app-supply-list',
-  templateUrl: './supply-list.component.html',
-  styleUrls: ['./supply-list.component.sass'],
-  animations: [
-    rowsAnimation,
-    detailExpand,
-    arrowDirection
-  ],
+    selector: 'app-supply-list',
+    templateUrl: './supply-list.component.html',
+    styleUrls: ['./supply-list.component.sass'],
+    animations: [
+        rowsAnimation,
+        detailExpand,
+        arrowDirection
+    ],
+    standalone: false
 })
 export class SupplyListComponent implements OnInit, AfterContentInit {
   @Output() editSupplyEvent = new EventEmitter();
