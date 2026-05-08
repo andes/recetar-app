@@ -6,7 +6,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 @Component({
     selector: 'app-confirm-update',
     templateUrl: './confirm-update.component.html',
-    styleUrls: ['./confirm-update.component.sass']
+    styleUrls: ['./confirm-update.component.sass'],
+    standalone: false
 })
 export class ConfirmUpdateComponent implements OnInit {
     isLoading = true;

@@ -45,13 +45,14 @@ function validDateValidator(): ValidatorFn {
 @Component({
   selector: 'app-stock',
   templateUrl: './stock.component.html',
-  styleUrls: ['./stock.component.sass']
+  styleUrls: ['./stock.component.sass'],
+  standalone: false
 })
 
 export class StockComponent implements OnInit, OnDestroy {
   termControl = new FormControl('');
-  typeControl = new FormControl('', Validators.required);
-  quantityControl = new FormControl('', [Validators.required, Validators.min(1)]);
+  typeControl = new FormControl<string>('', Validators.required);
+  quantityControl = new FormControl<number | string>('', [Validators.required, Validators.min(1)]);
   specificationControl = new FormControl('');
   requiresSpecificationControl = new FormControl(false);
   filteredSupplies: Insumo[] = [];
@@ -71,7 +72,7 @@ export class StockComponent implements OnInit, OnDestroy {
   maxDate = new Date();
   today = new Date();
 
-  obraSocialControl = new FormControl('');
+  obraSocialControl = new FormControl<any>('');
   filteredObrasSociales: Observable<any[]>;
   organizacionControl = new FormControl('');
   obraSocial: any[];
@@ -125,7 +126,7 @@ export class StockComponent implements OnInit, OnDestroy {
     // Configurar filtro de obras sociales
     this.filteredObrasSociales = this.obraSocialControl.valueChanges.pipe(
       startWith(''),
-      map(value => {
+      map((value: any) => {
         const name = typeof value === 'string' ? value : value?.nombre;
         return name ? this._filter(name) : (this.obrasSociales ? this.obrasSociales.slice() : []);
       })
@@ -172,7 +173,7 @@ export class StockComponent implements OnInit, OnDestroy {
   }
 
   onSupplySelected(supply: any) {
-    let displayName = supply.nombre || supply.insumo || supply.supply || supply.name || supply.term || '';
+    const displayName = supply.nombre || supply.insumo || supply.supply || supply.name || supply.term || '';
 
     // if (supply.tipo) {
     //   displayName += ` (${supply.tipo})`;
@@ -286,7 +287,6 @@ export class StockComponent implements OnInit, OnDestroy {
         this.obraSocial = [];
       },
       (error) => {
-        console.error('Error al crear prescripción:', error);
         this.saving = false;
         alert('Error al guardar la prescripción. Por favor, intente nuevamente.');
       }
@@ -479,4 +479,3 @@ export class StockComponent implements OnInit, OnDestroy {
     return os && os.nombre ? os.nombre : '';
   }
 }
-

@@ -4,5 +4,4 @@ export default interface SnomedConcept {
     term: string;
     fsn: string;
     semanticTag: string;
-}
-  
+};

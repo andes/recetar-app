@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators, AbstractControl, FormGroupDirective
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '@auth/services/auth.service';
 import { PharmacistsService } from '../../../services/pharmacists.service';
-import * as moment from 'moment';
+import moment from 'moment';
 import { Router } from '@angular/router';
 
 @Component({
@@ -98,19 +98,19 @@ export class NewUserPharmacistComponent implements OnInit {
 
     userRegister(newUserForm: FormGroup, newUserNgForm: FormGroupDirective) {
         this.authService.register(this.newUserForm.value).subscribe
-            (() => {
-                this.cancelar();
-                this._snackBar.open('La cuenta ha sido creada exitosamente', 'cerrar', {
-                    duration: 5000
-                });
-                newUserNgForm.resetForm();
-                newUserForm.reset();
-            },
-                err => {
-                    this._snackBar.open(`Ha ocurrido un error al intentar crear la cuenta: ${JSON.stringify(err)}'`, 'cerrar', {
-                        duration: 5000
-                    });
-                });
+        (() => {
+            this.cancelar();
+            this._snackBar.open('La cuenta ha sido creada exitosamente', 'cerrar', {
+                duration: 5000
+            });
+            newUserNgForm.resetForm();
+            newUserForm.reset();
+        },
+        err => {
+            this._snackBar.open(`Ha ocurrido un error al intentar crear la cuenta: ${JSON.stringify(err)}'`, 'cerrar', {
+                duration: 5000
+            });
+        });
     }
 
     checkDisposicionFarmacia(pharmacist) {

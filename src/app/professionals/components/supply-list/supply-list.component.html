@@ -9,36 +9,37 @@
     </mat-form-field>
 
     <div class="container mat-elevation-z8">
-      <div class="table-container" *ngIf="!loadingPrescriptions">
-        <table mat-table [dataSource]="dataSource" matSort multiTemplateDataRows>
-
-          <!-- Paciente Column -->
-          <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> Nombre </th>
-            <td mat-cell *matCellDef="let element" class='title-cell' test data-label='Nombre'> {{ element.name.toUpperCase() }} </td>
-          </ng-container>
-          <ng-container matColumnDef="action">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> Acción </th>
-            <td mat-cell *matCellDef="let element" (click)="$event.stopPropagation()" class="actions-cell">
-              <button mat-menu-item type="button" (click)="editSupply(element)" matTooltip="Editar" matTooltipPosition="above">
-                <mat-icon>edit</mat-icon>
-              </button>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-          <tr mat-row [@rowsAnimation]="" *matRowDef="let row; columns: displayedColumns;"
-            class="element-row"
-            [class.expanded-row]="expandedElement === row"
-            (click)="expandedElement = expandedElement === row ? null : row">
-          </tr>
-          <!-- <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr> -->
-
-        </table>
-      </div>
-      <div fxLayout="row" fxLayoutAlign="center" class="loading-prescriptions" *ngIf="loadingPrescriptions">
-        <mat-spinner matSuffix color="primary" [diameter]="40"></mat-spinner>
-      </div>
+      @if (!loadingPrescriptions) {
+        <div class="table-container">
+          <table mat-table [dataSource]="dataSource" matSort multiTemplateDataRows>
+            <!-- Paciente Column -->
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Nombre </th>
+              <td mat-cell *matCellDef="let element" class='title-cell' test data-label='Nombre'> {{ element.name.toUpperCase() }} </td>
+            </ng-container>
+            <ng-container matColumnDef="action">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Acción </th>
+              <td mat-cell *matCellDef="let element" (click)="$event.stopPropagation()" class="actions-cell">
+                <button mat-menu-item type="button" (click)="editSupply(element)" matTooltip="Editar" matTooltipPosition="above">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+            <tr mat-row [@rowsAnimation]="" *matRowDef="let row; columns: displayedColumns;"
+              class="element-row"
+              [class.expanded-row]="expandedElement === row"
+              (click)="expandedElement = expandedElement === row ? null : row">
+            </tr>
+            <!-- <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr> -->
+          </table>
+        </div>
+      }
+      @if (loadingPrescriptions) {
+        <div fxLayout="row" fxLayoutAlign="center" class="loading-prescriptions">
+          <mat-spinner matSuffix color="primary" [diameter]="40"></mat-spinner>
+        </div>
+      }
       <mat-paginator [pageSizeOptions]="[10, 20, 30]"></mat-paginator>
     </div>
 

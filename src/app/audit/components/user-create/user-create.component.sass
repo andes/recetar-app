@@ -1,3 +1,5 @@
+@use 'styles/variables' as *
+
 .user-create-container
   padding: 24px
   max-width: 800px
@@ -214,8 +216,10 @@
       
       .actions-container
         display: flex
+        width: 100%
         justify-content: flex-end
         gap: 16px
+        align-items: center
         
         .cancel-button
           min-width: 120px
@@ -232,22 +236,44 @@
             transform: translateY(-1px)
             
         .save-button
-          min-width: 140px
+          min-width: 180px
           height: 44px
           border-radius: 22px
           background: #3f51b5
           box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3)
           transition: all 0.3s ease
+          padding: 0 20px
           
           &:hover:not([disabled])
             transform: translateY(-2px)
             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4)
           
           .button
-            display: flex
-            align-items: center
-            justify-content: center
-            gap: 8px
+              display: flex
+              align-items: center
+              justify-content: center
+              gap: 8px
+              white-space: nowrap
+
+@media (max-width: $small-devices)
+  .user-create-container
+    padding: 16px
+
+    .create-user-card
+      .card-content
+        padding: 24px 16px
+
+      .card-actions
+        padding: 20px 16px
+
+        .actions-container
+          flex-direction: column-reverse
+          align-items: stretch
+
+          .cancel-button,
+          .save-button
+            width: 100%
+            min-width: 0
 
 // Role option styling
 ::ng-deep .mat-option

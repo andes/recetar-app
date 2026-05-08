@@ -1,9 +1,8 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, HostBinding } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { fadeInOnEnterAnimation, fadeOutOnLeaveAnimation } from 'angular-animations';
 import { Prescriptions } from '@interfaces/prescriptions';
-import {MatIconModule} from '@angular/material/icon';
-import { animate, state, style, transition, trigger } from '@angular/animations';
+import { MatIconModule } from '@angular/material/icon';
+import { dialogFade } from '@animations/animations.template';
 import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unified-printer.component';
 
 
@@ -11,31 +10,29 @@ import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unif
     selector: 'app-dialog',
     templateUrl: './dialog.component.html',
     styleUrls: ['./dialog.component.sass'],
-    animations: [
-        fadeInOnEnterAnimation(),
-        fadeOutOnLeaveAnimation()
-    ],
+    animations: [dialogFade],
     standalone: false
 })
 export class DialogComponent implements OnInit {
+    @HostBinding('@dialogFade') public dialogFade = true;
 
-  constructor(
-    public dialogRef: MatDialogRef<DialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: DialogData,
-    private unifiedPrinter: UnifiedPrinterComponent
-  ) {}
-  
-  ngOnInit(): void {
-  }
+    constructor(
+        public dialogRef: MatDialogRef<DialogComponent>,
+        @Inject(MAT_DIALOG_DATA) public data: DialogData,
+        private unifiedPrinter: UnifiedPrinterComponent
+    ) {}
 
-  onNoClick(): void {
-    this.dialogRef.close();
-  }
+    ngOnInit(): void {
+    }
+
+    onNoClick(): void {
+        this.dialogRef.close();
+    }
 
 }
 
 export interface DialogData {
-  prescription: Prescriptions;
-  dialogType: string;
-  text: string;
+    prescription: Prescriptions;
+    dialogType: string;
+    text: string;
 }

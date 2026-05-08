@@ -197,7 +197,7 @@ export class UsersListComponent implements OnInit, AfterContentInit, OnDestroy {
                 data[index] = updatedUser;
                 this.dataSource.data = data;
             }
-        })
+        });
         this.loadingUsers = false;
     }
 

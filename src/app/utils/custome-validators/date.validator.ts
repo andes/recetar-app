@@ -4,7 +4,7 @@ import { AbstractControl, ValidationErrors } from '@angular/forms';
 
 export function fechaValida(control: AbstractControl): ValidationErrors | null {
     const value = control.value;
-    if (!value) return null;
+    if (!value) {return null;}
     const fecha = new Date(value);
     const hoy = new Date();
     fecha.setHours(0, 0, 0, 0);

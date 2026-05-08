@@ -11,9 +11,9 @@
 
         <mat-card-content>
           <form [formGroup]="practicesForm" #practicesNgForm="ngForm"
-                (ngSubmit)="onSubmitPracticesForm(practicesNgForm)" fxLayout="column">
+            (ngSubmit)="onSubmitPracticesForm(practicesNgForm)" fxLayout="column">
             <div class="sub-container" fxLayout="column" fxLayoutAlign="center" fxLayoutGap="10px"
-                 fxLayoutGap.xs="10px">
+              fxLayoutGap.xs="10px">
               <div class="first-block" fxLayout="column" fxLayoutGap="10px" fxLayoutGap.xs="10px">
                 <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center" fxLayoutAlign.xs="center center">
                   <!-- Fecha de práctica -->
@@ -22,9 +22,11 @@
                     <input matInput [matDatepicker]="picker" formControlName="date" required>
                     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                     <mat-datepicker #picker></mat-datepicker>
-                    <mat-error *ngIf="practicesForm.get('date')?.errors?.required">
-                      Debe ingresar la fecha de la práctica
-                    </mat-error>
+                    @if (practicesForm.get('date')?.errors?.required) {
+                      <mat-error>
+                        Debe ingresar la fecha de la práctica
+                      </mat-error>
+                    }
                   </mat-form-field>
                 </div>
 
@@ -51,17 +53,21 @@
               </div>
 
               <!-- Botones -->
-              <div fxLayout="column" fxLayoutAlign="center" fxLayoutGap="20px" *ngIf="!isSubmitPractice" fxFlex="100">
-                <button mat-raised-button color="primary" type="submit">
-                  Crear
-                </button>
-                <button mat-raised-button type="button" (click)="clearPracticesForm(practicesNgForm)">
-                  Limpiar
-                </button>
-              </div>
-              <div fxLayout="row" fxLayoutAlign="center" *ngIf="isSubmitPractice">
-                <mat-spinner [color]="'primary'" [diameter]="30"></mat-spinner>
-              </div>
+              @if (!isSubmitPractice) {
+                <div fxLayout="column" fxLayoutAlign="center" fxLayoutGap="20px" fxFlex="100">
+                  <button mat-raised-button color="primary" type="submit">
+                    Crear
+                  </button>
+                  <button mat-raised-button type="button" (click)="clearPracticesForm(practicesNgForm)">
+                    Limpiar
+                  </button>
+                </div>
+              }
+              @if (isSubmitPractice) {
+                <div fxLayout="row" fxLayoutAlign="center">
+                  <mat-spinner [color]="'primary'" [diameter]="30"></mat-spinner>
+                </div>
+              }
             </div>
           </form>
         </mat-card-content>

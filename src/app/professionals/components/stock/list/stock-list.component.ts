@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, Input, OnChanges, SimpleChanges, AfterContentInit } from '@angular/core';
+import { AfterContentInit, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -16,17 +16,18 @@ import { StockPrinterComponent } from '../printer/stock-printer.component';
         rowsAnimation,
         detailExpand,
         arrowDirection
-    ]
+    ],
+    standalone: false
 })
-export class StockListComponent implements OnInit, OnDestroy, OnChanges {
-    @Input() searchTerm: string = '';
+export class StockListComponent implements OnInit, OnDestroy, OnChanges, AfterContentInit {
+    @Input() searchTerm = '';
 
 
     private destroy$ = new Subject<void>();
 
     dataStock = new MatTableDataSource<any>([]);
     stockColumns: string[] = ['patient', 'dni', 'date', 'status', 'action', 'arrow'];
-    loadingStock: boolean = false;
+    loadingStock = false;
     totalStock = 0;
     expandedElement: any | null;
     stockPageSize = 10;
@@ -79,7 +80,7 @@ export class StockListComponent implements OnInit, OnDestroy, OnChanges {
     private loadStock(offset: number = 0, limit: number = 10) {
         this.loadingStock = true;
 
-        let obs = this.stockService.getAll();
+        const obs = this.stockService.getAll();
 
         // if (this.searchTerm) {
         //      obs = this.stockService.search(this.searchTerm);

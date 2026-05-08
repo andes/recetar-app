@@ -4,21 +4,21 @@ import { Observable } from 'rxjs';
 import { AuthService } from '@auth/services/auth.service';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class RolePharmacistGuard implements CanActivate {
 
-  constructor(private authService: AuthService, private router: Router){}
+    constructor(private authService: AuthService, private router: Router) {}
 
-  canActivate(): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-      if (!(this.authService.isPharmacistsRole() || this.authService.isPharmacistsPublicRole()) && (this.authService.isProfessionalRole() || this.authService.isProfessionalPublicRole())) {
-        this.router.navigate(['/profesionales/recetas/nueva']);
-        return false;
-      } else if (!(this.authService.isPharmacistsRole() || this.authService.isPharmacistsPublicRole()) && this.authService.isAuditRole()) {
-        this.router.navigate(['/audit/recetas/auditar']);
-        return false;
-      }
-      return true;
-  }
+    canActivate(): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
+        if (!(this.authService.isPharmacistsRole() || this.authService.isPharmacistsPublicRole()) && (this.authService.isProfessionalRole() || this.authService.isProfessionalPublicRole())) {
+            this.router.navigate(['/profesionales/recetas/nueva']);
+            return false;
+        } else if (!(this.authService.isPharmacistsRole() || this.authService.isPharmacistsPublicRole()) && this.authService.isAuditRole()) {
+            this.router.navigate(['/audit/recetas/auditar']);
+            return false;
+        }
+        return true;
+    }
 
 }

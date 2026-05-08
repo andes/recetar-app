@@ -3,7 +3,7 @@ import { AbstractControl, ValidationErrors } from '@angular/forms';
 export function cuilValidator(control: AbstractControl): ValidationErrors | null {
     const cuil = control.value;
 
-    if (!cuil) return null; // No validar si está vacío (para uso combinado con Validators.required)
+    if (!cuil) {return null;} // No validar si está vacío (para uso combinado con Validators.required)
 
     const cuilRegex = /^\d{11}$/;
     if (!cuilRegex.test(cuil)) {
@@ -19,8 +19,7 @@ export function cuilValidator(control: AbstractControl): ValidationErrors | null
     }
 
     let verificador = 11 - (sum % 11);
-    if (verificador === 11) verificador = 0;
-    else if (verificador === 10) verificador = 9;
+    if (verificador === 11) {verificador = 0;} else if (verificador === 10) {verificador = 9;}
 
     if (verificador !== nums[10]) {
         return { invalidCuil: true };

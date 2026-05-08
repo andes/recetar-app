@@ -1,81 +1,81 @@
-<div [ngSwitch]="data.dialogType">
-
+<ng-container [ngSwitch]="data.dialogType">
   <div *ngSwitchCase="'noPrescriptions'">
-    <h3 mat-dialog-title><mat-icon>error_outline</mat-icon>  Atención</h3>
+    <h3 mat-dialog-title><mat-icon>error_outline</mat-icon> Atencion</h3>
     <div mat-dialog-content>
       <p>No hay recetas para este paciente</p>
     </div>
     <div mat-dialog-actions align="end">
       <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
     </div>
-  </div> <!-- End case noPrescriptions -->
+  </div>
 
   <div *ngSwitchCase="'dispensed'">
-    <h3 mat-dialog-title><mat-icon>check</mat-icon>  Dispensada</h3>
+    <h3 mat-dialog-title><mat-icon>check</mat-icon> Dispensada</h3>
     <div mat-dialog-content>
-      <p>La receta de {{data.text}} se ha dispensado correctamente!</p>
+      <p>La receta de {{ data.text }} se ha dispensado correctamente!</p>
     </div>
     <div mat-dialog-actions align="end">
       <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
     </div>
-  </div> <!-- End case dispensed -->
+  </div>
 
   <div *ngSwitchCase="'cancel-dispensed'">
-    <h3 mat-dialog-title><mat-icon>check</mat-icon>  Dispensa cancelada</h3>
+    <h3 mat-dialog-title><mat-icon>check</mat-icon> Dispensa cancelada</h3>
     <div mat-dialog-content>
-      <p>La dispensación de la receta se ha cancelado correctamente!</p>
+      <p>La dispensacion de la receta se ha cancelado correctamente!</p>
     </div>
     <div mat-dialog-actions align="end">
       <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
     </div>
-  </div> <!-- End case cansel dispense -->
+  </div>
 
-    <div *ngSwitchCase="'error-cancel-dispensed'">
-        <h3 mat-dialog-title><mat-icon>error</mat-icon>  Error</h3>
-        <div mat-dialog-content>
-        <p>No se ha podido dispensar la receta de {{data.text}}. Inténtelo de nuevo más tarde.</p>
-        </div>
-        <div mat-dialog-actions align="end">
-        <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
+  <div *ngSwitchCase="'error-cancel-dispensed'">
+    <h3 mat-dialog-title><mat-icon>error</mat-icon> Error</h3>
+    <div mat-dialog-content>
+      <p>No se ha podido dispensar la receta de {{ data.text }}. Intentelo de nuevo mas tarde.</p>
     </div>
+    <div mat-dialog-actions align="end">
+      <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
+    </div>
+  </div>
 
   <div *ngSwitchCase="'noPrescriptionsDate'">
-    <h3 mat-dialog-title><mat-icon>error_outline</mat-icon>  Atención</h3>
+    <h3 mat-dialog-title><mat-icon>error_outline</mat-icon> Atencion</h3>
     <div mat-dialog-content>
-      <p>No hay recetas para este paciente en la fecha {{data.text}}</p>
+      <p>No hay recetas para este paciente en la fecha {{ data.text }}</p>
     </div>
     <div mat-dialog-actions align="end">
       <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
     </div>
-  </div> <!-- End case noPrescriptionsDate -->
+  </div>
 
   <div *ngSwitchCase="'selectPatient'">
-    <h3 mat-dialog-title><mat-icon>error_outline</mat-icon>  Atención</h3>
+    <h3 mat-dialog-title><mat-icon>error_outline</mat-icon> Atencion</h3>
     <div mat-dialog-content>
       <p>Seleccione un paciente para luego filtrar por fecha</p>
     </div>
     <div mat-dialog-actions align="end">
       <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
     </div>
-  </div> <!-- End case noPrescriptionsDate -->
+  </div>
 
   <div *ngSwitchCase="'patientNotFound'">
-    <h3 mat-dialog-title><mat-icon>error_outline</mat-icon>  Atención</h3>
+    <h3 mat-dialog-title><mat-icon>error_outline</mat-icon> Atencion</h3>
     <div mat-dialog-content>
-      <p>No se ha encontrado ningún paciente con DNI {{data.text}}</p>
+      <p>No se ha encontrado ningun paciente con DNI {{ data.text }}</p>
     </div>
     <div mat-dialog-actions align="end">
       <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
     </div>
-  </div> <!-- End case noPrescriptionsDate -->
+  </div>
 
   <div *ngSwitchDefault>
-    <h3 mat-dialog-title><mat-icon>error</mat-icon>  Error</h3>
+    <h3 mat-dialog-title><mat-icon>error</mat-icon> Error</h3>
     <div mat-dialog-content>
-      <p>{{data.text}}</p>
+      <p>{{ data.text }}</p>
     </div>
     <div mat-dialog-actions align="end">
       <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
     </div>
-  </div> <!-- End default switch -->
-</div>
+  </div>
+</ng-container>

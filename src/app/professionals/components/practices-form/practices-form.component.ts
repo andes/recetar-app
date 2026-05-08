@@ -60,7 +60,6 @@ export class PracticesFormComponent implements OnInit {
                 },
                 error => {
                     this.isSubmitPractice = false;
-                    console.error('Error al crear la práctica:', error);
                     this.openDialog('practiceError');
                 }
             );
