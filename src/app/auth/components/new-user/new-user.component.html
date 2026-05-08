@@ -5,10 +5,12 @@
   </mat-card-header>
   <mat-card-content fxFlex>
     <form [formGroup]="newUserForm" #newUserNgForm="ngForm" (ngSubmit)="onSubmitEvent(newUserForm,newUserNgForm)"
-          class="form-container">
-      <mat-error *ngIf="error">
-        {{ error }}
-      </mat-error>
+      class="form-container">
+      @if (error) {
+        <mat-error>
+          {{ error }}
+        </mat-error>
+      }
       <mat-card-title>
         <h2 class="text-center" fxLayoutAlign="center center">
           <mat-icon>account_circle</mat-icon> <span>Registrar nuevo usuario</span>
@@ -16,18 +18,20 @@
       </mat-card-title>
       <div fxLayout.lg="row" fxLayout.md="column" fxLayout.sm="column" fxLayout.xs="column" fxLayoutGap="0.5rem">
         <mat-form-field appearance="fill" fxFlex>
-           <mat-label>Rol</mat-label>
+          <mat-label>Rol</mat-label>
           <mat-select formControlName="roleType" required>
             <mat-option value="professional">Profesional</mat-option>
           </mat-select>
-      
+
         </mat-form-field>
         <mat-form-field appearance="fill" fxFlex>
-              <mat-label>Profesión</mat-label>
+          <mat-label>Profesión</mat-label>
           <mat-select formControlName="profesion" required>
-            <mat-option *ngFor="let prof of authorizedProfessions" [value]="prof">
-              {{ prof.profesion }}
-            </mat-option>
+            @for (prof of authorizedProfessions; track prof) {
+              <mat-option [value]="prof">
+                {{ prof.profesion }}
+              </mat-option>
+            }
           </mat-select>
         </mat-form-field>
       </div>
@@ -35,57 +39,73 @@
         <mat-form-field appearance="fill" fxFlex>
           <mat-label>DNI</mat-label>
           <input matInput formControlName="dni" required>
-          <mat-error *ngIf="newUserForm.get('dni').errors">
-            Formato inválido
-          </mat-error>
+          @if (newUserForm.get('dni').errors) {
+            <mat-error>
+              Formato inválido
+            </mat-error>
+          }
         </mat-form-field>
         <mat-form-field appearance="fill" fxFlex>
           <mat-label>CUIL</mat-label>
           <input matInput type="text" formControlName="cuil">
-          <mat-error *ngIf="newUserForm.get('cuil')?.errors?.required">El CUIL es obligatorio.</mat-error>
-          <mat-error *ngIf="newUserForm.get('cuil')?.errors?.invalidFormat">Formato inválido (deben ser 11
+          @if (newUserForm.get('cuil')?.errors?.required) {
+            <mat-error>El CUIL es obligatorio.</mat-error>
+          }
+          @if (newUserForm.get('cuil')?.errors?.invalidFormat) {
+            <mat-error>Formato inválido (deben ser 11
             dígitos).</mat-error>
-          <mat-error *ngIf="newUserForm.get('cuil')?.errors?.invalidCuil">CUIL inválido (falla
+          }
+          @if (newUserForm.get('cuil')?.errors?.invalidCuil) {
+            <mat-error>CUIL inválido (falla
             verificación).</mat-error>
+          }
         </mat-form-field>
         <mat-form-field appearance="fill" fxFlex>
           <mat-label>N° Matricula provincial</mat-label>
           <input matInput formControlName="enrollment" required>
-          <mat-error *ngIf="newUserForm.get('enrollment').errors">
-            Formato inválido
-          </mat-error>
+          @if (newUserForm.get('enrollment').errors) {
+            <mat-error>
+              Formato inválido
+            </mat-error>
+          }
         </mat-form-field>
       </div>
       <div fxLayout.lg="row" fxLayout.md="column" fxLayout.sm="column" fxLayout.xs="column" fxLayoutGap="0.5rem">
         <mat-form-field appearance="fill" fxFlex>
           <mat-label>Fecha de egreso</mat-label>
           <input matInput [max]="minDate" formControlName="fechaEgreso" [matDatepicker]="fechaEgresoPicker" readonly
-                 required>
+            required>
           <mat-datepicker-toggle matSuffix [for]="fechaEgresoPicker"></mat-datepicker-toggle>
           <mat-datepicker #fechaEgresoPicker></mat-datepicker>
-          <mat-error *ngIf="newUserForm.get('fechaEgreso').errors">
-            Fecha incorrecta debe ser una fecha válida
-          </mat-error>
+          @if (newUserForm.get('fechaEgreso').errors) {
+            <mat-error>
+              Fecha incorrecta debe ser una fecha válida
+            </mat-error>
+          }
         </mat-form-field>
         <mat-form-field appearance="fill" fxFlex>
           <mat-label matTooltip="Refiere a la fecha de vencimiento de la última renovación">Fecha de
-            vecimiento de matrícula</mat-label>
+          vecimiento de matrícula</mat-label>
           <input matInput formControlName="fechaMatVencimiento" [matDatepicker]="fechaMatVencimientoPicker" readonly
-                 required>
+            required>
           <mat-datepicker-toggle matSuffix [for]="fechaMatVencimientoPicker"></mat-datepicker-toggle>
           <mat-datepicker #fechaMatVencimientoPicker></mat-datepicker>
-          <mat-error *ngIf="newUserForm.get('fechaMatVencimiento').errors">
-            Fecha incorrecta debe ser una fecha válida
-          </mat-error>
+          @if (newUserForm.get('fechaMatVencimiento').errors) {
+            <mat-error>
+              Fecha incorrecta debe ser una fecha válida
+            </mat-error>
+          }
         </mat-form-field>
       </div>
       <div fxLayout.lg="row" fxLayout.md="column" fxLayout.sm="column" fxLayout.xs="column" fxLayoutGap="0.5rem">
         <mat-form-field appearance="fill" fxFlex>
           <mat-label>Contraseña</mat-label>
           <input matInput formControlName="password" type="password" [pattern]="regexPassword" required>
-          <mat-error *ngIf="newUserForm.get('password').errors">
-            Contraseña incorrecta debe contener una mayúscula, una minúscula y un número
-          </mat-error>
+          @if (newUserForm.get('password').errors) {
+            <mat-error>
+              Contraseña incorrecta debe contener una mayúscula, una minúscula y un número
+            </mat-error>
+          }
         </mat-form-field>
         <mat-form-field appearance="fill" fxFlex>
           <mat-label>Email</mat-label>

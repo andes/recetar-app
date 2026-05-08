@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Practice } from '@interfaces/practices';
 import { saveAs } from 'file-saver';
-import * as moment from 'moment';
+import moment from 'moment';
 import * as CryptoJS from 'crypto-js';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { map, mapTo, tap } from 'rxjs/operators';

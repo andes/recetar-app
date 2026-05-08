@@ -52,7 +52,6 @@ module.exports = {
                 'style': 'camelCase'
             }
         ],
-        '@angular-eslint/no-host-metadata-property': 'error',
         '@angular-eslint/no-inputs-metadata-property': 'error',
         '@angular-eslint/no-output-rename': 'error',
         '@angular-eslint/no-outputs-metadata-property': 'error',
@@ -68,34 +67,6 @@ module.exports = {
         ],
         'keyword-spacing': ['error', { 'after': true, 'before': true }],
         'space-before-blocks': ['error', { 'functions': 'always', 'keywords': 'always', 'classes': 'always' }],
-        '@typescript-eslint/indent': [
-            'error',
-            4,
-            {
-                'ObjectExpression': 'first',
-                'FunctionDeclaration': {
-                    'parameters': 'first'
-                },
-                'FunctionExpression': {
-                    'parameters': 'first'
-                },
-                'SwitchCase': 1,
-                'ArrayExpression': 'first'
-            }
-        ],
-        '@typescript-eslint/member-delimiter-style': [
-            'error',
-            {
-                'multiline': {
-                    'delimiter': 'semi',
-                    'requireLast': true
-                },
-                'singleline': {
-                    'delimiter': 'semi',
-                    'requireLast': false
-                }
-            }
-        ],
         '@typescript-eslint/no-empty-function': 'off',
         '@typescript-eslint/no-empty-interface': 'error',
         '@typescript-eslint/no-inferrable-types': [
@@ -105,15 +76,6 @@ module.exports = {
             }
         ],
         '@typescript-eslint/prefer-function-type': 'error',
-        '@typescript-eslint/quotes': [
-            'error',
-            'single'
-        ],
-        '@typescript-eslint/semi': [
-            'error',
-            'always'
-        ],
-        '@typescript-eslint/type-annotation-spacing': 'error',
         '@typescript-eslint/unified-signatures': 'error',
         'brace-style': [
             'error',
@@ -203,7 +165,7 @@ module.exports = {
         ],
         'quotes': ['error', 'single'],
         'radix': 'error',
-        'semi': 'error',
+        'semi': 'off',
         'spaced-comment': [
             'error',
             'always',

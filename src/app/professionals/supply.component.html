@@ -5,13 +5,13 @@
 <div class="link-bar-indicator-container">
   <div class="indicator" [@stepLink]="isFormShown ? 'left' : 'right'"></div>
 </div>
- 
+
 <div class="pf-container">
   <div fxLayout="row" fxLayoutAlign="space-evenly start" fxLayoutGap="20px" class="cards-container" fxFill
     [@step]="isFormShown ? 'left' : 'right'">
 
     <div class="prescription-panel">
-       <mat-card fxLayout="column" fxLayoutAlign="space-between" class="new-prescription">
+      <mat-card fxLayout="column" fxLayoutAlign="space-between" class="new-prescription">
         <div fxFlex="100" fxLayout="column" fxLayoutAlign="start">
           <mat-card-title>
             <h2 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
@@ -30,7 +30,7 @@
                 fxLayoutGap.xs="0">
 
                 <div class="first-block">
-                <!-- Fecha de receta -->
+                  <!-- Fecha de receta -->
                   <div formGroupName="supply" class="supply-container" fxLayout="row" fxLayoutGap="10px">
                     <div class="st-bk-patient">
                       <!-- Dni -->
@@ -43,10 +43,12 @@
                           matInput
                           required
                           formControlName="name">
-                        
-                          <mat-error *ngIf="name.errors?.required">
-                          Debe ingresar principio nombre
-                            </mat-error> 
+
+                        @if (name.errors?.required) {
+                          <mat-error>
+                            Debe ingresar principio nombre
+                          </mat-error>
+                        }
 
                       </mat-form-field>
 
@@ -60,9 +62,11 @@
                           required
                           formControlName="activePrinciple">
 
-                        <mat-error *ngIf="activePrinciple.errors?.required">
-                          Debe ingresar principio activo
+                        @if (activePrinciple.errors?.required) {
+                          <mat-error>
+                            Debe ingresar principio activo
                           </mat-error>
+                        }
                       </mat-form-field>
 
                     <!-- </div>
@@ -78,25 +82,29 @@
                           required
                           formControlName="pharmaceutical_form">
 
-                        <mat-error *ngIf="pharmaceutical_form.errors?.required">
-                          Debe ingresar valor
+                        @if (pharmaceutical_form.errors?.required) {
+                          <mat-error>
+                            Debe ingresar valor
                           </mat-error>
+                        }
                       </mat-form-field>
 
                       <mat-form-field appearance="fill">
                         <mat-label>Power</mat-label>
                         <input type="text"
-                        tabIndex="4"
+                          tabIndex="4"
                           placeholder="Power"
                           matInput
                           required
                           formControlName="power">
-      
-                        <mat-error *ngIf="power.errors?.required">
-                          Debe ingresar valor
-                        </mat-error>
+
+                        @if (power.errors?.required) {
+                          <mat-error>
+                            Debe ingresar valor
+                          </mat-error>
+                        }
                       </mat-form-field>
-      
+
                       <mat-form-field appearance="fill">
                         <mat-label>Unidad</mat-label>
                         <input type="text"
@@ -105,12 +113,14 @@
                           matInput
                           required
                           formControlName="unity">
-      
-                        <mat-error *ngIf="unity.errors?.required">
-                          Debe ingresar unidad
-                        </mat-error>
+
+                        @if (unity.errors?.required) {
+                          <mat-error>
+                            Debe ingresar unidad
+                          </mat-error>
+                        }
                       </mat-form-field>
-      
+
                       <mat-form-field appearance="fill">
                         <mat-label>Primera presentación</mat-label>
                         <input type="text"
@@ -119,12 +129,14 @@
                           matInput
                           required
                           formControlName="firstPresentation">
-      
-                        <mat-error *ngIf="unity.errors?.required">
-                          Debe ingresar primera presentación
-                        </mat-error>
+
+                        @if (unity.errors?.required) {
+                          <mat-error>
+                            Debe ingresar primera presentación
+                          </mat-error>
+                        }
                       </mat-form-field>
-      
+
                       <mat-form-field appearance="fill">
                         <mat-label>Segunda presentación</mat-label>
                         <input type="text"
@@ -132,27 +144,33 @@
                           placeholder="Segunda presentación"
                           matInput
                           formControlName="secondPresentation">
-      
+
                       </mat-form-field>
                     </div>
-                    
+
                   </div>
-                  
+
                 </div>
               </div>
 
               <div fxLayout="row" fxLayoutAlign="center">
                 <div fxLayout="row" fxLayoutAlign="center" fxLayoutGap="20px" fxFlex="100%">
-                  <button mat-raised-button type="button" *ngIf="!isSubmit  && isEdit" fxFlex="100%" (click)="clearForm(supplyNgForm)">
-                    Cancelar
-                  </button>
+                  @if (!isSubmit  && isEdit) {
+                    <button mat-raised-button type="button" fxFlex="100%" (click)="clearForm(supplyNgForm)">
+                      Cancelar
+                    </button>
+                  }
 
-                  <button mat-raised-button color="primary" *ngIf="!isSubmit" type="submit" fxFlex="100%">
-                    {{ !isEdit ? 'Crear' : 'Guardar' }}
-                  </button>
+                  @if (!isSubmit) {
+                    <button mat-raised-button color="primary" type="submit" fxFlex="100%">
+                      {{ !isEdit ? 'Crear' : 'Guardar' }}
+                    </button>
+                  }
                 </div>
 
-                <mat-spinner [color]="spinnerColor" [diameter]="spinnerDiameter" *ngIf="isSubmit"></mat-spinner>
+                @if (isSubmit) {
+                  <mat-spinner [color]="spinnerColor" [diameter]="spinnerDiameter"></mat-spinner>
+                }
               </div>
             </form>
           </mat-card-content>

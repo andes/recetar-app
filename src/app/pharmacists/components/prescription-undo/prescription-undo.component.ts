@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, Input, Injectable, EventEmitter, Output } from '@angular/core';
 import { timer, Subscription } from 'rxjs';
-import * as moment from 'moment';
+import moment from 'moment';
 import { showCancelDispense, hideTimer } from '@animations/animations.template';
 import { AuthService } from '@auth/services/auth.service';
 import { Prescriptions } from '@interfaces/prescriptions';

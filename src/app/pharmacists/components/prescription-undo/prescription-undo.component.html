@@ -1,11 +1,11 @@
-<button mat-menu-item class="cancel-dispense" type="button" *ngIf="counter > 0 || isAdmin" (click)="cancelDispense(prescription)" matTooltip="Anular dispensa" matTooltipPosition="above" (mouseenter)="showtimes = !showtimes" (mouseleave)="showtimes = !showtimes">
-  <div class="timer-indicator" [@hidetimer]="(showtimes && counter > 0) ? 'show' : 'hide'">
-
-    <mat-spinner class="track" mode="determinate" value="100" diameter="35"></mat-spinner>
-    <mat-progress-spinner mode="determinate" value="{{progress}}" diameter="35"></mat-progress-spinner>
-
-    <div class="count-down-timer">{{ counter | formatTime }}</div>
-    <div class="tt-indicator">{{typeTime}}</div>
-  </div>
-  <mat-icon color="warn" [@showcancel]="(!showtimes || (counter <= 0 && isAdmin)) ? 'show' : 'hide'">highlight_off</mat-icon>
-</button>
+@if (counter > 0 || isAdmin) {
+  <button mat-menu-item class="cancel-dispense" type="button" (click)="cancelDispense(prescription)" matTooltip="Anular dispensa" matTooltipPosition="above" (mouseenter)="showtimes = !showtimes" (mouseleave)="showtimes = !showtimes">
+    <div class="timer-indicator" [@hidetimer]="(showtimes && counter > 0) ? 'show' : 'hide'">
+      <mat-spinner class="track" mode="determinate" value="100" diameter="35"></mat-spinner>
+      <mat-progress-spinner mode="determinate" value="{{progress}}" diameter="35"></mat-progress-spinner>
+      <div class="count-down-timer">{{ counter | formatTime }}</div>
+      <div class="tt-indicator">{{typeTime}}</div>
+    </div>
+    <mat-icon color="warn" [@showcancel]="(!showtimes || (counter <= 0 && isAdmin)) ? 'show' : 'hide'">highlight_off</mat-icon>
+  </button>
+}

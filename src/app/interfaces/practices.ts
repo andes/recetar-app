@@ -2,6 +2,7 @@
 export class Practice {
     _id?: string;
     date: Date;
+    observations?: string;
     patient: {
         dni: string;
         sex: string;

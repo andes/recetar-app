@@ -116,9 +116,7 @@ export class PharmacistsFormComponent implements OnInit {
             data: { dialogType: aDialogType, prescription: aPrescription, text: aText }
         });
 
-        dialogRef.afterClosed().subscribe(result => {
-            console.log('The dialog was closed');
-        });
+        dialogRef.afterClosed().subscribe();
     }
 
 
@@ -134,5 +132,4 @@ export class PharmacistsFormComponent implements OnInit {
         return this.prescriptionForm.get('dateFilter');
     }
 }
-
 

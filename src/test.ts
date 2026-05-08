@@ -18,8 +18,8 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import {
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting
+    BrowserDynamicTestingModule,
+    platformBrowserDynamicTesting
 } from '@angular/platform-browser-dynamic/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -35,7 +35,8 @@ import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
             useExisting: forwardRef(() => MockPatientFormValueAccessorDirective),
             multi: true
         }
-    ]
+    ],
+    standalone: false
 })
 class MockPatientFormValueAccessorDirective implements ControlValueAccessor {
     writeValue(): void {}
@@ -87,39 +88,39 @@ const defaultTestModuleMetadata: TestModuleMetadata = {
 const originalConfigureTestingModule = TestBed.configureTestingModule.bind(TestBed);
 
 TestBed.configureTestingModule = (moduleDef: TestModuleMetadata = {}) =>
-  originalConfigureTestingModule({
-    ...moduleDef,
-    declarations: [
-      ...defaultTestModuleMetadata.declarations!,
-      ...(moduleDef.declarations ?? [])
-    ],
-    imports: [
-      ...defaultTestModuleMetadata.imports!,
-      ...(moduleDef.imports ?? [])
-    ],
-    providers: [
-      ...defaultTestModuleMetadata.providers!,
-      ...(moduleDef.providers ?? [])
-    ],
-    schemas: [
-      ...(moduleDef.schemas ?? []),
-      ...defaultTestModuleMetadata.schemas!
-    ]
-  });
+    originalConfigureTestingModule({
+        ...moduleDef,
+        declarations: [
+            ...defaultTestModuleMetadata.declarations!,
+            ...(moduleDef.declarations ?? [])
+        ],
+        imports: [
+            ...defaultTestModuleMetadata.imports!,
+            ...(moduleDef.imports ?? [])
+        ],
+        providers: [
+            ...defaultTestModuleMetadata.providers!,
+            ...(moduleDef.providers ?? [])
+        ],
+        schemas: [
+            ...(moduleDef.schemas ?? []),
+            ...defaultTestModuleMetadata.schemas!
+        ]
+    });
 
 const turnstileMock = {
-  render: jasmine.createSpy('turnstile.render').and.returnValue('widget-id'),
-  reset: jasmine.createSpy('turnstile.reset'),
-  getResponse: jasmine.createSpy('turnstile.getResponse').and.returnValue('token'),
-  remove: jasmine.createSpy('turnstile.remove')
+    render: jasmine.createSpy('turnstile.render').and.returnValue('widget-id'),
+    reset: jasmine.createSpy('turnstile.reset'),
+    getResponse: jasmine.createSpy('turnstile.getResponse').and.returnValue('token'),
+    remove: jasmine.createSpy('turnstile.remove')
 };
 
 (window as unknown as { turnstile: typeof turnstileMock }).turnstile = turnstileMock;
 
 // First, initialize the Angular testing environment.
 getTestBed().initTestEnvironment(
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting(), {
-    teardown: { destroyAfterEach: false }
-}
+    BrowserDynamicTestingModule,
+    platformBrowserDynamicTesting(), {
+        teardown: { destroyAfterEach: false }
+    }
 );

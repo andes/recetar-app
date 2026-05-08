@@ -1,5 +1,5 @@
 // component selector
-@import 'styles/_variables'
+@use 'styles/variables' as *
 
 $panels-height: 294px
 $panels-height-xl: 325px
@@ -24,29 +24,39 @@ $panels-height-xl: 325px
         width: calc(100% / 3)
         mat-card
             box-sizing: content-box!important
-            height: 20.21rem
+            display: flex
+            flex-direction: column
+            height: auto
+            min-height: 20.21rem
 
             @media (min-width: $x-small-devices) and (max-width: $larger-devices)
                 height: auto
             mat-card-title, mat-card-content
                 margin: 0!important
 
+            mat-card-content
+                flex: 1 1 auto
+
                 @media (min-width: $larger-devices) and (max-width: $xx-larger-devices)
                     .login-error
                         margin-bottom: -15px!important
 
             mat-card-actions
-                padding: 0!important
+                box-sizing: border-box
+                width: 100%
+                padding: 12px 16px 16px!important
                 margin: 0!important
                 a.btn-link
-                    margin: 10px 0!important
+                    width: 100%
+                    margin: 0!important
                     min-height: 35px !important
+                    justify-content: center
 
                 @media (min-width: $x-small-devices) and (max-width: $larger-devices)
                     flex-direction: column!important
                     a.btn-link
                         max-width: 100%!important
-                        margin: 10px 0!important
+                        margin: 0!important
 
         @media (min-width: $medium-devices) and (max-width: $larger-devices)
             width: 310px
@@ -80,6 +90,24 @@ $panels-height-xl: 325px
 .boton-olvidar-clave
     padding-top: 0.2rem
     padding-bottom:1rem
+
+.login-action
+    align-items: stretch
+    margin-top: 8px
+
+    > button,
+    > div
+        flex: 1 1 0
+
+    > div
+        display: flex
+        flex-direction: column
+
+        button
+            width: 100%
+
+    @media (min-width: $x-small-devices) and (max-width: $small-devices)
+        flex-direction: column!important
 
 mat-card-content
     margin-bottom:0px!important
