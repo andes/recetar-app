@@ -1,6 +1,6 @@
-import { Component, OnInit } from "@angular/core";
-import { Router } from "@angular/router";
-import { AmbitoService } from "@auth/services/ambito.service";
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { AmbitoService } from '@auth/services/ambito.service';
 
 
 @Component({
@@ -16,7 +16,7 @@ export class SelectorAmbitoComponent implements OnInit {
         private ambitoService: AmbitoService,
         private router: Router,
     ) { }
-    
+
     ngOnInit(): void {
         this.ambitoService.clearAmbito();
     }

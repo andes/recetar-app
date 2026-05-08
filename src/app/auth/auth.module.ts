@@ -20,40 +20,40 @@ import { DialogComponent } from './components/dialog/dialog.component';
 import { NewUserComponent } from './components/new-user/new-user.component';
 import { NewUserPharmacistComponent } from './components/new-user-pharmacist/new-user-pharmacist.component';
 import { MatSelectModule } from '@angular/material/select';
-import {MatDatepickerModule} from '@angular/material/datepicker';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { NgxTurnstileFormsModule } from '../shared/ngx-turnstile/ngx-turnstile-forms.module';
 
 
 
 
 @NgModule({
-  declarations: [
-    routingComponents,
-    NewUserComponent,
-    NewUserPharmacistComponent,
-  ],
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    AuthRoutingModule,
-    BrowserModule,
-    NgxTurnstileModule,
-    NgxTurnstileFormsModule,
-    HttpClientModule,
-    FlexLayoutModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatIconModule,
-    MatButtonModule,
-    MatCardModule,
-    MatProgressSpinnerModule,
-    MatSelectModule,
-    MatDatepickerModule
-  ],
-  providers: [
-    AuthService,
-    httpInterceptorProvider
-  ]
+    declarations: [
+        routingComponents,
+        NewUserComponent,
+        NewUserPharmacistComponent,
+    ],
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        AuthRoutingModule,
+        BrowserModule,
+        NgxTurnstileModule,
+        NgxTurnstileFormsModule,
+        HttpClientModule,
+        FlexLayoutModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatIconModule,
+        MatButtonModule,
+        MatCardModule,
+        MatProgressSpinnerModule,
+        MatSelectModule,
+        MatDatepickerModule
+    ],
+    providers: [
+        AuthService,
+        httpInterceptorProvider
+    ]
 })
 export class AuthModule { }
 

@@ -7,7 +7,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import * as moment from 'moment';
+import moment from 'moment';
 import { DialogComponent } from '@pharmacists/components/dialog/dialog.component';
 import { AuthService } from '@auth/services/auth.service';
 import { detailExpand, arrowDirection } from '@animations/animations.template';

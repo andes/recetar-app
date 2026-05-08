@@ -10,33 +10,33 @@ import { PrescriptionPrinterComponent } from '@audit/components/prescription-pri
 import { UsersListComponent } from './components/user-list/users-list.component';
 
 const routes: Routes = [
-  {
-    path: 'audit',
-    component: AuditComponent,
-    canActivate: [AuthGuard, RoleAuditGuard],
-    children: [
-      {
-        path: 'recetas/auditar',
-        component: AuditFormComponent
-      },
-      {
-        path: 'users',
-        component: UsersListComponent
-      }
-    ]
-  }
+    {
+        path: 'audit',
+        component: AuditComponent,
+        canActivate: [AuthGuard, RoleAuditGuard],
+        children: [
+            {
+                path: 'recetas/auditar',
+                component: AuditFormComponent
+            },
+            {
+                path: 'users',
+                component: UsersListComponent
+            }
+        ]
+    }
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+    imports: [RouterModule.forChild(routes)],
+    exports: [RouterModule]
 })
 export class AuditRoutingModule { }
 
 export const routingComponent = [
-  AuditComponent,
-  AuditFormComponent,
-  UsersListComponent,
-  DialogComponent,
-  PrescriptionPrinterComponent
-]
+    AuditComponent,
+    AuditFormComponent,
+    UsersListComponent,
+    DialogComponent,
+    PrescriptionPrinterComponent
+];

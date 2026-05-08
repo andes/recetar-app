@@ -1,4 +1,4 @@
-import { Directive, forwardRef, OnInit} from '@angular/core';
+import { Directive, forwardRef, OnInit } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NgxTurnstileComponent } from './ngx-turnstile.component';
 
@@ -14,38 +14,38 @@ import { NgxTurnstileComponent } from './ngx-turnstile.component';
     standalone: false
 })
 export class NgxTurnstileValueAccessorDirective implements ControlValueAccessor, OnInit {
-  private onChange!: (value: string) => void;
-  private onTouched!: () => void;
-  private resolved: boolean = false;
+    private onChange!: (value: string) => void;
+    private onTouched!: () => void;
+    private resolved = false;
 
-  constructor(private turnstileComp: NgxTurnstileComponent) {}
+    constructor(private turnstileComp: NgxTurnstileComponent) {}
 
-  ngOnInit(): void {
-    this.turnstileComp.resolved.subscribe((token: string) =>{
-      this.resolved = !!token;
+    ngOnInit(): void {
+        this.turnstileComp.resolved.subscribe((token: string) =>{
+            this.resolved = !!token;
 
-      if (this.onChange) {
-        this.onChange(token);
-      }
+            if (this.onChange) {
+                this.onChange(token);
+            }
 
-      if (this.onTouched) {
-        this.onTouched();
-      }
-    });
-  }
-
-  writeValue(value: any): void {
-    if (this.resolved) {
-      this.resolved = false;
-      this.turnstileComp.reset();
+            if (this.onTouched) {
+                this.onTouched();
+            }
+        });
     }
-  }
 
-  registerOnChange(fn: any): void {
-    this.onChange = fn;
-  }
+    writeValue(value: any): void {
+        if (this.resolved) {
+            this.resolved = false;
+            this.turnstileComp.reset();
+        }
+    }
 
-  registerOnTouched(fn: any): void {
-    this.onTouched = fn;
-  }
+    registerOnChange(fn: any): void {
+        this.onChange = fn;
+    }
+
+    registerOnTouched(fn: any): void {
+        this.onTouched = fn;
+    }
 }

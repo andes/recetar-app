@@ -71,3 +71,14 @@ export const hideTimer =
       state('hide', style({ top: '15%', opacity: 0 })),
       transition('hide <=> show', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)'))
   ]);
+
+export const dialogFade =
+  trigger('dialogFade', [
+      transition(':enter', [
+          style({ opacity: 0, transform: 'scale(0.98)' }),
+          animate('180ms ease-out', style({ opacity: 1, transform: 'scale(1)' }))
+      ]),
+      transition(':leave', [
+          animate('140ms ease-in', style({ opacity: 0, transform: 'scale(0.98)' }))
+      ])
+  ]);

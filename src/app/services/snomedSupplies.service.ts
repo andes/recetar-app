@@ -6,20 +6,20 @@ import SnomedConcept from '@interfaces/snomedConcept';
 import { tap } from 'rxjs/operators';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class SnomedSuppliesService {
 
-  private mySupplies: BehaviorSubject<SnomedConcept[]>;
-  private suppliesArray: SnomedConcept[] = [];
-  private dataLoaded = false;
+    private mySupplies: BehaviorSubject<SnomedConcept[]>;
+    private suppliesArray: SnomedConcept[] = [];
+    private dataLoaded = false;
 
-  constructor(private http: HttpClient) {
-    this.mySupplies = new BehaviorSubject<any[]>(this.suppliesArray);
-  }
+    constructor(private http: HttpClient) {
+        this.mySupplies = new BehaviorSubject<any[]>(this.suppliesArray);
+    }
 
-  get(params): Observable<any[]> {
-    return this.http.get<any[]>(`${environment.API_END_POINT}/snomed/supplies?search=${params}`);
-  }
+    get(params): Observable<any[]> {
+        return this.http.get<any[]>(`${environment.API_END_POINT}/snomed/supplies?search=${params}`);
+    }
 
 }

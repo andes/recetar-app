@@ -1,487 +1,533 @@
 <mat-card fxLayout="column" fxLayoutAlign="space-between">
-    <mat-card-title>
-        <h2 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"><mat-icon>list_alt</mat-icon> <span>Buscar
-                documentos</span></h2>
-    </mat-card-title>
-    <mat-card-content>
-        <mat-form-field>
-            <mat-select placeholder="Seleccione un tipo de registro" [(value)]="selectedType"
-                        (selectionChange)="onSelectedTypeChange()" class="select-type">
-                <mat-option value="receta">Medicamentos</mat-option>
-                <mat-option value="practicas" *ngIf="ambito !== 'publico'">Prácticas</mat-option>
-                <mat-option value="certificados" *ngIf="ambito !== 'publico'">Certificados</mat-option>
-            </mat-select>
-        </mat-form-field>
+<mat-card-title>
+  <h2 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"><mat-icon>list_alt</mat-icon> <span>Buscar
+  documentos</span></h2>
+</mat-card-title>
+<mat-card-content>
+  <div class="filters-row">
+    <mat-form-field class="filter-field">
+      <mat-select placeholder="Seleccione un tipo de registro" [(value)]="selectedType"
+        (selectionChange)="onSelectedTypeChange()" class="select-type">
+        <mat-option value="receta">Medicamentos</mat-option>
+        @if (ambito !== 'publico') {
+          <mat-option value="practicas">Prácticas</mat-option>
+        }
+        @if (ambito !== 'publico') {
+          <mat-option value="certificados">Certificados</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
 
-        <mat-form-field *ngIf="selectedType">
-            <input matInput [(ngModel)]="currentSearchTerm" (keyup)="applyFilter($event.target.value)"
-                   placeholder="Filtrar por nombre o documento">
-        </mat-form-field>
+    @if (selectedType) {
+      <mat-form-field class="filter-field">
+        <input matInput [(ngModel)]="currentSearchTerm" (keyup)="applyFilter($event.target.value)"
+          placeholder="Filtrar por nombre o documento">
+      </mat-form-field>
+    }
+  </div>
 
-        <!-- Mensaje cuando no hay selección -->
-        <div *ngIf="!selectedType" class="no-selection-message">
-            <mat-card class="message-card">
-                <mat-card-content>
-                    <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="10px">
-                        <mat-icon
-                                  style="color: #757575; font-size: 24px; display: flex; justify-content: center; margin: 0;">info</mat-icon>
-                        <h5 style="color: #757575; margin: 0;">Seleccione una tipo de registro para mostrar resultados
-                        </h5>
+  <!-- Mensaje cuando no hay selección -->
+  @if (!selectedType) {
+    <div class="no-selection-message">
+      <mat-card class="message-card">
+        <mat-card-content>
+          <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="10px">
+            <mat-icon
+            style="color: #757575; font-size: 24px; display: flex; justify-content: center; margin: 0;">info</mat-icon>
+            <h5 style="color: #757575; margin: 0;">Seleccione una tipo de registro para mostrar resultados
+            </h5>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+
+  @if (selectedType === 'receta') {
+    <div>
+      <h3 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"><mat-icon>list_alt</mat-icon>
+      <span>Recetas</span>
+    </h3>
+    <div class="container mat-elevation-z8">
+      @if (!loadingPrescriptions) {
+        <div class="table-container">
+          <table mat-table [dataSource]="dataSource" multiTemplateDataRows>
+            <!-- Fuente Column -->
+            <ng-container matColumnDef="source">
+              <th mat-header-cell *matHeaderCellDef class="source-column-header"> Origen </th>
+              <td mat-cell *matCellDef="let element" class='title-cell source-column' data-label='Origen'>
+                <!-- Icono para ANDES -->
+                @if (isAndesPrescription(element)) {
+                  <div class="source-icon andes-icon">
+                    <img src="assets/img/LogoAndes.svg" alt="ANDES" />
+                  </div>
+                }
+                <!-- Icono para RECETAR -->
+                @if (isLocalPrescription(element)) {
+                  <div class="source-icon recetar-icon">
+                    <img src="assets/img/LogoRecetar.png" alt="RECETAR" />
+                  </div>
+                }
+              </td>
+            </ng-container>
+            <!-- Paciente Column -->
+            <ng-container matColumnDef="patient">
+              <th mat-header-cell *matHeaderCellDef> Paciente </th>
+              <td mat-cell *matCellDef="let element" class='title-cell' test data-label='Paciente'> {{
+                getPatientName(element).toUpperCase() }}
+              </td>
+            </ng-container>
+            <!-- DNI Column -->
+            <ng-container matColumnDef="dni">
+              <th mat-header-cell *matHeaderCellDef> DNI </th>
+              <td mat-cell *matCellDef="let element" class='title-cell' data-label='DNI'> {{
+                getPatientDni(element) }}
+              </td>
+            </ng-container>
+            <!-- Fecha Column -->
+            <ng-container matColumnDef="prescription_date">
+              <th mat-header-cell *matHeaderCellDef> Fecha </th>
+              <td mat-cell *matCellDef="let element" class='m-card-sub-title' data-label='Fecha'>
+                {{getPrescriptionDate(element) | date :
+              'dd/MM/yyyy' }} </td>
+            </ng-container>
+            <!-- Estado Column -->
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef> Estado </th>
+              <td mat-cell *matCellDef="let element" class='has_label_on_mobile' data-label='Estado:'
+                [style.color]="getStatusColor(element)"> {{ getPrescriptionStatus(element) | titlecase }}
+              </td>
+            </ng-container>
+            <!-- Accion Column -->
+            <ng-container matColumnDef="action">
+              <th mat-header-cell *matHeaderCellDef> Acción </th>
+              <td mat-cell *matCellDef="let element" (click)="$event.stopPropagation()"
+                class="actions-cell">
+                @if (!isStatus(element, 'VENCIDA')) {
+                  <button mat-menu-item [matMenuTriggerFor]="menu" class="menu-collapse"
+                    >
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                }
+                <mat-menu #menu="matMenu">
+                  @if (canPrint(element)) {
+                    <button mat-menu-item type="button"
+                      (click)="printPrescription(element)">
+                      <mat-icon>print</mat-icon>
+                      <span>Imprimir receta</span>
+                    </button>
+                  }
+                  @if (canDelete(element)) {
+                    <button mat-menu-item type="button"
+                      (click)="deleteDialogPrescription(element)">
+                      <mat-icon>delete</mat-icon>
+                      <span>{{ isAndesPrescription(element) ? 'Suspender receta' : 'Eliminar receta'
+                      }}</span>
+                    </button>
+                  }
+                </mat-menu>
+                <div fxLayout="row" class="action-buttons">
+                  @if (canPrint(element)) {
+                    <button mat-menu-item type="button"
+                      (click)="printPrescription(element)" matTooltip="Imprimir"
+                      matTooltipPosition="above">
+                      <mat-icon>print</mat-icon>
+                    </button>
+                  }
+                  @if (canDelete(element)) {
+                    <button mat-menu-item type="button"
+                      (click)="deleteDialogPrescription(element)"
+                      [matTooltip]="isAndesPrescription(element) ? 'Suspender' : 'Eliminar'"
+                      matTooltipPosition="above">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  }
+                </div>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="arrow">
+              <th mat-header-cell *matHeaderCellDef> </th>
+              <td mat-cell *matCellDef="let element">
+                <button mat-menu-item type="button">
+                  <mat-icon
+                  [@arrowDirection]="isExpanded(element) ? 'up' : 'down'">expand_more</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+            <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
+            <ng-container matColumnDef="expandedDetail">
+              <td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumns.length">
+                <div class="element-detail"
+                  [@detailExpand]="isExpanded(element) ? 'expanded' : 'collapsed'">
+                  <div class="element-diagram">
+                    <!-- Para prescripciones locales -->
+                    @if (isLocalPrescription(element)) {
+                      <div>
+                        <div class="supplies-list">
+                          @for (supp of element.supplies; track supp) {
+                            <div class="supply-description">
+                              @if (supp.quantityPresentation) {
+                                <span>
+                                  {{ supp.supply.name }} x {{supp.quantityPresentation}}
+                                </span>
+                              }
+                              @if (!supp.quantityPresentation) {
+                                <span>{{ supp.supply.name }} x
+                                {{supp.quantity}}</span>
+                              }
+                            </div>
+                          }
+                        </div>
+                        @for (supp of element.supplies; track supp) {
+                          <div class="element-description">
+                            @if (supp.quantityPresentation) {
+                              <span><span class="description-title">
+                              Cantidad de envases:</span> {{supp.quantity}}</span>
+                            }
+                          </div>
+                        }
+                        @if (element.diagnostic) {
+                          <div class="element-description"> <span
+                            class="description-title">
+                          Diagnóstico:</span> {{element.diagnostic}} </div>
+                        }
+                        @if (element.observation) {
+                          <div class="element-description"> <span
+                          class="description-title">Observaciones:</span>
+                          {{element.observation}}
+                        </div>
+                      }
                     </div>
-                </mat-card-content>
-            </mat-card>
-        </div>
-
-        <div *ngIf="selectedType === 'receta'">
-            <h3 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"><mat-icon>list_alt</mat-icon>
-                <span>Recetas</span>
-            </h3>
-            <div class="container mat-elevation-z8">
-                <div class="table-container" *ngIf="!loadingPrescriptions">
-                    <table mat-table [dataSource]="dataSource" multiTemplateDataRows>
-
-                        <!-- Fuente Column -->
-                        <ng-container matColumnDef="source">
-                            <th mat-header-cell *matHeaderCellDef class="source-column-header"> Origen </th>
-                            <td mat-cell *matCellDef="let element" class='title-cell source-column' data-label='Origen'>
-                                <!-- Icono para ANDES -->
-                                <div *ngIf="isAndesPrescription(element)" class="source-icon andes-icon">
-                                    <img src="assets/img/LogoAndes.svg" alt="ANDES" />
-                                </div>
-                                <!-- Icono para RECETAR -->
-                                <div *ngIf="isLocalPrescription(element)" class="source-icon recetar-icon">
-                                    <img src="assets/img/LogoRecetar.png" alt="RECETAR" />
-                                </div>
-                            </td>
-                        </ng-container>
-
-                        <!-- Paciente Column -->
-                        <ng-container matColumnDef="patient">
-                            <th mat-header-cell *matHeaderCellDef> Paciente </th>
-                            <td mat-cell *matCellDef="let element" class='title-cell' test data-label='Paciente'> {{
-                                getPatientName(element).toUpperCase() }}
-                            </td>
-                        </ng-container>
-
-                        <!-- DNI Column -->
-                        <ng-container matColumnDef="dni">
-                            <th mat-header-cell *matHeaderCellDef> DNI </th>
-                            <td mat-cell *matCellDef="let element" class='title-cell' data-label='DNI'> {{
-                                getPatientDni(element) }}
-                            </td>
-                        </ng-container>
-
-                        <!-- Fecha Column -->
-                        <ng-container matColumnDef="prescription_date">
-                            <th mat-header-cell *matHeaderCellDef> Fecha </th>
-                            <td mat-cell *matCellDef="let element" class='m-card-sub-title' data-label='Fecha'>
-                                {{getPrescriptionDate(element) | date :
-                                'dd/MM/yyyy' }} </td>
-                        </ng-container>
-
-                        <!-- Estado Column -->
-                        <ng-container matColumnDef="status">
-                            <th mat-header-cell *matHeaderCellDef> Estado </th>
-                            <td mat-cell *matCellDef="let element" class='has_label_on_mobile' data-label='Estado:'
-                                [style.color]="getStatusColor(element)"> {{ getPrescriptionStatus(element) | titlecase }}
-                            </td>
-                        </ng-container>
-
-                        <!-- Accion Column -->
-                        <ng-container matColumnDef="action">
-                            <th mat-header-cell *matHeaderCellDef> Acción </th>
-                            <td mat-cell *matCellDef="let element" (click)="$event.stopPropagation()"
-                                class="actions-cell">
-                                <button mat-menu-item [matMenuTriggerFor]="menu" class="menu-collapse"
-                                        *ngIf="!isStatus(element, 'VENCIDA')">
-                                    <mat-icon>more_vert</mat-icon>
-                                </button>
-                                <mat-menu #menu="matMenu">
-
-                                    <button mat-menu-item type="button" *ngIf="canPrint(element)"
-                                            (click)="printPrescription(element)">
-                                        <mat-icon>print</mat-icon>
-                                        <span>Imprimir receta</span>
-                                    </button>
-                                    <button mat-menu-item type="button" *ngIf="canDelete(element)"
-                                            (click)="deleteDialogPrescription(element)">
-                                        <mat-icon>delete</mat-icon>
-                                        <span>{{ isAndesPrescription(element) ? 'Suspender receta' : 'Eliminar receta'
-                                            }}</span>
-                                    </button>
-                                </mat-menu>
-
-                                <div fxLayout="row" class="action-buttons">
-                                    <button mat-menu-item type="button" *ngIf="canPrint(element)"
-                                            (click)="printPrescription(element)" matTooltip="Imprimir"
-                                            matTooltipPosition="above">
-                                        <mat-icon>print</mat-icon>
-                                    </button>
-                                    <button mat-menu-item type="button" *ngIf="canDelete(element)"
-                                            (click)="deleteDialogPrescription(element)"
-                                            [matTooltip]="isAndesPrescription(element) ? 'Suspender' : 'Eliminar'"
-                                            matTooltipPosition="above">
-                                        <mat-icon>delete</mat-icon>
-                                    </button>
-                                </div>
-                            </td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="arrow">
-                            <th mat-header-cell *matHeaderCellDef> </th>
-                            <td mat-cell *matCellDef="let element">
-                                <button mat-menu-item type="button">
-                                    <mat-icon
-                                              [@arrowDirection]="isExpanded(element) ? 'up' : 'down'">expand_more</mat-icon>
-                                </button>
-                            </td>
-                        </ng-container>
-
-                        <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
-                        <ng-container matColumnDef="expandedDetail">
-                            <td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumns.length">
-                                <div class="element-detail"
-                                     [@detailExpand]="isExpanded(element) ? 'expanded' : 'collapsed'">
-                                    <div class="element-diagram">
-                                        <!-- Para prescripciones locales -->
-                                        <div *ngIf="isLocalPrescription(element)">
-                                            <div class="supplies-list">
-                                                <div class="supply-description" *ngFor="let supp of element.supplies">
-                                                    <span *ngIf="supp.quantityPresentation">
-                                                        {{ supp.supply.name }} x {{supp.quantityPresentation}}
-                                                    </span>
-                                                    <span *ngIf="!supp.quantityPresentation">{{ supp.supply.name }} x
-                                                        {{supp.quantity}}</span>
-                                                </div>
-                                            </div>
-                                            <div class="element-description" *ngFor="let supp of element.supplies">
-                                                <span *ngIf="supp.quantityPresentation"><span class="description-title">
-                                                        Cantidad de envases:</span> {{supp.quantity}}</span>
-                                            </div>
-                                            <div class="element-description" *ngIf="element.diagnostic"> <span
-                                                      class="description-title">
-                                                    Diagnóstico:</span> {{element.diagnostic}} </div>
-                                            <div class="element-description" *ngIf="element.observation"> <span
-                                                      class="description-title">Observaciones:</span>
-                                                {{element.observation}}
-                                            </div>
-                                        </div>
-
-                                        <!-- Para prescripciones de ANDES -->
-                                        <div *ngIf="isAndesPrescription(element)">
-                                            <div class="supplies-list">
-                                                <div class="supply-description">
-                                                    {{ element.medicamento.concepto.term }} x
-                                                    {{element.medicamento.cantidad}} {{element.medicamento.unidades}}
-                                                </div>
-                                            </div>
-                                            <div class="element-description">
-                                                <span class="description-title">Presentación:</span>
-                                                {{element.medicamento.presentacion}}
-                                            </div>
-                                            <div class="element-description">
-                                                <span class="description-title">Envases:</span>
-                                                {{element.medicamento.cantEnvases}}
-                                            </div>
-                                            <div class="element-description" *ngIf="element.diagnostico">
-                                                <span class="description-title">Diagnóstico:</span>
-                                                {{element.diagnostico?.term|| element.diagnostico.descripcion}}
-                                            </div>
-                                            <div class="element-description" *ngIf="element.medicamento.dosisDiaria">
-                                                <span class="description-title">Posología:</span>
-                                                {{element.medicamento.dosisDiaria.dosis}} -
-                                                {{element.medicamento.dosisDiaria.dias}} días
-                                            </div>
-                                            <div class="element-description">
-                                                <span class="description-title">Organización:</span>
-                                                {{element.organizacion.nombre}}
-                                            </div>
-                                            <div class="element-description">
-                                                <span class="description-title">Profesional:</span>
-                                                {{element.profesional.apellido}}, {{element.profesional.nombre}} (Mat:
-                                                {{element.profesional.matricula}})
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </ng-container>
-
-                        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-                        <tr mat-row [@rowsAnimation]="" *matRowDef="let row; columns: displayedColumns;"
-                            class="element-row" [class.expanded-row]="isExpanded(row)"
-                            (click)="expandedElement = isExpanded(row) ? null : row">
-                        </tr>
-                        <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
-
-                    </table>
+                  }
+                  <!-- Para prescripciones de ANDES -->
+                  @if (isAndesPrescription(element)) {
+                    <div>
+                      <div class="supplies-list">
+                        <div class="supply-description">
+                          {{ element.medicamento.concepto.term }} x
+                          {{element.medicamento.cantidad}} {{element.medicamento.unidades}}
+                        </div>
+                      </div>
+                      <div class="element-description">
+                        <span class="description-title">Presentación:</span>
+                        {{element.medicamento.presentacion}}
+                      </div>
+                      <div class="element-description">
+                        <span class="description-title">Envases:</span>
+                        {{element.medicamento.cantEnvases}}
+                      </div>
+                      @if (element.diagnostico) {
+                        <div class="element-description">
+                          <span class="description-title">Diagnóstico:</span>
+                          {{element.diagnostico?.term|| element.diagnostico.descripcion}}
+                        </div>
+                      }
+                      @if (element.medicamento.dosisDiaria) {
+                        <div class="element-description">
+                          <span class="description-title">Posología:</span>
+                          {{element.medicamento.dosisDiaria.dosis}} -
+                          {{element.medicamento.dosisDiaria.dias}} días
+                        </div>
+                      }
+                      <div class="element-description">
+                        <span class="description-title">Organización:</span>
+                        {{element.organizacion.nombre}}
+                      </div>
+                      <div class="element-description">
+                        <span class="description-title">Profesional:</span>
+                        {{element.profesional.apellido}}, {{element.profesional.nombre}} (Mat:
+                        {{element.profesional.matricula}})
+                      </div>
+                    </div>
+                  }
                 </div>
-                <div fxLayout="row" fxLayoutAlign="center" class="loading-prescriptions" *ngIf="loadingPrescriptions">
-                    <mat-spinner matSuffix color="primary" [diameter]="40"></mat-spinner>
-                </div>
-                <mat-paginator #prescriptionsPaginator [length]="totalPrescriptions" [pageSize]="prescriptionsPageSize"
-                               [pageIndex]="prescriptionsPageIndex" [pageSizeOptions]="pageSizeOptions"
-                               (page)="onPrescriptionsPageChange($event)" showFirstLastButtons></mat-paginator>
+              </div>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+          <tr mat-row [@rowsAnimation]="" *matRowDef="let row; columns: displayedColumns;"
+            class="element-row" [class.expanded-row]="isExpanded(row)"
+            (click)="expandedElement = isExpanded(row) ? null : row">
+          </tr>
+          <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
+        </table>
+      </div>
+    }
+    @if (loadingPrescriptions) {
+      <div fxLayout="row" fxLayoutAlign="center" class="loading-prescriptions">
+        <mat-spinner matSuffix color="primary" [diameter]="40"></mat-spinner>
+      </div>
+    }
+    <mat-paginator #prescriptionsPaginator [length]="totalPrescriptions" [pageSize]="prescriptionsPageSize"
+      [pageIndex]="prescriptionsPageIndex" [pageSizeOptions]="pageSizeOptions"
+    (page)="onPrescriptionsPageChange($event)" showFirstLastButtons></mat-paginator>
+  </div>
+</div>
+}
+
+@if (selectedType === 'certificados') {
+  <div>
+    <h3 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"><mat-icon>list_alt</mat-icon>
+    <span>Certificados</span>
+  </h3>
+  <div class="container mat-elevation-z8">
+    @if (!loadingCertificates) {
+      <div class="table-container">
+        <table mat-table [dataSource]="dataCertificates" matSort multiTemplateDataRows>
+          <!-- Patient Column -->
+          <ng-container matColumnDef="patient">
+            <th mat-header-cell *matHeaderCellDef> Paciente </th>
+            <td mat-cell *matCellDef="let element" class='title-cell' test data-label='Paciente'> {{
+              element.patient.lastName.toUpperCase() }}, {{ (element.patient |
+              patientName).toUpperCase() }}
+            </td>
+          </ng-container>
+          <!-- DNI Column -->
+          <ng-container matColumnDef="dni">
+            <th mat-header-cell *matHeaderCellDef> DNI </th>
+            <td mat-cell *matCellDef="let element" class='title-cell' data-label='DNI'> {{
+              element.patient.dni }}
+            </td>
+          </ng-container>
+          <!-- Certificate date Column -->
+          <ng-container matColumnDef="certificate_date">
+            <th mat-header-cell *matHeaderCellDef> Inicio</th>
+            <td mat-cell *matCellDef="let element" class='title-cell' test data-label='Fecha'> {{
+            element.startDate | date :'dd/MM/yyyy HH:mm':'-0300'}}</td>
+          </ng-container>
+          <!-- End date Column -->
+          <ng-container matColumnDef="end_date">
+            <th mat-header-cell *matHeaderCellDef> Fin </th>
+            <td mat-cell *matCellDef="let element" class='title-cell' data-label='Fecha Fin'> {{
+            element.endDate | date :'dd/MM/yyyy HH:mm':'-0300'}}</td>
+          </ng-container>
+          <!-- Certificate status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
+            <td mat-cell *matCellDef="let element" class='has_label_on_mobile' data-label='Estado'
+              [style.color]="getCertificateStatusColor(element)"> {{getCertificateStatus(element) |
+            uppercase}}</td>
+          </ng-container>
+          <!-- Action Column -->
+          <ng-container matColumnDef="action">
+            <th mat-header-cell *matHeaderCellDef> Acción </th>
+            <td mat-cell *matCellDef="let element" (click)="$event.stopPropagation()"
+              class="actions-cell">
+              <button mat-menu-item [matMenuTriggerFor]="menu" class="menu-collapse">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item type="button" matTooltip="Anular" matTooltipPosition="above"
+                  (click)="anulateCertificate(element)"
+                  [disabled]="element?.status === 'anulado'">
+                  <mat-icon>block</mat-icon>
+                  <span>Anular certificado</span>
+                </button>
+                <button mat-menu-item type="button" (click)="printCertificate(element)">
+                  <mat-icon>print</mat-icon>
+                  <span>Imprimir certificado</span>
+                </button>
+                <!-- <button mat-menu-item type="button" matTooltip="Eliminar" matTooltipPosition="above"
+                (click)="deleteDialogCertificate(element)">
+                <mat-icon>delete</mat-icon>
+                <span>Eliminar certificado</span>
+              </button> -->
+            </mat-menu>
+            <div fxLayout="row" fxLayoutAlign="center center" class="action-buttons">
+              <button mat-menu-item type="button" (click)="printCertificate(element)"
+                matTooltip="Imprimir" matTooltipPosition="above" [disabled]="element.status"
+                [style.opacity]="element.status ? 0.5 : 1">
+                <mat-icon>print</mat-icon>
+              </button>
+              <button mat-menu-item type="button" matTooltip="Anular" matTooltipPosition="above"
+                (click)="anulateCertificate(element)"
+                [disabled]="element?.status === 'anulado'"
+                [style.opacity]="element?.status === 'anulado' ? 0.5 : 1">
+                <mat-icon>block</mat-icon>
+              </button>
             </div>
-        </div>
-
-        <div *ngIf="selectedType === 'certificados'">
-            <h3 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"><mat-icon>list_alt</mat-icon>
-                <span>Certificados</span>
-            </h3>
-            <div class="container mat-elevation-z8">
-                <div class="table-container" *ngIf="!loadingCertificates">
-                    <table mat-table [dataSource]="dataCertificates" matSort multiTemplateDataRows>
-
-                        <!-- Patient Column -->
-                        <ng-container matColumnDef="patient">
-                            <th mat-header-cell *matHeaderCellDef> Paciente </th>
-                            <td mat-cell *matCellDef="let element" class='title-cell' test data-label='Paciente'> {{
-                                element.patient.lastName.toUpperCase() }}, {{ (element.patient |
-                                patientName).toUpperCase() }}
-                            </td>
-                        </ng-container>
-
-                        <!-- DNI Column -->
-                        <ng-container matColumnDef="dni">
-                            <th mat-header-cell *matHeaderCellDef> DNI </th>
-                            <td mat-cell *matCellDef="let element" class='title-cell' data-label='DNI'> {{
-                                element.patient.dni }}
-                            </td>
-                        </ng-container>
-
-                        <!-- Certificate date Column -->
-                        <ng-container matColumnDef="certificate_date">
-                            <th mat-header-cell *matHeaderCellDef> Inicio</th>
-                            <td mat-cell *matCellDef="let element" class='title-cell' test data-label='Fecha'> {{
-                                element.startDate | date :'dd/MM/yyyy HH:mm':'-0300'}}</td>
-                        </ng-container>
-
-                        <!-- End date Column -->
-                        <ng-container matColumnDef="end_date">
-                            <th mat-header-cell *matHeaderCellDef> Fin </th>
-                            <td mat-cell *matCellDef="let element" class='title-cell' data-label='Fecha Fin'> {{
-                                element.endDate | date :'dd/MM/yyyy HH:mm':'-0300'}}</td>
-                        </ng-container>
-
-                        <!-- Certificate status Column -->
-
-                        <ng-container matColumnDef="status">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
-                            <td mat-cell *matCellDef="let element" class='has_label_on_mobile' data-label='Estado'
-                                [style.color]="getCertificateStatusColor(element)"> {{getCertificateStatus(element) |
-                                uppercase}}</td>
-                        </ng-container>
-
-                        <!-- Action Column -->
-                        <ng-container matColumnDef="action">
-                            <th mat-header-cell *matHeaderCellDef> Acción </th>
-                            <td mat-cell *matCellDef="let element" (click)="$event.stopPropagation()"
-                                class="actions-cell">
-                                <button mat-menu-item [matMenuTriggerFor]="menu" class="menu-collapse">
-                                    <mat-icon>more_vert</mat-icon>
-                                </button>
-
-                                <mat-menu #menu="matMenu">
-                                    <button mat-menu-item type="button" matTooltip="Anular" matTooltipPosition="above"
-                                            (click)="anulateCertificate(element)"
-                                            [disabled]="element?.status === 'anulado'">
-                                        <mat-icon>block</mat-icon>
-                                        <span>Anular certificado</span>
-                                    </button>
-                                    <button mat-menu-item type="button" (click)="printCertificate(element)">
-                                        <mat-icon>print</mat-icon>
-                                        <span>Imprimir certificado</span>
-                                    </button>
-                                    <!-- <button mat-menu-item type="button" matTooltip="Eliminar" matTooltipPosition="above"
-                                            (click)="deleteDialogCertificate(element)">
-                                        <mat-icon>delete</mat-icon>
-                                        <span>Eliminar certificado</span>
-                                    </button> -->
-                                </mat-menu>
-
-                                <div fxLayout="row" fxLayoutAlign="center center" class="action-buttons">
-                                    <button mat-menu-item type="button" (click)="printCertificate(element)"
-                                            matTooltip="Imprimir" matTooltipPosition="above" [disabled]="element.status"
-                                            [style.opacity]="element.status ? 0.5 : 1">
-                                        <mat-icon>print</mat-icon>
-                                    </button>
-                                    <button mat-menu-item type="button" matTooltip="Anular" matTooltipPosition="above"
-                                            (click)="anulateCertificate(element)"
-                                            [disabled]="element?.status === 'anulado'"
-                                            [style.opacity]="element?.status === 'anulado' ? 0.5 : 1">
-                                        <mat-icon>block</mat-icon>
-                                    </button>
-                                </div>
-                            </td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="arrow">
-                            <th mat-header-cell *matHeaderCellDef> </th>
-                            <td mat-cell *matCellDef="let element">
-                                <button mat-menu-item type="button">
-                                    <mat-icon
-                                              [@arrowDirection]="element._id == expandedElement?._id ? 'up' : 'down'">expand_more</mat-icon>
-                                </button>
-                            </td>
-                        </ng-container>
-
-                        <!-- Expanded Content Column -->
-                        <ng-container matColumnDef="expandedDetail">
-                            <td mat-cell *matCellDef="let element" [attr.colspan]="certificatesColumns.length">
-                                <div class="element-detail"
-                                     [@detailExpand]="element._id == expandedElement?._id ? 'expanded' : 'collapsed'">
-                                    <div class="element-diagram">
-                                        <div class="element-description"
-                                             *ngIf="element.certificate  && !element.status">
-                                            <span>Descripción:</span> {{ element.certificate }}
-                                        </div>
-                                        <div class="element-description" *ngIf="element.cantDias">
-                                            <span>Cantidad de días:</span> {{
-                                            element.cantDias }}
-                                        </div>
-                                        <div class="element-description" *ngIf="element.anulateReason">
-                                            <span>Motivo:</span> {{ element.anulateReason }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </ng-container>
-
-                        <tr mat-header-row *matHeaderRowDef="certificatesColumns; sticky: true"></tr>
-                        <tr mat-row [@rowsAnimation]="" *matRowDef="let row; columns: certificatesColumns;"
-                            class="element-row" [class.expanded-row]="expandedElement === row"
-                            (click)="expandedElement = expandedElement === row ? null : row">
-                        </tr>
-                        <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
-                    </table>
-                </div>
-                <div fxLayout="row" fxLayoutAlign="center" class="loading-prescriptions" *ngIf="loadingCertificates">
-                    <mat-spinner matSuffix color="primary" [diameter]="40"></mat-spinner>
-                </div>
-                <mat-paginator #certificatesPaginator [length]="totalCertificates" [pageSize]="certificatesPageSize"
-                               [pageIndex]="certificatesPageIndex" [pageSizeOptions]="pageSizeOptions"
-                               (page)="onCertificatesPageChange($event)" showFirstLastButtons></mat-paginator>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="arrow">
+          <th mat-header-cell *matHeaderCellDef> </th>
+          <td mat-cell *matCellDef="let element">
+            <button mat-menu-item type="button">
+              <mat-icon
+              [@arrowDirection]="element._id == expandedElement?._id ? 'up' : 'down'">expand_more</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+        <!-- Expanded Content Column -->
+        <ng-container matColumnDef="expandedDetail">
+          <td mat-cell *matCellDef="let element" [attr.colspan]="certificatesColumns.length">
+            <div class="element-detail"
+              [@detailExpand]="element._id == expandedElement?._id ? 'expanded' : 'collapsed'">
+              <div class="element-diagram">
+                @if (element.certificate  && !element.status) {
+                  <div class="element-description"
+                    >
+                    <span>Descripción:</span> {{ element.certificate }}
+                  </div>
+                }
+                @if (element.cantDias) {
+                  <div class="element-description">
+                    <span>Cantidad de días:</span> {{
+                    element.cantDias }}
+                  </div>
+                }
+                @if (element.anulateReason) {
+                  <div class="element-description">
+                    <span>Motivo:</span> {{ element.anulateReason }}
+                  </div>
+                }
+              </div>
             </div>
-        </div>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="certificatesColumns; sticky: true"></tr>
+        <tr mat-row [@rowsAnimation]="" *matRowDef="let row; columns: certificatesColumns;"
+          class="element-row" [class.expanded-row]="expandedElement === row"
+          (click)="expandedElement = expandedElement === row ? null : row">
+        </tr>
+        <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
+      </table>
+    </div>
+  }
+  @if (loadingCertificates) {
+    <div fxLayout="row" fxLayoutAlign="center" class="loading-prescriptions">
+      <mat-spinner matSuffix color="primary" [diameter]="40"></mat-spinner>
+    </div>
+  }
+  <mat-paginator #certificatesPaginator [length]="totalCertificates" [pageSize]="certificatesPageSize"
+    [pageIndex]="certificatesPageIndex" [pageSizeOptions]="pageSizeOptions"
+  (page)="onCertificatesPageChange($event)" showFirstLastButtons></mat-paginator>
+</div>
+</div>
+}
 
-        <div *ngIf="selectedType === 'practicas'">
-            <h3 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"><mat-icon>list_alt</mat-icon>
-                <span>Prácticas</span>
-            </h3>
-            <div class="container mat-elevation-z8">
-                <div class="table-container" *ngIf="!loadingPractices">
-                    <table mat-table [dataSource]="dataPractices" matSort multiTemplateDataRows>
+@if (selectedType === 'practicas') {
+  <div>
+    <h3 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"><mat-icon>list_alt</mat-icon>
+    <span>Prácticas</span>
+  </h3>
+  <div class="container mat-elevation-z8">
+    @if (!loadingPractices) {
+      <div class="table-container">
+        <table mat-table [dataSource]="dataPractices" matSort multiTemplateDataRows>
+          <!-- Patient Column -->
+          <ng-container matColumnDef="patient">
+            <th mat-header-cell *matHeaderCellDef> Paciente </th>
+            <td mat-cell *matCellDef="let element" class='title-cell' test data-label='Paciente'> {{
+              element.patient.lastName.toUpperCase() }}, {{ (element.patient |
+              patientName).toUpperCase() }}
+            </td>
+          </ng-container>
+          <!-- DNI Column -->
+          <ng-container matColumnDef="dni">
+            <th mat-header-cell *matHeaderCellDef> DNI </th>
+            <td mat-cell *matCellDef="let element" class='title-cell' data-label='DNI'> {{
+              element.patient.dni }}
+            </td>
+          </ng-container>
+          <!-- Practice date Column -->
+          <ng-container matColumnDef="practice_date">
+            <th mat-header-cell *matHeaderCellDef> Fecha </th>
+            <td mat-cell *matCellDef="let element" class='title-cell' test data-label='Fecha'> {{
+            element.date | date :'dd/MM/yyyy'}}</td>
+          </ng-container>
+          <!-- Action Column -->
+          <ng-container matColumnDef="action">
+            <th mat-header-cell *matHeaderCellDef> Acción </th>
+            <td mat-cell *matCellDef="let element" (click)="$event.stopPropagation()"
+              class="actions-cell">
+              <button mat-menu-item [matMenuTriggerFor]="menu" class="menu-collapse">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item type="button" (click)="printPractice(element)">
+                  <mat-icon>print</mat-icon>
+                  <span>Imprimir práctica</span>
+                </button>
+                <button mat-menu-item type="button" matTooltip="Eliminar" matTooltipPosition="above"
+                  (click)="deleteDialogPractice(element)">
+                  <mat-icon>delete</mat-icon>
+                  <span>Eliminar práctica</span>
+                </button>
+              </mat-menu>
+              <div fxLayout="row" fxLayoutAlign="center center" class="action-buttons">
+                <button mat-menu-item type="button" (click)="printPractice(element)"
+                  matTooltip="Imprimir" matTooltipPosition="above">
+                  <mat-icon>print</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="arrow">
+            <th mat-header-cell *matHeaderCellDef> </th>
+            <td mat-cell *matCellDef="let element">
+              <button mat-menu-item type="button">
+                <mat-icon
+                [@arrowDirection]="element._id == expandedElement?._id ? 'up' : 'down'">expand_more</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+          <!-- Expanded Content Column -->
+          <ng-container matColumnDef="expandedDetail">
+            <td mat-cell *matCellDef="let element" [attr.colspan]="practicesColumns.length">
+              <div class="element-detail"
+                [@detailExpand]="element._id == expandedElement?._id ? 'expanded' : 'collapsed'">
+                <div class="element-diagram">
+                  <div class="supplies-list">
+                    <div class="supply-description">
+                      @if (element.practice) {
+                        <span style="display: inline-block; text-align: left;"
+                          >
+                          <strong>Práctica:</strong> {{ element.practice }}
+                        </span>
+                      }
+                      @if (element.practice && element.diagnostic) {
+                        <br>
+                        }
+                        @if (element.diagnostic) {
+                          <span style="display: inline-block; text-align: left;"
+                            >
+                            <strong>Diagnóstico:</strong> {{ element.diagnostic }}
+                          </span>
+                        }
+                        @if (element.diagnostic && element.indications) {
+                          <br>
+                          }
+                          @if (element.indications) {
+                            <span style="display: inline-block; text-align: left;"
+                              >
+                              <strong>Indicaciones:</strong> {{ element.indications }}
+                            </span>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="practicesColumns; sticky: true"></tr>
+              <tr mat-row [@rowsAnimation]="" *matRowDef="let row; columns: practicesColumns;"
+                class="element-row" [class.expanded-row]="expandedElement === row"
+                (click)="expandedElement = expandedElement === row ? null : row">
+              </tr>
+              <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
+            </table>
+          </div>
+        }
+        @if (loadingPractices) {
+          <div fxLayout="row" fxLayoutAlign="center" class="loading-prescriptions">
+            <mat-spinner matSuffix color="primary" [diameter]="40"></mat-spinner>
+          </div>
+        }
+        <mat-paginator #practicesPaginator [length]="totalPractices" [pageSize]="practicesPageSize"
+          [pageIndex]="practicesPageIndex" [pageSizeOptions]="pageSizeOptions"
+        (page)="onPracticesPageChange($event)" showFirstLastButtons></mat-paginator>
+      </div>
+    </div>
+  }
 
-                        <!-- Patient Column -->
-                        <ng-container matColumnDef="patient">
-                            <th mat-header-cell *matHeaderCellDef> Paciente </th>
-                            <td mat-cell *matCellDef="let element" class='title-cell' test data-label='Paciente'> {{
-                                element.patient.lastName.toUpperCase() }}, {{ (element.patient |
-                                patientName).toUpperCase() }}
-                            </td>
-                        </ng-container>
-
-                        <!-- DNI Column -->
-                        <ng-container matColumnDef="dni">
-                            <th mat-header-cell *matHeaderCellDef> DNI </th>
-                            <td mat-cell *matCellDef="let element" class='title-cell' data-label='DNI'> {{
-                                element.patient.dni }}
-                            </td>
-                        </ng-container>
-
-                        <!-- Practice date Column -->
-                        <ng-container matColumnDef="practice_date">
-                            <th mat-header-cell *matHeaderCellDef> Fecha </th>
-                            <td mat-cell *matCellDef="let element" class='title-cell' test data-label='Fecha'> {{
-                                element.date | date :'dd/MM/yyyy'}}</td>
-                        </ng-container>
-
-                        <!-- Action Column -->
-                        <ng-container matColumnDef="action">
-                            <th mat-header-cell *matHeaderCellDef> Acción </th>
-                            <td mat-cell *matCellDef="let element" (click)="$event.stopPropagation()"
-                                class="actions-cell">
-                                <button mat-menu-item [matMenuTriggerFor]="menu" class="menu-collapse">
-                                    <mat-icon>more_vert</mat-icon>
-                                </button>
-
-                                <mat-menu #menu="matMenu">
-                                    <button mat-menu-item type="button" (click)="printPractice(element)">
-                                        <mat-icon>print</mat-icon>
-                                        <span>Imprimir práctica</span>
-                                    </button>
-                                    <button mat-menu-item type="button" matTooltip="Eliminar" matTooltipPosition="above"
-                                            (click)="deleteDialogPractice(element)">
-                                        <mat-icon>delete</mat-icon>
-                                        <span>Eliminar práctica</span>
-                                    </button>
-                                </mat-menu>
-
-                                <div fxLayout="row" fxLayoutAlign="center center" class="action-buttons">
-                                    <button mat-menu-item type="button" (click)="printPractice(element)"
-                                            matTooltip="Imprimir" matTooltipPosition="above">
-                                        <mat-icon>print</mat-icon>
-                                    </button>
-                                </div>
-                            </td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="arrow">
-                            <th mat-header-cell *matHeaderCellDef> </th>
-                            <td mat-cell *matCellDef="let element">
-                                <button mat-menu-item type="button">
-                                    <mat-icon
-                                              [@arrowDirection]="element._id == expandedElement?._id ? 'up' : 'down'">expand_more</mat-icon>
-                                </button>
-                            </td>
-                        </ng-container>
-
-                        <!-- Expanded Content Column -->
-                        <ng-container matColumnDef="expandedDetail">
-                            <td mat-cell *matCellDef="let element" [attr.colspan]="practicesColumns.length">
-                                <div class="element-detail"
-                                     [@detailExpand]="element._id == expandedElement?._id ? 'expanded' : 'collapsed'">
-                                    <div class="element-diagram">
-                                        <div class="supplies-list">
-                                            <div class="supply-description">
-                                                <span style="display: inline-block; text-align: left;"
-                                                      *ngIf="element.practice">
-                                                    <strong>Práctica:</strong> {{ element.practice }}
-                                                </span>
-                                                <br *ngIf="element.practice && element.diagnostic">
-                                                <span style="display: inline-block; text-align: left;"
-                                                      *ngIf="element.diagnostic">
-                                                    <strong>Diagnóstico:</strong> {{ element.diagnostic }}
-                                                </span>
-                                                <br *ngIf="element.diagnostic && element.indications">
-                                                <span style="display: inline-block; text-align: left;"
-                                                      *ngIf="element.indications">
-                                                    <strong>Indicaciones:</strong> {{ element.indications }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </ng-container>
-
-                        <tr mat-header-row *matHeaderRowDef="practicesColumns; sticky: true"></tr>
-                        <tr mat-row [@rowsAnimation]="" *matRowDef="let row; columns: practicesColumns;"
-                            class="element-row" [class.expanded-row]="expandedElement === row"
-                            (click)="expandedElement = expandedElement === row ? null : row">
-                        </tr>
-                        <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
-                    </table>
-                </div>
-                <div fxLayout="row" fxLayoutAlign="center" class="loading-prescriptions" *ngIf="loadingPractices">
-                    <mat-spinner matSuffix color="primary" [diameter]="40"></mat-spinner>
-                </div>
-                <mat-paginator #practicesPaginator [length]="totalPractices" [pageSize]="practicesPageSize"
-                               [pageIndex]="practicesPageIndex" [pageSizeOptions]="pageSizeOptions"
-                               (page)="onPracticesPageChange($event)" showFirstLastButtons></mat-paginator>
-            </div>
-        </div>
-
-    </mat-card-content>
+</mat-card-content>
 </mat-card>

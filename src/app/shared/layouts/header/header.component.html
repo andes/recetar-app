@@ -1,29 +1,31 @@
-<mat-toolbar *ngIf="isLoggedIn$ | async">
-  <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="20" class="container-header">
-    <button mat-button>
-      <img src="assets/img/LogoRecetar.png" class="icon-navbar">
-      RecetAR
-    </button>
-
-    <mat-toolbar *ngIf="isAuditRole$|async">
-      <a mat-button [routerLink]="['/audit/users']">Usuarios</a>
-    </mat-toolbar>
-
-
-
-
-    <p *ngIf="(ambito$ | async) && !(isOnlyAuditRole$ | async)">Ámbito {{(ambito$ | async) === 'publico' ? 'público' :
-      (ambito$ | async)}}</p>
-    <div>
-      <button mat-button [matMenuTriggerFor]="menu">{{businessName$ | async}}</button>
-      <mat-menu #menu="matMenu">
-        <a mat-menu-item [routerLink]="['/auth/reset-password']">Cambiar contraseña</a>
-        <a mat-menu-item [routerLink]="['/profesionales/editar-usuario']">Editar información</a>
-        <a *ngIf="isProfessionalBothRoles$|async" mat-menu-item
-          [routerLink]="['/profesionales/seleccionador-ambito']">Cambiar ámbito</a>
-        <button mat-menu-item (click)="logout()">Salir</button>
-      </mat-menu>
+@if (isLoggedIn$ | async) {
+  <mat-toolbar>
+    <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="20" class="container-header">
+      <button mat-button class="brand-button">
+        <img src="assets/img/LogoRecetar.png" class="icon-navbar">
+        <span class="brand-title">RecetAR</span>
+      </button>
+      @if (isAuditRole$|async) {
+        <mat-toolbar>
+          <a mat-button [routerLink]="['/audit/users']">Usuarios</a>
+        </mat-toolbar>
+      }
+      @if ((ambito$ | async) && !(isOnlyAuditRole$ | async)) {
+        <p>Ámbito {{(ambito$ | async) === 'publico' ? 'público' :
+        (ambito$ | async)}}</p>
+      }
+      <div>
+        <button mat-button class="user-button" [matMenuTriggerFor]="menu">{{businessName$ | async}}</button>
+        <mat-menu #menu="matMenu">
+          <a mat-menu-item [routerLink]="['/auth/reset-password']">Cambiar contraseña</a>
+          <a mat-menu-item [routerLink]="['/profesionales/editar-usuario']">Editar información</a>
+          @if (isProfessionalBothRoles$|async) {
+            <a mat-menu-item
+            [routerLink]="['/profesionales/seleccionador-ambito']">Cambiar ámbito</a>
+          }
+          <button mat-menu-item (click)="logout()">Salir</button>
+        </mat-menu>
+      </div>
     </div>
-
-  </div>
-</mat-toolbar>
+  </mat-toolbar>
+}

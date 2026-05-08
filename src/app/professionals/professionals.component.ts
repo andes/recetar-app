@@ -8,9 +8,9 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ProfessionalsComponent implements OnInit {
 
-  constructor() { }
+    constructor() { }
 
-  ngOnInit(): void {
-  }
+    ngOnInit(): void {
+    }
 
 }

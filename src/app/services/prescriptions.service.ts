@@ -5,7 +5,7 @@ import { Observable, BehaviorSubject, of } from 'rxjs';
 import { Prescriptions, PrescriptionsResponse } from '../interfaces/prescriptions';
 import { tap, mapTo, map } from 'rxjs/operators';
 import { saveAs } from 'file-saver';
-import * as moment from 'moment';
+import moment from 'moment';
 import { AmbitoService } from '../auth/services/ambito.service';
 
 @Injectable({

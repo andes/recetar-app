@@ -1,151 +1,183 @@
-<div [ngSwitch]="data.dialogType">
-
-    <div *ngSwitchCase="'created'">
-        <h3 mat-dialog-title><mat-icon>check</mat-icon> Creada</h3>
-        <div mat-dialog-content>
-            <p>La receta se ha creado correctamente!</p>
-        </div>
-        <div mat-dialog-actions align="end">
-            <button mat-raised-button color="primary" style="background-color: green; color: white;"
-                    (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
-        </div>
-    </div> <!-- End case noPrescriptions -->
-
-    <div *ngSwitchCase="'created_certificate'">
-        <h3 mat-dialog-title><mat-icon>check</mat-icon> Creado</h3>
-        <div mat-dialog-content>
-            <p>El certificado se ha creado correctamente!</p>
-        </div>
-        <div mat-dialog-actions align="end">
-            <button mat-raised-button color="primary" style="background-color: green; color: white;"
-                    (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
-        </div>
+<ng-container [ngSwitch]="data.dialogType">
+  <div *ngSwitchCase="'created'">
+    <h3 mat-dialog-title><mat-icon>check</mat-icon> Creada</h3>
+    <div mat-dialog-content>
+      <p>La receta se ha creado correctamente!</p>
     </div>
-
-    <div *ngSwitchCase="'updated'">
-        <h3 mat-dialog-title><mat-icon>check</mat-icon> Modificado</h3>
-        <div mat-dialog-content>
-            <p>La receta se ha modificado correctamente!</p>
-        </div>
-        <div mat-dialog-actions align="end">
-            <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
-        </div>
-    </div> <!-- End case noPrescriptions -->
-
-    <div *ngSwitchCase="'deleted'">
-        <h3 mat-dialog-title><mat-icon>check</mat-icon> Eliminada</h3>
-        <div mat-dialog-content>
-            <p>La receta se ha eliminado correctamente!</p>
-        </div>
-        <div mat-dialog-actions align="end">
-            <button mat-raised-button color="primary" style="background-color: green; color: white;"
-                    (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
-        </div>
-    </div> <!-- End case deleted -->
-
-    <div *ngSwitchCase="'delete'">
-        <h3 mat-dialog-title><mat-icon>delete</mat-icon> Desea eliminar la receta?</h3>
-        <div mat-dialog-content>
-            <p>Receta de {{getPatientName()}}</p>
-            <p>Una vez eliminada no se podrá recuperar</p>
-        </div>
-        <div mat-dialog-actions fxLayoutAlign="space-around" align="end">
-            <button mat-button (click)="onNoClick()" cdkFocusInitial>Cancelar</button>
-            <button mat-raised-button color="warn" (click)="deletePrescription(data.item)">Confirmar</button>
-        </div>
-    </div> <!-- End case noPrescriptions -->
-
-    <div *ngSwitchCase="'anulate_certificate'">
-        <h3 mat-dialog-title><mat-icon>check</mat-icon> Anulado</h3>
-        <div mat-dialog-content>
-            <p>¡El certificado se ha anulado correctamente!</p>
-            <p>Recuerde que, a partir de este momento, pierde toda validez.</p>
-           
+    <div mat-dialog-actions align="end">
+      <button
+        mat-raised-button
+        color="primary"
+        style="background-color: green; color: white;"
+        (click)="onNoClick()"
+        cdkFocusInitial
+      >Aceptar</button>
     </div>
-     <div mat-dialog-actions align="end">
-            <button mat-raised-button color="primary" style="background-color: green; color: white;"
-                    (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
-        </div>
+  </div>
+
+  <div *ngSwitchCase="'created_certificate'">
+    <h3 mat-dialog-title><mat-icon>check</mat-icon> Creado</h3>
+    <div mat-dialog-content>
+      <p>El certificado se ha creado correctamente!</p>
     </div>
-    <div *ngSwitchCase="'practiceSuccess'">
-        <h3 mat-dialog-title><mat-icon>check</mat-icon> Creada</h3>
-        <div mat-dialog-content>
-            <p>La práctica se ha creado correctamente!</p>
-        </div>
-        <div mat-dialog-actions align="end">
-            <button mat-button style="background-color: green; color: white;" (click)="onNoClick()"
-                    cdkFocusInitial>Aceptar</button>
-        </div>
-    </div> <!-- End case practiceSuccess -->
-
-    <div *ngSwitchCase="'practiceError'">
-        <h3 mat-dialog-title><mat-icon>error</mat-icon> Error</h3>
-        <div mat-dialog-content>
-            <p>Hubo un error al crear la práctica. Por favor, inténtelo nuevamente.</p>
-        </div>
-        <div mat-dialog-actions align="end">
-            <button mat-raised-button color="primary" style="background-color: green; color: white;"
-                    (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
-        </div>
-    </div> <!-- End case practiceError -->
-
-    <div *ngSwitchCase="'suspend_andes'">
-        <h3 mat-dialog-title><mat-icon>block</mat-icon> ¿Desea suspender la receta?</h3>
-        <div mat-dialog-content>
-            <p>Receta de {{getPatientName()}}</p>
-            <p>Una vez suspendida, la receta no podrá dispensarse</p>
-        </div>
-        <div mat-dialog-actions fxLayoutAlign="space-around" align="end">
-            <button mat-button (click)="onNoClick()" cdkFocusInitial>Cancelar</button>
-            <button mat-raised-button color="warn" (click)="confirmSuspendAndes()">Suspender</button>
-        </div>
+    <div mat-dialog-actions align="end">
+      <button
+        mat-raised-button
+        color="primary"
+        style="background-color: green; color: white;"
+        (click)="onNoClick()"
+        cdkFocusInitial
+      >Aceptar</button>
     </div>
+  </div>
 
-    <div *ngSwitchCase="'suspend_andes_success'">
-        <h3 mat-dialog-title><mat-icon>check</mat-icon> Suspendida</h3>
-        <div mat-dialog-content>
-            <p>La receta se ha suspendido correctamente!</p>
-        </div>
-        <div mat-dialog-actions align="end">
-            <button mat-raised-button color="primary" style="background-color: green; color: white;"
-                    (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
-        </div>
+  <div *ngSwitchCase="'updated'">
+    <h3 mat-dialog-title><mat-icon>check</mat-icon> Modificado</h3>
+    <div mat-dialog-content>
+      <p>La receta se ha modificado correctamente!</p>
     </div>
-
-    <div *ngSwitchCase="'suspend_andes_error'">
-        <h3 mat-dialog-title><mat-icon>error</mat-icon> Error</h3>
-        <div mat-dialog-content>
-            <p>Hubo un error al suspender la receta. Por favor, inténtelo nuevamente.</p>
-        </div>
-        <div mat-dialog-actions align="end">
-            <button mat-raised-button color="primary" style="background-color: green; color: white;"
-                    (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
-        </div>
+    <div mat-dialog-actions align="end">
+      <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
     </div>
+  </div>
 
-    <div *ngSwitchDefault>
-        <h3 mat-dialog-title><mat-icon>error</mat-icon> Error</h3>
-        <div mat-dialog-content>
-            <p>{{data.text}}</p>
-        </div>
-
-        <div *ngSwitchCase="'error-dispensed'">
-            <h3 mat-dialog-title><mat-icon>error_outline</mat-icon> Atención</h3>
-            <div mat-dialog-content>
-                <p>La receta ya se ha dispensado y no es posible eliminarla</p>
-            </div>
-            <div mat-dialog-actions align="end">
-                <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
-            </div>
-        </div> <!-- End case noPrescriptions -->
-
-        <div *ngSwitchDefault>
-            <h3 mat-dialog-title><mat-icon>error</mat-icon> Error</h3>
-            <div mat-dialog-content>
-                <p>{{data.text}}</p>
-            </div>
-            <div mat-dialog-actions align="end">
-                <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
-            </div>
-        </div> <!-- End default switch -->
+  <div *ngSwitchCase="'deleted'">
+    <h3 mat-dialog-title><mat-icon>check</mat-icon> Eliminada</h3>
+    <div mat-dialog-content>
+      <p>La receta se ha eliminado correctamente!</p>
     </div>
+    <div mat-dialog-actions align="end">
+      <button
+        mat-raised-button
+        color="primary"
+        style="background-color: green; color: white;"
+        (click)="onNoClick()"
+        cdkFocusInitial
+      >Aceptar</button>
+    </div>
+  </div>
+
+  <div *ngSwitchCase="'delete'">
+    <h3 mat-dialog-title><mat-icon>delete</mat-icon> Desea eliminar la receta?</h3>
+    <div mat-dialog-content>
+      <p>Receta de {{ getPatientName() }}</p>
+      <p>Una vez eliminada no se podra recuperar</p>
+    </div>
+    <div mat-dialog-actions fxLayoutAlign="space-around" align="end">
+      <button mat-button (click)="onNoClick()" cdkFocusInitial>Cancelar</button>
+      <button mat-raised-button color="warn" (click)="deletePrescription(data.item)">Confirmar</button>
+    </div>
+  </div>
+
+  <div *ngSwitchCase="'anulate_certificate'">
+    <h3 mat-dialog-title><mat-icon>check</mat-icon> Anulado</h3>
+    <div mat-dialog-content>
+      <p>El certificado se ha anulado correctamente!</p>
+      <p>Recuerde que, a partir de este momento, pierde toda validez.</p>
+    </div>
+    <div mat-dialog-actions align="end">
+      <button
+        mat-raised-button
+        color="primary"
+        style="background-color: green; color: white;"
+        (click)="onNoClick()"
+        cdkFocusInitial
+      >Aceptar</button>
+    </div>
+  </div>
+
+  <div *ngSwitchCase="'practiceSuccess'">
+    <h3 mat-dialog-title><mat-icon>check</mat-icon> Creada</h3>
+    <div mat-dialog-content>
+      <p>La practica se ha creado correctamente!</p>
+    </div>
+    <div mat-dialog-actions align="end">
+      <button
+        mat-button
+        style="background-color: green; color: white;"
+        (click)="onNoClick()"
+        cdkFocusInitial
+      >Aceptar</button>
+    </div>
+  </div>
+
+  <div *ngSwitchCase="'practiceError'">
+    <h3 mat-dialog-title><mat-icon>error</mat-icon> Error</h3>
+    <div mat-dialog-content>
+      <p>Hubo un error al crear la practica. Por favor, intentelo nuevamente.</p>
+    </div>
+    <div mat-dialog-actions align="end">
+      <button
+        mat-raised-button
+        color="primary"
+        style="background-color: green; color: white;"
+        (click)="onNoClick()"
+        cdkFocusInitial
+      >Aceptar</button>
+    </div>
+  </div>
+
+  <div *ngSwitchCase="'suspend_andes'">
+    <h3 mat-dialog-title><mat-icon>block</mat-icon> Desea suspender la receta?</h3>
+    <div mat-dialog-content>
+      <p>Receta de {{ getPatientName() }}</p>
+      <p>Una vez suspendida, la receta no podra dispensarse</p>
+    </div>
+    <div mat-dialog-actions fxLayoutAlign="space-around" align="end">
+      <button mat-button (click)="onNoClick()" cdkFocusInitial>Cancelar</button>
+      <button mat-raised-button color="warn" (click)="confirmSuspendAndes()">Suspender</button>
+    </div>
+  </div>
+
+  <div *ngSwitchCase="'suspend_andes_success'">
+    <h3 mat-dialog-title><mat-icon>check</mat-icon> Suspendida</h3>
+    <div mat-dialog-content>
+      <p>La receta se ha suspendido correctamente!</p>
+    </div>
+    <div mat-dialog-actions align="end">
+      <button
+        mat-raised-button
+        color="primary"
+        style="background-color: green; color: white;"
+        (click)="onNoClick()"
+        cdkFocusInitial
+      >Aceptar</button>
+    </div>
+  </div>
+
+  <div *ngSwitchCase="'suspend_andes_error'">
+    <h3 mat-dialog-title><mat-icon>error</mat-icon> Error</h3>
+    <div mat-dialog-content>
+      <p>Hubo un error al suspender la receta. Por favor, intentelo nuevamente.</p>
+    </div>
+    <div mat-dialog-actions align="end">
+      <button
+        mat-raised-button
+        color="primary"
+        style="background-color: green; color: white;"
+        (click)="onNoClick()"
+        cdkFocusInitial
+      >Aceptar</button>
+    </div>
+  </div>
+
+  <div *ngSwitchCase="'error-dispensed'">
+    <h3 mat-dialog-title><mat-icon>error_outline</mat-icon> Atencion</h3>
+    <div mat-dialog-content>
+      <p>La receta ya se ha dispensado y no es posible eliminarla</p>
+    </div>
+    <div mat-dialog-actions align="end">
+      <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
+    </div>
+  </div>
+
+  <div *ngSwitchDefault>
+    <h3 mat-dialog-title><mat-icon>error</mat-icon> Error</h3>
+    <div mat-dialog-content>
+      <p>{{ data.text }}</p>
+    </div>
+    <div mat-dialog-actions align="end">
+      <button mat-button (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
+    </div>
+  </div>
+</ng-container>

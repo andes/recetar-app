@@ -8,9 +8,9 @@ import { Component, OnInit } from '@angular/core';
 })
 export class PharmacistsComponent implements OnInit {
 
-  constructor() { }
+    constructor() { }
 
-  ngOnInit(): void {
-  }
+    ngOnInit(): void {
+    }
 
 }

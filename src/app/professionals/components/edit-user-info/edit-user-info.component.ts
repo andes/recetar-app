@@ -76,7 +76,6 @@ export class EditUserInfoComponent implements OnInit {
                     this.router.navigate(['/']);
                 },
                 error: (error) => {
-                    console.log(error);
                     this.isLoading = false;
                     this.updateError = error.error.mensaje || 'Error al cargar la información del usuario';
                     this.snackBar.open(

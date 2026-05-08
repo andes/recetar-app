@@ -12,33 +12,33 @@ import { AmbitoService } from '../../../auth/services/ambito.service';
 })
 export class HeaderComponent implements OnInit {
 
-  isLoggedIn$: Observable<boolean>;
-  businessName$: Observable<string>;
-  isAuditRole$: Observable<boolean>;
-  isOnlyAuditRole$: Observable<boolean>;
-  isProfessionalBothRoles$: Observable<boolean>;
-  ambito$: Observable<string | null>;
+    isLoggedIn$: Observable<boolean>;
+    businessName$: Observable<string>;
+    isAuditRole$: Observable<boolean>;
+    isOnlyAuditRole$: Observable<boolean>;
+    isProfessionalBothRoles$: Observable<boolean>;
+    ambito$: Observable<string | null>;
 
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-    private ambitoService: AmbitoService,
-  ) { }
+    constructor(
+        private authService: AuthService,
+        private router: Router,
+        private ambitoService: AmbitoService,
+    ) { }
 
-  ngOnInit(): void {
-    this.isLoggedIn$ = this.authService.isLoggedIn;
-    this.businessName$ = this.authService.getBusinessName;
-    this.isAuditRole$ = this.authService.getIsAudit;
-    this.isOnlyAuditRole$ = this.authService.getIsOnlyAudit;
-    this.isProfessionalBothRoles$ = this.authService.getIsProfessionalBothRoles;
-    this.ambito$ = this.ambitoService.getAmbitoSeleccionado;
-  }
+    ngOnInit(): void {
+        this.isLoggedIn$ = this.authService.isLoggedIn;
+        this.businessName$ = this.authService.getBusinessName;
+        this.isAuditRole$ = this.authService.getIsAudit;
+        this.isOnlyAuditRole$ = this.authService.getIsOnlyAudit;
+        this.isProfessionalBothRoles$ = this.authService.getIsProfessionalBothRoles;
+        this.ambito$ = this.ambitoService.getAmbitoSeleccionado;
+    }
 
-  logout() {
-    this.authService.logout().subscribe(success => {
-      if (success) {
-        this.router.navigate(['/auth/login']);
-      }
-    });
-  }
+    logout() {
+        this.authService.logout().subscribe(success => {
+            if (success) {
+                this.router.navigate(['/auth/login']);
+            }
+        });
+    }
 }

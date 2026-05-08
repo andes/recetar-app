@@ -1,4 +1,4 @@
-@import 'styles/_variables'
+@use 'styles/variables' as *
 
 $panels-height: 294px
 $panels-height-xl: 325px
@@ -310,8 +310,9 @@ th.mat-column-isActive, td.mat-column-isActive
 // Centrar contenedor de botones en columna Acciones
 td.mat-column-actions .action-buttons
   justify-content: center
-    .menu-collapse:
-      display: none
+
+td.mat-column-actions .menu-collapse
+  display: none
 
 .mat-form-field
   font-size: 14px
@@ -530,5 +531,3 @@ td.mat-column-actions .action-buttons
     button
       min-width: 90px
       font-size: 13px
-
-

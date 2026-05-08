@@ -13,52 +13,52 @@ import { NewUserPharmacistComponent } from './components/new-user-pharmacist/new
 
 
 const routes: Routes = [
-  {
-    path: 'auth',
-    component: AuthComponent,
-    children: [
-      {
-        path: 'login',
-        component: LoginComponent,
-        canActivate: [IsSignedInGuard],
-      },
-      {
-        path: 'reset-password',
-        component: ResetPasswordComponent,
-      },
-      {
-        path: 'forgot-password',
-        component: ForgotComponent,
-      },
-      {
-        path: 'recovery-password/:token',
-        component: RecoveryComponent,
-      },
-      {
-        path: 'new-user',
-        component: NewUserComponent,
-      },
-      {
-        path: 'new-user-pharmacist',
-        component: NewUserPharmacistComponent,
-      },
-    ]
-  }
+    {
+        path: 'auth',
+        component: AuthComponent,
+        children: [
+            {
+                path: 'login',
+                component: LoginComponent,
+                canActivate: [IsSignedInGuard],
+            },
+            {
+                path: 'reset-password',
+                component: ResetPasswordComponent,
+            },
+            {
+                path: 'forgot-password',
+                component: ForgotComponent,
+            },
+            {
+                path: 'recovery-password/:token',
+                component: RecoveryComponent,
+            },
+            {
+                path: 'new-user',
+                component: NewUserComponent,
+            },
+            {
+                path: 'new-user-pharmacist',
+                component: NewUserPharmacistComponent,
+            },
+        ]
+    }
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+    imports: [RouterModule.forChild(routes)],
+    exports: [RouterModule]
 })
 export class AuthRoutingModule { }
 
 export const routingComponents = [
-  AuthComponent,
-  LoginComponent,
-  ResetPasswordComponent,
-  DialogComponent,
-  ForgotComponent,
-  RecoveryComponent
+    AuthComponent,
+    LoginComponent,
+    ResetPasswordComponent,
+    DialogComponent,
+    ForgotComponent,
+    RecoveryComponent
 ];
 
 
