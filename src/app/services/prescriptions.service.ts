@@ -50,9 +50,38 @@ export class PrescriptionsService {
     }
 
     getFromDniAndDate(params: { patient_dni: string; dateFilter: string }): Observable<boolean> {
-        return this.http.get<Prescriptions[]>(`${environment.API_END_POINT}/prescriptions/find/${params.patient_dni}&${params.dateFilter}`).pipe(
+        return this.http.get<Prescriptions[]>(`${environment.API_END_POINT}/prescriptions/find/${params.patient_dni}?${params.dateFilter}`).pipe(
             tap((prescriptions: Prescriptions[]) => this.setPrescriptions(prescriptions)),
             map((prescriptions: Prescriptions[]) => prescriptions.length > 0)
+        );
+    }
+
+    // Método para obtener prescripciones con filtros (retorna recetas combinadas de Andes y locales)
+    getPrescriptionsWithFiltersDirect(patient_dni: string, filters?: { status?: string; dateFrom?: string; dateTo?: string; sexo?: string }): Observable<Prescriptions[]> {
+        let url = `${environment.API_END_POINT}/prescriptions/find/${patient_dni}`;
+        const queryParams: string[] = [];
+
+        if (filters) {
+            if (filters.status) {
+                queryParams.push(`status=${filters.status}`);
+            }
+            if (filters.dateFrom) {
+                queryParams.push(`dateFrom=${filters.dateFrom}`);
+            }
+            if (filters.dateTo) {
+                queryParams.push(`dateTo=${filters.dateTo}`);
+            }
+            if (filters.sexo) {
+                queryParams.push(`sexo=${filters.sexo}`);
+            }
+        }
+
+        if (queryParams.length > 0) {
+            url += `?${queryParams.join('&')}`;
+        }
+
+        return this.http.get<Prescriptions[]>(url).pipe(
+            tap((prescriptions: Prescriptions[]) => this.setPrescriptions(prescriptions))
         );
     }
 

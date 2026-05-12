@@ -77,8 +77,9 @@
             </div>
 
         </div>
+
         <div class="prescription-panel">
-            <app-prescription-list></app-prescription-list>
+            <app-prescription-list [filtersEnabled]="hasSearchedOnce"></app-prescription-list>
         </div>
     </div>
 </div>
