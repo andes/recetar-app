@@ -2,6 +2,9 @@ import { SubOrganizacion } from './organizaciones';
 export class User {
     _id: string;
     enrollment: string;
+    responsibleDTEnrollment?: string;
+    authorizationDisposition?: string;
+    authorizationExpiration?: Date;
     businessName: string;
     email: string;
     cuil: string;
