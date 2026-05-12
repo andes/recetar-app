@@ -10,6 +10,7 @@ import { ForgotComponent } from '@auth/components/forgot/forgot.component';
 import { RecoveryComponent } from '@auth/components/recovery-password/recovery-password.component';
 import { NewUserComponent } from './components/new-user/new-user.component';
 import { NewUserPharmacistComponent } from './components/new-user-pharmacist/new-user-pharmacist.component';
+import { ConfirmUpdateComponent } from './components/confirm-update/confirm-update.component';
 
 
 const routes: Routes = [
@@ -42,6 +43,10 @@ const routes: Routes = [
         path: 'new-user-pharmacist',
         component: NewUserPharmacistComponent,
       },
+      {
+        path: 'confirm-update/:token',
+        component: ConfirmUpdateComponent
+      }
     ]
   }
 ];
