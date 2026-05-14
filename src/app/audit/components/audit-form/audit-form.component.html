@@ -24,15 +24,21 @@
                     matInput
                     maxlength="11"
                     formControlName="pharmacy_cuit">
-                  <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20" *ngIf="cuitShowSpinner"></mat-spinner>
+                  @if (cuitShowSpinner) {
+                    <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20"></mat-spinner>
+                  }
                   <mat-hint align="end">{{ pharmacy_cuit.value.length }} / 11</mat-hint>
-                  <mat-error *ngIf="pharmacy_cuit.errors?.required && pharmacy_cuit.touched">
-                    Debe ingresar el cuit de una farmacia
-                  </mat-error>
+                  @if (pharmacy_cuit.errors?.required && pharmacy_cuit.touched) {
+                    <mat-error>
+                      Debe ingresar el cuit de una farmacia
+                    </mat-error>
+                  }
 
-                  <mat-error *ngIf="pharmacy_cuit.errors?.minlength && pharmacy_cuit.touched">
-                    Debe ingresar al menos 10 dígitos
-                  </mat-error>
+                  @if (pharmacy_cuit.errors?.minlength && pharmacy_cuit.touched) {
+                    <mat-error>
+                      Debe ingresar al menos 10 dígitos
+                    </mat-error>
+                  }
                 </mat-form-field>
               </div>
             </form>

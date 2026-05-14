@@ -24,7 +24,7 @@ import { Prescriptions } from '@interfaces/prescriptions';
     selector: 'app-pharmacists-form',
     templateUrl: './pharmacists-form.component.html',
     styleUrls: ['./pharmacists-form.component.sass'],
-
+    standalone: false
 })
 export class PharmacistsFormComponent implements OnInit {
 
@@ -116,9 +116,7 @@ export class PharmacistsFormComponent implements OnInit {
             data: { dialogType: aDialogType, prescription: aPrescription, text: aText }
         });
 
-        dialogRef.afterClosed().subscribe(result => {
-            console.log('The dialog was closed');
-        });
+        dialogRef.afterClosed().subscribe();
     }
 
 
@@ -134,5 +132,4 @@ export class PharmacistsFormComponent implements OnInit {
         return this.prescriptionForm.get('dateFilter');
     }
 }
-
 

@@ -5,10 +5,12 @@
   </mat-card-header>
   <mat-card-content fxFlex>
     <form [formGroup]="newUserForm" #newUserNgForm="ngForm" (ngSubmit)="onSubmitEvent(newUserForm,newUserNgForm)"
-          class="form-container">
-      <mat-error *ngIf="error">
-        {{ error }}
-      </mat-error>
+      class="form-container">
+      @if (error) {
+        <mat-error>
+          {{ error }}
+        </mat-error>
+      }
       <mat-card-title>
         <h2 class="text-center" fxLayoutAlign="center center">
           <mat-icon>account_circle</mat-icon> <span>Registrar nueva farmacia</span>
@@ -38,9 +40,11 @@
           <input matInput [min]="minDate" formControlName="vencimientoHabilitacion" [matDatepicker]="vencimientoHabilitacionPicker" readonly required>
           <mat-datepicker-toggle matSuffix [for]="vencimientoHabilitacionPicker"></mat-datepicker-toggle>
           <mat-datepicker #vencimientoHabilitacionPicker></mat-datepicker>
-          <mat-error *ngIf="newUserForm.get('vencimientoHabilitacion').errors">
-            Fecha incorrecta debe ser una fecha de vencimiento válida
-          </mat-error>
+          @if (newUserForm.get('vencimientoHabilitacion').errors) {
+            <mat-error>
+              Fecha incorrecta debe ser una fecha de vencimiento válida
+            </mat-error>
+          }
         </mat-form-field>
         <!-- Matricula DT Farmacia -->
         <mat-form-field appearance="fill" fxFlex>
@@ -53,9 +57,11 @@
         <mat-form-field appearance="fill" fxFlex>
           <mat-label>Contraseña</mat-label>
           <input matInput formControlName="password" type="password" [pattern]="regexPassword" required>
-          <mat-error *ngIf="newUserForm.get('password').errors">
-            Contraseña incorrecta debe contener una mayúscula, una minúscula y un número
-          </mat-error>
+          @if (newUserForm.get('password').errors) {
+            <mat-error>
+              Contraseña incorrecta debe contener una mayúscula, una minúscula y un número
+            </mat-error>
+          }
         </mat-form-field>
         <!-- Email -->
         <mat-form-field appearance="fill" fxFlex>
@@ -69,7 +75,7 @@
           formControlName="captcha"
           theme="light"
           required
-        >
+          >
         </ngx-turnstile>
       </div>
       <div class="botones" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="0.5rem">

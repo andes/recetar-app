@@ -27,7 +27,8 @@ import { PrescriptionPrinterComponent } from '../prescription-printer/prescripti
     providers: [
         PrescriptionPrinterComponent,
         { provide: MatPaginatorIntl, useClass: SpanishPaginatorIntl }
-    ]
+    ],
+    standalone: false
 })
 export class UsersListComponent implements OnInit, AfterContentInit, OnDestroy {
 
@@ -196,7 +197,7 @@ export class UsersListComponent implements OnInit, AfterContentInit, OnDestroy {
                 data[index] = updatedUser;
                 this.dataSource.data = data;
             }
-        })
+        });
         this.loadingUsers = false;
     }
 

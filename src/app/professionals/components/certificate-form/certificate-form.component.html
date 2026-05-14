@@ -1,87 +1,108 @@
 <mat-card fxLayout="column" fxLayoutAlign="space-between">
-    <mat-card-title>
-        <h2 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
-            <mat-icon>{{ "description" }}</mat-icon>
-            <span>{{ anulateCertificate ? "Anular certificado" : "Crear certificado" }}</span>
-        </h2>
-    </mat-card-title>
-    <mat-card-content>
-        <form [formGroup]="certificateForm" #professionalNgForm="ngForm" fxLayout="column"
-              (ngSubmit)="onSubmitCertificateForm(professionalNgForm)">
-            <div class="sub-container" fxLayout="column" fxLayoutAlign="center" fxLayoutGap="10px"
-                 fxLayoutGap.xs="10px">
-                <div class="first-block" fxLayout="column" fxLayoutGap="10px" fxLayoutGap.xs="10px">
-                    <div *ngIf="!anulateCertificate" fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center"
-                         fxLayoutAlign.xs="center center">
-                        <mat-form-field appearance="fill" fxFlex="50" fxFlex.xs="100">
-                            <mat-label>Fecha inicio</mat-label>
-                            <input matInput [matDatepicker]="picker2" [formControl]="startDate" autocomplete="off"
-                                   required tabIndex="-1">
-                            <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
-                            <mat-datepicker [startAt]="today" #picker2></mat-datepicker>
-                            <mat-error *ngIf="startDate.errors?.required">
-                                La fecha de inicio es requerida
-                            </mat-error>
-                            <mat-error *ngIf="startDate.errors?.tooOld">
-                                La fecha de inicio no puede ser superior a 15 días antes de hoy
-                            </mat-error>
-                        </mat-form-field>
-
-                        <mat-form-field appearance="fill" fxFlex="50" fxFlex.xs="100">
-                            <mat-label>Cantidad de días de vigencia</mat-label>
-                            <input matInput type="number" [formControl]="cantDias" autocomplete="off" required
-                                   tabIndex="-1" min="1">
-                            <mat-error *ngIf="cantDias.errors?.required">
-                                La cantidad de días es requerida
-                            </mat-error>
-                            <mat-error *ngIf="cantDias.errors?.min">
-                                La cantidad de días debe ser al menos 1
-                            </mat-error>
-                            <mat-hint *ngIf="cantDias.value && getEndDateHint()">{{ getEndDateHint() }}</mat-hint>
-                        </mat-form-field>
-                    </div>
-
-                    <!-- Componente reutilizable de paciente -->
-                    <app-patient-form #patientForm formControlName="patient"></app-patient-form>
-
-                    <!-- Detalle del certificado - Fuera del grupo patient según FormBuilder -->
-                    <div fxLayout="column" fxLayoutGap="10px">
-                        <mat-form-field appearance="fill">
-                            <mat-label>Descripción</mat-label>
-                            <textarea matInput required rows="5" formControlName="certificate"></textarea>
-                            <mat-error *ngIf="certificateForm.get('certificate').hasError('required')">
-                                Debe ingresar una descripción
-                            </mat-error>
-                            <mat-error *ngIf="certificateForm.get('certificate').hasError('whitespace')">
-                                La descripción no puede contener sólo espacios en blanco
-                            </mat-error>
-                        </mat-form-field>
-                    </div>
-
-                    <!-- Motivo de anulación - Fuera del grupo patient según FormBuilder -->
-                    <div *ngIf="anulateCertificate" fxLayout="column" fxLayoutGap="10px">
-                        <mat-form-field appearance="fill">
-                            <mat-label>Motivo de anulación</mat-label>
-                            <textarea matInput required rows="5" formControlName="anulateReason"></textarea>
-                        </mat-form-field>
-                    </div>
-
-                    <!-- Botones -->
-                    <button *ngIf="!anulateCertificate" mat-raised-button color="primary" type="submit" fxFlex="100%">
-                        Crear certificado
-                    </button>
-                    <div fxLayout="row" fxLayoutAlign="center" fxLayoutGap="20px" *ngIf="anulateCertificate"
-                         fxFlex="100%">
-                        <button mat-raised-button type="submit" fxFlex="48%" (click)="clearForm(professionalNgForm)">
-                            Cancelar
-                        </button>
-                        <button mat-raised-button color="primary" type="submit" fxFlex="48%"
-                                [disabled]="!certificateForm.get('anulateReason')?.value">
-                            Anular certificado
-                        </button>
-                    </div>
-                </div>
+  <mat-card-title>
+    <h2 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
+      <mat-icon>{{ "description" }}</mat-icon>
+      <span>{{ anulateCertificate ? "Anular certificado" : "Crear certificado" }}</span>
+    </h2>
+  </mat-card-title>
+  <mat-card-content>
+    <form [formGroup]="certificateForm" #professionalNgForm="ngForm" fxLayout="column"
+      (ngSubmit)="onSubmitCertificateForm(professionalNgForm)">
+      <div class="sub-container" fxLayout="column" fxLayoutAlign="center" fxLayoutGap="10px"
+        fxLayoutGap.xs="10px">
+        <div class="first-block" fxLayout="column" fxLayoutGap="10px" fxLayoutGap.xs="10px">
+          @if (!anulateCertificate) {
+            <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center"
+              fxLayoutAlign.xs="center center">
+              <mat-form-field appearance="fill" fxFlex="50" fxFlex.xs="100">
+                <mat-label>Fecha inicio</mat-label>
+                <input matInput [matDatepicker]="picker2" [formControl]="startDate" autocomplete="off"
+                  required tabIndex="-1">
+                <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+                <mat-datepicker [startAt]="today" #picker2></mat-datepicker>
+                @if (startDate.errors?.required) {
+                  <mat-error>
+                    La fecha de inicio es requerida
+                  </mat-error>
+                }
+                @if (startDate.errors?.tooOld) {
+                  <mat-error>
+                    La fecha de inicio no puede ser superior a 15 días antes de hoy
+                  </mat-error>
+                }
+              </mat-form-field>
+              <mat-form-field appearance="fill" fxFlex="50" fxFlex.xs="100">
+                <mat-label>Cantidad de días de vigencia</mat-label>
+                <input matInput type="number" [formControl]="cantDias" autocomplete="off" required
+                  tabIndex="-1" min="1">
+                @if (cantDias.errors?.required) {
+                  <mat-error>
+                    La cantidad de días es requerida
+                  </mat-error>
+                }
+                @if (cantDias.errors?.min) {
+                  <mat-error>
+                    La cantidad de días debe ser al menos 1
+                  </mat-error>
+                }
+                @if (cantDias.value && getEndDateHint()) {
+                  <mat-hint>{{ getEndDateHint() }}</mat-hint>
+                }
+              </mat-form-field>
             </div>
-        </form>
-    </mat-card-content>
+          }
+
+          <!-- Componente reutilizable de paciente -->
+          <app-patient-form #patientForm formControlName="patient"></app-patient-form>
+
+          <!-- Detalle del certificado - Fuera del grupo patient según FormBuilder -->
+          <div fxLayout="column" fxLayoutGap="10px">
+            <mat-form-field appearance="fill">
+              <mat-label>Descripción</mat-label>
+              <textarea matInput required rows="5" formControlName="certificate"></textarea>
+              @if (certificateForm.get('certificate').hasError('required')) {
+                <mat-error>
+                  Debe ingresar una descripción
+                </mat-error>
+              }
+              @if (certificateForm.get('certificate').hasError('whitespace')) {
+                <mat-error>
+                  La descripción no puede contener sólo espacios en blanco
+                </mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <!-- Motivo de anulación - Fuera del grupo patient según FormBuilder -->
+          @if (anulateCertificate) {
+            <div fxLayout="column" fxLayoutGap="10px">
+              <mat-form-field appearance="fill">
+                <mat-label>Motivo de anulación</mat-label>
+                <textarea matInput required rows="5" formControlName="anulateReason"></textarea>
+              </mat-form-field>
+            </div>
+          }
+
+          <!-- Botones -->
+          @if (!anulateCertificate) {
+            <button mat-raised-button color="primary" type="submit" fxFlex="100%">
+              Crear certificado
+            </button>
+          }
+          @if (anulateCertificate) {
+            <div fxLayout="row" fxLayoutAlign="center" fxLayoutGap="20px"
+              fxFlex="100%">
+              <button mat-raised-button type="submit" fxFlex="48%" (click)="clearForm(professionalNgForm)">
+                Cancelar
+              </button>
+              <button mat-raised-button color="primary" type="submit" fxFlex="48%"
+                [disabled]="!certificateForm.get('anulateReason')?.value">
+                Anular certificado
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </form>
+  </mat-card-content>
 </mat-card>

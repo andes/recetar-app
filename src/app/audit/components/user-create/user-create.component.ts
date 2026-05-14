@@ -10,7 +10,8 @@ import { debounceTime, distinctUntilChanged, switchMap, takeUntil, catchError } 
 @Component({
     selector: 'app-user-create',
     templateUrl: './user-create.component.html',
-    styleUrls: ['./user-create.component.sass']
+    styleUrls: ['./user-create.component.sass'],
+    standalone: false
 })
 export class UserCreateComponent implements OnInit, OnDestroy {
     @Output() cancelCreate = new EventEmitter<void>();
@@ -494,7 +495,7 @@ export class UserCreateComponent implements OnInit, OnDestroy {
                 }
             },
             error: (error) => {
-                // Failsafe, no debería llegar acá por el catchError, 
+                // Failsafe, no debería llegar acá por el catchError,
                 // pero por si acaso re-activamos variables
                 this.isValidatingCuil = false;
                 this.isCuilValid = false;
@@ -612,8 +613,8 @@ export class UserCreateComponent implements OnInit, OnDestroy {
         ).subscribe({
             next: (result: any) => {
                 this.isValidatingUsername = false;
-                
-                if (result === null) return;
+
+                if (result === null) {return;}
 
                 if (result.error) {
                     this.isUsernameValid = false;
@@ -651,19 +652,19 @@ export class UserCreateComponent implements OnInit, OnDestroy {
     onCuilChange(event: any): void {
         const rawValue = event.target.value;
         const formattedValue = this.formatCuilString(rawValue);
-        
+
         // Evita mover el cursor mientras tipea actualizando solo si difiere en longitud significativamente o limitándose a onBlur.
         // Pero para forzar formato, podemos setear el valor de nuevo
         if (rawValue !== formattedValue) {
             this.userForm.get('cuil')?.setValue(formattedValue, { emitEvent: false });
         }
-        
+
         const cleanValue = rawValue.replace(/-/g, '');
         this.cuilSearchSubject.next(cleanValue);
     }
-    
+
     formatCuilString(cuil: string): string {
-        if (!cuil) return '';
+        if (!cuil) {return '';}
         const cleanCuil = cuil.replace(/[^\d]/g, '');
         if (cleanCuil.length > 10) {
             return `${cleanCuil.substring(0, 2)}-${cleanCuil.substring(2, 10)}-${cleanCuil.substring(10, 11)}`;
@@ -772,34 +773,34 @@ export class UserCreateComponent implements OnInit, OnDestroy {
         const disposicionHabilitacion = this.userForm.get('disposicionHabilitacion');
         const vencimientoHabilitacion = this.userForm.get('vencimientoHabilitacion');
         const enrollment = this.userForm.get('enrollment');
-        
+
         cuil?.clearValidators();
         disposicionHabilitacion?.clearValidators();
         vencimientoHabilitacion?.clearValidators();
         enrollment?.clearValidators();
-        
+
         if (hasPharma) {
             cuil?.setValidators([Validators.required, Validators.pattern(/^\d{2}-?\d{8}-?\d{1}$|^\d{11}$/)]);
             cuil?.enable();
-            
+
             disposicionHabilitacion?.clearValidators();
             disposicionHabilitacion?.disable();
-            
+
             vencimientoHabilitacion?.clearValidators();
             vencimientoHabilitacion?.disable();
-            
+
             enrollment?.clearValidators();
             enrollment?.disable();
         } else {
             cuil?.disable();
             cuil?.reset('', { emitEvent: false });
-            
+
             disposicionHabilitacion?.disable();
             disposicionHabilitacion?.reset('', { emitEvent: false });
-            
+
             vencimientoHabilitacion?.disable();
             vencimientoHabilitacion?.reset('', { emitEvent: false });
-            
+
             if (!hasPro) {
                 // Si no es profesional ni farmacia, limpiar enrollment también si estuviera vinculado
                 enrollment?.disable();

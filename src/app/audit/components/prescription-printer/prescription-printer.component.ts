@@ -5,7 +5,8 @@ import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unif
 @Component({
     selector: 'app-prescription-printer',
     templateUrl: './prescription-printer.component.html',
-    styleUrls: ['./prescription-printer.component.sass']
+    styleUrls: ['./prescription-printer.component.sass'],
+    standalone: false
 })
 export class PrescriptionPrinterComponent implements OnInit {
 

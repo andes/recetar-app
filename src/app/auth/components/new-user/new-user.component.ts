@@ -5,13 +5,14 @@ import { cuilValidator } from '../../../utils/custome-validators/cuil.validator'
 import { fechaValida } from '../../../utils/custome-validators/date.validator';
 import { AuthService } from '@auth/services/auth.service';
 import { ProfessionalsService } from '../../../services/professionals.service';
-import * as moment from 'moment';
+import moment from 'moment';
 import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-new-user',
     templateUrl: './new-user.component.html',
-    styleUrls: ['./new-user.component.sass']
+    styleUrls: ['./new-user.component.sass'],
+    standalone: false
 })
 export class NewUserComponent implements OnInit {
 
@@ -87,34 +88,33 @@ export class NewUserComponent implements OnInit {
 
     userRegister(newUserForm: FormGroup, newUserNgForm: FormGroupDirective) {
         this.authService.register(this.newUserForm.value).subscribe
-            (user => {
-                this.cancelar();
-                const selectedProf = this.newUserForm.get('profesion').value;
-                const mensaje = `La cuenta ha sido creada exitosamente
+        (user => {
+            this.cancelar();
+            const selectedProf = this.newUserForm.get('profesion').value;
+            const mensaje = `La cuenta ha sido creada exitosamente
                 Nombre: ${user.newUser.businessName}
                 Usuario: ${this.newUserForm.get('username').value}
                 Profesión: ${selectedProf?.profesion || 'No especificada'}
                 Matrícula: ${this.newUserForm.get('enrollment').value}`;
-                this._snackBar.open(mensaje, 'cerrar', {
-                    duration: 12000,
-                    panelClass: ['success-snackbar']
+            this._snackBar.open(mensaje, 'cerrar', {
+                duration: 12000,
+                panelClass: ['success-snackbar']
 
-                });
-                newUserNgForm.resetForm();
-                newUserForm.reset();
-            },
-                err => {
-                    this._snackBar.open(`Ha ocurrido un error al intentar crear la cuenta: ${JSON.stringify(err)}'`, 'cerrar', {
-                        duration: 5000
-                    });
-                });
+            });
+            newUserNgForm.resetForm();
+            newUserForm.reset();
+        },
+        err => {
+            this._snackBar.open(`Ha ocurrido un error al intentar crear la cuenta: ${JSON.stringify(err)}'`, 'cerrar', {
+                duration: 5000
+            });
+        });
     }
 
 
     checkPersona(profesional) {
         const cuil = this.newUserForm.get('cuil').value;
-        const salida = profesional.cuit == cuil ? true : false;
-        return salida;
+        return profesional.cuit === cuil;
     }
 
     cancelar() {

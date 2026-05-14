@@ -1,12 +1,13 @@
-import { Component, OnInit } from "@angular/core";
-import { Router } from "@angular/router";
-import { AmbitoService } from "@auth/services/ambito.service";
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { AmbitoService } from '@auth/services/ambito.service';
 
 
 @Component({
     selector: 'app-selector-ambito',
     templateUrl: './selector-ambito.component.html',
-    styleUrls: ['./selector-ambito.component.sass']
+    styleUrls: ['./selector-ambito.component.sass'],
+    standalone: false
 })
 export class SelectorAmbitoComponent implements OnInit {
     ambito: 'publico' | 'privado';
@@ -15,7 +16,7 @@ export class SelectorAmbitoComponent implements OnInit {
         private ambitoService: AmbitoService,
         private router: Router,
     ) { }
-    
+
     ngOnInit(): void {
         this.ambitoService.clearAmbito();
     }

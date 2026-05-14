@@ -1,21 +1,20 @@
-import { Component, Inject, OnInit, } from '@angular/core';
+import { Component, Inject, OnInit, HostBinding, } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Prescriptions } from '@interfaces/prescriptions';
 import AndesPrescriptions from '@interfaces/andesPrescriptions';
 import { InteractionService } from '@professionals/interaction.service';
 import { Certificate } from '@interfaces/certificate';
-import { fadeInOnEnterAnimation, fadeOutOnLeaveAnimation } from 'angular-animations';
+import { dialogFade } from '@animations/animations.template';
 
 @Component({
     selector: 'app-professional-dialog',
     templateUrl: './professional-dialog.component.html',
     styleUrls: ['./professional-dialog.component.sass'],
-    animations: [
-        fadeInOnEnterAnimation(),
-        fadeOutOnLeaveAnimation()
-    ],
+    animations: [dialogFade],
+    standalone: false
 })
 export class ProfessionalDialogComponent implements OnInit {
+    @HostBinding('@dialogFade') public dialogFade = true;
     prescription: Prescriptions;
     constructor(
         public dialogRef: MatDialogRef<ProfessionalDialogComponent>,

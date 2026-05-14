@@ -22,17 +22,21 @@ export interface Insumo {
 }
 
 export const TIPO_INSUMO_DICT: { [key: string]: string } = {
-    nutrition: "Nutrición",
-    nutricion: "Nutrición",
-    device: "Dispositivo",
-    dispositivo: "Dispositivo",
-    magistral: "Magistral",
+    nutrition: 'Nutrición',
+    nutricion: 'Nutrición',
+    device: 'Dispositivo',
+    dispositivo: 'Dispositivo',
+    magistral: 'Magistral',
 };
 
 export function formatTipoInsumo(type: string | undefined): string {
-    if (!type) return 'Sin definir';
+    if (!type) {
+        return 'Sin definir';
+    }
     const t = TIPO_INSUMO_DICT[type.toLowerCase()];
-    if (t) return t;
+    if (t) {
+        return t;
+    }
     return type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
 }
 
