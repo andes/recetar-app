@@ -306,6 +306,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
         // Sólo validar contra Andes cuando es ámbito público y es creación
         if (!this.isEdit && this.isAmbitoPublico()) {
             const pacienteDni = professionalNgForm.value?.patient?.dni;
+            const sexo = professionalNgForm.value?.patient?.sex.toLowerCase();
             const supplyConceptIds: string[] = (this.suppliesForm.controls || [])
                 .map((ctrl: FormGroup) => ctrl.value?.supply?.snomedConcept?.conceptId)
                 .filter(Boolean);
@@ -321,7 +322,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
 
             // Verificar en paralelo si ya existe receta activa para cada conceptId
             const verificaciones$ = supplyConceptIds.map(conceptId =>
-                this.andesService.verificarRecetaExistente(pacienteDni, conceptId).pipe(
+                this.andesService.verificarRecetaExistente(pacienteDni, conceptId, sexo).pipe(
                     catchError(() => of(false))
                 )
             );
