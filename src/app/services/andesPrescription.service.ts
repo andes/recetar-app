@@ -130,10 +130,11 @@ export class AndesPrescriptionsService {
      * @param conceptId conceptId SNOMED del medicamento
      * @returns Observable<boolean> true si existe una receta activa
      */
-    verificarRecetaExistente(dni: string, conceptId: string): Observable<boolean> {
+    verificarRecetaExistente(dni: string, conceptId: string, sexo: string): Observable<boolean> {
         const params = new HttpParams()
             .set('dni', dni)
-            .set('conceptId', conceptId);
+            .set('conceptId', conceptId)
+            .set('sexo', sexo);
         return this.http.get<any[]>(`${environment.API_END_POINT}/andes-prescriptions/verificar`, { params }).pipe(
             map((recetas: any[]) => Array.isArray(recetas) && recetas.length > 0)
         );
