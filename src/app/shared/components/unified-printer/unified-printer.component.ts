@@ -446,7 +446,14 @@ export class UnifiedPrinterComponent {
 
             pdf.add(new Txt([
                 { text: 'Matrícula: ' },
-                { text: `${practice.professional.enrollment}`, bold: true }
+                {
+                    text: `\n ${practice.professional?.profesionGrado?.length ?
+                        practice.professional.profesionGrado
+                            .map((g: any) => `${g.profesion} MP ${g.numeroMatricula}`)
+                            .join('\n')
+                        : (practice.professional?.enrollment ? `MP ${practice.professional.enrollment}\n` : '')}`,
+                    bold: true, fontSize: 9
+                }
             ]).end);
             pdf.add(new Txt('\n').end);
 
