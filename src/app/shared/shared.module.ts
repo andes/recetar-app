@@ -10,8 +10,11 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { PatientNamePipe } from './pipes/patient-name.pipe';
 import { PatientFormComponent } from './components/patient-form/patient-form.component';
+import { SessionExpirationBannerComponent } from './components/session-expiration-banner/session-expiration-banner.component';
 
 const MATERIAL_MODULES = [
     MatFormFieldModule,
@@ -22,12 +25,15 @@ const MATERIAL_MODULES = [
     MatDatepickerModule,
     MatNativeDateModule,
     MatProgressSpinnerModule,
+    MatButtonModule,
+    MatIconModule
 ];
 
 @NgModule({
     declarations: [
         PatientNamePipe,
-        PatientFormComponent
+        PatientFormComponent,
+        SessionExpirationBannerComponent
     ],
     imports: [
         CommonModule,
@@ -39,6 +45,7 @@ const MATERIAL_MODULES = [
         PatientNamePipe,
         PatientFormComponent,
         FlexLayoutModule,
+        SessionExpirationBannerComponent,
         ...MATERIAL_MODULES,
     ]
 })
