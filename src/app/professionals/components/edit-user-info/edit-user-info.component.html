@@ -16,6 +16,11 @@
                         Ingrese un correo electrónico válido
                     </mat-error>
                 </mat-form-field>
+                
+                <div class="alert alert-danger" *ngIf="updateError" style="color: #f44336; margin-bottom: 16px; font-size: 0.9em; font-weight: 500;">
+                    {{ updateError }}
+                </div>
+
 
                 <div class="form-actions">
                     <button mat-raised-button color="primary" type="submit"

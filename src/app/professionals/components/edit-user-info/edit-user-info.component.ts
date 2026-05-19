@@ -75,16 +75,8 @@ export class EditUserInfoComponent implements OnInit {
                     this.router.navigate(['/']);
                 },
                 error: (error) => {
-                    console.log(error);
                     this.isLoading = false;
-                    this.updateError = error.error.mensaje || 'Error al cargar la información del usuario';
-                    this.snackBar.open(
-                        `${this.updateError}`,
-                        'Cerrar',
-                        {
-                            duration: 5000
-                        }
-                    );
+                    this.updateError = error || error.error?.message || error.message || 'Error al actualizar el usuario';
                 }
             });
         }
