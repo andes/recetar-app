@@ -58,7 +58,10 @@ export class UserService {
     updateIsActive(_id: string, isActive: boolean): Observable<User> {
         return this.updateUser(_id, { isActive });
     }
-    updateUserOrganizaciones(_id: string, organizaciones: SubOrganizacion[]): Observable<User> {
-        return this.http.post<User>(`${environment.API_END_POINT}/users/update-own`, { _id, organizaciones });
+    updateUserOwn(_id: string, updateData: {
+        organizaciones?: SubOrganizacion[];
+        email?: string;
+    }): Observable<User> {
+        return this.http.post<User>(`${environment.API_END_POINT}/users/update-own`, { _id, ...updateData });
     }
 }

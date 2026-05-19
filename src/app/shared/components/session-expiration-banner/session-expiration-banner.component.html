@@ -1,0 +1,20 @@
+<div class="session-warning-banner" *ngIf="isVisible">
+  <div class="banner-content">
+    <mat-icon class="banner-icon">warning</mat-icon>
+    <div class="banner-text">
+      <strong>Atención:</strong> Su sesión va a cerrarse en {{ remainingDays }} {{ remainingDays === 1 ? 'día' : 'días' }}. Le recordamos su usuario: <strong>"{{username}}"</strong> y su mail: <strong>"{{email}}"</strong>.
+      <br>Si su mail no corresponde o no recuerda su contraseña, puede usar los siguientes botones para gestionarlo.
+    </div>
+  </div>
+  <div class="banner-actions">
+    <button mat-stroked-button class="action-btn" (click)="goToEditUser()">
+      Cambiar email
+    </button>
+    <button mat-stroked-button class="action-btn" (click)="goToChangePassword()">
+      Cambiar contraseña
+    </button>
+    <button mat-icon-button class="close-btn" aria-label="Close" (click)="closeBanner()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+</div>

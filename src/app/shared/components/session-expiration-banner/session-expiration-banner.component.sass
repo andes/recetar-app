@@ -1,0 +1,44 @@
+.session-warning-banner
+  position: sticky
+  top: 0
+  z-index: 100
+  background-color: #fff3cd
+  color: #856404
+  border-bottom: 1px solid #ffeeba
+  display: flex
+  align-items: center
+  justify-content: space-between
+  padding: 0.75rem 1.25rem
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1)
+  margin-bottom: 2px
+
+  .banner-content
+    display: flex
+    align-items: center
+    font-size: 0.95rem
+    
+    .banner-icon
+      margin-right: 12px
+      color: #856404
+
+  .banner-actions
+    display: flex
+    align-items: center
+
+    .action-btn
+      margin-right: 16px
+      border-color: #856404
+      color: #856404
+
+    .close-btn
+      color: #856404
+      
+  @media (max-width: 600px)
+    flex-direction: column
+    align-items: stretch
+    
+    .banner-content
+      margin-bottom: 10px
+      
+    .banner-actions
+      justify-content: flex-end

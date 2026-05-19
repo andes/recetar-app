@@ -85,7 +85,7 @@ export class OrganizacionFormSessionService {
 
         const organizacionesParaServidor = this.workingOrganizaciones.map(organizacion => this.prepareOrganizacionForServer(organizacion));
 
-        return this.userService.updateUserOrganizaciones(this.userId, organizacionesParaServidor).pipe(
+        return this.userService.updateUserOwn(this.userId, { organizaciones: organizacionesParaServidor }).pipe(
             tap(updatedUser => {
                 const updatedOrganizaciones = updatedUser && updatedUser.organizaciones ? updatedUser.organizaciones : this.workingOrganizaciones;
                 const cloned = this.cloneOrganizaciones(updatedOrganizaciones);
