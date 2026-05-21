@@ -34,8 +34,8 @@ const routes: Routes = [
 export class PharmacistsRoutingModule { }
 
 export const routingComponent = [
-  PharmacistsComponent,
-  PharmacistsFormComponent,
-  DialogComponent,
-  AndesPrescriptionPrinterComponent
-]
+    PharmacistsComponent,
+    PharmacistsFormComponent,
+    DialogComponent,
+    AndesPrescriptionPrinterComponent
+];

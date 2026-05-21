@@ -8,42 +8,56 @@
       <input type="text" tabIndex="1" #dni placeholder="DNI" aria-label="Number" matInput required maxlength="8"
         formControlName="dni" [matAutocomplete]="auto">
 
-      <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20" *ngIf="dniShowSpinner"></mat-spinner>
+      @if (dniShowSpinner) {
+        <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20"></mat-spinner>
+      }
 
       <mat-autocomplete #auto="matAutocomplete">
-        <mat-option *ngFor="let patient of patientSearch" (onSelectionChange)="completePatientInputs(patient)"
-          [value]="patient.dni">
-          {{patient.lastName}} {{patient | patientName}} DNI {{patient.dni}}
-        </mat-option>
+        @for (patient of patientSearch; track patient) {
+          <mat-option (onSelectionChange)="completePatientInputs(patient)"
+            [value]="patient.dni">
+            {{patient.lastName}} {{patient | patientName}} DNI {{patient.dni}}
+          </mat-option>
+        }
       </mat-autocomplete>
 
       <mat-hint align="end">{{dni.value.length}} / 8</mat-hint>
 
-      <mat-error *ngIf="patientDni.errors?.['required']">
-        Debe ingresar el DNI del paciente
-      </mat-error>
+      @if (patientDni.errors?.['required']) {
+        <mat-error>
+          Debe ingresar el DNI del paciente
+        </mat-error>
+      }
 
-      <mat-error *ngIf="patientDni.errors?.['minlength'] && patientDni.touched">
-        El DNI debe tener al menos {{patientDni.errors?.['minlength'].requiredLength}} dígitos
-      </mat-error>
+      @if (patientDni.errors?.['minlength'] && patientDni.touched) {
+        <mat-error>
+          El DNI debe tener al menos {{patientDni.errors?.['minlength'].requiredLength}} dígitos
+        </mat-error>
+      }
 
-      <mat-error *ngIf="patientDni.errors?.['pattern'] && patientDni.touched">
-        El DNI debe contener solo números
-      </mat-error>
+      @if (patientDni.errors?.['pattern'] && patientDni.touched) {
+        <mat-error>
+          El DNI debe contener solo números
+        </mat-error>
+      }
     </mat-form-field>
 
     <!-- Sexo paciente -->
     <mat-form-field appearance="fill" fxFlex>
       <mat-label>Sexo</mat-label>
       <mat-select formControlName="sex" required tabIndex="2">
-        <mat-option *ngFor="let sex of sex_options" [value]="sex">
-          {{ sex }}
-        </mat-option>
+        @for (sex of sex_options; track sex) {
+          <mat-option [value]="sex">
+            {{ sex }}
+          </mat-option>
+        }
       </mat-select>
 
-      <mat-error *ngIf="patientSex.errors?.['required'] && patientSex.touched">
-        Debe seleccionar el sexo del paciente
-      </mat-error>
+      @if (patientSex.errors?.['required'] && patientSex.touched) {
+        <mat-error>
+          Debe seleccionar el sexo del paciente
+        </mat-error>
+      }
     </mat-form-field>
   </div>
 
@@ -55,9 +69,11 @@
       <mat-label>Apellido paciente</mat-label>
       <input type="text" tabIndex="3" placeholder="Apellido" matInput required formControlName="lastName">
 
-      <mat-error *ngIf="patientLastName.errors?.['required'] && patientLastName.touched">
-        Debe ingresar el apellido del paciente
-      </mat-error>
+      @if (patientLastName.errors?.['required'] && patientLastName.touched) {
+        <mat-error>
+          Debe ingresar el apellido del paciente
+        </mat-error>
+      }
     </mat-form-field>
 
     <!-- Nombre paciente -->
@@ -66,9 +82,11 @@
       <input type="text" tabIndex="4" placeholder="Nombre" matInput required formControlName="firstName"
         [value]="displayPatientName">
 
-      <mat-error *ngIf="patientFirstName.errors?.['required'] && patientFirstName.touched">
-        Debe ingresar el nombre del paciente
-      </mat-error>
+      @if (patientFirstName.errors?.['required'] && patientFirstName.touched) {
+        <mat-error>
+          Debe ingresar el nombre del paciente
+        </mat-error>
+      }
     </mat-form-field>
 
     <!-- Nombre autopercibido -->
@@ -80,74 +98,94 @@
 
   <!-- Fila 3: Fecha de nacimiento -->
   <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center" class="patient-container">
-    <mat-form-field appearance="fill" fxFlex="50" *ngIf="showFechaNac">
-      <mat-label>Fecha de nacimiento</mat-label>
-      <input matInput [matDatepicker]="fechaNacPicker" formControlName="fechaNac" placeholder="DD/MM/AAAA" required
-        tabIndex="6" readonly [min]="minDate" [max]="maxDate">
-      <mat-datepicker-toggle matSuffix [for]="fechaNacPicker"></mat-datepicker-toggle>
-      <mat-datepicker #fechaNacPicker [startAt]="null" [touchUi]="false" [startView]="'multi-year'"></mat-datepicker>
-
-      <mat-error *ngIf="patientFechaNac.errors?.['required']">
-        Debe ingresar la fecha de nacimiento
-      </mat-error>
-      <mat-error *ngIf="patientFechaNac.errors?.['invalidDate']">
-        Fecha inválida
-      </mat-error>
-      <mat-error *ngIf="patientFechaNac.errors?.['futureDate']">
-        La fecha de nacimiento no puede ser futura
-      </mat-error>
-      <mat-error *ngIf="patientFechaNac.errors?.['tooOldDate']">
-        La fecha de nacimiento debe ser posterior a 1900
-      </mat-error>
-    </mat-form-field>
+    @if (showFechaNac) {
+      <mat-form-field appearance="fill" fxFlex="50">
+        <mat-label>Fecha de nacimiento</mat-label>
+        <input matInput [matDatepicker]="fechaNacPicker" formControlName="fechaNac" placeholder="DD/MM/AAAA" required
+          tabIndex="6" readonly [min]="minDate" [max]="maxDate">
+        <mat-datepicker-toggle matSuffix [for]="fechaNacPicker"></mat-datepicker-toggle>
+        <mat-datepicker #fechaNacPicker [startAt]="null" [touchUi]="false" [startView]="'multi-year'"></mat-datepicker>
+        @if (patientFechaNac.errors?.['required']) {
+          <mat-error>
+            Debe ingresar la fecha de nacimiento
+          </mat-error>
+        }
+        @if (patientFechaNac.errors?.['invalidDate']) {
+          <mat-error>
+            Fecha inválida
+          </mat-error>
+        }
+        @if (patientFechaNac.errors?.['futureDate']) {
+          <mat-error>
+            La fecha de nacimiento no puede ser futura
+          </mat-error>
+        }
+        @if (patientFechaNac.errors?.['tooOldDate']) {
+          <mat-error>
+            La fecha de nacimiento debe ser posterior a 1900
+          </mat-error>
+        }
+      </mat-form-field>
+    }
   </div>
 
   <!-- Sección de Obra Social (opcional) -->
-  <div *ngIf="showObraSocial" class="obra-social-section">
-    <mat-checkbox formControlName="otraOS">Elegir otra cobertura social</mat-checkbox>
-
-    <div formGroupName="os" fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center"
-      class="obra-social-container">
-
-      <!-- Obra Social - Select cuando hay paciente y checkbox no marcado -->
-      <mat-form-field appearance="fill" fxFlex *ngIf="!patientForm.get('otraOS')?.value">
-        <mat-label>Obra Social</mat-label>
-        <mat-select formControlName="nombre" (selectionChange)="onOsSelected($event.value)">
-          <mat-option *ngIf="!obraSocial || obraSocial.length === 0" disabled>
-            Sin obras sociales del paciente
-          </mat-option>
-          <mat-option *ngFor="let os of obraSocial" [value]="os.nombre">
-            {{ os.nombre }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <!-- Obra Social - Autocomplete cuando checkbox está marcado -->
-      <mat-form-field appearance="fill" fxFlex *ngIf="patientForm.get('otraOS')?.value">
-        <mat-label>Obra Social</mat-label>
-        <input type="text" matInput formControlName="nombre" [matAutocomplete]="autoOS"
-          placeholder="Buscar obra social">
-
-        <mat-autocomplete #autoOS="matAutocomplete" [displayWith]="displayOs"
-          (optionSelected)="onOsSelected($event.option.value)">
-          <mat-option *ngFor="let os of filteredObrasSociales | async" [value]="os">
-            {{ os.nombre }}
-          </mat-option>
-        </mat-autocomplete>
-      </mat-form-field>
-
-      <!-- Número de Afiliado -->
-      <mat-form-field appearance="fill" fxFlex="18">
-        <mat-label>Numero de Afiliado</mat-label>
-        <input type="text" matInput formControlName="numeroAfiliado" [disabled]="!patientForm.get('os.nombre')?.value"
-          inputmode="numeric" pattern="[0-9]*">
-        <mat-error *ngIf="patientForm.get('os')?.get('numeroAfiliado')?.errors?.['required']">
-          Debe ingresar el número de afiliado.
-        </mat-error>
-        <mat-error *ngIf="patientForm.get('os')?.get('numeroAfiliado')?.errors?.['pattern']">
-          Sólo se permiten números.
-        </mat-error>
-      </mat-form-field>
+  @if (showObraSocial) {
+    <div class="obra-social-section">
+      <mat-checkbox formControlName="otraOS">Elegir otra cobertura social</mat-checkbox>
+      <div formGroupName="os" fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center"
+        class="obra-social-container">
+        <!-- Obra Social - Select cuando hay paciente y checkbox no marcado -->
+        @if (!patientForm.get('otraOS')?.value) {
+          <mat-form-field appearance="fill" fxFlex>
+            <mat-label>Obra Social</mat-label>
+            <mat-select formControlName="nombre" (selectionChange)="onOsSelected($event.value)">
+              @if (!obraSocial || obraSocial.length === 0) {
+                <mat-option disabled>
+                  Sin obras sociales del paciente
+                </mat-option>
+              }
+              @for (os of obraSocial; track os) {
+                <mat-option [value]="os.nombre">
+                  {{ os.nombre }}
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        }
+        <!-- Obra Social - Autocomplete cuando checkbox está marcado -->
+        @if (patientForm.get('otraOS')?.value) {
+          <mat-form-field appearance="fill" fxFlex>
+            <mat-label>Obra Social</mat-label>
+            <input type="text" matInput formControlName="nombre" [matAutocomplete]="autoOS"
+              placeholder="Buscar obra social">
+            <mat-autocomplete #autoOS="matAutocomplete" [displayWith]="displayOs"
+              (optionSelected)="onOsSelected($event.option.value)">
+              @for (os of filteredObrasSociales | async; track os) {
+                <mat-option [value]="os">
+                  {{ os.nombre }}
+                </mat-option>
+              }
+            </mat-autocomplete>
+          </mat-form-field>
+        }
+        <!-- Número de Afiliado -->
+        <mat-form-field appearance="fill" fxFlex="18">
+          <mat-label>Numero de Afiliado</mat-label>
+          <input type="text" matInput formControlName="numeroAfiliado" [disabled]="!patientForm.get('os.nombre')?.value"
+            inputmode="numeric" pattern="[0-9]*">
+          @if (patientForm.get('os')?.get('numeroAfiliado')?.errors?.['required']) {
+            <mat-error>
+              Debe ingresar el número de afiliado.
+            </mat-error>
+          }
+          @if (patientForm.get('os')?.get('numeroAfiliado')?.errors?.['pattern']) {
+            <mat-error>
+              Sólo se permiten números.
+            </mat-error>
+          }
+        </mat-form-field>
+      </div>
     </div>
-  </div>
+  }
 </div>

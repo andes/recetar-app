@@ -8,7 +8,8 @@ import { UserService } from '@services/users.service';
 @Component({
     selector: 'app-edit-user-info',
     templateUrl: './edit-user-info.component.html',
-    styleUrls: ['./edit-user-info.component.sass']
+    styleUrls: ['./edit-user-info.component.sass'],
+    standalone: false
 })
 export class EditUserInfoComponent implements OnInit {
     editUserForm: FormGroup;
@@ -60,6 +61,10 @@ export class EditUserInfoComponent implements OnInit {
         return this.editUserForm.get('email');
     }
 
+    private getErrorMessage(error: any, fallback: string): string {
+        return error?.error?.mensaje || error?.mensaje || error || fallback;
+    }
+
     onSubmit(): void {
         if (this.editUserForm.valid && !this.isLoading) {
             this.isLoading = true;
@@ -79,7 +84,7 @@ export class EditUserInfoComponent implements OnInit {
                     },
                     error: (error) => {
                         this.isLoading = false;
-                        this.updateError = error || error?.mensaje || 'Error al solicitar la actualización';
+                        this.updateError = this.getErrorMessage(error, 'Error al solicitar la actualización');
                         this.snackBar.open(this.updateError as string, 'Cerrar', { duration: 5000 });
                     }
                 });
@@ -94,9 +99,8 @@ export class EditUserInfoComponent implements OnInit {
                         this.router.navigate(['/']);
                     },
                     error: (error) => {
-                        console.log(error);
                         this.isLoading = false;
-                        this.updateError = error || error?.mensaje || 'Error al cargar la información del usuario';
+                        this.updateError = this.getErrorMessage(error, 'Error al cargar la información del usuario');
                         this.snackBar.open(
                             `${this.updateError}`,
                             'Cerrar',

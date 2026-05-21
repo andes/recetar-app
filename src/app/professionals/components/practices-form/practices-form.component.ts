@@ -9,7 +9,8 @@ import { PatientFormComponent } from '@shared/components/patient-form/patient-fo
 @Component({
     selector: 'app-practices-form',
     templateUrl: './practices-form.component.html',
-    styleUrls: ['./practices-form.component.sass']
+    styleUrls: ['./practices-form.component.sass'],
+    standalone: false
 })
 export class PracticesFormComponent implements OnInit {
     @ViewChild('patientForm') patientFormComponent: PatientFormComponent;
@@ -59,7 +60,6 @@ export class PracticesFormComponent implements OnInit {
                 },
                 error => {
                     this.isSubmitPractice = false;
-                    console.error('Error al crear la práctica:', error);
                     this.openDialog('practiceError');
                 }
             );

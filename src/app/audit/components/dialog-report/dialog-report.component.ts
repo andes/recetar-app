@@ -9,7 +9,8 @@ export interface DialogData {
 
 @Component({
     selector: 'app-dialog-report',
-    templateUrl: './dialog-report.component.html'
+    templateUrl: './dialog-report.component.html',
+    standalone: false
 })
 export class DialogReportComponent {
     constructor(

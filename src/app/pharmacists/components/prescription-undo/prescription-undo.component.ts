@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, Input, Injectable, EventEmitter, Output } from '@angular/core';
 import { timer, Subscription } from 'rxjs';
-import * as moment from 'moment';
+import moment from 'moment';
 import { showCancelDispense, hideTimer } from '@animations/animations.template';
 import { AuthService } from '@auth/services/auth.service';
 import { Prescriptions } from '@interfaces/prescriptions';
@@ -15,11 +15,12 @@ export class CounterDownService {
     selector: 'app-prescription-undo',
     templateUrl: './prescription-undo.component.html',
     styleUrls: ['./prescription-undo.component.sass'],
-    animations:[
+    animations: [
         showCancelDispense,
         hideTimer
     ],
-    providers: [CounterDownService]
+    providers: [CounterDownService],
+    standalone: false
 })
 export class PrescriptionUndoComponent implements OnInit, OnDestroy {
 

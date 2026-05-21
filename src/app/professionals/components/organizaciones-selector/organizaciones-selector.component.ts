@@ -10,7 +10,8 @@ import { OrganizacionDialogComponent } from '../organizacion-dialog/organizacion
 @Component({
     selector: 'app-organizaciones-selector',
     templateUrl: './organizaciones-selector.component.html',
-    styleUrls: ['./organizaciones-selector.component.sass']
+    styleUrls: ['./organizaciones-selector.component.sass'],
+    standalone: false
 })
 export class OrganizacionesSelectorComponent implements OnInit, OnDestroy {
     @Input() organizacionControl: FormControl = new FormControl('', Validators.required);

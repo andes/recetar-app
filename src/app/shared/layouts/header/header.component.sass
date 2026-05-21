@@ -1,4 +1,4 @@
-@import 'styles/_variables'
+@use 'styles/variables' as *
 
 :host
   display: block
@@ -10,6 +10,7 @@
 mat-toolbar
   background: #4c4c4c
   color: #ffffff
+
   .container-header
     width: 100%
 
@@ -17,3 +18,22 @@ mat-toolbar
   width: 40px
   height: 40px
   margin-right: 6px
+
+.brand-button,
+.user-button
+  color: #ffffff !important
+
+.brand-button
+  padding: 0
+
+.brand-title
+  color: #ffffff
+  font-size: 1.5rem
+  font-weight: 600
+  letter-spacing: 0.02em
+
+:host ::ng-deep .container-header .mat-mdc-button,
+:host ::ng-deep .container-header .mdc-button,
+:host ::ng-deep .container-header .mat-mdc-button .mdc-button__label,
+:host ::ng-deep .container-header .mat-toolbar a.mat-mdc-button
+  color: #ffffff !important

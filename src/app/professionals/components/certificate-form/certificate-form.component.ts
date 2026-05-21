@@ -23,7 +23,8 @@ import { PatientFormComponent } from '@shared/components/patient-form/patient-fo
     animations: [
         step,
         stepLink
-    ]
+    ],
+    standalone: false
 })
 export class CertificateFormComponent implements OnInit {
     @Output() anulateCertificateEvent = new EventEmitter();

@@ -1,17 +1,16 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, HostBinding, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { fadeInOnEnterAnimation, fadeOutOnLeaveAnimation } from 'angular-animations';
+import { dialogFade } from '@animations/animations.template';
 
 @Component({
     selector: 'app-stock-dialog',
     templateUrl: './stock-dialog.component.html',
     styleUrls: ['./stock-dialog.component.sass'],
-    animations: [
-        fadeInOnEnterAnimation(),
-        fadeOutOnLeaveAnimation()
-    ]
+    animations: [dialogFade],
+    standalone: false
 })
 export class StockDialogComponent implements OnInit {
+    @HostBinding('@dialogFade') public dialogFade = true;
 
     constructor(
         public dialogRef: MatDialogRef<StockDialogComponent>,

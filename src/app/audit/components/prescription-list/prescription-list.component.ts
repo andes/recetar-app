@@ -9,7 +9,7 @@ import { Prescriptions } from '@interfaces/prescriptions';
 import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unified-printer.component';
 import { PrescriptionsService } from '@services/prescriptions.service';
 import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
-import * as moment from 'moment';
+import moment from 'moment';
 import { DialogReportComponent } from '../dialog-report/dialog-report.component';
 
 @Component({
@@ -20,7 +20,7 @@ import { DialogReportComponent } from '../dialog-report/dialog-report.component'
         detailExpand,
         arrowDirection
     ],
-
+    standalone: false
 })
 export class PrescriptionListComponent implements OnInit, AfterContentInit {
 

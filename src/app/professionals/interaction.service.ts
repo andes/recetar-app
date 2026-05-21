@@ -13,7 +13,7 @@ export class InteractionService {
 
     deletePrescription$ = this._deletePrescriptionSource.asObservable();
     deleteCertificate$ = this._deleteCertificateSource.asObservable();
-    
+
     constructor(private prescriptionsService: PrescriptionsService) { }
 
     deletePrescription(prescription: Prescriptions): Observable<Boolean> {
