@@ -3,7 +3,7 @@ import AndesPrescriptions from '@interfaces/andesPrescriptions';
 import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unified-printer.component';
 
 @Component({
-    selector: 'app-prescription-printer',
+    selector: 'app-andes-prescription-printer',
     templateUrl: './andes-prescription-printer.component.html',
     styleUrls: ['./andes-prescription-printer.component.sass'],
     standalone: false

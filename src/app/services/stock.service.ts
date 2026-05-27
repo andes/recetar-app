@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { environment } from '@root/environments/environment';
+import { SupplyAdapter } from '@interfaces/supplies';
 
 export interface Insumo {
     _id?: string;
@@ -11,14 +12,22 @@ export interface Insumo {
     supply?: string;
     name?: string;
     term?: string;
+    type?: string;
     tipo?: string;
+    requiresSpecification?: boolean;
     requiereEspecificacion?: boolean;
     quantity?: number;
     specification?: string;
     description?: string;
+    code?: Array<{ source?: string; value?: string; id?: string }>;
+    codigo?: Array<{ fuente?: string; valor?: string; id?: string; source?: string; value?: string }>;
+    status?: string;
+    estado?: string;
+    snomedConcept?: { conceptId?: string; term?: string; fsn?: string; semanticTag?: string };
+    concepto?: { conceptId?: string; term?: string; fsn?: string; semanticTag?: string };
     createdAt?: Date;
     updatedAt?: Date;
-    createdBy?: any;
+    createdBy?: { nombre?: string; apellido?: string; [key: string]: unknown };
 }
 
 export const TIPO_INSUMO_DICT: { [key: string]: string } = {
@@ -49,13 +58,47 @@ export class StockService {
     private insumosSubject = new BehaviorSubject<Insumo[]>([]);
     public insumos$ = this.insumosSubject.asObservable();
 
-    constructor(private http: HttpClient) { }
+    constructor(private http: HttpClient, private supplyAdapter: SupplyAdapter) { }
+
+    private normalizeToInsumo(item: unknown): Insumo {
+        const sourceItem = item as Partial<Insumo> & { [key: string]: unknown };
+        const adaptedSupply = this.supplyAdapter.adapt(item);
+        const normalizedType = adaptedSupply.type === 'nutrition'
+            ? 'nutricion'
+            : (adaptedSupply.type === 'device' ? 'dispositivo' : ((sourceItem.tipo as string) || adaptedSupply.type));
+
+        return {
+            _id: adaptedSupply._id || sourceItem._id || sourceItem.id,
+            id: sourceItem.id,
+            insumo: sourceItem.insumo || sourceItem.supply || adaptedSupply.name,
+            supply: sourceItem.supply || adaptedSupply.name,
+            name: adaptedSupply.name,
+            term: sourceItem.term || adaptedSupply.name,
+            type: adaptedSupply.type,
+            tipo: normalizedType,
+            requiresSpecification: adaptedSupply.requiresSpecification,
+            requiereEspecificacion: sourceItem.requiereEspecificacion ?? adaptedSupply.requiresSpecification,
+            quantity: typeof sourceItem.quantity === 'number' ? sourceItem.quantity : Number(sourceItem.quantity || 0),
+            specification: sourceItem.specification,
+            description: sourceItem.description,
+            code: sourceItem.code,
+            codigo: sourceItem.codigo,
+            status: sourceItem.status,
+            estado: sourceItem.estado,
+            snomedConcept: adaptedSupply.snomedConcept || sourceItem.snomedConcept,
+            concepto: sourceItem.concepto,
+            createdAt: sourceItem.createdAt ? new Date(sourceItem.createdAt) : undefined,
+            updatedAt: sourceItem.updatedAt ? new Date(sourceItem.updatedAt) : undefined,
+            createdBy: sourceItem.createdBy as { nombre?: string; apellido?: string; [key: string]: unknown }
+        };
+    }
 
     /**
      * Obtener todos los insumos
      */
     getAll(): Observable<Insumo[]> {
         return this.http.get<Insumo[]>(this.API_URL).pipe(
+            map((insumos) => insumos.map((insumo) => this.normalizeToInsumo(insumo))),
             tap(insumos => this.insumosSubject.next(insumos))
         );
     }
@@ -64,8 +107,9 @@ export class StockService {
      * Crear un nuevo insumo
      * Body ejemplo: { "supply": "Dispositivo de prueba", "type": "dispositivo", "requiresSpecification": false }
      */
-    create(insumo: any): Observable<any> {
+    create(insumo: Partial<Insumo>): Observable<Insumo> {
         return this.http.post<Insumo>(this.API_URL, insumo).pipe(
+            map((newInsumo) => this.normalizeToInsumo(newInsumo)),
             tap(newInsumo => {
                 const currentInsumos = this.insumosSubject.value;
                 this.insumosSubject.next([newInsumo, ...currentInsumos]);
@@ -76,8 +120,8 @@ export class StockService {
     /**
      * Eliminar un insumo
      */
-    delete(id: string): Observable<any> {
-        return this.http.delete(`${this.API_URL}/${id}`).pipe(
+    delete(id: string): Observable<void> {
+        return this.http.delete<void>(`${this.API_URL}/${id}`).pipe(
             tap(() => {
                 const currentInsumos = this.insumosSubject.value;
                 const filteredInsumos = currentInsumos.filter(i => i._id !== id);
@@ -91,7 +135,9 @@ export class StockService {
      * Ejemplo: GET /api/stock?query=Dispositivo
      */
     search(query: string): Observable<Insumo[]> {
-        const url = `${this.API_URL}/andes/search?insumo=${encodeURIComponent(query)}&tipos=dispositivo,nutricion`;
-        return this.http.get<Insumo[]>(url);
+        const url = `${this.API_URL}/andes?insumo=${encodeURIComponent(query)}&tipos=dispositivo,nutricion`;
+        return this.http.get<Insumo[]>(url).pipe(
+            map((insumos) => insumos.map((insumo) => this.normalizeToInsumo(insumo)))
+        );
     }
 }

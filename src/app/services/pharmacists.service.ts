@@ -1,19 +1,36 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError, tap, map, first } from 'rxjs/operators';
-import { Observable, of, throwError } from 'rxjs';
-import { Pharmacists, PharmacistsAdapter } from '../interfaces/pharmacists';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+export interface PharmacistLookupParams {
+    cuil: string;
+    disposicionHabilitacion: string;
+}
+
+type QueryParams = Record<string, string | number | boolean>;
+
+export interface PharmacistLookupResult {
+    cuil?: string;
+    disposicionHabilitacion?: string;
+    matriculaDTResponsable?: string;
+    vencimientoHabilitacion?: string;
+}
 
 @Injectable({
     providedIn: 'root'
 })
 export class PharmacistsService {
 
-    constructor(private http: HttpClient, private adapter: PharmacistsAdapter) { }
+    constructor(private http: HttpClient) { }
 
-    getPharmacistByCuit(params): Observable<any> {
+    getPharmacistByCuit(params: PharmacistLookupParams): Observable<PharmacistLookupResult[]> {
         const url = `${environment.API_END_POINT}/auth/pharmacies-andes`;
-        return this.http.get(url, { params });
+        const queryParams: QueryParams = {
+            cuil: params.cuil,
+            disposicionHabilitacion: params.disposicionHabilitacion
+        };
+
+        return this.http.get<PharmacistLookupResult[]>(url, { params: queryParams });
     };
 }

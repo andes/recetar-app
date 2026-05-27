@@ -25,14 +25,12 @@ const MATERIAL_MODULES = [
 ];
 
 @NgModule({
-    declarations: [
-        PatientNamePipe,
-        PatientFormComponent
-    ],
     imports: [
         CommonModule,
         ReactiveFormsModule,
         FlexLayoutModule,
+        PatientNamePipe,
+        PatientFormComponent,
         ...MATERIAL_MODULES,
     ],
     exports: [

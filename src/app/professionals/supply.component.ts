@@ -4,10 +4,12 @@ import { Observable, BehaviorSubject } from 'rxjs';
 import { FormGroup, FormGroupDirective, FormBuilder, Validators, AbstractControl } from '@angular/forms';
 import { ThemePalette } from '@angular/material/core';
 import { SuppliesService } from '@services/supplies.service';
+import Supplies from '@interfaces/supplies';
 import { MatDialog } from '@angular/material/dialog';
 import { SupplyDialogComponent } from './components/supply-dialog/supply-dialog.component';
 import { AuthService } from '@auth/services/auth.service';
 import { Router } from '@angular/router';
+import { take } from 'rxjs/operators';
 
 @Component({
     selector: 'app-productos',
@@ -29,16 +31,16 @@ export class SupplyComponent implements OnInit {
 
     }
 
-    private mySupplies: BehaviorSubject<any[]>;
-    private suppliesArray: any[] = [];
+    private mySupplies: BehaviorSubject<Supplies[]> = new BehaviorSubject<Supplies[]>([]);
+    private suppliesArray: Supplies[] = [];
 
     readonly spinnerColor: ThemePalette = 'primary';
     readonly spinnerDiameter: number = 30;
 
-    supply;
-    isSubmit;
-    isFormShown;
-    isEdit;
+    supply: Supplies | null;
+    isSubmit = false;
+    isFormShown = true;
+    isEdit = false;
     supplyForm: FormGroup;
 
     ngOnInit(): void {
@@ -67,14 +69,13 @@ export class SupplyComponent implements OnInit {
         }
     }
 
-    openDialog(aDialogType: string, aPrescription?: any, aText?: string): void {
+    openDialog(aDialogType: string, aPrescription?: Supplies, aText?: string): void {
         const dialogRef = this.dialog.open(SupplyDialogComponent, {
             width: '400px',
             data: { dialogType: aDialogType, prescription: aPrescription, text: aText }
         });
 
-        dialogRef.afterClosed().subscribe(result => {
-        });
+        dialogRef.afterClosed().pipe(take(1)).subscribe();
     }
 
     showForm() {
@@ -112,7 +113,7 @@ export class SupplyComponent implements OnInit {
         });
     }
 
-    editSupply(e) {
+    editSupply(e: Supplies) {
         this.supplyForm.reset({
             supply: e
         });
@@ -140,7 +141,7 @@ export class SupplyComponent implements OnInit {
         this.isEdit = false;
     }
 
-    get supplies(): Observable<any[]> {
+    get supplies(): Observable<Supplies[]> {
         return this.mySupplies.asObservable();
     }
 

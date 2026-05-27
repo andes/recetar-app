@@ -1,18 +1,33 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, AbstractControl, FormGroupDirective } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, AbstractControl, FormGroupDirective, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { AuthService } from '@auth/services/auth.service';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { ThemePalette } from '@angular/material/core';
-import { DialogComponent } from '@auth/components/dialog/dialog.component';
-// Material
-import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { getHttpErrorMessage } from '@shared/utils/http-error.util';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
     selector: 'app-forgot',
     templateUrl: './forgot.component.html',
     styleUrls: ['./forgot.component.sass'],
-    standalone: false
+    standalone: true,
+    imports: [
+        ReactiveFormsModule,
+        FormsModule,
+        RouterModule,
+        FlexLayoutModule,
+        MatCardModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatProgressSpinnerModule
+    ]
 })
 export class ForgotComponent implements OnInit {
 
@@ -28,8 +43,7 @@ export class ForgotComponent implements OnInit {
         private fBuilder: FormBuilder,
         private authService: AuthService,
         private router: Router,
-        private _snackBar: MatSnackBar,
-        public dialog: MatDialog
+        private _snackBar: MatSnackBar
     ) { }
 
     ngOnInit(): void {
@@ -64,7 +78,7 @@ export class ForgotComponent implements OnInit {
                 err => {
                     resetNgForm.resetForm();
                     resetForm.reset();
-                    this.error = err;
+                    this.error = getHttpErrorMessage(err);
                     this.showSubmit = false;
                 });
         }

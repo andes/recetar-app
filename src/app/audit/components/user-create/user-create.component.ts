@@ -1,11 +1,52 @@
 import { Component, EventEmitter, OnInit, Output, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSelectChange } from '@angular/material/select';
 import { UserService } from '@services/users.service';
 import { Role, RolesService } from '@services/roles.service';
-import { AndesSearchService } from '@services/andes-search.service';
+import { AndesApiResponse, AndesPharmacyData, AndesProfessionalData, AndesSearchService } from '@services/andes-search.service';
 import { Subject, forkJoin, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, takeUntil, catchError } from 'rxjs/operators';
+
+type AndesProfessionalProfession = AndesProfessionalData['profesiones'][number];
+type AndesMatriculacion = AndesProfessionalProfession['matriculacion'][number];
+
+interface ProfesionGradoEntry {
+    profesion: string;
+    codigoProfesion: string;
+    numeroMatricula: string;
+}
+
+interface CreateUserPayload {
+    businessName: string;
+    username: string;
+    email: string;
+    password: string;
+    cuil: string;
+    enrollment: string;
+    responsibleDTEnrollment: string;
+    authorizationDisposition: string;
+    authorizationExpiration: string | null;
+    roles: Array<{ _id?: string; role: string }>;
+    idAndes?: string;
+    profesionGrado?: ProfesionGradoEntry[];
+}
+
+interface CuilSearchResult {
+    pharmacyData: AndesApiResponse<AndesPharmacyData>;
+}
+
+interface SearchErrorResult {
+    error: true;
+}
+
+function isSearchErrorResult(value: unknown): value is SearchErrorResult {
+    return typeof value === 'object' && value !== null && 'error' in value;
+}
+
+function isCuilSearchResult(value: unknown): value is CuilSearchResult {
+    return typeof value === 'object' && value !== null && 'pharmacyData' in value;
+}
 
 @Component({
     selector: 'app-user-create',
@@ -33,8 +74,8 @@ export class UserCreateComponent implements OnInit, OnDestroy {
     isUsernameValid = false;
 
     // Datos encontrados
-    foundProfessionalData: any = null;
-    foundPharmacyData: any = null;
+    foundProfessionalData: AndesProfessionalData | null = null;
+    foundPharmacyData: AndesPharmacyData | null = null;
 
     constructor(
         private fb: FormBuilder,
@@ -108,7 +149,7 @@ export class UserCreateComponent implements OnInit, OnDestroy {
             this.isLoading = true;
 
             const formData = this.userForm.getRawValue(); // getRawValue incluye controles deshabilitados
-            const userData = {
+            const userData: CreateUserPayload = {
                 businessName: formData.businessName,
                 username: formData.username,
                 email: formData.email,
@@ -118,7 +159,7 @@ export class UserCreateComponent implements OnInit, OnDestroy {
                 responsibleDTEnrollment: formData.enrollment || '',
                 authorizationDisposition: formData.disposicionHabilitacion || '',
                 authorizationExpiration: formData.vencimientoHabilitacion || null,
-                roles: formData.roles.map(roleKey => {
+                roles: formData.roles.map((roleKey: string) => {
                     const roleObject = this.availableRoleOptions.find(r => r.role === roleKey);
                     return {
                         _id: roleObject?._id,
@@ -129,9 +170,9 @@ export class UserCreateComponent implements OnInit, OnDestroy {
 
             // Vincular con el registro de Andes (idAndes)
             if (this.foundPharmacyData) {
-                (userData as any).idAndes = this.foundPharmacyData.id || this.foundPharmacyData._id || '';
+                userData.idAndes = this.foundPharmacyData.id || this.foundPharmacyData._id || '';
             } else if (this.foundProfessionalData) {
-                (userData as any).idAndes = this.foundProfessionalData.id || this.foundProfessionalData._id || '';
+                userData.idAndes = this.foundProfessionalData.id || this.foundProfessionalData._id || '';
             }
 
             // Profesiones: transformar la estructura de Andes al esquema de Mongoose
@@ -139,16 +180,16 @@ export class UserCreateComponent implements OnInit, OnDestroy {
             // Mongoose: { profesion: String, codigoProfesion: String, numeroMatricula: String }
             if (this.foundProfessionalData && this.foundProfessionalData.profesiones?.length > 0) {
                 const profesionGrado = this.foundProfessionalData.profesiones
-                    .flatMap((p: any) => {
+                    .flatMap((p: AndesProfessionalProfession) => {
                         if (p.matriculacion && Array.isArray(p.matriculacion)) {
                             // Obtener matrículas únicas para esta profesión (evita duplicados por historial de renovaciones)
                             const uniqueMatriculas = Array.from(new Set(
                                 p.matriculacion
-                                    .filter((mat: any) => mat.matriculaNumero != null)
-                                    .map((mat: any) => mat.matriculaNumero.toString())
+                                    .filter((mat: AndesMatriculacion) => mat.matriculaNumero != null)
+                                    .map((mat: AndesMatriculacion) => mat.matriculaNumero.toString())
                             ));
 
-                            return uniqueMatriculas.map((matricula: string) => ({
+                            return uniqueMatriculas.map((matricula: string): ProfesionGradoEntry => ({
                                 profesion: p.profesion?.nombre || '',
                                 codigoProfesion: p.profesion?.codigo?.toString() || '',
                                 numeroMatricula: matricula
@@ -157,10 +198,10 @@ export class UserCreateComponent implements OnInit, OnDestroy {
                         return [];
                     })
                     // Solo incluir entradas con todos los campos requeridos
-                    .filter((p: any) => p.profesion && p.codigoProfesion && p.numeroMatricula);
+                    .filter((p: ProfesionGradoEntry) => p.profesion && p.codigoProfesion && p.numeroMatricula);
 
                 if (profesionGrado.length > 0) {
-                    (userData as any).profesionGrado = profesionGrado;
+                    userData.profesionGrado = profesionGrado;
                 }
             }
 
@@ -335,7 +376,7 @@ export class UserCreateComponent implements OnInit, OnDestroy {
         return this.availableRoleOptions;
     }
 
-    onRoleSelectionChange(event: any): void {
+    onRoleSelectionChange(_event: MatSelectChange): void {
         // Obtener los roles seleccionados actuales
         const selectedRoles = this.userForm.get('roles')?.value || [];
 
@@ -409,7 +450,7 @@ export class UserCreateComponent implements OnInit, OnDestroy {
 
     hasPharmacyRole(): boolean {
         const selectedRoles = this.userForm.get('roles')?.value || [];
-        return selectedRoles.some((role: any) => this.rolesService.isPharmacistRole(role));
+        return selectedRoles.some((role: string) => this.rolesService.isPharmacistRole(role));
     }
 
     hasOnlyAuditorRole(): boolean {
@@ -417,8 +458,9 @@ export class UserCreateComponent implements OnInit, OnDestroy {
         return selectedRoles.length === 1 && selectedRoles[0] === 'auditor';
     }
 
-    onUsernameChange(event: any): void {
-        const username = event.target.value;
+    onUsernameChange(event: Event): void {
+        const target = event.target as HTMLInputElement | null;
+        const username = target?.value || '';
         this.usernameSearchSubject.next(username);
     }
 
@@ -441,41 +483,41 @@ export class UserCreateComponent implements OnInit, OnDestroy {
 
                 // Obtener roles seleccionados
                 const selectedRoles = this.userForm.get('roles')?.value || [];
-                const selectedRoleObjects = selectedRoles.map(roleKey =>
+                const selectedRoleObjects = selectedRoles.map((roleKey: string) =>
                     this.availableRoleOptions.find(r => r.role === roleKey)
-                ).filter(Boolean);
+                ).filter((role): role is Role => !!role);
 
                 const hasPharmacist = selectedRoleObjects.some(r => this.rolesService.isPharmacistRole(r.role));
 
-                // Crear objeto para forkJoin basado en roles seleccionados
-                const searchQueries: any = {};
-
                 // Solo buscar en farmacias si hay roles de farmacia seleccionados
-                if (hasPharmacist) {
-                    searchQueries.pharmacyData = this.andesSearchService.searchPharmacy(cuil);
-                }
-
-                // Si no hay consultas que hacer, retornar null
-                if (Object.keys(searchQueries).length === 0) {
+                if (!hasPharmacist) {
                     this.isValidatingCuil = false;
                     this.cuilValidationMessage = 'Seleccione un rol de farmacia para buscar por CUIL';
                     this.isCuilValid = false;
                     return of(null);
                 }
 
-                return forkJoin(searchQueries).pipe(
-                    catchError(err => of({ error: true }))
+                return forkJoin({
+                    pharmacyData: this.andesSearchService.searchPharmacy(cuil)
+                }).pipe(
+                    catchError(() => of({ error: true as const }))
                 );
             })
         ).subscribe({
-            next: (result: any) => {
+            next: (result: CuilSearchResult | SearchErrorResult | null) => {
                 this.isValidatingCuil = false;
                 if (result === null) {
                     // No se realizó búsqueda
                     return;
                 }
 
-                if (result.error) {
+                if (isSearchErrorResult(result)) {
+                    this.isCuilValid = false;
+                    this.cuilValidationMessage = 'Error al buscar en Andes';
+                    return;
+                }
+
+                if (!isCuilSearchResult(result)) {
                     this.isCuilValid = false;
                     this.cuilValidationMessage = 'Error al buscar en Andes';
                     return;
@@ -494,7 +536,7 @@ export class UserCreateComponent implements OnInit, OnDestroy {
                     this.cuilValidationMessage = 'No se encontró la farmacia en Andes';
                 }
             },
-            error: (error) => {
+            error: () => {
                 // Failsafe, no debería llegar acá por el catchError,
                 // pero por si acaso re-activamos variables
                 this.isValidatingCuil = false;
@@ -516,11 +558,15 @@ export class UserCreateComponent implements OnInit, OnDestroy {
 
     }
 
-    private autocompleteFields(data: any): void {
+    private isAndesProfessionalData(data: AndesProfessionalData | AndesPharmacyData): data is AndesProfessionalData {
+        return 'profesiones' in data;
+    }
+
+    private autocompleteFields(data: AndesProfessionalData | AndesPharmacyData): void {
         if (data) {
             // Determinar si es un profesional o farmacia
-            const isProfessional = data.nombre && data.apellido;
-            const isPharmacy = data.denominacion || data.razonSocial;
+            const isProfessional = this.isAndesProfessionalData(data);
+            const isPharmacy = !isProfessional;
 
             if (isProfessional) {
                 // Almacenar datos del profesional
@@ -607,16 +653,16 @@ export class UserCreateComponent implements OnInit, OnDestroy {
                 this.usernameValidationMessage = 'Buscando profesional en Andes...';
 
                 return this.andesSearchService.searchProfessional(documento).pipe(
-                    catchError(err => of({ error: true }))
+                    catchError(() => of({ error: true as const }))
                 );
             })
         ).subscribe({
-            next: (result: any) => {
+            next: (result: AndesApiResponse<AndesProfessionalData> | SearchErrorResult | null) => {
                 this.isValidatingUsername = false;
 
                 if (result === null) {return;}
 
-                if (result.error) {
+                if (isSearchErrorResult(result)) {
                     this.isUsernameValid = false;
                     this.usernameValidationMessage = 'Error al buscar en Andes';
                     return;
@@ -649,8 +695,9 @@ export class UserCreateComponent implements OnInit, OnDestroy {
         });
     }
 
-    onCuilChange(event: any): void {
-        const rawValue = event.target.value;
+    onCuilChange(event: Event): void {
+        const target = event.target as HTMLInputElement | null;
+        const rawValue = target?.value || '';
         const formattedValue = this.formatCuilString(rawValue);
 
         // Evita mover el cursor mientras tipea actualizando solo si difiere en longitud significativamente o limitándose a onBlur.
@@ -685,7 +732,7 @@ export class UserCreateComponent implements OnInit, OnDestroy {
 
 
 
-    getProfessionStatus(profession: any): string {
+    getProfessionStatus(profession: AndesProfessionalProfession): string {
         if (!profession.matriculacion || !Array.isArray(profession.matriculacion)) {
             return 'Sin información';
         }
@@ -693,7 +740,7 @@ export class UserCreateComponent implements OnInit, OnDestroy {
         const now = new Date();
         let hasValidMatricula = false;
 
-        profession.matriculacion.forEach((mat: any) => {
+        profession.matriculacion.forEach((mat: AndesMatriculacion) => {
             if (mat.fin) {
                 const endDate = new Date(mat.fin);
                 if (endDate > now) {
@@ -705,7 +752,7 @@ export class UserCreateComponent implements OnInit, OnDestroy {
         return hasValidMatricula ? 'Vigente' : 'Vencida';
     }
 
-    getProfessionMatricula(profession: any): string {
+    getProfessionMatricula(profession: AndesProfessionalProfession): string {
         if (!profession.matriculacion || !Array.isArray(profession.matriculacion)) {
             return 'N/A';
         }
@@ -713,11 +760,11 @@ export class UserCreateComponent implements OnInit, OnDestroy {
         let latestMatricula = '';
         let latestEndDate = new Date(0);
 
-        profession.matriculacion.forEach((mat: any) => {
+        profession.matriculacion.forEach((mat: AndesMatriculacion) => {
             if (mat.matriculaNumero && mat.fin) {
                 const endDate = new Date(mat.fin);
                 if (endDate > latestEndDate) {
-                    latestMatricula = mat.matriculaNumero;
+                    latestMatricula = mat.matriculaNumero?.toString() || '';
                     latestEndDate = endDate;
                 }
             }

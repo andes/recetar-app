@@ -19,10 +19,50 @@ import { PatientFormComponent } from '@shared/components/patient-form/patient-fo
 import { of, Subject, Subscription, Observable, forkJoin } from 'rxjs';
 import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap, take, takeUntil } from 'rxjs/operators';
 import { Patient } from '@interfaces/patients';
+import SnomedConcept from '@interfaces/snomedConcept';
+
+interface ProfessionalCoverageOption {
+    nombre: string;
+    codigoPuco?: string;
+    numeroAfiliado?: string;
+}
+
+interface ProfessionalValidatorErrorPayload {
+    value: unknown;
+}
+
+interface ProfessionalValidatorErrors {
+    invalidDate?: ProfessionalValidatorErrorPayload;
+    futureDate?: ProfessionalValidatorErrorPayload;
+    tooOldDate?: ProfessionalValidatorErrorPayload;
+    medicationNotSelected?: ProfessionalValidatorErrorPayload;
+    whitespace?: ProfessionalValidatorErrorPayload;
+}
+
+interface ProfessionalDevices {
+    mobile: boolean;
+    tablet: boolean;
+    desktop: boolean;
+}
+
+interface ProfessionalSupplyItem {
+    isMagistral?: boolean;
+    supply?: {
+        type?: string;
+    };
+}
+
+interface ProfessionalPrescriptionDraft {
+    [key: string]: unknown;
+    ambito?: 'publico' | 'privado';
+    organizacion?: unknown;
+    insumos?: unknown[];
+    supplies: ProfessionalSupplyItem[];
+}
 
 // Validador personalizado para fechas
 function validDateValidator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } | null => {
+    return (control: AbstractControl): ProfessionalValidatorErrors | null => {
         if (!control.value) {
             return null; // Si no hay valor, no validamos (required se encarga)
         }
@@ -51,7 +91,7 @@ function validDateValidator(): ValidatorFn {
 }
 
 function medicationSelectedValidator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } | null => {
+    return (control: AbstractControl): ProfessionalValidatorErrors | null => {
         if (!control.value) {
             return null;
         }
@@ -82,13 +122,13 @@ function medicationSelectedValidator(): ValidatorFn {
 })
 export class ProfessionalFormComponent implements OnInit, OnDestroy {
     obraSocialControl = new FormControl('');
-    filteredObrasSociales: Observable<any[]>;
+    filteredObrasSociales: Observable<ProfessionalCoverageOption[]>;
     organizacionControl = new FormControl('');
 
     // Suscripciones
     private subscriptions: Subscription = new Subscription();
 
-    onOsSelected(selectedOs: any): void {
+    onOsSelected(selectedOs: ProfessionalCoverageOption): void {
         const osGroup = this.professionalForm.get('patient.os') as FormGroup;
         if (osGroup && selectedOs) {
             osGroup.patchValue({
@@ -103,7 +143,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
     }
 
 
-    existenObrasSociales(array: any[]): boolean {
+    existenObrasSociales(array: ProfessionalCoverageOption[]): boolean {
         if (!array || array.length === 0) {
             return false;
         }
@@ -115,12 +155,15 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
     private destroy$ = new Subject<void>();
     professionalForm: FormGroup;
 
-    filteredSupplies = [];
+    filteredSupplies: SnomedConcept[] = [];
     filteredInsumos = [];
     request;
     storedSupplies = [];
     today = new Date();
-    professionalData: any;
+    professionalData: {
+        userId: string;
+        businessName: string;
+    };
     readonly maxQSupplies: number = 10;
     readonly spinnerColor: ThemePalette = 'primary';
     readonly spinnerDiameter: number = 30;
@@ -138,7 +181,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
     isCertificateShown = false;
     /** _id del paciente seleccionado (para consulta al endpoint /recetas/verificar) */
     selectedPatientId: string | null = null;
-    devices: any = {
+    devices: ProfessionalDevices = {
         mobile: false,
         tablet: false,
         desktop: false
@@ -224,7 +267,10 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
         this.today = new Date((new Date()));
         this.minDate = new Date();
         this.maxDate = new Date(new Date().setMonth(new Date().getMonth() + 1));
-        this.professionalData = this.authService.getLoggedUserId();
+        this.professionalData = {
+            userId: this.authService.getLoggedUserId(),
+            businessName: this.authService.getLoggedBusinessName(),
+        };
 
         // Obtener el ámbito actual del servicio
         const currentAmbito = this.ambitoService.getAmbito();
@@ -268,7 +314,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
         const formValue = this.professionalForm.value;
         const combinedSupplies = [
             ...formValue.supplies,
-            ...formValue.insumos.map((ins: any) => ({
+            ...formValue.insumos.map((ins: { supply: unknown; type: string; requiresSpecification: boolean; description: string }) => ({
                 supply: ins.supply,
                 type: ins.type,
                 requiresSpecification: ins.requiresSpecification,
@@ -276,8 +322,8 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
             }))
         ];
 
-        const newPrescription = { ...formValue, supplies: combinedSupplies } as any;
-        delete (newPrescription as any).insumos;
+        const newPrescription = { ...formValue, supplies: combinedSupplies } as ProfessionalPrescriptionDraft;
+        delete newPrescription.insumos;
 
         const shouldPersistOrganizacion = this.isAmbitoPublico();
 
@@ -314,7 +360,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
 
             // Si no tenemos el DNI del paciente, no podemos verificar: crear directo
             if (!pacienteDni) {
-                this.apiPrescriptions.newPrescription(newPrescription).subscribe({
+                this.apiPrescriptions.newPrescription(newPrescription as unknown as Prescriptions).subscribe({
                     next: (success) => { if (success) { handleSuccess(); } },
                     error: (err) => this.handleSupplyError(err)
                 });
@@ -342,7 +388,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
                         });
 
                         dialogRef.afterClosed().pipe(take(1)).subscribe(() => {
-                            this.apiPrescriptions.newPrescription(payload).subscribe({
+                            this.apiPrescriptions.newPrescription(payload as unknown as Prescriptions).subscribe({
                                 next: (success) => {
                                     if (success) { handleSuccess(); }
                                 },
@@ -350,7 +396,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
                             });
                         });
                     } else {
-                        this.apiPrescriptions.newPrescription(payload).subscribe({
+                        this.apiPrescriptions.newPrescription(payload as unknown as Prescriptions).subscribe({
                             next: (success) => {
                                 if (success) { handleSuccess(); }
                             },
@@ -360,7 +406,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
                 },
                 error: () => {
                     // Error inesperado en forkJoin: crear igualmente
-                    this.apiPrescriptions.newPrescription(newPrescription).subscribe({
+                    this.apiPrescriptions.newPrescription(newPrescription as unknown as Prescriptions).subscribe({
                         next: (success) => {
                             if (success) { handleSuccess(); }
                         },
@@ -373,12 +419,12 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
 
         // Editar o ámbito privado: flujo original
         if (!this.isEdit) {
-            this.apiPrescriptions.newPrescription(newPrescription).subscribe({
+            this.apiPrescriptions.newPrescription(newPrescription as unknown as Prescriptions).subscribe({
                 next: (success) => { if (success) { handleSuccess(); } },
                 error: (err) => this.handleSupplyError(err)
             });
         } else {
-            this.apiPrescriptions.editPrescription(newPrescription).subscribe({
+            this.apiPrescriptions.editPrescription(newPrescription as unknown as Prescriptions).subscribe({
                 next: (success) => { if (success) { handleSuccess(); } },
                 error: (err) => this.handleSupplyError(err)
             });
@@ -386,12 +432,11 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
     }
 
     private handleSupplyError(err) {
-        if (err.error.length > 0) {
-            err.error.map(err => {
-                // handle supplies error
+        if (err?.error && Array.isArray(err.error) && err.error.length > 0) {
+            err.error.map(e => {
                 this.suppliesForm.controls.map(control => {
-                    if (control.get('supply').value === err.supply) {
-                        control.get('supply').setErrors({ invalid: err.message });
+                    if (control.get('supply').value === e.supply) {
+                        control.get('supply').setErrors({ invalid: e.message });
                     }
                 });
             });
@@ -449,7 +494,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
         return supply ? supply : '';
     }
 
-    onSupplySelected(supply, index: number) {
+    onSupplySelected(supply: SnomedConcept, index: number) {
         const control = this.suppliesForm.at(index); // Obtiene el FormGroup en la posición del array
         const supplyControl = control.get('supply');
 
@@ -640,7 +685,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
     }
 
     medicationSelectedValidator(): ValidatorFn {
-        return (control: AbstractControl): { [key: string]: any } | null => {
+        return (control: AbstractControl): ProfessionalValidatorErrors | null => {
             if (!control.value) {
                 return null;
             }
@@ -660,7 +705,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
     }
 
     noWhitespaceValidator(): ValidatorFn {
-        return (control: AbstractControl): { [key: string]: any } | null => {
+        return (control: AbstractControl): ProfessionalValidatorErrors | null => {
             if (!control.value) {
                 return null;
             }
@@ -772,7 +817,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
         professionalNgForm.resetForm();
         const currentAmbito = this.ambitoService.getAmbito();
 
-        const applyReset = (organizacionValue: any) => {
+        const applyReset = (organizacionValue: unknown) => {
             this.professionalForm.reset({
                 _id: '',
                 professional: this.professionalData,

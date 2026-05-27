@@ -1,16 +1,27 @@
-import { Component, Input, Output, EventEmitter, OnInit, ViewChild, forwardRef, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, AbstractControl, Validators, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidatorFn, NG_VALIDATORS, Validator, ValidationErrors } from '@angular/forms';
+import { Component, Input, Output, EventEmitter, OnInit, ViewChild, forwardRef, OnDestroy, ElementRef } from '@angular/core';
+import { FormBuilder, FormGroup, AbstractControl, Validators, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidatorFn, NG_VALIDATORS, Validator, ValidationErrors, ReactiveFormsModule } from '@angular/forms';
 import { PatientsService } from '@services/patients.service';
 import { Patient } from '@interfaces/patients';
 import { ThemePalette } from '@angular/material/core';
 import { debounceTime } from 'rxjs/operators';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { AmbitoService } from '@auth/services/ambito.service';
+import { CommonModule } from '@angular/common';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 
 // Validador personalizado para fechas
 function validDateValidator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } | null => {
+    return (control: AbstractControl): ValidationErrors | null => {
         if (!control.value) {
             return null; // Si no hay valor, no validamos (required se encarga)
         }
@@ -38,6 +49,37 @@ function validDateValidator(): ValidatorFn {
     };
 }
 
+interface ObraSocialOption {
+    nombre: string;
+    codigoPuco?: string;
+    numeroAfiliado?: string;
+    [key: string]: unknown;
+}
+
+interface PatientOsFormValue {
+    nombre: string | ObraSocialOption;
+    codigoPuco: string;
+    numeroAfiliado: string;
+}
+
+interface PatientFormRawValue {
+    dni: string;
+    lastName: string;
+    firstName: string;
+    nombreAutopercibido: string;
+    sex: string;
+    fechaNac: string | Date | null;
+    otraOS: boolean;
+    os: PatientOsFormValue;
+}
+
+function isObraSocialOption(value: unknown): value is ObraSocialOption {
+    return typeof value === 'object'
+        && value !== null
+        && 'nombre' in value
+        && typeof (value as { nombre?: unknown }).nombre === 'string';
+}
+
 @Component({
     selector: 'app-patient-form',
     templateUrl: './patient-form.component.html',
@@ -54,7 +96,21 @@ function validDateValidator(): ValidatorFn {
             multi: true
         }
     ],
-    standalone: false
+    standalone: true,
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        FlexLayoutModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatAutocompleteModule,
+        MatSelectModule,
+        MatCheckboxModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatProgressSpinnerModule,
+        PatientNamePipe
+    ]
 })
 export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAccessor, Validator {
     @Input() showObraSocial = false;
@@ -64,16 +120,16 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
     @Output() patientFound = new EventEmitter<Patient>();
     @Output() patientNotFound = new EventEmitter<void>();
 
-    @ViewChild('dni', { static: true }) dni: any;
+    @ViewChild('dni', { static: true }) dni: ElementRef<HTMLInputElement>;
 
     patientForm: FormGroup;
     patientSearch: Patient[] = [];
     sex_options: string[] = ['Femenino', 'Masculino', 'Otro'];
     readonly spinnerColor: ThemePalette = 'primary';
     dniShowSpinner = false;
-    obraSocial: any[] = [];
-    obrasSociales: any[] = [];
-    filteredObrasSociales: Observable<any[]>;
+    obraSocial: ObraSocialOption[] = [];
+    obrasSociales: ObraSocialOption[] = [];
+    filteredObrasSociales: Observable<ObraSocialOption[]>;
     fieldsDisabled = false;
     lastSearchedDni = '';
     selectedPatient: Patient | null = null;
@@ -83,7 +139,7 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
     dniMinLength = 6;
     dniMaxLength = 8;
 
-    private onChange = (value: any) => { };
+    private onChange: (value: PatientFormRawValue) => void = (_value: PatientFormRawValue) => { };
     private onTouched = () => { };
     private onValidatorChange = () => { };
     private subscriptions: Subscription = new Subscription();
@@ -136,7 +192,7 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
         // Suscribirse a todos los cambios del formulario para propagarlos
         this.patientForm.valueChanges.subscribe(() => {
             if (this.onChange) {
-                const rawValue = this.patientForm.getRawValue();
+                const rawValue = this.getRawFormValue();
 
                 this.onChange(rawValue);
             }
@@ -188,7 +244,7 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
 
                     return this._filterOS(isExactMatch ? '' : name, useOtraOS);
                 })
-            ) || new Observable();
+            ) ?? of([]);
 
             this.loadObrasSociales();
         }
@@ -315,9 +371,11 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
             }
 
             this.osRequestSubscription = this.apiPatients.getPatientOSByDni(dniValue, sexValue).subscribe({
-                next: (res) => {
+                next: (res: unknown) => {
                     // Guardar todas las obras sociales del paciente
-                    this.obraSocial = Array.isArray(res) && res.length > 0 ? res : [];
+                    this.obraSocial = Array.isArray(res)
+                        ? res.filter((os): os is ObraSocialOption => isObraSocialOption(os))
+                        : [];
 
                     // Si no está activada la opción "Elegir otra cobertura social"
                     if (!this.patientForm.get('otraOS')?.value) {
@@ -365,8 +423,10 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
     private loadObrasSociales(): void {
         if (this.showObraSocial) {
             this.apiPatients.getOS().subscribe(
-                res => {
-                    this.obrasSociales = (res as Array<any>);
+                (res: unknown) => {
+                    this.obrasSociales = Array.isArray(res)
+                        ? res.filter((os): os is ObraSocialOption => isObraSocialOption(os))
+                        : [];
                 }
             );
         }
@@ -389,7 +449,7 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
 
         // Emitir los cambios al formulario padre
         if (this.onChange) {
-            this.onChange(this.patientForm.getRawValue());
+            this.onChange(this.getRawFormValue());
         }
     }
 
@@ -443,7 +503,7 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
 
         // Emitir los cambios al formulario padre
         if (this.onChange) {
-            this.onChange(this.patientForm.getRawValue());
+            this.onChange(this.getRawFormValue());
         }
         if (this.onTouched) {
             this.onTouched();
@@ -452,17 +512,19 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
         this.patientFound.emit(patient);
     }
 
-    onOsSelected(selectedOs: any): void {
+    onOsSelected(selectedOs: string | ObraSocialOption): void {
         if (this.showObraSocial) {
             const osGroup = this.patientObraSocial as FormGroup;
 
             if (osGroup && selectedOs) {
-                let osObject = selectedOs;
+                let osObject: ObraSocialOption | undefined;
 
                 // Si selectedOs es un string (nombre), buscar el objeto completo
                 if (typeof selectedOs === 'string') {
                     osObject = this.obraSocial.find(os => os.nombre === selectedOs) ||
                         this.obrasSociales.find(os => os.nombre === selectedOs);
+                } else if (isObraSocialOption(selectedOs)) {
+                    osObject = selectedOs;
                 }
 
                 if (osObject) {
@@ -478,7 +540,7 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
 
                     // Emitir los cambios al formulario padre
                     if (this.onChange) {
-                        this.onChange(this.patientForm.getRawValue());
+                        this.onChange(this.getRawFormValue());
                     }
                 }
             }
@@ -491,10 +553,10 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
      * @param showAllOptions Si es true, muestra todas las obras sociales, si es false solo las del paciente
      * @returns Lista filtrada de obras sociales
      */
-    private _filterOS(value: string, showAllOptions: boolean): any[] {
+    private _filterOS(value: string, showAllOptions: boolean): ObraSocialOption[] {
         const useAllObrasSociales = showAllOptions || !this.obraSocial || this.obraSocial.length === 0;
 
-        let sourceList = [];
+        let sourceList: ObraSocialOption[] = [];
 
         if (useAllObrasSociales) {
             sourceList = this.obrasSociales;
@@ -520,8 +582,8 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
     };
 
     // ControlValueAccessor implementation
-    writeValue(value: any): void {
-        if (value) {
+    writeValue(value: Partial<PatientFormRawValue> | null): void {
+        if (value && typeof value === 'object') {
             this.patientForm.patchValue(value, { emitEvent: false });
         } else {
             this.patientForm.reset();
@@ -532,11 +594,11 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
         }
     }
 
-    registerOnChange(fn: any): void {
+    registerOnChange(fn: (value: PatientFormRawValue) => void): void {
         this.onChange = fn;
     }
 
-    registerOnTouched(fn: any): void {
+    registerOnTouched(fn: () => void): void {
         this.onTouched = fn;
     }
 
@@ -616,8 +678,8 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
     }
 
     // Método público para obtener el valor del formulario
-    getFormValue(): any {
-        return this.patientForm.getRawValue();
+    getFormValue(): PatientFormRawValue {
+        return this.getRawFormValue();
     }
 
     // Método público para verificar si el formulario es válido
@@ -647,5 +709,9 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
             const control = this.patientForm.get(key);
             control?.markAsTouched();
         });
+    }
+
+    private getRawFormValue(): PatientFormRawValue {
+        return this.patientForm.getRawValue() as PatientFormRawValue;
     }
 }

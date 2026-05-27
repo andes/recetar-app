@@ -7,6 +7,8 @@ import { AuthService } from '@auth/services/auth.service';
 import { ProfessionalDialogComponent } from '@professionals/components/professional-dialog/professional-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { rowsAnimation, detailExpand, arrowDirection } from '@animations/animations.template';
+import Supplies from '@interfaces/supplies';
+import { take } from 'rxjs/operators';
 
 
 
@@ -22,12 +24,12 @@ import { rowsAnimation, detailExpand, arrowDirection } from '@animations/animati
     standalone: false
 })
 export class SupplyListComponent implements OnInit, AfterContentInit {
-    @Output() editSupplyEvent = new EventEmitter();
+    @Output() editSupplyEvent = new EventEmitter<Supplies>();
 
     // displayedColumns: string[] = ['patient', 'prescription_date', 'status', 'supply_count', 'action', 'arrow'];
     displayedColumns: string[] = ['name', 'action'];
-    dataSource = new MatTableDataSource<any>([]);
-    expandedElement: any | null;
+    dataSource = new MatTableDataSource<Supplies>([]);
+    expandedElement: Supplies | null;
     loadingPrescriptions: boolean;
     supplyName: string;
 
@@ -46,8 +48,8 @@ export class SupplyListComponent implements OnInit, AfterContentInit {
     }
 
     searchSupplies() {
-        this.supplyService.get(this.supplyName).subscribe((supply: any[]) => {
-            this.dataSource = new MatTableDataSource<any>(supply);
+        this.supplyService.get(this.supplyName).subscribe((supply: Supplies[]) => {
+            this.dataSource = new MatTableDataSource<Supplies>(supply);
 
             this.dataSource.sort = this.sort;
             this.dataSource.paginator = this.paginator;
@@ -78,37 +80,37 @@ export class SupplyListComponent implements OnInit, AfterContentInit {
         this.searchSupplies();
     }
 
-    canPrint(prescription: any): boolean {
+    canPrint(prescription: { professional: { userId: string }; status: string }): boolean {
         return (prescription.professional.userId === this.authService.getLoggedUserId()) && prescription.status !== 'Vencida';
     }
 
-    canEdit(prescription: any): boolean {
+    canEdit(prescription: { status: string }): boolean {
         return prescription.status === 'Pendiente';
     }
 
-    canDelete(prescription: any): boolean {
+    canDelete(prescription: { professional: { userId: string }; status: string }): boolean {
         return (prescription.professional.userId === this.authService.getLoggedUserId() && prescription.status === 'Pendiente');
     }
 
-    editSupply(supply: any) {
+    editSupply(supply: Supplies) {
         this.editSupplyEvent.emit(supply);
     }
 
-    isStatus(prescritpion: any, status: string): boolean {
+    isStatus(prescritpion: { status: string }, status: string): boolean {
         return prescritpion.status === status;
     }
 
-    deleteDialogPrescription(prescription: any) {
+    deleteDialogPrescription(prescription: Supplies) {
         this.openDialog('delete', prescription);
     }
 
     // Show a dialog
-    private openDialog(aDialogType: string, aPrescription?: any, aText?: string): void {
+    private openDialog(aDialogType: string, aPrescription?: Supplies, aText?: string): void {
         const dialogRef = this.dialog.open(ProfessionalDialogComponent, {
             width: '400px',
             data: { dialogType: aDialogType, prescription: aPrescription, text: aText }
         });
 
-        dialogRef.afterClosed().subscribe();
+        dialogRef.afterClosed().pipe(take(1)).subscribe();
     }
 }

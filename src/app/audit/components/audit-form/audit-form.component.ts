@@ -1,6 +1,7 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, AbstractControl, Validators } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
+import { switchMap, take, takeUntil } from 'rxjs/operators';
 
 // Services
 import { PrescriptionsService } from '@services/prescriptions.service';
@@ -20,12 +21,12 @@ import { duration } from 'moment';
 
 
 @Component({
-    selector: 'app-pharmacists-form',
+    selector: 'app-audit-form',
     templateUrl: './audit-form.component.html',
     styleUrls: ['./audit-form.component.sass'],
     standalone: false
 })
-export class AuditFormComponent implements OnInit {
+export class AuditFormComponent implements OnInit, OnDestroy {
 
     @ViewChild('picker1') picker1;
 
@@ -38,6 +39,7 @@ export class AuditFormComponent implements OnInit {
     readonly spinnerColor: ThemePalette = 'primary';
     cuitShowSpinner = false;
     private lastCuit: string;
+    private destroy$ = new Subject<void>();
 
     constructor(
         private fBuilder: FormBuilder,
@@ -50,23 +52,32 @@ export class AuditFormComponent implements OnInit {
     ngOnInit(): void {
         this.initFilterPrescriptionForm();
 
-        this.prescriptionForm.valueChanges.subscribe(
-            values => {
+        this.prescriptionForm.valueChanges.pipe(
+            takeUntil(this.destroy$),
+            switchMap(values => {
                 if (typeof(values.pharmacy_cuit) !== 'undefined' && values.pharmacy_cuit >= 10) {
                     this.cuitShowSpinner = this.lastCuit !== values.pharmacy_cuit;
-
-                    this.apiPrescriptions.getPrescriptions({ dispensedBy: values.pharmacy_cuit }).subscribe(
-                        success => {
-                            this.lastCuit = values.pharmacy_cuit;
-                            this.cuitShowSpinner = false;
-                            if (!success) {
-                                this._snackBar.open('No se encuentra una farmacia con ese CUIT', 'cerrar', { duration: 3000 });
-                            }
-                        }
-                    );
+                    return this.apiPrescriptions.getPrescriptions({ dispensedBy: values.pharmacy_cuit });
                 }
+                return of(null);
+            })
+        ).subscribe(success => {
+            if (success === null) {
+                return;
             }
-        );
+            if (success) {
+                this.lastCuit = this.prescriptionForm.value.pharmacy_cuit;
+                this.cuitShowSpinner = false;
+            } else {
+                this._snackBar.open('No se encuentra una farmacia con ese CUIT', 'cerrar', { duration: 3000 });
+                this.cuitShowSpinner = false;
+            }
+        });
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     initFilterPrescriptionForm() {
@@ -85,7 +96,7 @@ export class AuditFormComponent implements OnInit {
             data: { dialogType: aDialogType, prescription: aPrescription, text: aText }
         });
 
-        dialogRef.afterClosed().subscribe();
+        dialogRef.afterClosed().pipe(take(1)).subscribe();
     }
 
 
@@ -94,4 +105,3 @@ export class AuditFormComponent implements OnInit {
     }
 
 }
-

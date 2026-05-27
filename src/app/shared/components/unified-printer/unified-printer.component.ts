@@ -1,4 +1,4 @@
-import { Component, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { PdfMakeWrapper, Txt, Canvas, Line, Img, Columns } from 'pdfmake-wrapper';
 import * as pdfFontsX from 'pdfmake-unicode/dist/pdfmake-unicode.js';
 import { DatePipe } from '@angular/common';
@@ -20,6 +20,8 @@ PdfMakeWrapper.setFonts(pdfFontsX);
 })
 export class UnifiedPrinterComponent {
 
+    private readonly EMPTY_STACK: unknown[] = [];
+
     constructor(
         private datePipe: DatePipe,
         private barcodeService: BarcodeService,
@@ -27,6 +29,19 @@ export class UnifiedPrinterComponent {
         private practicesService: PracticesService,
         private patientsService: PatientsService
     ) { }
+
+    private formatProfessionalEnrollment(professional: {
+        profesionGrado?: Array<{ profesion: string; numeroMatricula: string }>;
+        enrollment?: string;
+    }): string {
+        if (professional?.profesionGrado?.length) {
+            return professional.profesionGrado
+                .map((grade) => `${grade.profesion} MP ${grade.numeroMatricula}`)
+                .join('\n');
+        }
+
+        return professional?.enrollment ? `MP ${professional.enrollment}\n` : '';
+    }
 
     private async _generatePdf(buildFunction: (pdf: PdfMakeWrapper) => Promise<void> | void) {
         const pdf = new PdfMakeWrapper();
@@ -165,9 +180,7 @@ export class UnifiedPrinterComponent {
                 },
                 {
                     text: `\n ${prescription.professional?.profesionGrado?.length ?
-                        prescription.professional.profesionGrado
-                            .map(g => `${g.profesion} MP ${g.numeroMatricula}`)
-                            .join('\n')
+                        this.formatProfessionalEnrollment(prescription.professional)
                         : (prescription.professional?.enrollment ? `MP ${prescription.professional.enrollment}\n` : '')}`,
                     bold: true, fontSize: 9
                 }
@@ -406,7 +419,7 @@ export class UnifiedPrinterComponent {
         });
     }
 
-    private getOrganizacionDireccion(direccion: any): string {
+    private getOrganizacionDireccion(direccion: unknown): string {
         if (!direccion) {
             return '';
         }
@@ -415,7 +428,12 @@ export class UnifiedPrinterComponent {
             return direccion;
         }
 
-        return direccion.valor || '';
+        if (typeof direccion === 'object' && direccion !== null && 'valor' in direccion) {
+            const valor = (direccion as { valor?: unknown }).valor;
+            return typeof valor === 'string' ? valor : '';
+        }
+
+        return '';
     }
 
     // Print practice
@@ -446,9 +464,7 @@ export class UnifiedPrinterComponent {
                 { text: 'Matrícula: ' },
                 {
                     text: `\n ${practice.professional?.profesionGrado?.length ?
-                        practice.professional.profesionGrado
-                            .map((g: any) => `${g.profesion} MP ${g.numeroMatricula}`)
-                            .join('\n')
+                        this.formatProfessionalEnrollment(practice.professional)
                         : (practice.professional?.enrollment ? `MP ${practice.professional.enrollment}\n` : '')}`,
                     bold: true, fontSize: 9
                 }
@@ -505,10 +521,18 @@ export class UnifiedPrinterComponent {
         });
     }
 
-    private addProfessionalSignature(pdf: PdfMakeWrapper, professional: any, leftStack?: any[]) {
+    private addProfessionalSignature(
+        pdf: PdfMakeWrapper,
+        professional: {
+            businessName: string;
+            profesionGrado?: Array<{ profesion: string; numeroMatricula: string }>;
+            enrollment?: string;
+        },
+        leftStack?: unknown[]
+    ) {
         pdf.add(new Columns([
             {
-                stack: leftStack || [],
+                stack: leftStack || this.EMPTY_STACK,
                 alignment: 'center',
                 width: '50%'
             },
@@ -519,9 +543,7 @@ export class UnifiedPrinterComponent {
                         { text: `\n ${professional.businessName}`, fontSize: 14, bold: true },
                         {
                             text: `\n ${professional?.profesionGrado?.length ?
-                                professional.profesionGrado
-                                    .map((g: any) => `${g.profesion} MP ${g.numeroMatricula}`)
-                                    .join('\n')
+                                this.formatProfessionalEnrollment(professional)
                                 : (professional?.enrollment ? `MP ${professional.enrollment}\n` : '')}`,
                             bold: true, fontSize: 9
                         }

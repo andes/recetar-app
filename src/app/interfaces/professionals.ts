@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Adapter } from './adapter';
+import { Adapter, asRecord } from './adapter';
 
 export class Professionals {
     constructor(
@@ -23,16 +23,20 @@ export class Professionals {
     providedIn: 'root'
 })
 export class ProfessionalsAdapter implements Adapter<Professionals> {
-    adapt(item: any): Professionals {
+    adapt(item: unknown): Professionals {
+        const data = asRecord(item);
+        const professions = data['profesiones'] as Array<{ matriculacion?: Array<{ matriculaNumero?: string }> }>;
+        const enrollment = professions?.[0]?.matriculacion?.[0]?.matriculaNumero || '';
+
         return new Professionals(
-            item.id,
-            item.nombre,
-            item.sexo,
-            item.apellido,
-            item.documento,
-            item.nacionalidad,
-            item.profesiones[0].matriculacion[0].matriculaNumero,
-            new Date(item.created)
+            data['id'] as string,
+            data['nombre'] as string,
+            data['sexo'] as string,
+            data['apellido'] as string,
+            data['documento'] as string,
+            data['nacionalidad'] as string,
+            enrollment,
+            new Date(data['created'] as string | number | Date)
         );
     }
 }

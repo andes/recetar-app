@@ -1,9 +1,16 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { SubOrganizacion } from '@interfaces/organizaciones';
-import { User } from '@interfaces/users';
+import { User, UserAdapter } from '@interfaces/users';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+
+interface UserUpdateRequestResponse {
+    status?: string;
+    message?: string;
+    msg?: string;
+}
 
 @Injectable({
     providedIn: 'root'
@@ -11,24 +18,37 @@ import { environment } from '../../environments/environment';
 export class UserService {
 
     constructor(
-        private http: HttpClient
+        private http: HttpClient,
+        private userAdapter: UserAdapter
     ) { }
 
     getUserById(userId: string): Observable<User> {
-        return this.http.get<User>(`${environment.API_END_POINT}/users/${userId}`);
+        return this.http.get<User>(`${environment.API_END_POINT}/users/${userId}`).pipe(
+            map((user) => this.userAdapter.adapt(user))
+        );
     }
 
-    getUsers(params?: { offset?: number; limit?: number }): Observable<{ users: User[]; total: number; offset: number; limit: number }> {
+    getUsers(params?: { offset?: number; limit?: number }): Observable<{ items: User[]; total: number; offset: number; limit: number }> {
         const queryParams = params || {};
-        return this.http.get<{ users: User[]; total: number; offset: number; limit: number }>(`${environment.API_END_POINT}/users/index`, { params: queryParams });
+        return this.http.get<{ items: User[]; total: number; offset: number; limit: number }>(`${environment.API_END_POINT}/users`, { params: queryParams }).pipe(
+            map((response) => ({
+                ...response,
+                items: response.items.map((user) => this.userAdapter.adapt(user))
+            }))
+        );
     }
 
-    searchUsers(searchTerm: string, params?: { offset?: number; limit?: number }): Observable<{ users: User[]; total: number; offset: number; limit: number }> {
+    searchUsers(searchTerm: string, params?: { offset?: number; limit?: number }): Observable<{ items: User[]; total: number; offset: number; limit: number }> {
         const queryParams = {
             searchTerm,
             ...(params || {})
         };
-        return this.http.get<{ users: User[]; total: number; offset: number; limit: number }>(`${environment.API_END_POINT}/users/search`, { params: queryParams });
+        return this.http.get<{ items: User[]; total: number; offset: number; limit: number }>(`${environment.API_END_POINT}/users`, { params: queryParams }).pipe(
+            map((response) => ({
+                ...response,
+                items: response.items.map((user) => this.userAdapter.adapt(user))
+            }))
+        );
     }
 
     createUser(userData: {
@@ -39,35 +59,38 @@ export class UserService {
         enrollment?: string;
         roles: Array<{ role: string }>;
     }): Observable<User> {
-        return this.http.post<User>(`${environment.API_END_POINT}/users/create`, userData);
+        return this.http.post<User>(`${environment.API_END_POINT}/users`, userData).pipe(
+            map((user) => this.userAdapter.adapt(user))
+        );
     }
 
-    // Unified update method that can handle multiple fields in a single request
-    updateUser(_id: string, updateData: {
+    updateUser(id: string, updateData: {
         email?: string;
         username?: string;
         businessName?: string;
         roles?: Array<{ _id: string; role: string }>;
         isActive?: boolean;
     }): Observable<User> {
-        const payload = { _id, ...updateData };
-        return this.http.post<User>(`${environment.API_END_POINT}/users/update`, payload);
+        return this.http.patch<User>(`${environment.API_END_POINT}/users/${id}`, updateData).pipe(
+            map((user) => this.userAdapter.adapt(user))
+        );
     }
 
-    // Legacy methods for backward compatibility (now using the unified method)
-    updateIsActive(_id: string, isActive: boolean): Observable<User> {
-        return this.updateUser(_id, { isActive });
+    updateIsActive(id: string, isActive: boolean): Observable<User> {
+        return this.updateUser(id, { isActive });
     }
 
     updateUserOrganizaciones(_id: string, organizaciones: SubOrganizacion[]): Observable<User> {
-        return this.http.post<User>(`${environment.API_END_POINT}/users/update-own`, { _id, organizaciones });
+        return this.http.patch<User>(`${environment.API_END_POINT}/users/me/organizaciones`, { organizaciones }).pipe(
+            map((user) => this.userAdapter.adapt(user))
+        );
     }
 
-    requestUpdateUser(userId: string, updateData: { email: string, username?: string }): Observable<any> {
-        return this.http.post<any>(`${environment.API_END_POINT}/users/request-update`, { userId, ...updateData });
+    requestUpdateUser(userId: string, updateData: { email: string, username?: string }): Observable<UserUpdateRequestResponse> {
+        return this.http.post<UserUpdateRequestResponse>(`${environment.API_END_POINT}/users/request-email-update`, { userId, ...updateData });
     }
 
-    confirmUserUpdate(token: string): Observable<any> {
-        return this.http.post<any>(`${environment.API_END_POINT}/users/confirm-update`, { token });
+    confirmUserUpdate(token: string): Observable<UserUpdateRequestResponse> {
+        return this.http.post<UserUpdateRequestResponse>(`${environment.API_END_POINT}/users/confirm-email-update`, { token });
     }
 }

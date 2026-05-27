@@ -1,16 +1,42 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, AbstractControl, FormGroupDirective } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { FormBuilder, FormGroup, Validators, AbstractControl, FormGroupDirective, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '@auth/services/auth.service';
-import { PharmacistsService } from '../../../services/pharmacists.service';
+import { PharmacistLookupResult, PharmacistsService } from '../../../services/pharmacists.service';
 import moment from 'moment';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatButtonModule } from '@angular/material/button';
+import { NgxTurnstileModule } from '../../../shared/ngx-turnstile/ngx-turnstile.module';
+import { NgxTurnstileFormsModule } from '../../../shared/ngx-turnstile/ngx-turnstile-forms.module';
 
 @Component({
     selector: 'app-new-user',
     templateUrl: './new-user-pharmacist.component.html',
     styleUrls: ['./new-user-pharmacist.component.sass'],
-    standalone: false
+    standalone: true,
+    imports: [
+        ReactiveFormsModule,
+        FormsModule,
+        RouterModule,
+        FlexLayoutModule,
+        MatCardModule,
+        MatIconModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatButtonModule,
+        MatSnackBarModule,
+        NgxTurnstileModule,
+        NgxTurnstileFormsModule
+    ]
 })
 export class NewUserPharmacistComponent implements OnInit {
 
@@ -113,19 +139,19 @@ export class NewUserPharmacistComponent implements OnInit {
         });
     }
 
-    checkDisposicionFarmacia(pharmacist) {
+    checkDisposicionFarmacia(pharmacist: PharmacistLookupResult) {
         const disposicionHabilitacion = this.newUserForm.get('disposicionHabilitacion').value;
         const salida = pharmacist.disposicionHabilitacion === disposicionHabilitacion ? true : false;
         return salida;
     }
 
-    checkMatricula(pharmacist) {
+    checkMatricula(pharmacist: PharmacistLookupResult) {
         const matriculaDTResponsable = this.newUserForm.get('enrollment').value;
         const salida = pharmacist.matriculaDTResponsable === matriculaDTResponsable ? true : false;
         return salida;
     }
 
-    checkVencimientoHabilitacion(pharmacist) {
+    checkVencimientoHabilitacion(pharmacist: PharmacistLookupResult) {
         const vencimientoHabilitacionForm = this.newUserForm.get('vencimientoHabilitacion').value;
         const vencimientoHabilitacionAndes = moment(pharmacist.vencimientoHabilitacion);
         const diferencia = vencimientoHabilitacionForm.diff(vencimientoHabilitacionAndes, 'days');

@@ -8,6 +8,11 @@ import { of, Subject } from 'rxjs';
 import { OrganizacionesAndesService } from '@services/organizacionesAndes.service';
 import { ThemePalette } from '@angular/material/core';
 
+interface OrganizacionDialogData {
+    dialogType?: string;
+    text?: string;
+}
+
 
 @Component({
     selector: 'app-organizacion-dialog',
@@ -27,7 +32,7 @@ export class OrganizacionDialogComponent implements OnInit, OnDestroy {
         private formBuilder: FormBuilder,
         private dialogRef: MatDialogRef<OrganizacionDialogComponent>,
         private organizacionesAndesService: OrganizacionesAndesService,
-        @Inject(MAT_DIALOG_DATA) public data: any
+        @Inject(MAT_DIALOG_DATA) public data: OrganizacionDialogData
     ) {
         this.organizacionForm = this.formBuilder.group({
             nombre: ['', [Validators.required, Validators.minLength(3)]]

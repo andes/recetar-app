@@ -48,3 +48,8 @@ src/environments/api.key.ts
 # System Files
 .DS_Store
 Thumbs.db
+
+# Agentes
+.agents
+skills-lock.json
+

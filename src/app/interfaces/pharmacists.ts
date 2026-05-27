@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Adapter } from './adapter';
+import { Adapter, asRecord } from './adapter';
 
 export class Pharmacists {
     // Cambiar campos
@@ -24,17 +24,21 @@ export class Pharmacists {
     providedIn: 'root'
 })
 export class PharmacistsAdapter implements Adapter<Pharmacists> {
-    adapt(item: any): Pharmacists {
+    adapt(item: unknown): Pharmacists {
+        const data = asRecord(item);
+        const professions = data['profesiones'] as Array<{ matriculacion?: Array<{ matriculaNumero?: string }> }>;
+        const enrollment = professions?.[0]?.matriculacion?.[0]?.matriculaNumero || '';
+
     // Cambiar campos
         return new Pharmacists(
-            item.id,
-            item.nombre,
-            item.sexo,
-            item.apellido,
-            item.documento,
-            item.nacionalidad,
-            item.profesiones[0].matriculacion[0].matriculaNumero,
-            new Date(item.created)
+            data['id'] as string,
+            data['nombre'] as string,
+            data['sexo'] as string,
+            data['apellido'] as string,
+            data['documento'] as string,
+            data['nacionalidad'] as string,
+            enrollment,
+            new Date(data['created'] as string | number | Date)
         );
     }
 }

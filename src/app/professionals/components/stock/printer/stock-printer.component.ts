@@ -7,6 +7,50 @@ import { formatTipoInsumo } from '@services/stock.service';
 
 PdfMakeWrapper.setFonts(pdfFontsX);
 
+interface StockPrinterProfessionalGrade {
+    profesion: string;
+    numeroMatricula: string;
+}
+
+interface StockPrinterProfessional {
+    businessName: string;
+    enrollment?: string;
+    profesionGrado?: StockPrinterProfessionalGrade[];
+}
+
+interface StockPrinterSupply {
+    name: string;
+    type?: string;
+    specification?: string;
+}
+
+interface StockPrinterSupplyItem {
+    quantity: number;
+    quantityPresentation?: string;
+    supply: StockPrinterSupply;
+}
+
+interface StockPrinterPatient {
+    firstName: string;
+    lastName: string;
+    dni: string;
+    fechaNac?: Date | string;
+    sex: string;
+    obraSocial?: {
+        nombre?: string;
+        numeroAfiliado?: string;
+    };
+}
+
+export interface StockPrintData {
+    _id: string;
+    prescriptionId?: string;
+    date: Date | string;
+    patient: StockPrinterPatient;
+    professional: StockPrinterProfessional;
+    supplies: StockPrinterSupplyItem[];
+}
+
 @Injectable()
 export class StockPrinterComponent {
 
@@ -15,20 +59,30 @@ export class StockPrinterComponent {
         private barcodeService: BarcodeService
     ) { }
 
+    private formatProfessionalEnrollment(professional: StockPrinterProfessional): string {
+        if (professional?.profesionGrado?.length) {
+            return professional.profesionGrado
+                .map((grade) => `${grade.profesion} MP ${grade.numeroMatricula}`)
+                .join('\n');
+        }
+
+        return professional?.enrollment ? `MP ${professional.enrollment}\n` : '';
+    }
+
     private async _generatePdf(buildFunction: (pdf: PdfMakeWrapper) => Promise<void> | void) {
         const pdf = new PdfMakeWrapper();
         await Promise.resolve(buildFunction(pdf));
         pdf.create().open();
     }
 
-    async print(stockData: any) {
+    async print(stockData: StockPrintData) {
         await this._generatePdf(async (pdf) => {
             await this.addPage(pdf, stockData);
             // Si necesitaramos duplicado, aquí iría la lógica similar a recetas
         });
     }
 
-    private async addPage(pdf: PdfMakeWrapper, stockData: any, label?: string) {
+    private async addPage(pdf: PdfMakeWrapper, stockData: StockPrintData, label?: string) {
 
         const barcodeBase64 = await this.barcodeService.generateBarcodeBase64(stockData._id);
         const barcodeImg = await new Img(barcodeBase64).fit([230, 60]).alignment('center').margin([0, 20]).build();
@@ -107,7 +161,7 @@ export class StockPrinterComponent {
         pdf.add(new Txt('\n').end);
 
         // Supplies
-        stockData.supplies.forEach((item: any) => {
+        stockData.supplies.forEach((item: StockPrinterSupplyItem) => {
             const cant = item.quantityPresentation ? `${item.quantity} envase(s) de ${item.quantityPresentation} unidades` : `x ${item.quantity}`;
 
             pdf.add(new Columns([
@@ -152,9 +206,7 @@ export class StockPrinterComponent {
                 { text: `\n ${stockData.professional.businessName}`, fontSize: 14, bold: true },
                 {
                     text: `\n ${stockData.professional?.profesionGrado?.length ?
-                        stockData.professional.profesionGrado
-                            .map((g: any) => `${g.profesion} MP ${g.numeroMatricula}`)
-                            .join('\n')
+                        this.formatProfessionalEnrollment(stockData.professional)
                         : (stockData.professional?.enrollment ? `MP ${stockData.professional.enrollment}\n` : '')
                         }`, bold: true, fontSize: 9
                 }
@@ -176,9 +228,7 @@ export class StockPrinterComponent {
                             { text: `\n ${stockData.professional.businessName}`, fontSize: 14, bold: true },
                             {
                                 text: `\n ${stockData.professional?.profesionGrado?.length ?
-                                    stockData.professional.profesionGrado
-                                        .map((g: any) => `${g.profesion} MP ${g.numeroMatricula}`)
-                                        .join('\n')
+                                    this.formatProfessionalEnrollment(stockData.professional)
                                     : (stockData.professional?.enrollment ? `MP ${stockData.professional.enrollment}\n` : '')
                                     }`, bold: true, fontSize: 9
                             }
