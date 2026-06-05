@@ -1,0 +1,76 @@
+<app-canvas [showSidebar]="true" [sidebarItems]="sidebarItems">
+    <div class="profile-container">
+        <mat-card class="profile-card">
+            <mat-card-header>
+                <mat-card-title>Mi Perfil</mat-card-title>
+                <mat-card-subtitle>Administrá tus datos personales</mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+                @if (isLoading) {
+                    <div class="loading-container">
+                        <mat-spinner diameter="40"></mat-spinner>
+                        <p>Cargando datos...</p>
+                    </div>
+                }
+
+                @if (!isLoading) {
+                    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" autocomplete="off" novalidate>
+                        <div class="form-fields">
+                            <app-form-field
+                                type="text"
+                                label="Nombre de fantasía"
+                                [control]="businessName"
+                                placeholder="Tu nombre de fantasía"
+                                [errors]="{ 'required': 'El nombre es obligatorio', 'minlength': 'Mínimo 3 caracteres' }"
+                                [submitted]="submitted"
+                                [fullwidth]="true">
+                            </app-form-field>
+
+                            <app-form-field
+                                type="text"
+                                label="Nombre de usuario"
+                                [control]="username"
+                                placeholder="Tu nombre de usuario"
+                                [errors]="{ 'required': 'El nombre de usuario es obligatorio', 'minlength': 'Mínimo 3 caracteres' }"
+                                [submitted]="submitted"
+                                [fullwidth]="true">
+                            </app-form-field>
+
+                            <app-form-field
+                                type="text"
+                                label="Email"
+                                [control]="email"
+                                placeholder="tu@email.com"
+                                [errors]="{ 'required': 'El email es obligatorio', 'email': 'Ingresá un email válido' }"
+                                [submitted]="submitted"
+                                [fullwidth]="true">
+                            </app-form-field>
+                        </div>
+
+                        @if (isPharmacist) {
+                            <p class="notice">
+                                <mat-icon>info</mat-icon>
+                                Al modificar tu email, recibirás un enlace de confirmación.
+                            </p>
+                        }
+
+                        <div class="form-actions">
+                            <button type="button" mat-button (click)="cancel()" [disabled]="isSaving">
+                                Cancelar
+                            </button>
+                            <button type="submit" mat-flat-button [disabled]="isSaving">
+                                @if (isSaving) {
+                                    <mat-spinner diameter="20"></mat-spinner>
+                                    <span>Guardando...</span>
+                                } @else {
+                                    Guardar cambios
+                                }
+                            </button>
+                        </div>
+                    </form>
+                }
+            </mat-card-content>
+        </mat-card>
+    </div>
+</app-canvas>

@@ -1,0 +1,536 @@
+@use 'styles/variables' as *
+
+.page-title
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+    font-size: 1.3rem
+    font-weight: 500
+    margin: var(--space-4) 0 var(--space-5) 0
+    color: var(--text-primary)
+    position: relative
+    justify-content: space-between
+
+.content-row
+    display: flex
+    flex-direction: column
+
+.main-col
+    flex: 1
+    min-width: 0
+    display: flex
+    flex-direction: column
+    gap: var(--space-5)
+
+.sidebar-col
+    display: none
+
+// ============================================
+// STEP CARDS
+// ============================================
+
+.step-card + .step-card
+    margin-top: 0
+
+.step-card-icon
+    width: 32px
+    height: 32px
+    border-radius: 50%
+    display: flex
+    align-items: center
+    justify-content: center
+    font-weight: 600
+    font-size: 14px
+    flex-shrink: 0
+    transition: all .2s
+    border: 2px solid var(--secondary-500)
+    color: var(--secondary-500)
+    background: var(--bg-card)
+
+    .mat-icon
+        font-size: 18px
+        width: 18px
+        height: 18px
+        line-height: 18px
+
+    &.completed
+        background: var(--primary)
+        color: var(--bg-card)
+        border-color: var(--primary)
+
+// ============================================
+// STEP CARD 1 — PATIENT SEARCH
+// ============================================
+
+.patient-search-bar
+    margin-bottom: var(--space-3)
+
+// ============================================
+// SEARCH RESULTS
+// ============================================
+
+.search-results
+    overflow: hidden
+    animation: fadeIn .2s ease
+
+.search-result
+    display: flex
+    align-items: center
+    gap: var(--space-3)
+    padding: 14px 16px
+    cursor: pointer
+    border-bottom: 1px solid var(--border-color)
+    transition: background .12s
+
+    &:last-child
+        border-bottom: none
+
+    &:active
+        background: var(--hover-bg)
+
+    app-patient-item
+        flex: 1
+        min-width: 0
+
+.result-chevron
+    color: var(--border-color)
+    font-size: 20px
+    flex-shrink: 0
+
+.patient-empty
+    display: flex
+    flex-direction: column
+    align-items: center
+    padding: 28px 16px
+    color: var(--text-disabled)
+
+    .mat-icon
+        font-size: 36px
+        margin-bottom: 8px
+        color: var(--border-color)
+
+    p
+        font-size: 13px
+
+// ============================================
+// FREQUENT PATIENTS GRID
+// ============================================
+
+.freq-grid
+    display: grid
+    grid-template-columns: 1fr
+    gap: 8px
+
+    ui-card
+        cursor: pointer
+
+    @media (min-width: $small-devices + 1px)
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+        gap: var(--space-3)
+
+// ============================================
+// PATIENT SELECTED (inside step card body)
+// ============================================
+
+.patient-selected-inner
+    animation: fadeIn .25s ease
+
+    .patient-selected-body
+        display: flex
+        flex-direction: row
+        align-items: center
+        gap: var(--space-3)
+        min-width: 0
+
+    .patient-avatar
+        display: none
+
+    [mat-card-avatar]
+        background: var(--secondary-50)
+        display: flex
+        align-items: center
+        justify-content: center
+        margin: 0
+        width: 38px
+        height: 38px
+        border-radius: var(--radius-md)
+        flex-shrink: 0
+
+        &.female
+            background: var(--highlight-light)
+
+        &.other
+            background: #d4f0f7
+
+        .mat-icon
+            font-size: 22px
+            width: 22px
+            height: 22px
+
+    .info
+        flex: 1
+        min-width: 0
+
+        .name
+            font-weight: 500
+            display: flex
+            align-items: center
+            gap: var(--space-2)
+            margin-bottom: var(--space-1)
+
+            .name-text
+                overflow: hidden
+                white-space: nowrap
+                text-overflow: ellipsis
+                min-width: 0
+
+            .autopercibido
+                font-weight: 400
+                font-style: italic
+                color: var(--text-secondary)
+
+        .detail
+            font-size: 14px
+            // color: var(--text-secondary)
+            display: flex
+            flex-wrap: wrap
+            align-items: center
+            gap: var(--space-5)
+
+            .patient-meta-item
+                display: inline-flex
+                align-items: center
+                gap: 0
+
+                @media (min-width: $small-devices + 1px)
+                    gap: 4px
+
+                .mat-icon
+                    display: none
+                    font-size: 13px
+                    width: 13px
+                    height: 13px
+                    color: var(--text-disabled)
+
+                    @media (min-width: $small-devices + 1px)
+                        display: inline-block
+
+    .validated-icon
+        color: var(--success-text)
+
+        @media (min-width: $small-devices + 1px)
+            margin-left: var(--space-1)
+
+// ============================================
+// PATIENT CARD ACTIONS (in card header)
+// ============================================
+
+.patient-card-actions-desktop
+    display: none
+    align-items: center
+    gap: var(--space-1)
+
+    @media (min-width: $small-devices + 1px)
+        display: flex
+
+.patient-card-actions-mobile
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+
+    @media (min-width: $small-devices + 1px)
+        display: none
+
+// ============================================
+// Sidebar
+// ============================================
+
+.mobile-fab
+    position: fixed
+    bottom: 24px
+    right: 24px
+    z-index: 100
+
+.sidebar-modal-overlay
+    display: block
+    position: fixed
+    inset: 0
+    background: rgba(0, 0, 0, .4)
+    z-index: 999
+
+.sidebar-modal
+    display: flex
+    flex-direction: column
+    position: fixed
+    bottom: 0
+    left: 0
+    right: 0
+    z-index: 1000
+    background: var(--bg-card)
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0
+    box-shadow: var(--elevation-3)
+    max-height: 70vh
+    animation: slideUp .25s ease-out
+
+    .sidebar-modal-header
+        flex-shrink: 0
+        display: flex
+        align-items: center
+        gap: var(--space-2)
+        font-size: 13px
+        font-weight: 500
+        color: var(--text-primary)
+        text-transform: uppercase
+        letter-spacing: .5px
+        padding: var(--space-5) var(--space-5) var(--space-3)
+        border-bottom: 1px solid #eee
+
+        .mat-icon
+            font-size: 18px
+            color: var(--text-primary)
+
+    .sidebar-modal-close
+        margin-left: auto
+
+    .sidebar-modal-scroll
+        flex: 1
+        overflow-y: auto
+        min-height: 0
+
+        .sidebar-header
+            display: none
+
+    .sidebar-modal-footer
+        flex-shrink: 0
+        padding: var(--space-5)
+        border-top: 1px solid var(--border-color)
+        background: var(--bg-card)
+
+        button
+            padding: var(--space-5) var(--space-4)
+            font-size: 16px
+            min-height: 52px
+
+.sidebar-card
+    border: 1px solid var(--border-color)
+    border-radius: var(--radius-lg)
+    padding: 0
+    background: var(--bg-card)
+    position: sticky
+    top: var(--space-5)
+    overflow: hidden
+
+.sidebar-footer
+    padding: var(--space-3) var(--space-5) var(--space-4)
+
+.sidebar-header
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+    padding: var(--space-4) var(--space-5)
+    background: var(--primary-100)
+    border-bottom: none
+
+    .sidebar-title
+        font-size: 13px
+        font-weight: 600
+
+    mat-icon
+        width: 18px
+        height: 18px
+        font-size: 18px
+
+    ui-badge
+        margin-left: auto
+
+        ::ng-deep .mat-mdc-standard-chip
+            background: var(--secondary) !important
+
+        ::ng-deep .mat-mdc-chip-action-label
+            color: var(--btn-base-text)
+
+.sidebar-empty
+    text-align: center
+    padding: var(--space-5) var(--space-3)
+    color: var(--text-disabled)
+    font-size: 12px
+    flex-direction: column
+    display: flex
+    align-items: center
+
+    .mat-icon
+        font-size: 28px
+        width: 28px
+        height: 28px
+        color: var(--text-disabled)
+        margin-bottom: var(--space-2)
+
+.sidebar-items
+    display: flex
+    flex-direction: column
+    max-height: 360px
+    overflow-y: auto
+
+.sidebar-item
+    display: flex
+    align-items: flex-start
+    gap: var(--space-3)
+    padding: var(--space-3) var(--space-5)
+    border-bottom: 1px solid var(--border-color)
+
+    &:last-of-type
+        border-bottom: none
+
+    .sidebar-item-body
+        flex: 1
+        min-width: 0
+
+    .sidebar-item-head
+        display: flex
+        align-items: baseline
+        justify-content: space-between
+        gap: var(--space-3)
+        margin-bottom: 2px
+        min-width: 0
+
+    .sidebar-item-name
+        font-size: 13px
+        font-weight: 500
+        color: var(--text-primary)
+        line-height: 1.3
+        text-transform: uppercase
+        overflow: hidden
+        white-space: nowrap
+        text-overflow: ellipsis
+
+    .sidebar-item-price
+        white-space: nowrap
+
+    .sidebar-item-detail
+        font-size: 12px
+        color: var(--text-secondary)
+        line-height: 1.3
+        text-transform: capitalize
+        overflow: hidden
+        white-space: nowrap
+        text-overflow: ellipsis
+
+    .sidebar-item-controls
+        display: flex
+        align-items: center
+        justify-content: space-between
+        margin-top: var(--space-2)
+
+    .qty
+        display: inline-flex
+        align-items: center
+        border: 1px solid var(--border-color)
+        border-radius: var(--radius-md)
+        overflow: hidden
+
+        .qty-btn
+            width: 28px
+            height: 28px
+            border: none
+            background: var(--bg-card)
+            color: var(--text-secondary)
+            cursor: pointer
+            display: inline-flex
+            align-items: center
+            justify-content: center
+            padding: 0
+            transition: background .12s
+
+            &:hover
+                background: var(--hover-bg)
+                color: var(--text-primary)
+
+            .mat-icon
+                font-size: 16px
+                width: 16px
+                height: 16px
+
+        .qty-value
+            min-width: 32px
+            text-align: center
+            font-size: 13px
+            font-weight: 600
+            color: var(--text-primary)
+            font-family: var(--font-mono)
+            border-left: 1px solid var(--border-color)
+            border-right: 1px solid var(--border-color)
+            line-height: 28px
+
+    .remove-btn
+        width: 32px
+        height: 32px
+        border-radius: var(--radius-md)
+        border: none
+        background: transparent
+        color: var(--text-disabled)
+        cursor: pointer
+        display: inline-flex
+        align-items: center
+        justify-content: center
+        padding: 0
+        transition: background .12s, color .12s
+
+        &:hover
+            background: var(--error-bg)
+            color: var(--error-text)
+
+        .mat-icon
+            font-size: 18px
+            width: 18px
+            height: 18px
+
+.sidebar-summary
+    display: grid
+    grid-template-columns: 1fr 1fr
+    gap: var(--space-2) var(--space-4)
+    padding: var(--space-3) var(--space-5)
+
+    .summary-cell
+        display: flex
+        flex-direction: column
+        gap: 2px
+
+    .summary-label
+        font-size: 10px
+        color: var(--text-secondary)
+        text-transform: uppercase
+        letter-spacing: .05em
+        font-weight: 500
+
+    .summary-value
+        font-size: 15px
+        font-weight: 600
+        color: var(--text-primary)
+        font-family: var(--font-mono)
+
+@media (min-width: 769px)
+    .content-row
+        flex-direction: row
+        gap: var(--space-6)
+
+    .sidebar-col
+        display: block
+        width: 350px
+        flex-shrink: 0
+
+    .main-col
+        gap: var(--space-5)
+
+@keyframes slideUp
+    from
+        transform: translateY(100%)
+    to
+        transform: translateY(0)
+
+@keyframes fadeIn
+    from
+        opacity: 0
+        transform: translateY(8px)
+    to
+        opacity: 1
+        transform: translateY(0)

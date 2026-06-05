@@ -9,7 +9,7 @@ const routes: Routes = [
     children: [
       {
         path: 'login',
-        loadComponent: () => import('@auth/components/login/login.component').then(m => m.LoginComponent),
+        loadComponent: () => import('@features/auth/pages/login/login.component').then(m => m.LoginComponent),
         canActivate: [IsSignedInGuard],
       },
       {
