@@ -17,10 +17,6 @@ const routes: Routes = [
       {
         path: 'recetas/dispensar',
         component: PharmacistsFormComponent
-      },
-      {
-        path: 'editar-usuario',
-        loadComponent: () => import('@shared/components/edit-user-info/edit-user-info.component').then(m => m.EditUserInfoComponent)
       }
     ]
   }

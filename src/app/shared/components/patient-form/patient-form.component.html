@@ -16,7 +16,11 @@
         @for (patient of patientSearch; track patient) {
           <mat-option (onSelectionChange)="completePatientInputs(patient)"
             [value]="patient.dni">
-            {{patient.lastName}} {{patient | patientName}} DNI {{patient.dni}}
+            <span class="autocomplete-option">
+              <span>{{patient.lastName}} {{patient | patientName}} DNI {{patient.dni}}</span>
+              <mat-icon *ngIf="patient.status === 'Validado' || patient.estado === 'validado'" class="status-icon validated" matTooltip="Validado RENAPER">verified_user</mat-icon>
+              <mat-icon *ngIf="patient.status === 'Temporal' || patient.estado === 'temporal'" class="status-icon temporal" matTooltip="Paciente temporal">warning</mat-icon>
+            </span>
           </mat-option>
         }
       </mat-autocomplete>

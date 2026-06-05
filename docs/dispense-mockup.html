@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dispensar — RecetAR</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+<style>
+  :root {
+    --bg-body: #f4f5f7;
+    --bg-card: #ffffff;
+    --bg-sidebar: #1e293b;
+    --bg-chip-active: #e8f0fe;
+    --border-color: #e2e5ea;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --text-disabled: #94a3b8;
+    --primary: #2563eb;
+    --primary-50: #eff6ff;
+    --secondary: #0ea5e9;
+    --secondary-50: #f0f9ff;
+    --success: #16a34a;
+    --success-bg: #dcfce7;
+    --warning: #d97706;
+    --warning-bg: #fef3c7;
+    --error: #dc2626;
+    --error-bg: #fef2f2;
+    --info: #6366f1;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --hover-bg: #f8fafc;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.04);
+    --shadow-card: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-body);
+    color: var(--text-primary);
+    font-size: 14px;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: var(--bg-sidebar);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+    overflow-y: auto;
+  }
+  .sidebar-brand {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 20px 24px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    margin-bottom: 12px;
+  }
+  .sidebar-brand .logo {
+    width: 34px; height: 34px; background: var(--primary);
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px;
+  }
+  .sidebar-brand span { font-weight: 600; font-size: 16px; letter-spacing: -.01em; }
+  .sidebar nav { padding: 8px 12px; }
+  .sidebar .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: var(--radius-sm);
+    color: rgba(255,255,255,.55); font-size: 13.5px; font-weight: 500;
+    transition: all .15s; cursor: default;
+    text-decoration: none; margin-bottom: 2px;
+  }
+  .sidebar .nav-item:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.85); }
+  .sidebar .nav-item.active { background: rgba(37,99,235,.2); color: #fff; }
+  .sidebar .nav-item .icon { font-size: 20px; width: 22px; }
+  .sidebar-footer {
+    margin-top: auto; padding: 16px 20px;
+    border-top: 1px solid rgba(255,255,255,.08);
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12.5px; color: rgba(255,255,255,.45);
+  }
+
+  /* ── Main ── */
+  .main {
+    flex: 1; display: flex; flex-direction: column;
+    overflow-y: auto; padding: 28px 32px;
+  }
+
+  .page-header { margin-bottom: 22px; }
+  .page-header h1 { font-size: 22px; font-weight: 650; letter-spacing: -.01em; }
+  .page-header .subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+  /* ── Search bar ── */
+  .search-wrap {
+    position: relative; margin-bottom: 16px;
+  }
+  .search-input {
+    width: 100%; padding: 11px 16px 11px 44px;
+    border: 1px solid var(--border-color); border-radius: var(--radius-md);
+    background: var(--bg-card); font-size: 14px;
+    outline: none; transition: border .15s, box-shadow .15s;
+    box-shadow: var(--shadow-sm);
+  }
+  .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+  .search-input::placeholder { color: var(--text-disabled); }
+  .search-icon {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--text-disabled); font-size: 20px;
+  }
+
+  /* ── Quick toolbar ── */
+  .toolbar {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 22px; flex-wrap: wrap;
+  }
+  .status-chips {
+    display: flex; gap: 6px; background: var(--bg-card);
+    border: 1px solid var(--border-color); border-radius: var(--radius-md);
+    padding: 4px; box-shadow: var(--shadow-sm);
+  }
+  .status-chip {
+    padding: 6px 14px; border-radius: var(--radius-sm);
+    font-size: 12.5px; font-weight: 500; cursor: default;
+    color: var(--text-secondary); background: transparent;
+    border: none; transition: all .15s;
+  }
+  .status-chip.active {
+    background: var(--primary); color: #fff;
+    box-shadow: 0 1px 3px rgba(37,99,235,.25);
+  }
+  .status-chip .count { font-weight: 400; opacity: .7; margin-left: 4px; }
+
+  .date-chips {
+    display: flex; gap: 4px; margin-left: auto;
+  }
+  .date-chip {
+    padding: 6px 12px; border-radius: var(--radius-sm);
+    font-size: 12px; cursor: default; background: transparent;
+    border: 1px solid var(--border-color); color: var(--text-secondary);
+    transition: all .15s;
+  }
+  .date-chip.active {
+    background: var(--bg-chip-active); color: var(--primary);
+    border-color: var(--primary); font-weight: 600;
+  }
+
+  /* ── Today banner ── */
+  .today-banner {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: var(--radius-sm);
+    background: var(--primary-50); margin-bottom: 18px;
+    font-size: 13px; color: var(--primary); font-weight: 500;
+  }
+  .today-banner .icon { font-size: 20px; }
+
+  /* ── Day group ── */
+  .day-group { margin-bottom: 6px; }
+  .day-group-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; cursor: default;
+    border-radius: var(--radius-sm); transition: background .12s;
+    user-select: none;
+  }
+  .day-group-header:hover { background: var(--hover-bg); }
+  .day-group-header .chevron {
+    font-size: 18px; color: var(--text-disabled);
+    transition: transform .2s;
+  }
+  .day-group-header.open .chevron { transform: rotate(90deg); }
+  .day-group-label { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .day-group-count { font-size: 12px; color: var(--text-disabled); }
+  .day-group-body { padding: 4px 0 8px 28px; }
+
+  /* ── Prescription card ── */
+  .rx-card {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 14px; margin-bottom: 6px;
+    background: var(--bg-card); border: 1px solid var(--border-color);
+    border-radius: var(--radius-md); transition: box-shadow .15s, border .15s;
+    box-shadow: var(--shadow-sm);
+  }
+  .rx-card:hover { border-color: #cbd5e1; box-shadow: var(--shadow-card); }
+  .rx-card .source-badge {
+    width: 28px; height: 28px; border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+  .source-r { background: var(--primary-50); color: var(--primary); }
+  .source-a { background: #fdf2f8; color: #be185d; }
+
+  .rx-card .rx-info { flex: 1; min-width: 0; }
+  .rx-card .rx-medication { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rx-card .rx-meta {
+    display: flex; gap: 16px; margin-top: 3px;
+    font-size: 12px; color: var(--text-secondary);
+  }
+  .rx-card .rx-meta span { display: flex; align-items: center; gap: 4px; }
+  .rx-card .rx-meta .icon { font-size: 15px; }
+
+  .rx-card .rx-tags { display: flex; gap: 6px; flex-shrink: 0; }
+  .badge {
+    padding: 3px 8px; border-radius: 999px;
+    font-size: 11px; font-weight: 600; letter-spacing: .02em;
+    text-transform: uppercase;
+  }
+  .badge-warning { background: var(--warning-bg); color: var(--warning); }
+  .badge-error { background: var(--error-bg); color: var(--error); }
+  .badge-info { background: var(--primary-50); color: var(--primary); }
+
+  .rx-card .rx-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .btn {
+    padding: 7px 14px; border-radius: var(--radius-sm);
+    font-size: 12.5px; font-weight: 600; cursor: default;
+    border: none; transition: all .15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-ghost {
+    background: transparent; color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+  }
+  .btn-ghost:hover { background: var(--hover-bg); }
+  .btn .icon { font-size: 18px; }
+
+  /* ── Dispensed card ── */
+  .rx-card.dispensed { border-left: 3px solid var(--success); background: #fafffc; }
+  .rx-card.dispensed .rx-medication { color: var(--text-secondary); }
+  .countdown-bar {
+    height: 4px; background: var(--border-color); border-radius: 2px;
+    overflow: hidden; margin-top: 8px; flex-basis: 100%;
+  }
+  .countdown-bar .fill {
+    height: 100%; background: var(--primary);
+    width: 72%; border-radius: 2px; transition: width 1s linear;
+  }
+
+  /* ── Expired card ── */
+  .rx-card.expired .rx-medication { color: var(--text-disabled); text-decoration: line-through; }
+
+  /* ── Detail expand ── */
+  .rx-detail {
+    padding: 12px 16px; margin-bottom: 6px;
+    border: 1px dashed var(--border-color); border-radius: var(--radius-md);
+    font-size: 12.5px;background: var(--hover-bg);
+  }
+  .rx-detail .row { display: flex; gap: 20px; margin-bottom: 4px; }
+  .rx-detail .row:last-child { margin-bottom: 0; }
+  .rx-detail label { color: var(--text-disabled); font-size: 11px; text-transform: uppercase; letter-spacing: .03em; font-weight: 600; }
+  .rx-detail .mono { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: var(--text-secondary); }
+
+  /* ── Empty state ── */
+  .empty-state {
+    text-align: center; padding: 56px 20px;
+  }
+  .empty-state .icon { font-size: 48px; color: var(--text-disabled); margin-bottom: 12px; }
+  .empty-state h3 { font-size: 15px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
+  .empty-state p { font-size: 13px; color: var(--text-disabled); }
+
+  /* ── Divider ── */
+  .section-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .05em; color: var(--text-disabled);
+    padding: 8px 14px; margin-bottom: 4px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ Sidebar ══════════ -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">R</div>
+    <span>RecetAR</span>
+  </div>
+  <nav>
+    <div class="nav-item"><span class="material-symbols-outlined icon">home</span>Inicio</div>
+    <div class="nav-item active"><span class="material-symbols-outlined icon">medication</span>Dispensar</div>
+    <div class="nav-item"><span class="material-symbols-outlined icon">description</span>Documentos</div>
+  </nav>
+  <div class="sidebar-footer">
+    <span class="material-symbols-outlined" style="font-size:16px">account_circle</span>
+    Farmacia Los Alamos
+  </div>
+</aside>
+
+<!-- ══════════ Main Content ══════════ -->
+<main class="main">
+
+  <div class="page-header">
+    <h1>Dispensar</h1>
+    <p class="subtitle">Busque y dispense recetas de pacientes</p>
+  </div>
+
+  <!-- Search bar -->
+  <div class="search-wrap">
+    <span class="material-symbols-outlined search-icon">search</span>
+    <input class="search-input" placeholder="Buscar por DNI, paciente, medicamento o código de receta..." value="" />
+  </div>
+
+  <!-- Toolbar: status chips + date quick select -->
+  <div class="toolbar">
+    <div class="status-chips">
+      <button class="status-chip active">Pendientes<span class="count">12</span></button>
+      <button class="status-chip">Dispensadas hoy<span class="count">8</span></button>
+      <button class="status-chip">Vencidas<span class="count">3</span></button>
+      <button class="status-chip">Todas<span class="count">23</span></button>
+    </div>
+    <div class="date-chips">
+      <button class="date-chip active">Hoy</button>
+      <button class="date-chip">7 días</button>
+      <button class="date-chip">30 días</button>
+      <button class="date-chip">Personalizado</button>
+    </div>
+  </div>
+
+  <!-- Today banner -->
+  <div class="today-banner">
+    <span class="material-symbols-outlined icon">today</span>
+    12 recetas pendientes para hoy — 4 de Andes, 8 de RecetAR
+  </div>
+
+  <!-- ══ HOY ══ -->
+  <div class="day-group">
+    <div class="day-group-header open">
+      <span class="material-symbols-outlined chevron">chevron_right</span>
+      <span class="day-group-label">Hoy</span>
+      <span class="day-group-count">&mdash; 5 recetas</span>
+    </div>
+    <div class="day-group-body">
+
+      <!-- Card 1: pending, local, triplicado, near expiry -->
+      <div class="rx-card">
+        <div class="source-badge source-r">R</div>
+        <div class="rx-info">
+          <div class="rx-medication">Ibuprofeno 600 mg comprimidos</div>
+          <div class="rx-meta">
+            <span><span class="material-symbols-outlined icon">person</span>González, María — DNI 28456123</span>
+            <span><span class="material-symbols-outlined icon">stethoscope</span>Dr. Martínez</span>
+            <span>2 envases</span>
+          </div>
+        </div>
+        <div class="rx-tags">
+          <span class="badge badge-warning">Vence en 24h</span>
+          <span class="badge badge-info">Triplicado</span>
+        </div>
+        <div class="rx-actions">
+          <button class="btn btn-ghost"><span class="material-symbols-outlined icon">print</span></button>
+          <button class="btn btn-primary"><span class="material-symbols-outlined icon">done_outline</span>Dispensar</button>
+        </div>
+      </div>
+
+      <!-- Card 2: pending, Andes, duplicate -->
+      <div class="rx-card">
+        <div class="source-badge source-a">A</div>
+        <div class="rx-info">
+          <div class="rx-medication">Amlodipina 10 mg comprimidos</div>
+          <div class="rx-meta">
+            <span><span class="material-symbols-outlined icon">person</span>Rodríguez, Carlos — DNI 31987234</span>
+            <span><span class="material-symbols-outlined icon">stethoscope</span>Dra. Fernández</span>
+            <span>1 envase</span>
+          </div>
+        </div>
+        <div class="rx-tags">
+          <span class="badge badge-info">Duplicado</span>
+        </div>
+        <div class="rx-actions">
+          <button class="btn btn-ghost"><span class="material-symbols-outlined icon">print</span></button>
+          <button class="btn btn-primary"><span class="material-symbols-outlined icon">done_outline</span>Dispensar</button>
+        </div>
+      </div>
+
+      <!-- Card 3: pending, expanded detail -->
+      <div class="rx-card">
+        <div class="source-badge source-r">R</div>
+        <div class="rx-info">
+          <div class="rx-medication">Metformina 850 mg comprimidos</div>
+          <div class="rx-meta">
+            <span><span class="material-symbols-outlined icon">person</span>López, Ana — DNI 25498763</span>
+            <span><span class="material-symbols-outlined icon">stethoscope</span>Dr. Gutiérrez</span>
+            <span>3 envases</span>
+          </div>
+        </div>
+        <div class="rx-actions">
+          <button class="btn btn-ghost"><span class="material-symbols-outlined icon">print</span></button>
+          <button class="btn btn-primary"><span class="material-symbols-outlined icon">done_outline</span>Dispensar</button>
+        </div>
+      </div>
+      <!-- Detail -->
+      <div class="rx-detail">
+        <div class="row"><label>Diagnóstico</label> Diabetes mellitus tipo 2</div>
+        <div class="row"><label>Indicaciones</label> 1 comprimido cada 12 horas con las comidas</div>
+        <div class="row"><label>Profesional</label> Dr. Gutiérrez — MN 45231</div>
+        <div class="row"><label>Código</label> <span class="mono">RX-2026-08-04-00182</span></div>
+      </div>
+
+      <!-- Card 4: just dispensed, countdown -->
+      <div class="rx-card dispensed">
+        <div class="source-badge source-r">R</div>
+        <div class="rx-info">
+          <div class="rx-medication">Losartán 50 mg comprimidos</div>
+          <div class="rx-meta">
+            <span><span class="material-symbols-outlined icon">person</span>García, Jorge — DNI 22783456</span>
+            <span>2 envases</span>
+          </div>
+          <div class="countdown-bar"><div class="fill" style="width:72%"></div></div>
+        </div>
+        <div class="rx-actions">
+          <button class="btn btn-ghost" style="color:var(--warning);border-color:var(--warning)">
+            <span class="material-symbols-outlined icon">undo</span>Deshacer 1h 26m
+          </button>
+        </div>
+      </div>
+
+      <!-- Card 5: pending, Andes, generic -->
+      <div class="rx-card">
+        <div class="source-badge source-a">A</div>
+        <div class="rx-info">
+          <div class="rx-medication">Paracetamol 500 mg comprimidos</div>
+          <div class="rx-meta">
+            <span><span class="material-symbols-outlined icon">person</span>Torres, Elena — DNI 27654123</span>
+            <span><span class="material-symbols-outlined icon">stethoscope</span>Dra. Ramírez</span>
+            <span>1 envase</span>
+          </div>
+        </div>
+        <div class="rx-actions">
+          <button class="btn btn-ghost"><span class="material-symbols-outlined icon">print</span></button>
+          <button class="btn btn-primary"><span class="material-symbols-outlined icon">done_outline</span>Dispensar</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ AYER ══ -->
+  <div class="day-group">
+    <div class="day-group-header">
+      <span class="material-symbols-outlined chevron">chevron_right</span>
+      <span class="day-group-label">Ayer</span>
+      <span class="day-group-count">&mdash; 4 recetas</span>
+    </div>
+    <div class="day-group-body" style="display:none">
+
+      <div class="rx-card">
+        <div class="source-badge source-r">R</div>
+        <div class="rx-info">
+          <div class="rx-medication">Levotiroxina 100 mcg comprimidos</div>
+          <div class="rx-meta">
+            <span><span class="material-symbols-outlined icon">person</span>Díaz, Pedro — DNI 29876234</span>
+            <span>1 envase</span>
+          </div>
+        </div>
+        <div class="rx-actions">
+          <button class="btn btn-ghost"><span class="material-symbols-outlined icon">print</span></button>
+          <button class="btn btn-primary"><span class="material-symbols-outlined icon">done_outline</span>Dispensar</button>
+        </div>
+      </div>
+
+      <div class="rx-card dispensed">
+        <div class="source-badge source-a">A</div>
+        <div class="rx-info">
+          <div class="rx-medication">Salbutamol 100 mcg inhalador</div>
+          <div class="rx-meta">
+            <span><span class="material-symbols-outlined icon">person</span>Silva, Marta — DNI 26789345</span>
+            <span>1 envase</span>
+          </div>
+        </div>
+        <div class="rx-actions">
+          <span class="badge badge-error" style="border-radius:6px;padding:6px 10px">Ventana cerrada</span>
+        </div>
+      </div>
+
+      <div class="rx-card expired">
+        <div class="source-badge source-r">R</div>
+        <div class="rx-info">
+          <div class="rx-medication">Omeprazol 20 mg cápsulas</div>
+          <div class="rx-meta">
+            <span><span class="material-symbols-outlined icon">person</span>Morales, Luis — DNI 24123678</span>
+            <span>2 envases</span>
+          </div>
+        </div>
+        <div class="rx-tags"><span class="badge badge-error">Vencida</span></div>
+        <div class="rx-actions">
+          <button class="btn btn-ghost"><span class="material-symbols-outlined icon">print</span></button>
+        </div>
+      </div>
+
+      <div class="rx-card">
+        <div class="source-badge source-a">A</div>
+        <div class="rx-info">
+          <div class="rx-medication">Atorvastatina 20 mg comprimidos</div>
+          <div class="rx-meta">
+            <span><span class="material-symbols-outlined icon">person</span>Vega, Patricia — DNI 30987234</span>
+            <span>1 envase</span>
+          </div>
+        </div>
+        <div class="rx-tags"><span class="badge badge-warning">Vence en 48h</span></div>
+        <div class="rx-actions">
+          <button class="btn btn-ghost"><span class="material-symbols-outlined icon">print</span></button>
+          <button class="btn btn-primary"><span class="material-symbols-outlined icon">done_outline</span>Dispensar</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ 03/08/2026 ══ -->
+  <div class="day-group">
+    <div class="day-group-header">
+      <span class="material-symbols-outlined chevron">chevron_right</span>
+      <span class="day-group-label">Lunes 3 de agosto</span>
+      <span class="day-group-count">&mdash; 3 recetas</span>
+    </div>
+    <div class="day-group-body" style="display:none">
+      <div class="rx-card">
+        <div class="source-badge source-r">R</div>
+        <div class="rx-info">
+          <div class="rx-medication">Enalapril 10 mg comprimidos</div>
+          <div class="rx-meta">
+            <span><span class="material-symbols-outlined icon">person</span>Ramírez, Juana — DNI 18563452</span>
+            <span>2 envases</span>
+          </div>
+        </div>
+        <div class="rx-actions">
+          <button class="btn btn-ghost"><span class="material-symbols-outlined icon">print</span></button>
+          <button class="btn btn-primary"><span class="material-symbols-outlined icon">done_outline</span>Dispensar</button>
+        </div>
+      </div>
+      <div class="rx-card dispensed">
+        <div class="source-badge source-a">A</div>
+        <div class="rx-info">
+          <div class="rx-medication">Clonazepam 2 mg comprimidos</div>
+          <div class="rx-meta">
+            <span><span class="material-symbols-outlined icon">person</span>Castillo, Hugo — DNI 22145678</span>
+            <span>1 envase</span>
+          </div>
+        </div>
+        <div class="rx-actions">
+          <span class="badge badge-info" style="border-radius:6px;padding:6px 10px">Dispensado</span>
+        </div>
+      </div>
+      <div class="rx-card">
+        <div class="source-badge source-r">R</div>
+        <div class="rx-info">
+          <div class="rx-medication">Tramadol 50 mg comprimidos</div>
+          <div class="rx-meta">
+            <span><span class="material-symbols-outlined icon">person</span>Ríos, Fabián — DNI 23450987</span>
+            <span>1 envase</span>
+          </div>
+        </div>
+        <div class="rx-tags"><span class="badge badge-info">Duplicado</span></div>
+        <div class="rx-actions">
+          <button class="btn btn-ghost"><span class="material-symbols-outlined icon">print</span></button>
+          <button class="btn btn-primary"><span class="material-symbols-outlined icon">done_outline</span>Dispensar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Script para toggle de acordeones -->
+<script>
+  document.querySelectorAll('.day-group-header').forEach(header => {
+    header.addEventListener('click', () => {
+      const group = header.parentElement;
+      const body = group.querySelector('.day-group-body');
+      const isOpen = body.style.display !== 'none';
+      body.style.display = isOpen ? 'none' : 'block';
+      header.classList.toggle('open', !isOpen);
+    });
+  });
+</script>
+
+</body>
+</html>

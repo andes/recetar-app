@@ -1,6 +1,6 @@
 <div class="custom-tab-link-bar">
-  <button mat-flat-button (click)="showForm()">Nuevo Producto</button>
-  <button mat-flat-button (click)="showList()">Listar Productos</button>
+  <button matButton="tonal" (click)="showForm()">Nuevo Producto</button>
+  <button matButton="tonal" (click)="showList()">Listar Productos</button>
 </div>
 <div class="link-bar-indicator-container">
   <div class="indicator" [@stepLink]="isFormShown ? 'left' : 'right'"></div>
@@ -21,13 +21,10 @@
           </mat-card-title>
 
           <mat-card-content>
-            <form [formGroup]="supplyForm" #supplyNgForm="ngForm" fxLayout="column" (ngSubmit)="onSubmitSupplyForm(supplyNgForm)">
-              <div class="sub-container"
-                fxLayout="column"
-                fxLayout.xs="column"
-                fxLayoutAlign="center"
-                fxLayoutGap="10px"
-                fxLayoutGap.xs="0">
+            <form [formGroup]="supplyForm" #supplyNgForm="ngForm" fxLayout="column"
+              (ngSubmit)="onSubmitSupplyForm(supplyNgForm)">
+              <div class="sub-container" fxLayout="column" fxLayout.xs="column" fxLayoutAlign="center"
+                fxLayoutGap="10px" fxLayoutGap.xs="0">
 
                 <div class="first-block">
                   <!-- Fecha de receta -->
@@ -36,18 +33,13 @@
                       <!-- Dni -->
                       <mat-form-field appearance="fill">
                         <mat-label>Nombre</mat-label>
-                        <input type="text"
-                          tabIndex="1"
-                          #dni
-                          placeholder="Nombre"
-                          matInput
-                          required
+                        <input type="text" tabIndex="1" #dni placeholder="Nombre" matInput required
                           formControlName="name">
 
                         @if (name.errors?.required) {
-                          <mat-error>
-                            Debe ingresar principio nombre
-                          </mat-error>
+                        <mat-error>
+                          Debe ingresar principio nombre
+                        </mat-error>
                         }
 
                       </mat-form-field>
@@ -55,94 +47,69 @@
                       <!-- Lastname -->
                       <mat-form-field appearance="fill">
                         <mat-label>Principio activo</mat-label>
-                        <input type="text"
-                          tabIndex="3"
-                          placeholder="Principio activo"
-                          matInput
-                          required
+                        <input type="text" tabIndex="3" placeholder="Principio activo" matInput required
                           formControlName="activePrinciple">
 
                         @if (activePrinciple.errors?.required) {
-                          <mat-error>
-                            Debe ingresar principio activo
-                          </mat-error>
+                        <mat-error>
+                          Debe ingresar principio activo
+                        </mat-error>
                         }
                       </mat-form-field>
 
-                    <!-- </div>
+                      <!-- </div>
                     <div class="nd-bk-patient"> -->
                       <!-- sex -->
                       <!-- Lastname -->
                       <mat-form-field appearance="fill">
                         <mat-label>Pharma Form</mat-label>
-                        <input type="text"
-                          tabIndex="3"
-                          placeholder="Pharma Form "
-                          matInput
-                          required
+                        <input type="text" tabIndex="3" placeholder="Pharma Form " matInput required
                           formControlName="pharmaceutical_form">
 
                         @if (pharmaceutical_form.errors?.required) {
-                          <mat-error>
-                            Debe ingresar valor
-                          </mat-error>
+                        <mat-error>
+                          Debe ingresar valor
+                        </mat-error>
                         }
                       </mat-form-field>
 
                       <mat-form-field appearance="fill">
                         <mat-label>Power</mat-label>
-                        <input type="text"
-                          tabIndex="4"
-                          placeholder="Power"
-                          matInput
-                          required
-                          formControlName="power">
+                        <input type="text" tabIndex="4" placeholder="Power" matInput required formControlName="power">
 
                         @if (power.errors?.required) {
-                          <mat-error>
-                            Debe ingresar valor
-                          </mat-error>
+                        <mat-error>
+                          Debe ingresar valor
+                        </mat-error>
                         }
                       </mat-form-field>
 
                       <mat-form-field appearance="fill">
                         <mat-label>Unidad</mat-label>
-                        <input type="text"
-                          tabIndex="4"
-                          placeholder="unity"
-                          matInput
-                          required
-                          formControlName="unity">
+                        <input type="text" tabIndex="4" placeholder="unity" matInput required formControlName="unity">
 
                         @if (unity.errors?.required) {
-                          <mat-error>
-                            Debe ingresar unidad
-                          </mat-error>
+                        <mat-error>
+                          Debe ingresar unidad
+                        </mat-error>
                         }
                       </mat-form-field>
 
                       <mat-form-field appearance="fill">
                         <mat-label>Primera presentación</mat-label>
-                        <input type="text"
-                          tabIndex="4"
-                          placeholder="Primera presentación"
-                          matInput
-                          required
+                        <input type="text" tabIndex="4" placeholder="Primera presentación" matInput required
                           formControlName="firstPresentation">
 
                         @if (unity.errors?.required) {
-                          <mat-error>
-                            Debe ingresar primera presentación
-                          </mat-error>
+                        <mat-error>
+                          Debe ingresar primera presentación
+                        </mat-error>
                         }
                       </mat-form-field>
 
                       <mat-form-field appearance="fill">
                         <mat-label>Segunda presentación</mat-label>
-                        <input type="text"
-                          tabIndex="4"
-                          placeholder="Segunda presentación"
-                          matInput
+                        <input type="text" tabIndex="4" placeholder="Segunda presentación" matInput
                           formControlName="secondPresentation">
 
                       </mat-form-field>
@@ -155,21 +122,21 @@
 
               <div fxLayout="row" fxLayoutAlign="center">
                 <div fxLayout="row" fxLayoutAlign="center" fxLayoutGap="20px" fxFlex="100%">
-                  @if (!isSubmit  && isEdit) {
-                    <button mat-raised-button type="button" fxFlex="100%" (click)="clearForm(supplyNgForm)">
-                      Cancelar
-                    </button>
+                  @if (!isSubmit && isEdit) {
+                  <button matButton="raised" type="button" fxFlex="100%" (click)="clearForm(supplyNgForm)">
+                    Cancelar
+                  </button>
                   }
 
                   @if (!isSubmit) {
-                    <button mat-raised-button color="primary" type="submit" fxFlex="100%">
-                      {{ !isEdit ? 'Crear' : 'Guardar' }}
-                    </button>
+                  <button matButton="raised" color="primary" type="submit" fxFlex="100%">
+                    {{ !isEdit ? 'Crear' : 'Guardar' }}
+                  </button>
                   }
                 </div>
 
                 @if (isSubmit) {
-                  <mat-spinner [color]="spinnerColor" [diameter]="spinnerDiameter"></mat-spinner>
+                <mat-spinner [color]="spinnerColor" [diameter]="spinnerDiameter"></mat-spinner>
                 }
               </div>
             </form>

@@ -1,0 +1,177 @@
+@use 'styles/variables' as *
+
+:host
+    display: flex
+    flex-direction: column
+    width: 100%
+    height: 100%
+    min-height: 0
+
+.preview-card
+    background: transparent
+    border: none
+    border-radius: 0
+    color: var(--text-primary)
+    display: flex
+    flex-direction: column
+    flex: 1
+    min-height: 0
+    overflow: hidden
+
+.preview-empty
+    text-align: center
+    padding: var(--space-10) var(--space-5)
+    color: var(--text-secondary)
+
+    .mat-icon
+        margin-bottom: var(--space-2)
+
+    p
+        margin: 0
+
+.top
+    padding: var(--space-4) var(--space-6)
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: var(--space-2)
+    border-bottom: 1px solid var(--border-color)
+    flex-shrink: 0
+
+.top-left
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+
+    .status-dot
+        width: 8px
+        height: 8px
+        border-radius: var(--radius-full)
+        background: currentColor
+        flex-shrink: 0
+
+.preview-scroll
+    flex: 1
+    min-height: 0
+    overflow-y: auto
+
+.med
+    padding: var(--space-6)
+
+    h3
+        word-break: break-word
+
+.med-brand
+    display: block
+    color: var(--text-secondary)
+    line-height: 1.4
+
+.rx-type-indicator
+    display: inline-block
+    margin-top: 2px
+    font-size: 11px
+    font-weight: 600
+    line-height: 1.3
+
+    &.duplicado
+        color: var(--warning-fill)
+
+    &.triplicado
+        color: var(--error-fill)
+
+.med-bottom
+    display: flex
+    align-items: baseline
+    gap: var(--space-5)
+    margin-top: var(--space-5)
+    padding-top: var(--space-4)
+    border-top: 1px solid var(--border-color)
+
+.med-qty
+    display: flex
+    flex-direction: column
+
+    & + .med-qty
+        padding-left: var(--space-5)
+        border-left: 1px solid var(--border-color)
+
+    label
+        margin-bottom: 0
+
+.replacement
+    margin-top: var(--space-4)
+    padding-top: var(--space-4)
+    border-top: 1px dashed var(--border-color)
+
+.replacement-label
+    display: flex
+    align-items: center
+    gap: var(--space-1)
+    margin-bottom: var(--space-2)
+
+.replacement-original
+    display: block
+    color: var(--text-disabled)
+    text-decoration: line-through
+
+.dispense-section
+    margin-top: 0
+    padding: 0 var(--space-6)
+
+.alerts
+    padding: 0 var(--space-6) var(--space-2)
+    display: flex
+    gap: var(--space-2)
+    flex-wrap: wrap
+
+.body
+    padding: 0 var(--space-6) var(--space-6)
+
+.section
+    margin-top: var(--space-6)
+
+    .indications-box, .diagnostic-box
+        border-radius: var(--radius-sm)
+        padding: var(--space-3)
+
+    .diagnostic-box
+        background-color: var(--primary-50)
+
+    .indications-box
+        background-color: var(--secondary-50)
+
+    p
+        margin: 0
+        font-style: italic
+
+.entity
+    display: flex
+    align-items: center
+    gap: var(--space-3)
+
+.entity-info
+    display: flex
+    flex-direction: column
+    min-width: 0
+
+    strong
+        color: var(--text-primary)
+        font-weight: 600
+        line-height: 1.4
+
+    small
+        margin-top: var(--space-1)
+
+.p-fields
+    margin-top: var(--space-4)
+    padding-top: var(--space-3)
+    border-top: 1px solid var(--border-color)
+
+.p-field
+    display: flex
+    flex-direction: column
+    padding: var(--space-2) 0
+
+    span
+        color: var(--text-secondary)
+        margin-bottom: var(--space-1)

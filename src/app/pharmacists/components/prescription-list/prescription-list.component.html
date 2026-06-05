@@ -54,7 +54,7 @@
             </div>
             <!-- Botón para aplicar filtros -->
             <div fxFlex.xs="100">
-                <button mat-raised-button color="primary" (click)="applyFilters()"
+                <button matButton="raised" color="primary" (click)="applyFilters()"
                     [disabled]="!filtersEnabled || dateRangeInvalid">
                     Aplicar filtros
                 </button>
@@ -110,12 +110,12 @@
                             </button>
                             <mat-menu #menu="matMenu">
 
-                                <button mat-menu-item type="button" *ngIf="canDispenseMap.get(element._id)"
+                                <button matButton="outlined" *ngIf="canDispenseMap.get(element._id)"
                                     (click)="printPrescription(element)">
                                     <mat-icon>print</mat-icon>
                                     <span>Imprimir receta</span>
                                 </button>
-                                <button mat-menu-item type="button" *ngIf="canDispenseMap.get(element._id)"
+                                <button matButton="filled" *ngIf="canDispenseMap.get(element._id)"
                                     (click)="dispense(element)">
                                     <mat-icon>done_outline</mat-icon>
                                     <span>Dispensar receta</span>

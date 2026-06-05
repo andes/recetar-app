@@ -1,0 +1,183 @@
+<app-canvas [showSidebar]="true" [noCard]="true" [sidebarItems]="sidebarItems">
+    <div class="profile-container">
+        @if (isLoading) {
+            <div class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+                <p>Cargando datos...</p>
+            </div>
+        }
+
+        @if (!isLoading && currentUser) {
+            <ui-card class="identity-hero" [bordered]>
+                <div class="hero-body">
+                    <div class="hero-id">
+                        <h1 class="hero-name text-xl">{{ currentUser.businessName | titlecase }}</h1>
+
+                        <div class="hero-tags">
+                            <span class="badge role-chip">{{ roleLabel }}</span>
+                            <span class="verified-chip text-xs">
+                                <mat-icon class="xs">verified</mat-icon>
+                                Identidad verificada
+                            </span>
+                        </div>
+
+                        <div class="hero-meta">
+                            @if (currentUser.cuil) {
+                                <span class="meta-item text-sm text-secondary">
+                                    <mat-icon class="xs">badge</mat-icon>
+                                    CUIL {{ currentUser.cuil }}
+                                </span>
+                            }
+                            <span class="meta-item text-sm text-secondary">
+                                <mat-icon class="xs">mail</mat-icon>
+                                {{ currentUser.email }}
+                            </span>
+                        </div>
+                    </div>
+
+                    @if (isProfessional) {
+                        <div class="hero-divider"></div>
+
+                        <div class="hero-summary">
+                            <div class="summary-head">
+                                <span class="summary-label text-caption">RESUMEN</span>
+                            </div>
+
+                            <div class="summary-grid">
+                                <div class="summary-card">
+                                    <div class="summary-value text-lg">{{ organizacionesCount }}</div>
+                                    <div class="summary-sub text-xs text-secondary">Organizaciones</div>
+                                </div>
+
+                                <button type="button" class="summary-card pin" [class.active]="pinActive === true" (click)="selectSection('pin')">
+                                    <span class="summary-value pin text-sm">
+                                        <mat-icon class="sm">{{ pinActive ? 'lock' : 'lock_open' }}</mat-icon>
+                                        {{ pinStatusLabel }}
+                                    </span>
+                                    <span class="summary-sub text-xs">{{ pinStatusHint }}</span>
+                                    <span class="summary-goto text-xs">
+                                        Gestionar
+                                        <mat-icon class="xs">chevron_right</mat-icon>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @if (isProfessional) {
+                    <div class="matriculas-block">
+                        <div class="block-head">
+                            <span class="block-title text-caption">MATRÍCULAS HABILITADAS</span>
+                            <span class="block-line"></span>
+                        </div>
+
+                        @if (matriculas.length) {
+                            <div class="matriculas-grid">
+                                @for (m of matriculas; track m.numeroMatricula) {
+                                    <ui-card class="matricula-card" [bordered]>
+                                        <ui-icon icon="workspace_premium" size="md"
+                                            [variant]="$index === 0 ? 'secondary' : 'primary'"></ui-icon>
+                                        <div class="mc-info">
+                                            <div class="mc-title text-base">{{ m.profesion }}</div>
+                                            <div class="mc-number mono text-sm text-secondary">{{ m.numeroMatricula }}</div>
+                                            @if (m.vencimiento) {
+                                                <div class="mc-expiry text-xs text-secondary">
+                                                    Vigencia hasta <strong>{{ formatVencimiento(m.vencimiento) }}</strong>
+                                                    @if (vencimientoText(m.vencimiento)) {
+                                                        <span class="mc-vence" [class.warning]="isNearExpiry(m.vencimiento)"> · {{ vencimientoText(m.vencimiento) }}</span>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                        <span class="badge badge-success mc-status">
+                                            <span class="badge-dot"></span>
+                                            Vigente
+                                        </span>
+                                    </ui-card>
+                                }
+                            </div>
+                        } @else {
+                            <span class="badge mat-empty text-secondary">No tenés matrículas registradas</span>
+                        }
+                    </div>
+                } @else if (isPharmacist) {
+                    <div class="matriculas-block">
+                        <div class="block-head">
+                            <span class="block-title text-caption">HABILITACIÓN</span>
+                            <span class="block-line"></span>
+                        </div>
+
+                        @if (currentUser.authorizationDisposition || currentUser.authorizationExpiration) {
+                            <ui-card class="matricula-card" [bordered]>
+                                <ui-icon icon="local_pharmacy" size="md" variant="secondary"></ui-icon>
+                                <div class="mc-info">
+                                    <div class="mc-title text-base">Habilitación de farmacia</div>
+                                    @if (currentUser.authorizationDisposition) {
+                                        <div class="mc-number mono text-sm text-secondary">{{ currentUser.authorizationDisposition }}</div>
+                                    }
+                                    @if (currentUser.authorizationExpiration) {
+                                        <div class="mc-expiry text-xs text-secondary">
+                                            Vigencia hasta <strong>{{ formatVencimiento(currentUser.authorizationExpiration) }}</strong>
+                                            @if (vencimientoText(currentUser.authorizationExpiration)) {
+                                                <span class="mc-vence" [class.warning]="isNearExpiry(currentUser.authorizationExpiration)"> · {{ vencimientoText(currentUser.authorizationExpiration) }}</span>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                                <span class="badge badge-success mc-status">
+                                    <span class="badge-dot"></span>
+                                    Vigente
+                                </span>
+                            </ui-card>
+                        } @else {
+                            <span class="badge mat-empty text-secondary">No tenés habilitación registrada</span>
+                        }
+                    </div>
+                }
+            </ui-card>
+
+            <div class="section-head">
+                <h2 class="section-title">Configuración y seguridad</h2>
+                <span class="section-subtitle text-xs text-secondary">Gestioná tu cuenta, acceso y organizaciones</span>
+            </div>
+
+            <ui-card class="settings" [bordered]>
+<nav class="menu">
+                    @for (s of sections; track s.id) {
+                        <button type="button" class="menu-item" [class.active]="selected === s.id"
+                            (click)="selectSection(s.id)">
+                            <ui-icon [icon]="s.icon" size="sm" [transparent]="true"
+                                [variant]="selected === s.id ? 'secondary' : 'neutral'"></ui-icon>
+                            <span class="menu-text">
+                                <span class="text-sm">{{ s.label }}</span>
+                                <span class="menu-description text-xs text-secondary">{{ s.description }}</span>
+                            </span>
+                        </button>
+                    }
+
+                    @if (isPharmacist) {
+                        <ui-alert variant="warning">
+                            Tu email es tu usuario. Si lo cambiás, te enviamos un link de confirmación.
+                        </ui-alert>
+                    }
+                </nav>
+
+                <div class="panel-wrap">
+                    @if (selected === 'cuenta') {
+                        <app-account-panel (saved)="onAccountSaved()"></app-account-panel>
+                    }
+                    @if (selected === 'password') {
+                        <app-password-panel></app-password-panel>
+                    }
+                    @if (selected === 'pin') {
+                        <app-pin-panel (statusChanged)="onPinStatusChanged()"></app-pin-panel>
+                    }
+                    @if (selected === 'organizaciones') {
+                        <app-organizations-panel (changed)="onOrganizationsChanged()"></app-organizations-panel>
+                    }
+                </div>
+            </ui-card>
+        }
+    </div>
+</app-canvas>

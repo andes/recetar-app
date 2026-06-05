@@ -1,90 +1,114 @@
 import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
-import { BreakpointService } from '@shared/services/breakpoint.service';
 import { AuthService } from '@auth/services/auth.service';
 import { Router, RouterModule } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
+import { TitleCasePipe } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { UserService } from '@services/users.service';
+import { ThemeService } from '@shared/services/theme.service';
+import { ProfileService } from '@features/profile/services/profile.service';
+import { UiUserMenuComponent, UiAvatarComponent, UiIconComponent } from '@shared/ui';
+import { User } from '@interfaces/users';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.sass'],
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
+    imports: [
+        CommonModule,
+        TitleCasePipe,
+        RouterModule,
     FlexLayoutModule,
     MatToolbarModule,
     MatButtonModule,
-    MatMenuModule,
-    MatIconModule,
-    MatTooltipModule
+    MatTooltipModule,
+    UiUserMenuComponent,
+    UiAvatarComponent,
+    UiIconComponent
   ]
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   @Output() menuClick = new EventEmitter<void>();
   isLoggedIn$: Observable<boolean>;
   businessName$: Observable<string>;
-  isProfessionalBothRoles$: Observable<boolean>;
-  editProfileLink$: Observable<string>;
   roleLabel = '';
+  roleIcon = 'person';
   userInitials = '';
-  userMatricula = '';
+  userEmail = '';
+  username = '';
+  matriculaCount = 0;
   menuOpen = false;
+  logoPath$: Observable<string>;
 
   private destroy$ = new Subject<void>();
 
   constructor(
     private authService: AuthService,
     private router: Router,
-    private userService: UserService,
-    private breakpointService: BreakpointService
+    private themeService: ThemeService,
+    private profileService: ProfileService
   ) { }
 
   ngOnInit(): void {
     this.isLoggedIn$ = this.authService.isLoggedIn;
     this.businessName$ = this.authService.getBusinessName;
-    this.isProfessionalBothRoles$ = this.authService.getIsProfessionalBothRoles;
-
-    this.editProfileLink$ = this.isLoggedIn$.pipe(
-      map(isLoggedIn => {
-        if (isLoggedIn && this.authService.isPharmacistsRole()) {
-          return '/farmacias/editar-usuario';
-        }
-        return '/profesionales/editar-usuario';
-      })
+    this.logoPath$ = this.themeService.isDarkMode$.pipe(
+      map(isDark => isDark ? 'assets/logo-light.svg' : 'assets/logo.svg')
     );
 
     this.isLoggedIn$.pipe(takeUntil(this.destroy$)).subscribe(isLoggedIn => {
       if (isLoggedIn) {
         this.roleLabel = this.authService.getRoleLabel();
+        this.roleIcon = this.getRoleIcon();
         this.userInitials = this.getInitials();
-
-        // Fetch user matrícula/license number
-        const userId = this.authService.getLoggedUserId();
-        if (userId) {
-          this.userService.getUserById(userId).pipe(takeUntil(this.destroy$)).subscribe({
-            next: (user) => {
-              this.userMatricula = user.enrollment || user.responsibleDTEnrollment || '';
-            },
-            error: () => { }
-          });
-        }
-
+        this.userEmail = this.authService.getLoggedUserEmail() || '';
+        this.username = this.authService.getLoggedUsername();
+        this.loadUserInfo();
       } else {
         this.roleLabel = '';
+        this.roleIcon = 'person';
         this.userInitials = '';
-        this.userMatricula = '';
+        this.userEmail = '';
+        this.username = '';
+        this.matriculaCount = 0;
       }
     });
+  }
+
+  private loadUserInfo(): void {
+    this.profileService.getCurrentUser()
+      .pipe(
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: (user: User) => {
+          this.matriculaCount = this.getMatriculaCount(user);
+          if (!this.userEmail && user.email) {
+            this.userEmail = user.email;
+          }
+          if (!this.username && user.username) {
+            this.username = user.username;
+          }
+        },
+        error: () => {
+          this.matriculaCount = 0;
+        }
+      });
+  }
+
+  private getMatriculaCount(user: User): number {
+    if (!user) {
+      return 0;
+    }
+    if (this.authService.isProfessionalRole() || this.authService.isProfessionalPublicRole()) {
+      return user.profesionGrado?.length || 0;
+    }
+    return (user.responsibleDTEnrollment || user.enrollment) ? 1 : 0;
   }
 
   ngOnDestroy(): void {
@@ -104,12 +128,17 @@ export class HeaderComponent implements OnInit, OnDestroy {
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
 
-  get isMobile(): boolean {
-    return this.breakpointService.isMobile();
-  }
-
-  toggleMenu(open: boolean): void {
-    this.menuOpen = open;
+  private getRoleIcon(): string {
+    if (this.authService.isProfessionalRole() || this.authService.isProfessionalPublicRole()) {
+      return 'medical_services';
+    }
+    if (this.authService.isPharmacistsRole() || this.authService.isPharmacistsPublicRole()) {
+      return 'local_pharmacy';
+    }
+    if (this.authService.isAuditRole()) {
+      return 'fact_check';
+    }
+    return 'person';
   }
 
   logout() {

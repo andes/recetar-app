@@ -42,6 +42,17 @@ export class Prescriptions {
         businessName: string;
     };
     dispensedAt?: Date;
+    replacedMedication?: {
+        name?: string;
+        quantity?: number;
+        supply?: Supply;
+        snomedConcept?: {
+            conceptId: string;
+            term: string;
+            fsn?: string;
+            semanticTag?: string;
+        };
+    };
     supplies: Array<{
         supply: Supply;
         quantity: number;
@@ -54,6 +65,11 @@ export class Prescriptions {
         triplicateData?: {
             serie: string;
             numero: number;
+        };
+        obraSocial?: {
+            nombre?: string;
+            codigoPuco?: string;
+            numeroAfiliado?: string;
         };
     }>;
     status: string;
@@ -81,6 +97,7 @@ export class PrescriptionsAdapter implements Adapter<Prescriptions> {
             organizacion: data['organizacion'] as Prescriptions['organizacion'],
             dispensedBy: data['dispensedBy'] as Prescriptions['dispensedBy'],
             dispensedAt: data['dispensedAt'] ? new Date(data['dispensedAt'] as string | number | Date) : undefined,
+            replacedMedication: data['replacedMedication'] as Prescriptions['replacedMedication'],
             supplies: (data['supplies'] as Prescriptions['supplies']) || [],
             status: data['status'] as string,
             date: new Date(data['date'] as string | number | Date),
