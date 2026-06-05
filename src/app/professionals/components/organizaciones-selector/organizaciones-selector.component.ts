@@ -50,7 +50,7 @@ export class OrganizacionesSelectorComponent implements OnInit, OnDestroy {
         private authService: AuthService,
         private organizacionSessionService: OrganizacionFormSessionService,
         private dialog: MatDialog
-    ) {}
+    ) { }
 
     ngOnInit(): void {
         this.userId = this.authService.getLoggedUserId();
@@ -62,7 +62,7 @@ export class OrganizacionesSelectorComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this.destroy$))
             .subscribe(
                 () => this.loadOrganizaciones(),
-                () => {}
+                () => { }
             );
 
         // Escuchar cambios en el control
@@ -122,7 +122,7 @@ export class OrganizacionesSelectorComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this.destroy$))
             .subscribe(
                 () => this.loadOrganizaciones(),
-                () => {}
+                () => { }
             );
     }
 

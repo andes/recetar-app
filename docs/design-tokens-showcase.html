@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Diseño RecetAR — Design Tokens</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary-50: #E8F3FA;
+            --primary-100: #C5DFF0;
+            --primary-200: #8BBEDD;
+            --primary-400: #1D6F9E;
+            --primary-500: #0B4F82;
+            --primary-600: #083B63;
+            --primary-700: #052844;
+            --secondary-50: #E5F5F4;
+            --secondary-100: #B3E5E2;
+            --secondary-400: #0C8C87;
+            --secondary-500: #0C6E69;
+            --secondary-600: #09524E;
+            --surface-base: var(--bg-light-custom);
+            --surface-card: #FFFFFF;
+            --surface-raised: #EEF0F4;
+            --border-default: #D6DAE3;
+            --border-strong: #B0B8C6;
+            --text-primary: #111821;
+            --text-secondary: #556070;
+            --text-disabled: #B0B8C6;
+            --error-bg: #FEECEB;
+            --error-text: #C0392B;
+            --warning-bg: #FEF5E7;
+            --warning-text: #B85C00;
+            --success-bg: #E8F6EF;
+            --success-text: #1A7A4A;
+            --info-bg: #E8F3FA;
+            --info-text: #1D6F9E;
+            --role-pharmacist: #4E6B1A;
+            --role-pharmacist-accent: #A6C257;
+            --role-auditor: #3E1D90;
+            --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --header-gradient: linear-gradient(135deg, #0B4F82, #0C6E69);
+            --bg-light-custom: #F8F9FB;
+            --bg-dark-custom: #1A1D23;
+        }
+
+        body.dark-mode {
+            --surface-base: var(--bg-dark-custom);
+            --surface-card: #23272E;
+            --surface-raised: #2D323A;
+            --border-default: #363B44;
+            --border-strong: #556070;
+            --text-primary: #E4E7EB;
+            --text-secondary: #9BA3B1;
+            --text-disabled: #556070;
+            --error-bg: #3D1F1E;
+            --error-text: #E67E71;
+            --warning-bg: #3D2F16;
+            --warning-text: #F5A623;
+            --success-bg: #1A3A28;
+            --success-text: #5CBF7A;
+            --info-bg: #1A2A3A;
+            --info-text: #6BB5E0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--surface-base);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 0;
+        }
+
+        .container { max-width: 1024px; margin: 0 auto; padding: 0 24px; }
+        section { padding: 60px 0; border-bottom: 1px solid var(--border-default); }
+        section:last-of-type { border-bottom: none; }
+
+        h1 { font-size: 28px; font-weight: 600; line-height: 1.2; }
+        h2 { font-size: 22px; font-weight: 600; line-height: 1.3; margin-bottom: 28px; color: var(--primary-500); }
+        h3 { font-size: 16px; font-weight: 600; line-height: 1.4; margin: 36px 0 16px; padding-top: 8px; border-top: 1px solid var(--border-default); text-transform: uppercase; letter-spacing: 0.3px; color: var(--text-secondary); }
+        h3:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+        p, .desc { font-size: 14px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.6; }
+
+        header.header {
+            background: var(--header-gradient);
+            color: #fff;
+            padding: 56px 0 40px;
+        }
+        header.header h1 { font-size: 32px; margin-bottom: 8px; }
+        header.header p { color: rgba(255,255,255,0.85); font-size: 16px; margin-bottom: 0; }
+        header.header .meta { margin-top: 16px; font-size: 13px; color: rgba(255,255,255,0.65); }
+
+        .controls-bar {
+            display: flex; gap: 24px; flex-wrap: wrap;
+            background: var(--surface-card);
+            border: 1px solid var(--border-default);
+            border-radius: 12px;
+            padding: 20px 24px; margin-bottom: 32px;
+            align-items: end;
+        }
+        .controls-bar .field { display: flex; flex-direction: column; gap: 4px; }
+        .controls-bar label { font-size: 12px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+        .controls-bar input[type="color"] {
+            width: 48px; height: 40px; border: 1px solid var(--border-default);
+            border-radius: 6px; padding: 2px; cursor: pointer; background: none;
+        }
+        .controls-bar .hex-display {
+            font-family: var(--font-mono); font-size: 13px; color: var(--text-primary);
+            padding: 8px 12px; border: 1px solid var(--border-default);
+            border-radius: 6px; background: var(--surface-raised); min-width: 90px;
+        }
+
+        /* Swatch Grids */
+        .swatch-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 12px;
+        }
+        .swatch {
+            border-radius: 8px; overflow: hidden;
+            border: 1px solid var(--border-default);
+            background: var(--surface-card);
+            transition: all 0.15s ease;
+        }
+        .swatch:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .swatch-color { height: 72px; position: relative; }
+        .swatch-color .hover-chip { position: absolute; bottom: 4px; right: 4px; padding: 2px 6px; border-radius: 4px; font-size: 8px; font-weight: 600; background: rgba(0,0,0,0.5); color: #fff; opacity: 0; transition: opacity 0.15s; pointer-events: none; }
+        .swatch:hover .swatch-color .hover-chip { opacity: 1; }
+        .swatch-info { padding: 10px 12px; }
+        .swatch-info .token-name { font-size: 12px; font-weight: 500; color: var(--text-primary); }
+        .swatch-info .token-hex { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .swatch-hover { display: flex; align-items: center; gap: 6px; padding: 6px 12px 8px; font-size: 10px; color: var(--text-disabled); border-top: 1px solid var(--border-default); }
+        .swatch-hover .hover-swatch { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+        .swatch-row {
+            display: flex; align-items: center; gap: 16px;
+            padding: 12px 16px; border-radius: 8px;
+            border: 1px solid var(--border-default);
+            background: var(--surface-card);
+            margin-bottom: 8px;
+        }
+        .swatch-row .swatch-color { width: 48px; height: 48px; border-radius: 6px; flex-shrink: 0; }
+        .swatch-row .swatch-info { flex: 1; padding: 0; }
+        .swatch-row .swatch-desc { font-size: 12px; color: var(--text-secondary); }
+
+        .neutral-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; }
+
+        /* Status */
+        .status-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+        .status-card { border-radius: 8px; padding: 20px; }
+        .status-card .label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .status-card .text { font-size: 14px; }
+        .status-card .contrast { font-family: var(--font-mono); font-size: 11px; margin-top: 8px; opacity: 0.7; }
+
+        /* Role */
+        .role-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+        .role-card { border-radius: 8px; border: 1px solid var(--border-default); overflow: hidden; background: var(--surface-card); }
+        .role-card-header { padding: 12px 16px; color: #fff; font-weight: 500; font-size: 14px; }
+        .role-card-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+        .role-sidebar-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 6px; font-size: 13px; }
+        .role-sidebar-item.active { color: #fff; }
+        .role-sidebar-item.inactive { color: var(--text-secondary); }
+        .role-avatar-ring { width: 32px; height: 32px; border-radius: 50%; border: 2px solid; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; background: var(--surface-raised); }
+
+        /* Typography */
+        .type-grid { display: flex; flex-direction: column; gap: 4px; }
+        .type-sample { padding: 12px 16px; border-radius: 6px; }
+        .type-sample:hover { background: var(--surface-raised); }
+        .type-sample .sample-text { margin-top: 2px; }
+        .type-sample .token-tag { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 4px; }
+
+        /* Spacing */
+        .spacing-grid { display: flex; flex-direction: column; gap: 6px; }
+        .spacing-bar { display: flex; align-items: center; gap: 12px; }
+        .spacing-bar .bar { background: var(--primary-200); border-radius: 4px; height: 16px; transition: width 0.2s; }
+        .spacing-bar .label { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); min-width: 80px; }
+
+        /* Radius */
+        .radius-grid { display: flex; flex-wrap: wrap; gap: 16px; }
+        .radius-box { width: 140px; min-height: 90px; border: 2px solid var(--primary-200); background: var(--primary-50); display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 11px; color: var(--primary-500); text-align: center; padding: 8px; }
+        .radius-box .radius-desc { font-family: var(--font-family); font-size: 9px; color: var(--text-secondary); margin-top: 4px; line-height: 1.3; }
+
+        /* Elevation */
+        .elevation-grid { display: flex; flex-wrap: wrap; gap: 20px; }
+        .elevation-box { width: 180px; height: 100px; border-radius: 8px; background: var(--surface-card); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; color: var(--text-secondary); padding: 8px; }
+        .elevation-box .elev-name { font-weight: 500; color: var(--text-primary); }
+        .elevation-box .elev-value { font-family: var(--font-mono); font-size: 10px; margin-top: 4px; text-align: center; word-break: break-all; }
+
+        /* Components */
+        .components-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+        .component-card { border: 1px solid var(--border-default); border-radius: 12px; padding: 20px; background: var(--surface-card); }
+        .component-card .comp-title { font-size: 12px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; }
+        .component-card .comp-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
+        .component-card .comp-row:last-child { margin-bottom: 0; }
+
+        .btn { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 20px; border: none; border-radius: 8px; font-family: var(--font-family); font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s ease; text-decoration: none; }
+        .btn-primary { background: var(--primary-500); color: #fff; }
+        .btn-primary:hover { background: var(--primary-600); }
+        .btn-secondary { background: var(--secondary-500); color: #fff; }
+        .btn-secondary:hover { background: var(--secondary-600); }
+        .btn-outline { border: 1px solid var(--border-strong); background: transparent; color: var(--text-primary); }
+        .btn-outline:hover { border-color: var(--primary-400); color: var(--primary-500); }
+        .btn-ghost { background: transparent; color: var(--text-secondary); padding: 0 12px; }
+        .btn-ghost:hover { background: var(--surface-raised); color: var(--text-primary); }
+        .btn-icon { width: 40px; padding: 0; justify-content: center; }
+        .btn-sm { height: 32px; padding: 0 14px; font-size: 12px; border-radius: 6px; }
+        .btn-lg { height: 48px; padding: 0 28px; font-size: 16px; }
+
+        .input-demo { width: 100%; height: 48px; padding: 0 16px; border: 1px solid var(--border-default); border-radius: 8px; font-family: var(--font-family); font-size: 14px; color: var(--text-primary); background: var(--surface-card); outline: none; transition: border-color 0.15s; }
+        .input-demo:focus { border-color: var(--primary-400); box-shadow: 0 0 0 3px rgba(13, 111, 158, 0.15); }
+        .input-demo::placeholder { color: var(--text-disabled); }
+        .input-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 4px; display: block; }
+        .input-group { margin-bottom: 12px; }
+        .input-group:last-child { margin-bottom: 0; }
+
+        .badge { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 9999px; font-size: 12px; font-weight: 500; line-height: 1.4; cursor: default; transition: all 0.12s; }
+        .badge:hover { opacity: 0.85; }
+        .badge-primary { background: var(--primary-50); color: var(--primary-500); }
+        .badge-primary:hover { background: var(--primary-100); }
+        .badge-success { background: var(--success-bg); color: var(--success-text); }
+        .badge-success:hover { opacity: 0.85; }
+        .badge-warning { background: var(--warning-bg); color: var(--warning-text); }
+        .badge-warning:hover { opacity: 0.85; }
+        .badge-error { background: var(--error-bg); color: var(--error-text); }
+        .badge-error:hover { opacity: 0.85; }
+
+        .chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500; background: var(--surface-raised); color: var(--text-primary); border: 1px solid var(--border-default); cursor: default; transition: all 0.12s; }
+        .chip:hover { border-color: var(--border-strong); color: var(--text-primary); }
+        .chip-primary { background: var(--primary-50); border-color: var(--primary-100); color: var(--primary-500); }
+        .chip-primary:hover { background: var(--primary-100); border-color: var(--primary-200); }
+        .chip-secondary { background: var(--secondary-50); border-color: var(--secondary-100); color: var(--secondary-500); }
+        .chip-secondary:hover { background: var(--secondary-100); border-color: var(--secondary-400); }
+        .chip .chip-icon { font-size: 14px; line-height: 1; }
+
+        .card-preview { border: 1px solid var(--border-default); border-radius: 12px; background: var(--surface-card); overflow: hidden; }
+        .card-preview .card-header { padding: 16px 20px 0; }
+        .card-preview .card-header h4 { font-size: 16px; font-weight: 500; }
+        .card-preview .card-header .sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+        .card-preview .card-body { padding: 12px 20px 16px; }
+        .card-preview .card-body p { font-size: 13px; color: var(--text-secondary); margin-bottom: 0; }
+        .card-preview .card-actions { padding: 12px 20px; border-top: 1px solid var(--border-default); display: flex; gap: 8px; }
+
+        .sidebar-preview { width: 100%; border-radius: 8px; border: 1px solid var(--border-default); overflow: hidden; background: var(--surface-card); }
+        .sidebar-preview .sp-header { height: 56px; display: flex; align-items: center; padding: 0 16px; gap: 10px; border-bottom: 1px solid var(--border-default); }
+        .sidebar-preview .sp-header .sp-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: #fff; }
+        .sidebar-preview .sp-header .sp-name { font-size: 12px; font-weight: 500; }
+        .sidebar-preview .sp-nav { padding: 8px; }
+        .sidebar-preview .sp-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 6px; font-size: 13px; color: var(--text-secondary); margin-bottom: 2px; cursor: default; transition: all 0.12s; }
+        .sidebar-preview .sp-item:not(.active):hover { background: var(--surface-raised); color: var(--text-primary); }
+        .sidebar-preview .sp-item.active { color: #fff; }
+        .sidebar-preview .sp-footer { padding: 8px; border-top: 1px solid var(--border-default); }
+
+        .layout-demo { display: flex; flex-direction: column; gap: 12px; }
+        .layout-bar { background: var(--surface-card); border: 1px solid var(--border-default); border-radius: 6px; display: flex; align-items: center; padding: 0 16px; font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); }
+        .layout-bar.toolbar { height: 64px; }
+        .layout-row { display: flex; gap: 8px; }
+        .layout-row .sidebar-exp { width: 256px; height: 120px; background: var(--surface-card); border: 1px solid var(--border-default); border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); flex-shrink: 0; }
+        .layout-row .sidebar-col { width: 72px; height: 120px; background: var(--surface-card); border: 1px solid var(--border-default); border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); flex-shrink: 0; }
+        .layout-row .content-area { flex: 1; height: 120px; background: var(--surface-raised); border: 1px solid var(--border-default); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); }
+
+        .footer { padding: 24px 0 48px; text-align: center; font-size: 12px; color: var(--text-disabled); }
+
+        @media (max-width: 640px) {
+            .swatch-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+            .neutral-grid { grid-template-columns: 1fr; }
+            .role-grid { grid-template-columns: 1fr; }
+            .components-grid { grid-template-columns: 1fr; }
+            .layout-row { flex-direction: column; }
+            .layout-row .sidebar-exp, .layout-row .sidebar-col { width: 100%; height: 48px; }
+            .radius-grid { justify-content: center; }
+            .elevation-grid { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="container">
+        <h1>Sistema de Diseño RecetAR</h1>
+        <p>Especificación de Design Tokens — alineada con Angular Material 20 y normativas WCAG AA/AAA.</p>
+        <div class="meta">Versión 1.0 &middot; Última actualización: junio 2026</div>
+    </div>
+</header>
+
+<!-- Color Pickers -->
+<div class="container" style="margin-top: -20px;">
+    <div class="controls-bar">
+        <div class="field">
+            <label>Color Primario</label>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <input type="color" id="primaryPicker" value="#0B4F82">
+                <span class="hex-display" id="primaryHex">#0B4F82</span>
+            </div>
+        </div>
+        <div class="field">
+            <label>Color Secundario</label>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <input type="color" id="secondaryPicker" value="#0C6E69">
+                <span class="hex-display" id="secondaryHex">#0C6E69</span>
+            </div>
+        </div>
+        <div class="field">
+            <label>Modo Oscuro</label>
+            <button id="darkModeToggle" style="height:40px;padding:0 16px;border:1px solid var(--border-default);border-radius:6px;background:var(--surface-raised);color:var(--text-primary);font-family:var(--font-family);font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.15s;">
+                <span id="darkModeIcon">☀️</span>
+                <span id="darkModeLabel">Claro</span>
+            </button>
+        </div>
+        <div class="field">
+            <label>Fondo Claro</label>
+            <input type="color" id="bgLightPicker" value="#F8F9FB" style="width:48px;height:40px;border:1px solid var(--border-default);border-radius:6px;padding:2px;cursor:pointer;background:none;">
+        </div>
+        <div class="field">
+            <label>Fondo Oscuro</label>
+            <input type="color" id="bgDarkPicker" value="#1A1D23" style="width:48px;height:40px;border:1px solid var(--border-default);border-radius:6px;padding:2px;cursor:pointer;background:none;">
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary);flex:1;text-align:right;">
+            Modifica colores base y fondos. Header se actualiza con primario + secundario.
+        </div>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- 01. Architecture -->
+    <section>
+        <h2>01. Arquitectura Cromática y Fundamentos Visuales</h2>
+
+        <h3>1.1 Paleta Primaria: "Azul Petróleo"</h3>
+        <p>Seleccionada como el identificador central de Recetar para establecer una diferenciación competitiva frente a soluciones existentes (evitando azul genérico o tonos púrpuras) y transmitir credibilidad médica sin caer en estéticas frías u hospitalarias.</p>
+        <div class="swatch-grid" id="primarySwatches"></div>
+
+        <h3>1.2 Paleta Secundaria: Teal. Acento</h3>
+        <p><strong>Criterio de Aplicación:</strong> No tiene responsabilidades informáticas o de estado. Su uso queda exclusivamente para componentes de acción e hitos interactivos (FABs, toggles, stepper activo) para evitar competir con la jerarquía del azul petróleo.</p>
+        <div class="swatch-grid" id="secondarySwatches"></div>
+
+        <h3>1.3 Neutros y Superficies de Sistema</h3>
+        <p>Escala para estructurar la interfaz garantizando contrastes nítidos.</p>
+        <div class="neutral-grid">
+            <div class="swatch-row">
+                <div class="swatch-color" style="background:var(--surface-base);border:1px solid var(--border-default);"></div>
+                <div class="swatch-info">
+                    <div class="token-name">color-surface-base</div>
+                    <div class="token-hex" id="hex-surface-base">#F8F9FB</div>
+                    <div class="swatch-desc">Fondo base de la aplicación (Modo Claro)</div>
+                </div>
+            </div>
+            <div class="swatch-row">
+                <div class="swatch-color" style="background:var(--surface-card);border:1px solid var(--border-default);"></div>
+                <div class="swatch-info">
+                    <div class="token-name">color-surface-card</div>
+                    <div class="token-hex">#FFFFFF</div>
+                    <div class="swatch-desc">Contenedores estructurados, tarjetas, diálogos y panel de propiedades</div>
+                </div>
+            </div>
+            <div class="swatch-row">
+                <div class="swatch-color" style="background:var(--surface-raised);border:1px solid var(--border-default);"></div>
+                <div class="swatch-info">
+                    <div class="token-name">color-surface-raised</div>
+                    <div class="token-hex">#EEF0F4</div>
+                    <div class="swatch-desc">Fondos para campos de entrada (inputs) y cabeceras de tablas.</div>
+                </div>
+            </div>
+            <div class="swatch-row">
+                <div class="swatch-color" style="background:var(--border-default);"></div>
+                <div class="swatch-info">
+                    <div class="token-name">color-border-default</div>
+                    <div class="token-hex">#D6DAE3</div>
+                    <div class="swatch-desc">Delimitación general de componentes</div>
+                </div>
+            </div>
+            <div class="swatch-row">
+                <div class="swatch-color" style="background:var(--border-strong);"></div>
+                <div class="swatch-info">
+                    <div class="token-name">color-border-strong</div>
+                    <div class="token-hex">#B0B8C6</div>
+                    <div class="swatch-desc">Bordes que requieren mayor contraste o énfasis.</div>
+                </div>
+            </div>
+            <div class="swatch-row">
+                <div class="swatch-color" style="background:var(--text-primary);"></div>
+                <div class="swatch-info">
+                    <div class="token-name">color-text-primary</div>
+                    <div class="token-hex" style="color:var(--text-primary);">#111821</div>
+                    <div class="swatch-desc">Tipografía principal (gris oscuro para disminuir fatiga visual del negro puro).</div>
+                </div>
+            </div>
+            <div class="swatch-row">
+                <div class="swatch-color" style="background:var(--text-secondary);"></div>
+                <div class="swatch-info">
+                    <div class="token-name">color-text-secondary</div>
+                    <div class="token-hex" style="color:var(--text-secondary);">#556070</div>
+                    <div class="swatch-desc">Etiquetas de formularios, placeholders y datos secundarios.</div>
+                </div>
+            </div>
+            <div class="swatch-row">
+                <div class="swatch-color" style="background:var(--text-disabled);"></div>
+                <div class="swatch-info">
+                    <div class="token-name">color-text-disabled</div>
+                    <div class="token-hex" style="color:var(--text-disabled);">#B0B8C6</div>
+                    <div class="swatch-desc">Texto e iconos deshabilitados</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 02. Status UI -->
+    <section>
+        <h2>02. LÓGICA DE ESTADOS UI</h2>
+        <p>Todos los estados utilizan tonos desaturados que conviven con la paleta principal, evitando los rojos y verdes sobresaturados nativos de material tradicional.</p>
+        <div class="status-grid">
+            <div class="status-card" style="background:var(--error-bg);">
+                <div class="label" style="color:var(--error-text);">Error</div>
+                <div class="text" style="color:var(--error-text);">Validaciones incorrectas y alertas.</div>
+                <div class="contrast" style="color:var(--error-text);">5.8:1 (AA)</div>
+            </div>
+            <div class="status-card" style="background:var(--warning-bg);">
+                <div class="label" style="color:var(--warning-text);">Warning</div>
+                <div class="text" style="color:var(--warning-text);">Indicadores de precaución o pasos pendientes.</div>
+                <div class="contrast" style="color:var(--warning-text);">4.7:1 (AA)</div>
+            </div>
+            <div class="status-card" style="background:var(--success-bg);">
+                <div class="label" style="color:var(--success-text);">Success</div>
+                <div class="text" style="color:var(--success-text);">Confirmación de recetas emitidas o procesos válidos.</div>
+                <div class="contrast" style="color:var(--success-text);">5.2:1 (AAA)</div>
+            </div>
+            <div class="status-card" style="background:var(--info-bg);">
+                <div class="label" style="color:var(--info-text);">Info</div>
+                <div class="text" style="color:var(--info-text);">Banners de ayuda y notas contextuales.</div>
+                <div class="contrast" style="color:var(--info-text);">5.5:1 (AA)</div>
+            </div>
+        </div>
+        <div class="status-note" style="margin-top:16px;padding:12px 16px;background:var(--surface-raised);border-radius:var(--radius-md);font-size:13px;color:var(--text-secondary);border-left:3px solid var(--info-text);">
+            <strong>Nota:</strong> El token de estado <strong>Info</strong> migra a la familia cromática del azul primario (#1D6F9E). Esto elimina el impacto semántico con el <strong>rol farmacéutico</strong> y con el teal secundario de acción.
+        </div>
+    </section>
+
+    <!-- 03. Role Identity -->
+    <section>
+        <h2>03. ESTRATEGIA DE IDENTIDAD VISUAL POR ROL</h2>
+
+        <h3>3.1 Regla de Aplicación (Ley de Prägnanz)</h3>
+        <div class="rule-block" style="padding:12px 16px;background:var(--surface-raised);border-radius:var(--radius-md);margin-bottom:20px;border-left:3px solid var(--primary-500);">
+            <strong>Regla de Aplicación (Ley de Prägnanz):</strong> El color de rol actúa como <strong>un acento, no como un tema global</strong>. La estructura visual base (grillas, layouts, cabeceras, espaciados) es idéntica para los 3 roles. Garantiza que el sistema se perciba como un todo coherente.
+        </div>
+
+        <h3>3.2 Definición de Identidades</h3>
+        <div class="role-grid">
+            <div class="role-card">
+                <div class="role-card-header" style="background:#0B4F82;">Profesional Médico (Rol Central)</div>
+                <div class="role-card-body">
+                    <div class="role-sidebar-item active" style="background:#0B4F82;"><span class="role-avatar-ring" style="border-color:#0B4F82;">JM</span> Dashboard</div>
+                    <div class="role-sidebar-item inactive"><span class="role-avatar-ring">→</span> Recetas</div>
+                    <div class="role-sidebar-item inactive"><span class="role-avatar-ring">→</span> Pacientes</div>
+                    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);padding:4px 12px;">
+                        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#0B4F82;"></span>
+                        Utiliza la paleta institucional base: azul petróleo (#0B4F82). Refuerza la identidad principal del producto.
+                    </div>
+                </div>
+            </div>
+            <div class="role-card">
+                <div class="role-card-header" style="background:#4E6B1A;">Farmacéutico</div>
+                <div class="role-card-body">
+                    <div class="role-sidebar-item active" style="background:#4E6B1A;"><span class="role-avatar-ring" style="border-color:#4E6B1A;">FC</span> Dashboard</div>
+                    <div class="role-sidebar-item inactive"><span class="role-avatar-ring">→</span> Dispensar</div>
+                    <div class="role-sidebar-item inactive"><span class="role-avatar-ring">→</span> Historial</div>
+                    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);padding:4px 12px;">
+                        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4E6B1A;"></span>
+                        Verde Oliva Institucional. Contraste normativo 4.9:1 (AA) sobre blanco. Se desmarca del verde esmeralda de éxito.
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);padding:4px 12px;">
+                        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#A6C257;"></span>
+                        Acento Lima (#A6C257) exclusivo para micro-indicadores interactivos sobre fondos oscuros (10.5:1 AAA).
+                    </div>
+                </div>
+            </div>
+            <div class="role-card">
+                <div class="role-card-header" style="background:#3E1D90;">Auditor</div>
+                <div class="role-card-body">
+                    <div class="role-sidebar-item active" style="background:#3E1D90;"><span class="role-avatar-ring" style="border-color:#3E1D90;">AU</span> Dashboard</div>
+                    <div class="role-sidebar-item inactive"><span class="role-avatar-ring">→</span> Usuarios</div>
+                    <div class="role-sidebar-item inactive"><span class="role-avatar-ring">→</span> Auditoría</div>
+                    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);padding:4px 12px;">
+                        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#3E1D90;"></span>
+                        Violeta (#3E1D90). Sin uso clínico previo en la interfaz = diferenciación semántica limpia. Contraste 11.9:1 (AAA).
+                    </div>
+                </div>
+            </div>
+        </div>
+        <h3>3.3 Matriz de Comportamiento en Componentes UI</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div style="padding:12px;background:var(--success-bg);border-radius:var(--radius-md);font-size:13px;color:var(--success-text);">
+                <strong style="display:block;margin-bottom:4px;">✅ Sí adoptan color de rol</strong>
+                Fondo de ítems activos en la barra de navegación lateral (Sidebar), anillo perimetral del avatar de usuario, y etiqueta contextual en la cabecera.
+            </div>
+            <div style="padding:12px;background:var(--error-bg);border-radius:var(--radius-md);font-size:13px;color:var(--error-text);">
+                <strong style="display:block;margin-bottom:4px;">❌ No adoptan color de rol</strong>
+                Botones primarios (acción con lenguaje del sistema, no del rol), tablas, listas de datos y alertas críticas de riesgo clínico.
+            </div>
+        </div>
+    </section>
+
+    <!-- 04. Typography -->
+    <section>
+        <h2>04. SISTEMA TIPOGRÁFICO</h2>
+        <p>La selección tipográfica responde a la necesidad de garantizar una lectura óptima en pantallas con cierta complejidad de datos técnicos (principio activo, matrículas profesionales y códigos comerciales).</p>
+
+        <h3>4.1 Fuentes Oficiales</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+            <div style="padding:12px;background:var(--surface-raised);border-radius:var(--radius-md);font-size:13px;">
+                <strong>Inter (Tipografía Principal):</strong> Elegida por su rendimiento en interfaces, presenta una altura de x elevada para facilitar la lectura de textos con mayúsculas y minúsculas. Se diferencia del estándar por defecto (Roboto) del resto de las interfaces.
+            </div>
+            <div style="padding:12px;background:var(--surface-raised);border-radius:var(--radius-md);font-size:13px;">
+                <strong>JetBrains Mono (Tipografía de Datos):</strong> Destinada exclusivamente a cadenas de caracteres (códigos de recetas, identificadores de CUIL, números de matrículas profesionales y nomencladores).
+            </div>
+        </div>
+
+        <h3>4.2 Escala y Jerarquía (Tokens de Texto)</h3>
+        <div class="type-grid">
+            <div class="type-sample">
+                <span class="token-tag">font-display — Inter 28px/1.2 Semibold</span>
+                <div class="sample-text" style="font-size:28px;font-weight:600;line-height:1.2;">RecetAR — Sistema de Prescripción Electrónica</div>
+            </div>
+            <div class="type-sample">
+                <span class="token-tag">font-heading-l — Inter 22px/1.3 Semibold</span>
+                <div class="sample-text" style="font-size:22px;font-weight:600;line-height:1.3;">Listado de recetas emitidas</div>
+            </div>
+            <div class="type-sample">
+                <span class="token-tag">font-heading-m — Inter 18px/1.4 Medium</span>
+                <div class="sample-text" style="font-size:18px;font-weight:500;line-height:1.4;">Datos del paciente</div>
+            </div>
+            <div class="type-sample">
+                <span class="token-tag">font-heading-s — Inter 15px/1.4 Medium</span>
+                <div class="sample-text" style="font-size:15px;font-weight:500;line-height:1.4;">Información de contacto</div>
+            </div>
+            <div class="type-sample">
+                <span class="token-tag">font-body-l — Inter 16px/1.6 Regular</span>
+                <div class="sample-text" style="font-size:16px;font-weight:400;line-height:1.6;">Complete el formulario con los datos del paciente para generar una nueva receta electrónica válida por 30 días.</div>
+            </div>
+            <div class="type-sample">
+                <span class="token-tag">font-body-m — Inter 14px/1.5 Regular</span>
+                <div class="sample-text" style="font-size:14px;font-weight:400;line-height:1.5;">Nombre del paciente *</div>
+            </div>
+            <div class="type-sample">
+                <span class="token-tag">font-body-s — Inter 12px/1.4 Regular</span>
+                <div class="sample-text" style="font-size:12px;font-weight:400;line-height:1.4;">Creado el 15/06/2026 · Última modificación: hoy</div>
+            </div>
+            <div class="type-sample">
+                <span class="token-tag">font-label-l — Inter 14px/1.0 Medium</span>
+                <div class="sample-text" style="font-size:14px;font-weight:500;line-height:1;">Crear receta</div>
+            </div>
+            <div class="type-sample">
+                <span class="token-tag">font-code — JetBrains Mono 13px/1.5 Regular</span>
+                <div class="sample-text" style="font-family:var(--font-mono);font-size:13px;font-weight:400;line-height:1.5;">CUIL: 20-12345678-9 · Matrícula: MN 123456 · Código: REC-2026-08A3F</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 05. Layout Structure -->
+    <section>
+        <h2>05. ESPACIADO, GEOMETRÍA Y ESTRUCTURA DE LAYOUT</h2>
+
+        <h3>5.1 Escala de Espacio (Base 4px)</h3>
+        <p>Alineación pixel-perfect compatible con la grilla de 8px Angular Material. Todos los tokens son múltiplos de 4px.</p>
+        <div class="spacing-grid" id="spacingGrid"></div>
+
+        <h3>5.2 Geometría y Radios de Borde (Shapes)</h3>
+        <div class="radius-grid">
+            <div class="radius-box" style="border-radius:0;">
+                <strong>radius-none</strong><br>0px
+                <span class="radius-desc">Divisores de tablas y líneas de entrada inferiores.</span>
+            </div>
+            <div class="radius-box" style="border-radius:2px;">
+                <strong>radius-xs</strong><br>2px
+                <span class="radius-desc">Etiquetas inline rígidas y micro-badges.</span>
+            </div>
+            <div class="radius-box" style="border-radius:4px;">
+                <strong>radius-sm</strong><br>4px
+                <span class="radius-desc">Tooltips informativos independientes.</span>
+            </div>
+            <div class="radius-box" style="border-radius:8px;">
+                <strong>radius-md</strong><br>8px
+                <span class="radius-desc">Inputs de texto, selectores y botones estándar.</span>
+            </div>
+            <div class="radius-box" style="border-radius:12px;">
+                <strong>radius-lg</strong><br>12px
+                <span class="radius-desc">Tarjetas contenedoras (cards) y paneles de expansión.</span>
+            </div>
+            <div class="radius-box" style="border-radius:16px;">
+                <strong>radius-xl</strong><br>16px
+                <span class="radius-desc">Ventanas de diálogo modales y hojas flotantes inferiores.</span>
+            </div>
+            <div class="radius-box" style="border-radius:24px;">
+                <strong>radius-2xl</strong><br>24px
+                <span class="radius-desc">Paneles de navegación laterales (drawers) y snack bars de notificación.</span>
+            </div>
+            <div class="radius-box" style="border-radius:9999px;">
+                <strong>radius-full</strong><br>9999px
+                <span class="radius-desc">FABs, componentes de avatar y chips tipo píldora.</span>
+            </div>
+        </div>
+
+        <h3>5.3 Sombras Estructurales (Elevación)</h3>
+        <p>Basadas en el Azul Petróleo primario (#0B4F82) con opacidad gradual. De reposo a FABs y alertas superpuestas.</p>
+        <div class="elevation-grid" id="elevationGrid"></div>
+
+        <h3>5.4 Dimensiones del Layout Principal</h3>
+        <div class="layout-demo">
+            <div class="layout-bar toolbar">
+                <span>size-toolbar-height: 64px</span>
+                <span style="margin-left:auto;font-size:10px;">Altura fija de la cabecera principal (Header).</span>
+            </div>
+            <div class="layout-row">
+                <div class="sidebar-exp">
+                    <span>size-nav-width<br>256px</span>
+                    <div style="font-size:9px;color:var(--text-disabled);margin-top:2px;">Ancho estandarizado de la barra lateral (Sidebar) expandida</div>
+                </div>
+                <div class="sidebar-col">
+                    <span>size-nav-collapsed<br>72px</span>
+                    <div style="font-size:9px;color:var(--text-disabled);margin-top:2px;">Ancho de la barra lateral colapsada (modo solo iconos)</div>
+                </div>
+                <div class="content-area">
+                    <span>Área de contenido principal</span>
+                </div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap;">
+                <div style="text-align:center;">
+                    <div style="background:var(--surface-card);border:1px solid var(--border-default);border-radius:6px;width:200px;height:48px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;color:var(--text-secondary);">size-input-height: 48px</div>
+                    <div style="font-size:10px;color:var(--text-disabled);margin-top:4px;">Altura por defecto de los campos de formulario (M3 Standard)</div>
+                </div>
+                <div style="text-align:center;">
+                    <div style="background:var(--primary-500);border-radius:6px;width:140px;height:40px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;color:#fff;">size-btn-height: 40px</div>
+                    <div style="font-size:10px;color:var(--text-disabled);margin-top:4px;">Altura de los botones de acción estándar</div>
+                </div>
+                <div style="text-align:center;">
+                    <div style="background:var(--surface-card);border:1px solid var(--border-default);border-radius:6px;width:160px;height:44px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;color:var(--text-secondary);">size-touch-min: 44px</div>
+                    <div style="font-size:10px;color:var(--text-disabled);margin-top:4px;">Área mínima táctil requerida para cumplimiento de accesibilidad WCAG 2.5.5</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bonus: Components Preview -->
+    <section>
+        <h2 style="opacity:0.6;">Componentes Preview</h2>
+        <p style="opacity:0.5;">Ejemplos visuales de componentes usando los tokens definidos (sección complementaria fuera de la especificación).</p>
+        <div class="components-grid">
+            <!-- Buttons -->
+            <div class="component-card">
+                <div class="comp-title">Botones</div>
+                <div class="comp-row">
+                    <button class="btn btn-primary">Primary</button>
+                    <button class="btn btn-secondary">Secondary</button>
+                </div>
+                <div class="comp-row">
+                    <button class="btn btn-outline">Outline</button>
+                    <button class="btn btn-ghost">Ghost</button>
+                </div>
+                <div class="comp-row">
+                    <button class="btn btn-primary btn-sm">Small</button>
+                    <button class="btn btn-primary btn-lg">Large</button>
+                </div>
+                <div class="comp-row">
+                    <button class="btn btn-primary btn-icon" title="Icon button">✕</button>
+                    <button class="btn btn-outline btn-icon" title="Settings">⚙</button>
+                </div>
+            </div>
+
+            <!-- Card -->
+            <div class="component-card">
+                <div class="comp-title">Tarjeta (Card)</div>
+                <div class="card-preview">
+                    <div class="card-header">
+                        <h4>Paciente: Juan Pérez</h4>
+                        <div class="sub">DNI: 12.345.678 · O.S. OSDE</div>
+                    </div>
+                    <div class="card-body">
+                        <p>Receta electrónica vigente hasta el 15/07/2026. Incluye 3 medicamentos recetados.</p>
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn btn-primary btn-sm">Ver detalle</button>
+                        <button class="btn btn-outline btn-sm">Imprimir</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inputs -->
+            <div class="component-card">
+                <div class="comp-title">Campos de formulario</div>
+                <div class="input-group">
+                    <label class="input-label">Nombre del paciente *</label>
+                    <input class="input-demo" type="text" placeholder="Ingrese el nombre completo">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">DNI</label>
+                    <input class="input-demo" type="text" placeholder="00.000.000">
+                </div>
+                <div class="input-group" style="margin-bottom:0;">
+                    <label class="input-label">Seleccionar obra social</label>
+                    <select class="input-demo" style="appearance:auto;">
+                        <option>— Sin obra social —</option>
+                        <option>OSDE</option>
+                        <option>Swiss Medical</option>
+                        <option>Galeno</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Chips & Badges -->
+            <div class="component-card">
+                <div class="comp-title">Badges y Chips</div>
+                <div class="comp-row">
+                    <span class="badge badge-primary">Activo</span>
+                    <span class="badge badge-success">Dispensado</span>
+                    <span class="badge badge-warning">Pendiente</span>
+                    <span class="badge badge-error">Vencido</span>
+                </div>
+                <div class="comp-row" style="margin-top:12px;">
+                    <span class="chip chip-primary"><span class="chip-icon">✓</span> Receta activa</span>
+                    <span class="chip chip-secondary"><span class="chip-icon">⟳</span> Trimestral</span>
+                    <span class="chip"><span class="chip-icon">ℹ</span> Datos completos</span>
+                </div>
+            </div>
+
+            <!-- Sidebar preview -->
+            <div class="component-card" style="grid-column:span 2;">
+                <div class="comp-title">Sidebar (Navegación por rol)</div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+                    <div class="sidebar-preview">
+                        <div class="sp-header">
+                            <div class="sp-avatar" style="background:#0B4F82;">JM</div>
+                            <span class="sp-name" style="color:#0B4F82;">Dr. Martínez</span>
+                        </div>
+                        <div class="sp-nav">
+                            <div class="sp-item active" style="background:#0B4F82;"><span>📊</span> Dashboard</div>
+                            <div class="sp-item"><span>📋</span> Recetas</div>
+                            <div class="sp-item"><span>👤</span> Pacientes</div>
+                            <div class="sp-item"><span>📈</span> Reportes</div>
+                        </div>
+                        <div class="sp-footer">
+                            <div class="sp-item"><span>⚙</span> Configuración</div>
+                        </div>
+                        <div style="padding:6px 12px;font-size:10px;color:var(--text-disabled);text-align:center;border-top:1px solid var(--border-default);">Rol: Profesional</div>
+                    </div>
+                    <div class="sidebar-preview">
+                        <div class="sp-header">
+                            <div class="sp-avatar" style="background:#4E6B1A;">FC</div>
+                            <span class="sp-name" style="color:#4E6B1A;">Farm. López</span>
+                        </div>
+                        <div class="sp-nav">
+                            <div class="sp-item active" style="background:#4E6B1A;"><span>📊</span> Dashboard</div>
+                            <div class="sp-item"><span>💊</span> Dispensar</div>
+                            <div class="sp-item"><span>📋</span> Historial</div>
+                        </div>
+                        <div class="sp-footer">
+                            <div class="sp-item"><span>⚙</span> Configuración</div>
+                        </div>
+                        <div style="padding:6px 12px;font-size:10px;color:var(--text-disabled);text-align:center;border-top:1px solid var(--border-default);">Rol: Farmacéutico</div>
+                    </div>
+                    <div class="sidebar-preview">
+                        <div class="sp-header">
+                            <div class="sp-avatar" style="background:#3E1D90;">AU</div>
+                            <span class="sp-name" style="color:#3E1D90;">Auditoría</span>
+                        </div>
+                        <div class="sp-nav">
+                            <div class="sp-item active" style="background:#3E1D90;"><span>📊</span> Dashboard</div>
+                            <div class="sp-item"><span>👥</span> Usuarios</div>
+                            <div class="sp-item"><span>🔍</span> Auditoría</div>
+                        </div>
+                        <div class="sp-footer">
+                            <div class="sp-item"><span>⚙</span> Configuración</div>
+                        </div>
+                        <div style="padding:6px 12px;font-size:10px;color:var(--text-disabled);text-align:center;border-top:1px solid var(--border-default);">Rol: Auditor</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<footer class="footer">
+    <div class="container">
+        RecetAR — Sistema de Diseño &middot; Documentación de tokens visuales para desarrollo.
+    </div>
+</footer>
+
+<script>
+    // ===== COLOR UTILITIES =====
+    function hexToRgb(hex) {
+        const h = hex.replace('#', '');
+        return {
+            r: parseInt(h.substring(0, 2), 16),
+            g: parseInt(h.substring(2, 4), 16),
+            b: parseInt(h.substring(4, 6), 16)
+        };
+    }
+
+    function rgbToHex(r, g, b) {
+        return '#' + [r, g, b].map(v => Math.max(0, Math.min(255, Math.round(v)))
+            .toString(16).padStart(2, '0')).join('');
+    }
+
+    function rgbToHsl(r, g, b) {
+        r /= 255; g /= 255; b /= 255;
+        const max = Math.max(r, g, b), min = Math.min(r, g, b);
+        let h = 0, s = 0, l = (max + min) / 2;
+        if (max !== min) {
+            const d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) {
+                case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                case g: h = ((b - r) / d + 2) / 6; break;
+                case b: h = ((r - g) / d + 4) / 6; break;
+            }
+        }
+        return { h: h * 360, s: s * 100, l: l * 100 };
+    }
+
+    function hslToRgb(h, s, l) {
+        h /= 360; s /= 100; l /= 100;
+        let r, g, b;
+        if (s === 0) {
+            r = g = b = l;
+        } else {
+            const hue2rgb = (p, q, t) => {
+                if (t < 0) t += 1; if (t > 1) t -= 1;
+                if (t < 1/6) return p + (q - p) * 6 * t;
+                if (t < 1/2) return q;
+                if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                return p;
+            };
+            const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            const p = 2 * l - q;
+            r = hue2rgb(p, q, h + 1/3);
+            g = hue2rgb(p, q, h);
+            b = hue2rgb(p, q, h - 1/3);
+        }
+        return { r: r * 255, g: g * 255, b: b * 255 };
+    }
+
+    function adjustShade(hex, lightnessOffset, saturationFactor) {
+        const { r, g, b } = hexToRgb(hex);
+        const hsl = rgbToHsl(r, g, b);
+        let newL = Math.max(2, Math.min(98, hsl.l + lightnessOffset));
+        let newS = Math.max(5, Math.min(100, hsl.s * saturationFactor));
+        const rgb = hslToRgb(hsl.h, newS, newL);
+        return rgbToHex(rgb.r, rgb.g, rgb.b);
+    }
+
+    // ===== GENERATE PALETTES =====
+    const primaryShades = [
+        { name: '50', lo: 66, sf: 0.78 },
+        { name: '100', lo: 57, sf: 0.74 },
+        { name: '200', lo: 43, sf: 0.68 },
+        { name: '400', lo: 9, sf: 0.85 },
+        { name: '500', lo: 0, sf: 1.0 },
+        { name: '600', lo: -7, sf: 1.02 },
+        { name: '700', lo: -14, sf: 1.04 },
+    ];
+
+    const secondaryShades = [
+        { name: '50', lo: 71, sf: 0.72 },
+        { name: '100', lo: 60, sf: 0.67 },
+        { name: '400', lo: 7, sf: 0.88 },
+        { name: '500', lo: 0, sf: 1.0 },
+        { name: '600', lo: -6, sf: 1.02 },
+    ];
+
+    function generatePalette(baseHex, shades) {
+        const result = [];
+        for (const s of shades) {
+            result.push({
+                name: s.name,
+                hex: adjustShade(baseHex, s.lo, s.sf)
+            });
+        }
+        return result;
+    }
+
+    // ===== RENDER =====
+    function renderSwatches(containerId, palette, prefix) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        for (let i = 0; i < palette.length; i++) {
+            const sw = palette[i];
+            const hoverIdx = Math.min(i + 1, palette.length - 1);
+            const hoverHex = palette[hoverIdx] ? palette[hoverIdx].hex : sw.hex;
+            const div = document.createElement('div');
+            div.className = 'swatch';
+            div.innerHTML = `
+                <div class="swatch-color" style="background:${sw.hex};">
+                    <span class="hover-chip">hover → ${hoverHex.toLowerCase()}</span>
+                </div>
+                <div class="swatch-info">
+                    <div class="token-name">${prefix}-${sw.name}</div>
+                    <div class="token-hex">${sw.hex.toLowerCase()}</div>
+                </div>
+                <div class="swatch-hover">
+                    <span class="hover-swatch" style="background:${hoverHex};"></span>
+                    <span>hover: ${hoverHex.toLowerCase()}</span>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+    }
+
+    function updateAll() {
+        const primaryHex = document.getElementById('primaryPicker').value;
+        const secondaryHex = document.getElementById('secondaryPicker').value;
+
+        document.getElementById('primaryHex').textContent = primaryHex.toLowerCase();
+        document.getElementById('secondaryHex').textContent = secondaryHex.toLowerCase();
+
+        const pPalette = generatePalette(primaryHex, primaryShades);
+        const sPalette = generatePalette(secondaryHex, secondaryShades);
+
+        renderSwatches('primarySwatches', pPalette, 'color-primary');
+        renderSwatches('secondarySwatches', sPalette, 'color-secondary');
+
+        // Update CSS custom properties
+        const root = document.documentElement;
+        root.style.setProperty('--primary-50', pPalette[0].hex);
+        root.style.setProperty('--primary-100', pPalette[1].hex);
+        root.style.setProperty('--primary-200', pPalette[2].hex);
+        root.style.setProperty('--primary-400', pPalette[3].hex);
+        root.style.setProperty('--primary-500', pPalette[4].hex);
+        root.style.setProperty('--primary-600', pPalette[5].hex);
+        root.style.setProperty('--primary-700', pPalette[6].hex);
+
+        root.style.setProperty('--secondary-50', sPalette[0].hex);
+        root.style.setProperty('--secondary-100', sPalette[1].hex);
+        root.style.setProperty('--secondary-400', sPalette[2].hex);
+        root.style.setProperty('--secondary-500', sPalette[3].hex);
+        root.style.setProperty('--secondary-600', sPalette[4].hex);
+        root.style.setProperty('--header-gradient', `linear-gradient(135deg, ${primaryHex}, ${secondaryHex})`);
+        document.querySelector('header.header').style.background = `linear-gradient(135deg, ${primaryHex}, ${secondaryHex})`;
+
+        // Re-draw generated elements that reference CSS vars
+        renderSpacing();
+        renderElevation();
+    }
+
+    // ===== SPACING =====
+    function renderSpacing() {
+        const grid = document.getElementById('spacingGrid');
+        const spaces = [
+            { name: 'space-1', px: 4 },
+            { name: 'space-2', px: 8 },
+            { name: 'space-3', px: 12 },
+            { name: 'space-4', px: 16 },
+            { name: 'space-5', px: 20 },
+            { name: 'space-6', px: 24 },
+            { name: 'space-8', px: 32 },
+            { name: 'space-10', px: 40 },
+            { name: 'space-12', px: 48 },
+            { name: 'space-16', px: 64 },
+            { name: 'space-20', px: 80 },
+            { name: 'space-24', px: 96 },
+        ];
+        grid.innerHTML = '';
+        for (const s of spaces) {
+            const div = document.createElement('div');
+            div.className = 'spacing-bar';
+            div.innerHTML = `
+                <span class="label">${s.name} (${s.px}px)</span>
+                <div class="bar" style="width:${s.px * 2}px;max-width:100%;"></div>
+            `;
+            grid.appendChild(div);
+        }
+    }
+
+    // ===== ELEVATION =====
+    function renderElevation() {
+        const grid = document.getElementById('elevationGrid');
+        const primaryHex = document.getElementById('primaryPicker').value;
+        function shadowPrimary(alpha) {
+            return `0 1px 3px ${primaryHex}${alpha}`;
+        }
+        const elevations = [
+            { name: 'elevation-0', val: 'none', desc: 'Superficie base del Canvas.' },
+            { name: 'elevation-1', val: `0 1px 3px ${primaryHex}14`, desc: 'Componentes y tarjetas en estado de reposo.' },
+            { name: 'elevation-2', val: `0 2px 8px ${primaryHex}1F`, desc: 'Menús desplegables y estados hover de tarjetas.' },
+            { name: 'elevation-3', val: `0 4px 16px ${primaryHex}29`, desc: 'Diálogos modales y drawers laterales estables.' },
+            { name: 'elevation-4', val: `0 8px 24px ${primaryHex}33`, desc: 'Botones de acción flotante (FABs) y alertas superpuestas.' },
+        ];
+        const hex = primaryHex;
+        let alpha = [0, 0.08, 0.12, 0.16, 0.20];
+        // Convert hex to rgba
+        const { r, g, b } = hexToRgb(hex);
+        grid.innerHTML = '';
+        for (let i = 0; i < elevations.length; i++) {
+            const div = document.createElement('div');
+            div.className = 'elevation-box';
+            const shadow = i === 0 ? 'none' : `0 ${i === 1 ? 1 : i === 2 ? 2 : i === 3 ? 4 : 8}px ${i === 1 ? 3 : i === 2 ? 8 : i === 3 ? 16 : 24}px rgba(${r},${g},${b},${alpha[i]})`;
+            div.style.boxShadow = shadow;
+            div.innerHTML = `
+                <div class="elev-name">${elevations[i].name}</div>
+                <div class="elev-value">${elevations[i].desc}</div>
+            `;
+            grid.appendChild(div);
+        }
+    }
+
+    // ===== DARK MODE TOGGLE =====
+    document.getElementById('darkModeToggle').addEventListener('click', function() {
+        const body = document.body;
+        const icon = document.getElementById('darkModeIcon');
+        const label = document.getElementById('darkModeLabel');
+        body.classList.toggle('dark-mode');
+        if (body.classList.contains('dark-mode')) {
+            icon.textContent = '🌙';
+            label.textContent = 'Oscuro';
+        } else {
+            icon.textContent = '☀️';
+            label.textContent = 'Claro';
+        }
+    });
+
+    // ===== BACKGROUND PICKERS =====
+    function updateBackgrounds() {
+        const root = document.documentElement;
+        root.style.setProperty('--bg-light-custom', document.getElementById('bgLightPicker').value);
+        root.style.setProperty('--bg-dark-custom', document.getElementById('bgDarkPicker').value);
+    }
+
+    document.getElementById('bgLightPicker').addEventListener('input', updateBackgrounds);
+    document.getElementById('bgDarkPicker').addEventListener('input', updateBackgrounds);
+
+    // ===== INIT =====
+    document.getElementById('primaryPicker').addEventListener('input', updateAll);
+    document.getElementById('secondaryPicker').addEventListener('input', updateAll);
+
+    updateAll();
+</script>
+</body>
+</html>

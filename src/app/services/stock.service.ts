@@ -27,7 +27,7 @@ export interface Insumo {
     concepto?: { conceptId?: string; term?: string; fsn?: string; semanticTag?: string };
     createdAt?: Date;
     updatedAt?: Date;
-    createdBy?: { nombre?: string; apellido?: string; [key: string]: unknown };
+    createdBy?: { nombre?: string; apellido?: string;[key: string]: unknown };
 }
 
 export const TIPO_INSUMO_DICT: { [key: string]: string } = {
@@ -89,7 +89,7 @@ export class StockService {
             concepto: sourceItem.concepto,
             createdAt: sourceItem.createdAt ? new Date(sourceItem.createdAt) : undefined,
             updatedAt: sourceItem.updatedAt ? new Date(sourceItem.updatedAt) : undefined,
-            createdBy: sourceItem.createdBy as { nombre?: string; apellido?: string; [key: string]: unknown }
+            createdBy: sourceItem.createdBy as { nombre?: string; apellido?: string;[key: string]: unknown }
         };
     }
 

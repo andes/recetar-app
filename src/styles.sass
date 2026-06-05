@@ -1,13 +1,241 @@
-/* You can add global styles to this file, and also import other style files */
 @use 'styles/variables' as *
 
-@font-face
-  src: url(assets/fonts/RobotoCondensed-Regular.ttf) format("opentype")
+:root
+  // Primary palette
+  --primary: #{$primary}
+  --primary-dark: #{$primary-dark}
+  --primary-light: #{$primary-light}
+  --primary-50: #{$primary-50}
+  --primary-100: #{$primary-100}
+  --primary-200: #{$primary-200}
+  --primary-300: #{$primary-300}
+  --primary-400: #{$primary-400}
+  --primary-500: #{$primary-500}
+  --primary-600: #{$primary-600}
+  --primary-700: #{$primary-700}
+
+  // Secondary palette
+  --secondary: #{$secondary}
+  --secondary-dark: #{$secondary-dark}
+  --secondary-light: #{$secondary-light}
+  --secondary-50: #{$secondary-50}
+  --secondary-100: #{$secondary-100}
+  --secondary-200: #{$secondary-200}
+  --secondary-300: #{$secondary-300}
+  --secondary-400: #{$secondary-400}
+  --secondary-500: #{$secondary-500}
+  --secondary-600: #{$secondary-600}
+
+  // Neutral surfaces & text
+  --bg-body: #{$bg-body}
+  --bg-card: #{$bg-card}
+  --bg-raised: #{$bg-raised}
+  --text-primary: #{$text-primary}
+  --text-secondary: #{$text-secondary}
+  --text-disabled: #{$text-disabled}
+  --border-color: #{$border-color}
+  --border-strong: #{$border-strong}
+  --hover-bg: #{$hover-bg}
+  --footer-bg: #{$footer-bg}
+
+  // Status colors
+  --error-bg: #{$error-bg}
+  --error-text: #{$error-text}
+  --warning-bg: #{$warning-bg}
+  --warning-text: #{$warning-text}
+  --success-bg: #{$success-bg}
+  --success-text: #{$success-text}
+  --info-bg: #{$info-bg}
+  --info-text: #{$info-text}
+
+  // Role identity
+  --role-pharmacist: #{$role-pharmacist}
+  --role-pharmacist-accent: #{$role-pharmacist-accent}
+  --role-auditor: #{$role-auditor}
+
+  // Radius scale
+  --radius-xs: #{$radius-xs}
+  --radius-sm: #{$radius-sm}
+  --radius-md: #{$radius-md}
+  --radius-lg: #{$radius-lg}
+  --radius-xl: #{$radius-xl}
+  --radius-2xl: #{$radius-2xl}
+  --radius-full: #{$radius-full}
+
+  // Elevation
+  --elevation-0: #{$elevation-0}
+  --elevation-1: #{$elevation-1}
+  --elevation-2: #{$elevation-2}
+  --elevation-3: #{$elevation-3}
+  --elevation-4: #{$elevation-4}
+
+  // Layout
+  --header-height: #{$header-height}
+  --sidebar-width: #{$sidebar-width}
+  --sidebar-collapsed: #{$sidebar-collapsed}
+
+  // Spacing
+  --space-1: #{$space-1}
+  --space-2: #{$space-2}
+  --space-3: #{$space-3}
+  --space-4: #{$space-4}
+  --space-5: #{$space-5}
+  --space-6: #{$space-6}
+  --space-8: #{$space-8}
+  --space-10: #{$space-10}
+  --space-12: #{$space-12}
+  --space-16: #{$space-16}
+  --space-20: #{$space-20}
+  --space-24: #{$space-24}
+
+  // ---- Material typography overrides (Inter) ----
+  --mat-button-filled-label-text-font: Inter, sans-serif
+  --mat-button-outlined-label-text-font: Inter, sans-serif
+  --mat-button-protected-label-text-font: Inter, sans-serif
+  --mat-button-text-label-text-font: Inter, sans-serif
+  --mat-button-tonal-label-text-font: Inter, sans-serif
+  --mat-list-list-item-label-text-font: Inter, sans-serif
+  --mat-list-list-item-supporting-text-font: Inter, sans-serif
+  --mat-paginator-container-text-font: Inter, sans-serif
+  --mat-tab-label-text-font: Inter, sans-serif
+  --mat-checkbox-label-text-font: Inter, sans-serif
+  --mat-table-header-headline-font: Inter, sans-serif
+  --mat-table-row-item-label-text-font: Inter, sans-serif
+  --mat-table-footer-supporting-text-font: Inter, sans-serif
+  --mat-badge-text-font: Inter, sans-serif
+  --mat-bottom-sheet-container-text-font: Inter, sans-serif
+  --mat-button-toggle-label-text-font: Inter, sans-serif
+  --mat-datepicker-calendar-text-font: Inter, sans-serif
+  --mat-expansion-header-text-font: Inter, sans-serif
+  --mat-expansion-container-text-font: Inter, sans-serif
+  --mat-snack-bar-supporting-text-font: Inter, sans-serif
+  --mat-stepper-container-text-font: Inter, sans-serif
+  --mat-stepper-header-label-text-font: Inter, sans-serif
+  --mat-toolbar-title-text-font: Inter, sans-serif
+  --mat-tree-node-text-font: Inter, sans-serif
+  --mat-fab-extended-label-text-font: Inter, sans-serif
+  --mat-form-field-label-text-font: Inter, sans-serif
+  --mat-form-field-leading-icon-text-font: Inter, sans-serif
+  --mat-option-label-text-font: Inter, sans-serif
+  --mat-option-label-text-font: Inter, sans-serif
+  --mat-select-trigger-text-font: Inter, sans-serif
+  --mat-menu-item-label-text-font: Inter, sans-serif
+  --mat-card-title-text-font: Inter, sans-serif
+  --mat-card-subtitle-text-font: Inter, sans-serif
+  --mat-dialog-title-text-font: Inter, sans-serif
+  --mat-dialog-content-text-font: Inter, sans-serif
+  --mat-chip-label-text-font: Inter, sans-serif
+  --mat-slider-label-text-font: Inter, sans-serif
+  --mat-radio-label-text-font: Inter, sans-serif
+  --mat-switch-label-text-font: Inter, sans-serif
+  --mat-sort-header-text-font: Inter, sans-serif
+
+  // --shadow-* aliases (backward compat)
+  --shadow-sm: #{$shadow-sm}
+  --shadow-lg: #{$shadow-lg}
+
+.dark-mode
+  --bg-body: #{$bg-body-dark}
+  --bg-card: #{$bg-card-dark}
+  --bg-raised: #{$bg-raised-dark}
+  --text-primary: #{$text-primary-dark}
+  --text-secondary: #{$text-secondary-dark}
+  --text-disabled: #{$text-disabled-dark}
+  --border-color: #{$border-color-dark}
+  --border-strong: #{$border-strong-dark}
+  --hover-bg: #{$hover-bg-dark}
+  --footer-bg: #{$footer-bg-dark}
+
+  --error-bg: #{$error-bg-dark}
+  --error-text: #{$error-text-dark}
+  --warning-bg: #{$warning-bg-dark}
+  --warning-text: #{$warning-text-dark}
+  --success-bg: #{$success-bg-dark}
+  --success-text: #{$success-text-dark}
+  --info-bg: #{$info-bg-dark}
+  --info-text: #{$info-text-dark}
+
+  --elevation-0: #{$elevation-0-dark}
+  --elevation-1: #{$elevation-1-dark}
+  --elevation-2: #{$elevation-2-dark}
+  --elevation-3: #{$elevation-3-dark}
+  --elevation-4: #{$elevation-4-dark}
+
+  --shadow-sm: #{$shadow-sm-dark}
+  --shadow-lg: #{$shadow-lg-dark}
+
+  // ---- Material component overrides ----
+
+  .mat-mdc-card
+    background-color: var(--bg-card) !important
+    color: var(--text-primary) !important
+
+  .mat-mdc-menu-panel
+    background-color: var(--bg-card) !important
+    border-color: var(--border-color) !important
+
+    .mat-mdc-menu-item
+      color: var(--text-primary) !important
+
+      &:hover:not([disabled])
+        background-color: var(--hover-bg) !important
+
+      .mat-icon
+        color: var(--text-secondary) !important
+
+  .mat-mdc-dialog-container
+    background-color: var(--bg-card) !important
+    color: var(--text-primary) !important
+
+    .mat-mdc-dialog-title
+      color: var(--text-primary) !important
+
+    .mat-mdc-dialog-content
+      color: var(--text-secondary) !important
+
+  .mat-mdc-table
+    background-color: var(--bg-card) !important
+    color: var(--text-primary) !important
+
+    .mat-mdc-header-cell
+      color: var(--text-primary) !important
+
+    .mat-mdc-cell
+      color: var(--text-primary) !important
+
+    .mat-mdc-row:hover
+      background-color: var(--hover-bg) !important
+
+  .mat-mdc-paginator
+    background-color: var(--bg-card) !important
+    color: var(--text-primary) !important
+
+  .mat-mdc-form-field
+    .mat-mdc-text-field-wrapper
+      background-color: var(--bg-card) !important
+
+    .mdc-floating-label
+      color: var(--text-secondary) !important
+
+    .mat-mdc-input-element
+      color: var(--text-primary) !important
+      caret-color: var(--text-primary) !important
+
+  .mat-mdc-chip
+    background-color: var(--hover-bg) !important
+    color: var(--text-primary) !important
+
+  .mat-mdc-dialog-actions
+    border-top-color: var(--border-color) !important
+
 body
   margin: 0
   padding: 0
-  background-color: #303030
-  font-family: roboto
+  background-color: var(--bg-body)
+  font-family: Inter, sans-serif
+
+  @media (max-width: $small-devices)
+    overflow-x: hidden
 
 .wrapper
     width: 80%

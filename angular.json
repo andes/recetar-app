@@ -27,10 +27,11 @@
             "tsConfig": "tsconfig.app.json",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              { "glob": "indigo-pink.css", "input": "node_modules/@angular/material/prebuilt-themes/", "output": "/" },
+              { "glob": "purple-green.css", "input": "node_modules/@angular/material/prebuilt-themes/", "output": "/" }
             ],
             "styles": [
-              "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
               "src/styles.sass"
             ],
             "scripts": [],
@@ -111,10 +112,11 @@
             "karmaConfig": "karma.conf.js",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              { "glob": "indigo-pink.css", "input": "node_modules/@angular/material/prebuilt-themes/", "output": "/" },
+              { "glob": "purple-green.css", "input": "node_modules/@angular/material/prebuilt-themes/", "output": "/" }
             ],
             "styles": [
-              "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
               "src/styles.sass"
             ],
             "scripts": [],

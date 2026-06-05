@@ -1,0 +1,170 @@
+@use 'styles/variables' as *
+
+:host
+    position: fixed !important
+    top: 0
+    left: 0
+    width: 260px
+    height: 100vh
+    z-index: 1000
+    transform: translateX(-100%)
+    transition: transform 0.2s ease
+    background: var(--bg-card)
+    border-right: 1px solid var(--border-color)
+
+:host.sidebar-host-overlay-open
+    transform: translateX(0)
+
+.sidebar
+    width: 100%
+    height: 100%
+    border: none
+    border-radius: 0
+    transition: none
+    display: flex
+    flex-direction: column
+
+    &.collapsed
+        width: 100%
+
+        .visually-hidden
+            display: flex
+
+        ::ng-deep
+            .mdc-list-item__content
+                display: flex
+
+            .mdc-list-item__start
+                margin-right: 12px
+
+.visually-hidden
+    display: none
+
+::ng-deep .sidebar .mat-mdc-list-item
+    height: 40px !important
+    padding-left: 17px !important
+    margin: 0 5px !important
+    border-radius: $radius-md !important
+    width: auto
+
+    .mdc-list-item__primary-text
+        color: var(--text-primary)
+        font-size: 0.9rem
+
+    .mat-icon
+        color: var(--text-primary)
+        font-size: 20px
+        width: 20px
+        height: 20px
+        margin-left: 0
+
+    .mdc-list-item__start
+        margin-right: 12px
+
+    &:hover
+        background: var(--hover-bg) !important
+
+        .mdc-list-item__primary-text,
+        .mat-icon
+            color: var(--primary)
+
+.sidebar-spacer
+    flex: 1
+
+.sidebar-footer
+    padding: 8px 0
+    border-top: 1px solid var(--border-color)
+    margin-top: 8px
+
+    .theme-toggle-btn
+        display: flex
+        align-items: center
+        gap: 12px
+        width: calc(100% - 10px)
+        margin: 0 5px
+        padding: 0 12px 0 17px
+        height: 40px
+        border: none
+        background: none
+        cursor: pointer
+        font-family: inherit
+        font-size: inherit
+        border-radius: $radius-md
+        color: var(--text-primary)
+
+        .mat-icon
+            font-size: 20px
+            width: 20px
+            height: 20px
+            color: var(--text-primary)
+            flex-shrink: 0
+            margin-left: 0
+
+        span
+            font-size: 0.9rem
+            white-space: nowrap
+            overflow: hidden
+            text-overflow: ellipsis
+
+        &:hover
+            background: var(--hover-bg)
+            color: var(--primary)
+
+            .mat-icon
+                color: var(--primary)
+
+:host-context(.dark-mode)
+    ::ng-deep .sidebar .mat-mdc-list-item:hover
+        background: var(--primary-700) !important
+
+        .mdc-list-item__primary-text,
+        .mat-icon
+            color: #ffffff !important
+
+    .sidebar-footer .theme-toggle-btn:hover
+        background: var(--primary-700) !important
+        color: #ffffff !important
+
+        .mat-icon
+            color: #ffffff !important
+
+@media (min-width: $small-devices + 1px)
+    :host
+        position: static !important
+        width: auto
+        height: auto
+        transform: none
+        transition: none
+        background: none
+        border-right: none
+        z-index: auto
+
+    :host.sidebar-host-overlay-open
+        transform: none
+
+    .sidebar
+        width: 260px
+        height: 100%
+        border-radius: $radius-md
+        border: 1px solid var(--border-color)
+        background: var(--bg-card)
+        overflow-y: auto
+        display: flex
+        flex-direction: column
+        transition: width 0.2s ease
+
+        &.collapsed
+            width: 64px
+
+            .visually-hidden
+                display: none !important
+
+            .sidebar-footer
+                border-top: none
+
+            ::ng-deep
+                .mdc-list-item__content
+                    display: none !important
+
+                .mdc-list-item__start
+                    margin-right: 0 !important

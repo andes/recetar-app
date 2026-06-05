@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Practice, PracticeAdapter } from '@interfaces/practices';
-
 import * as CryptoJS from 'crypto-js';
 import { BehaviorSubject, Observable, Subject, of, timer } from 'rxjs';
 import { map, mapTo, switchMap, takeUntil, tap } from 'rxjs/operators';
