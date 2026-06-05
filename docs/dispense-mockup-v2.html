@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dispensar v2 — RecetAR</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+<style>
+  :root {
+    --bg-body: #f1f3f6;
+    --bg-card: #ffffff;
+    --bg-sidebar: #0f172a;
+    --border-color: #e2e5ea;
+    --border-light: #eef0f3;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --text-hint: #94a3b8;
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --primary-soft: #eff6ff;
+    --success: #16a34a;
+    --success-soft: #f0fdf4;
+    --warning: #d97706;
+    --warning-soft: #fffbeb;
+    --error: #dc2626;
+    --error-soft: #fef2f2;
+    --andes: #be185d;
+    --andes-soft: #fdf2f8;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,.04), 0 1px 5px rgba(0,0,0,.04);
+    --shadow-hover: 0 2px 8px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.03);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-body); color: var(--text);
+    font-size: 15px; display: flex; height: 100vh; overflow: hidden;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 248px; min-width: 248px; background: var(--bg-sidebar);
+    color: #fff; display: flex; flex-direction: column; padding: 22px 0;
+    overflow-y: auto;
+  }
+  .sb-brand {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 18px 20px; margin-bottom: 14px;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+  }
+  .sb-brand .logo {
+    width: 36px; height: 36px; background: var(--primary); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 17px;
+  }
+  .sb-brand strong { font-size: 16px; font-weight: 650; letter-spacing: -.01em; }
+  .sb-nav { padding: 6px 10px; }
+  .sb-nav a {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 8px;
+    color: rgba(255,255,255,.5); font-size: 14px; font-weight: 500;
+    text-decoration: none; margin-bottom: 1px; transition: all .15s;
+  }
+  .sb-nav a:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.85); }
+  .sb-nav a.active { background: rgba(37,99,235,.22); color: #fff; }
+  .sb-nav a .mi { font-size: 20px; width: 24px; font-variation-settings: 'FILL' 1; }
+  .sb-foot {
+    margin-top: auto; padding: 16px 18px; border-top: 1px solid rgba(255,255,255,.07);
+    display: flex; align-items: center; gap: 10px; font-size: 13px; color: rgba(255,255,255,.4);
+  }
+
+  /* ── Main ── */
+  .main {
+    flex: 1; display: flex; flex-direction: column;
+    overflow-y: auto; padding: 0;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    background: var(--bg-card); border-bottom: 1px solid var(--border-color);
+    padding: 20px 36px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .topbar h1 { font-size: 24px; font-weight: 700; letter-spacing: -.02em; }
+  .topbar .hint { font-size: 14px; color: var(--text-muted); margin-top: 3px; }
+
+  /* ── Content area ── */
+  .content { padding: 28px 36px; flex: 1; overflow-y: auto; }
+
+  /* ── Search ── */
+  .search-hero {
+    position: relative; margin-bottom: 22px;
+  }
+  .search-hero input {
+    width: 100%; padding: 14px 20px 14px 52px;
+    border: 2px solid var(--border-color); border-radius: var(--radius);
+    background: var(--bg-card); font-size: 16px; outline: none;
+    transition: border .15s, box-shadow .15s; box-shadow: var(--shadow);
+  }
+  .search-hero input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37,99,235,.08); }
+  .search-hero input::placeholder { color: var(--text-hint); font-size: 15px; }
+  .search-hero .mi {
+    position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+    font-size: 24px; color: var(--text-hint);
+  }
+
+  /* ── Filter row ── */
+  .filter-row {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 28px; flex-wrap: wrap;
+  }
+  .filter-label { font-size: 13px; font-weight: 600; color: var(--text-hint); text-transform: uppercase; letter-spacing: .04em; margin-right: 4px; }
+
+  .chip-group {
+    display: flex; gap: 0; background: var(--bg-card);
+    border: 1px solid var(--border-color); border-radius: var(--radius);
+    overflow: hidden; box-shadow: var(--shadow);
+  }
+  .chip-group button {
+    padding: 10px 20px; font-size: 14px; font-weight: 500;
+    border: none; background: transparent; color: var(--text-muted);
+    cursor: default; transition: all .15s; border-right: 1px solid var(--border-light);
+    white-space: nowrap;
+  }
+  .chip-group button:last-child { border-right: none; }
+  .chip-group button.active { background: var(--primary); color: #fff; font-weight: 600; }
+  .chip-group button .b {
+    font-size: 10.5px; background: rgba(255,255,255,.2); padding: 2px 7px;
+    border-radius: 999px; margin-left: 6px;
+  }
+  .chip-group button.active .b { background: rgba(255,255,255,.25); }
+
+  .sep { width: 1px; height: 20px; background: var(--border-color); margin: 0 4px; }
+
+  .quick-dates { display: flex; gap: 6px; margin-left: auto; }
+  .quick-dates button {
+    padding: 9px 16px; font-size: 13px; font-weight: 500;
+    border: 1px solid var(--border-color); border-radius: var(--radius);
+    background: var(--bg-card); color: var(--text-muted); cursor: default;
+    transition: all .15s; white-space: nowrap;
+  }
+  .quick-dates button.active {
+    background: var(--primary-soft); color: var(--primary);
+    border-color: var(--primary); font-weight: 600;
+  }
+
+  /* ── Summary bar ── */
+  .summary {
+    display: flex; align-items: center; gap: 16px;
+    padding: 14px 18px; background: var(--primary-soft);
+    border-radius: var(--radius); margin-bottom: 24px;
+    font-size: 14px; font-weight: 500; color: var(--primary);
+  }
+  .summary .mi { font-size: 22px; }
+  .summary .sep-dot { width: 4px; height: 4px; background: var(--primary); border-radius: 50%; opacity: .4; }
+
+  /* ── Day group ── */
+  .day-group { margin-bottom: 20px; }
+  .day-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px; cursor: default; border-radius: var(--radius);
+    transition: background .12s; user-select: none;
+    margin-bottom: 10px;
+  }
+  .day-header:hover { background: #f8fafc; }
+  .day-header .chevron {
+    font-size: 22px; color: var(--text-hint); transition: transform .2s;
+  }
+  .day-header.open .chevron { transform: rotate(90deg); }
+  .day-title { font-size: 15px; font-weight: 700; color: var(--text); }
+  .day-count { font-size: 13px; color: var(--text-hint); font-weight: 400; }
+  .day-extra { font-size: 12px; color: var(--text-muted); margin-left: auto; }
+
+  /* ── Prescription grid (2 col) ── */
+  .rx-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 12px; padding-left: 28px;
+  }
+
+  /* ── Prescription card ── */
+  .rx-card {
+    background: var(--bg-card); border: 1px solid var(--border-color);
+    border-radius: var(--radius); padding: 20px;
+    display: flex; flex-direction: column; gap: 14px;
+    box-shadow: var(--shadow); transition: border .15s, box-shadow .15s;
+  }
+  .rx-card:hover { border-color: #cbd5e1; box-shadow: var(--shadow-hover); }
+  .rx-card:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+
+  .rx-top { display: flex; align-items: flex-start; gap: 12px; }
+  .rx-source {
+    width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800;
+  }
+  .src-r { background: var(--primary-soft); color: var(--primary); }
+  .src-a { background: var(--andes-soft); color: var(--andes); }
+
+  .rx-body { flex: 1; min-width: 0; }
+  .rx-med { font-size: 16px; font-weight: 700; line-height: 1.3; word-break: break-word; }
+  .rx-meta {
+    display: flex; flex-wrap: wrap; gap: 8px 18px;
+    margin-top: 8px; font-size: 13.5px; color: var(--text-muted);
+  }
+  .rx-meta-item {
+    display: flex; align-items: center; gap: 5px;
+  }
+  .rx-meta-item .mi { font-size: 17px; }
+
+  .rx-bottom {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 12px; border-top: 1px solid var(--border-light);
+  }
+  .rx-tags { display: flex; gap: 8px; }
+  .tag {
+    padding: 5px 10px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; letter-spacing: .02em;
+    text-transform: uppercase;
+  }
+  .tag-warn { background: var(--warning-soft); color: var(--warning); }
+  .tag-err  { background: var(--error-soft); color: var(--error); }
+  .tag-info { background: var(--primary-soft); color: var(--primary); }
+  .tag-succ { background: var(--success-soft); color: var(--success); }
+
+  .rx-actions { display: flex; gap: 8px; }
+  .btn {
+    display: flex; align-items: center; gap: 7px;
+    padding: 10px 20px; border-radius: var(--radius-sm);
+    font-size: 14px; font-weight: 600; cursor: default;
+    border: none; transition: all .15s; white-space: nowrap;
+  }
+  .btn .mi { font-size: 20px; }
+  .btn-prime {
+    background: var(--primary); color: #fff;
+    padding: 10px 24px; font-size: 14px;
+  }
+  .btn-prime:hover { background: var(--primary-hover); }
+  .btn-ghost {
+    background: var(--bg-card); color: var(--text-muted);
+    border: 1.5px solid var(--border-color); padding: 10px 16px;
+  }
+  .btn-ghost:hover { background: var(--bg-body); }
+  .btn-undo {
+    background: var(--warning-soft); color: var(--warning);
+    border: 1.5px solid var(--warning); font-size: 13px;
+  }
+
+  /* ── Countdown ── */
+  .countdown-inline {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px; background: #f8fafc;
+    border-radius: var(--radius-sm); margin-top: 4px;
+  }
+  .countdown-inline .bar {
+    flex: 1; height: 5px; background: var(--border-color); border-radius: 3px; overflow: hidden;
+  }
+  .countdown-inline .bar .fill { height: 100%; background: var(--primary); width: 68%; border-radius: 3px; }
+  .countdown-inline .time { font-size: 13px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+
+  /* ── Dispensed card ── */
+  .rx-card.dispensed { border-left: 4px solid var(--success); background: #fafffc; }
+  .rx-card.dispensed .rx-med { color: var(--text-muted); }
+
+  /* ── Expanded detail ── */
+  .rx-detail {
+    grid-column: 1 / -1;
+    background: #f8fafc; border: 1px dashed var(--border-color);
+    border-radius: var(--radius); padding: 16px 20px;
+    display: flex; flex-wrap: wrap; gap: 12px 28px; font-size: 13.5px;
+  }
+  .rx-detail .field { display: flex; flex-direction: column; gap: 2px; min-width: 140px; }
+  .rx-detail label { font-size: 10.5px; color: var(--text-hint); text-transform: uppercase; font-weight: 700; letter-spacing: .04em; }
+  .rx-detail code { font-size: 12px; color: var(--text-muted); font-family: 'SF Mono','Fira Code',monospace; }
+
+  /* ── Empty ── */
+  .empty {
+    text-align: center; padding: 60px 20px;
+  }
+  .empty .mi { font-size: 56px; color: var(--text-hint); margin-bottom: 16px; }
+  .empty h3 { font-size: 16px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+  .empty p { font-size: 14px; color: var(--text-hint); }
+
+  /* ── Responsive: single column ── */
+  @media (max-width: 900px) {
+    .rx-grid { grid-template-columns: 1fr; padding-left: 0; }
+    .content { padding: 20px; }
+    .topbar { padding: 18px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ Sidebar ══════════ -->
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="logo">R</div>
+    <strong>RecetAR</strong>
+  </div>
+  <div class="sb-nav">
+    <a href="#"><span class="material-symbols-outlined mi">home</span>Inicio</a>
+    <a href="#" class="active"><span class="material-symbols-outlined mi">medication</span>Dispensar</a>
+    <a href="#"><span class="material-symbols-outlined mi">description</span>Documentos</a>
+  </div>
+  <div class="sb-foot">
+    <span class="material-symbols-outlined" style="font-size:18px">storefront</span>
+    Farmacia Los Alamos
+  </div>
+</aside>
+
+<!-- ══════════ Main ══════════ -->
+<main class="main">
+
+  <div class="topbar">
+    <div>
+      <h1>Dispensar</h1>
+      <p class="hint">Busque y dispense recetas pendientes de sus pacientes</p>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Search -->
+    <div class="search-hero">
+      <span class="material-symbols-outlined mi">search</span>
+      <input type="text" placeholder="Buscar por DNI, nombre del paciente, medicamento o código de receta..." />
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-row">
+      <span class="filter-label">Estado</span>
+      <div class="chip-group">
+        <button class="active">Pendientes<span class="b">12</span></button>
+        <button>Dispensadas hoy<span class="b">8</span></button>
+        <button>Vencidas<span class="b">3</span></button>
+        <button>Todas<span class="b">23</span></button>
+      </div>
+      <div class="sep"></div>
+      <span class="filter-label">Período</span>
+      <div class="quick-dates">
+        <button class="active">Hoy</button>
+        <button>7 días</button>
+        <button>30 días</button>
+        <button>Personalizado</button>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary">
+      <span class="material-symbols-outlined mi">today</span>
+      12 recetas pendientes para hoy
+      <span class="sep-dot"></span>
+      4 de Andes
+      <span class="sep-dot"></span>
+      8 de RecetAR
+    </div>
+
+    <!-- ══ HOY ══ -->
+    <div class="day-group">
+      <div class="day-header open">
+        <span class="material-symbols-outlined chevron">chevron_right</span>
+        <span class="day-title">Hoy — miércoles 5 de agosto</span>
+        <span class="day-count">5 recetas</span>
+      </div>
+      <div class="rx-grid">
+
+        <!-- Card 1 -->
+        <div class="rx-card">
+          <div class="rx-top">
+            <div class="rx-source src-r">R</div>
+            <div class="rx-body">
+              <div class="rx-med">Ibuprofeno 600 mg comprimidos</div>
+              <div class="rx-meta">
+                <span class="rx-meta-item"><span class="material-symbols-outlined mi">person</span>González, María — DNI 28.456.123</span>
+              </div>
+            </div>
+          </div>
+          <div class="rx-bottom">
+            <div class="rx-tags">
+              <span class="tag tag-warn">Vence en 24 h</span>
+              <span class="tag tag-info">Triplicado</span>
+            </div>
+            <div class="rx-actions">
+              <button class="btn btn-ghost"><span class="material-symbols-outlined mi">print</span></button>
+              <button class="btn btn-prime"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="rx-card">
+          <div class="rx-top">
+            <div class="rx-source src-a">A</div>
+            <div class="rx-body">
+              <div class="rx-med">Amlodipina 10 mg comprimidos</div>
+              <div class="rx-meta">
+                <span class="rx-meta-item"><span class="material-symbols-outlined mi">person</span>Rodríguez, Carlos — DNI 31.987.234</span>
+              </div>
+            </div>
+          </div>
+          <div class="rx-bottom">
+            <div class="rx-tags">
+              <span class="tag tag-info">Duplicado</span>
+            </div>
+            <div class="rx-actions">
+              <button class="btn btn-ghost"><span class="material-symbols-outlined mi">print</span></button>
+              <button class="btn btn-prime"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3 — with detail -->
+        <div class="rx-card">
+          <div class="rx-top">
+            <div class="rx-source src-r">R</div>
+            <div class="rx-body">
+              <div class="rx-med">Metformina 850 mg comprimidos</div>
+              <div class="rx-meta">
+                <span class="rx-meta-item"><span class="material-symbols-outlined mi">person</span>López, Ana — DNI 25.498.763</span>
+                <span class="rx-meta-item"><span class="material-symbols-outlined mi">stethoscope</span>Dr. Gutiérrez</span>
+                <span class="rx-meta-item">3 envases</span>
+              </div>
+            </div>
+          </div>
+          <div class="rx-bottom">
+            <div class="rx-tags"></div>
+            <div class="rx-actions">
+              <button class="btn btn-ghost"><span class="material-symbols-outlined mi">print</span></button>
+              <button class="btn btn-prime"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+            </div>
+          </div>
+        </div>
+        <!-- Detail -->
+        <div class="rx-detail">
+          <div class="field"><label>Diagnóstico</label>Diabetes mellitus tipo 2</div>
+          <div class="field"><label>Indicaciones</label>1 comprimido cada 12 h con las comidas</div>
+          <div class="field"><label>Profesional</label>Dr. Gutiérrez — MN 45231</div>
+          <div class="field"><label>Código</label><code>RX-2026-08-04-00182</code></div>
+        </div>
+
+        <!-- Card 4 — just dispensed -->
+        <div class="rx-card dispensed">
+          <div class="rx-top">
+            <div class="rx-source src-r">R</div>
+            <div class="rx-body">
+              <div class="rx-med">Losartán 50 mg comprimidos</div>
+              <div class="rx-meta">
+                <span class="rx-meta-item"><span class="material-symbols-outlined mi">person</span>García, Jorge — DNI 22.783.456</span>
+                <span class="rx-meta-item">2 envases</span>
+              </div>
+            </div>
+          </div>
+          <div class="countdown-inline">
+            <span class="material-symbols-outlined mi" style="font-size:18px;color:var(--primary)">timer</span>
+            <span class="time">Queda 1 h 26 min para deshacer</span>
+            <div class="bar"><div class="fill" style="width:68%"></div></div>
+            <button class="btn btn-undo">
+              <span class="material-symbols-outlined mi">undo</span>Deshacer
+            </button>
+          </div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="rx-card">
+          <div class="rx-top">
+            <div class="rx-source src-a">A</div>
+            <div class="rx-body">
+              <div class="rx-med">Paracetamol 500 mg comprimidos</div>
+              <div class="rx-meta">
+                <span class="rx-meta-item"><span class="material-symbols-outlined mi">person</span>Torres, Elena — DNI 27.654.123</span>
+              </div>
+            </div>
+          </div>
+          <div class="rx-bottom">
+            <div class="rx-tags"></div>
+            <div class="rx-actions">
+              <button class="btn btn-ghost"><span class="material-symbols-outlined mi">print</span></button>
+              <button class="btn btn-prime"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ AYER ══ -->
+    <div class="day-group">
+      <div class="day-header">
+        <span class="material-symbols-outlined chevron">chevron_right</span>
+        <span class="day-title">Ayer — martes 4 de agosto</span>
+        <span class="day-count">4 recetas</span>
+      </div>
+      <div class="rx-grid" style="display:none">
+
+        <div class="rx-card">
+          <div class="rx-top">
+            <div class="rx-source src-r">R</div>
+            <div class="rx-body">
+              <div class="rx-med">Levotiroxina 100 mcg comprimidos</div>
+              <div class="rx-meta">
+                <span class="rx-meta-item"><span class="material-symbols-outlined mi">person</span>Díaz, Pedro — DNI 29.876.234</span>
+              </div>
+            </div>
+          </div>
+          <div class="rx-bottom">
+            <div class="rx-tags"></div>
+            <div class="rx-actions">
+              <button class="btn btn-ghost"><span class="material-symbols-outlined mi">print</span></button>
+              <button class="btn btn-prime"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="rx-card dispensed">
+          <div class="rx-top">
+            <div class="rx-source src-a">A</div>
+            <div class="rx-body">
+              <div class="rx-med">Salbutamol 100 mcg inhalador</div>
+              <div class="rx-meta">
+                <span class="rx-meta-item"><span class="material-symbols-outlined mi">person</span>Silva, Marta — DNI 26.789.345</span>
+              </div>
+            </div>
+          </div>
+          <div class="rx-bottom">
+            <div class="rx-tags"><span class="tag tag-err">Ventana cerrada</span></div>
+            <div class="rx-actions">
+              <button class="btn btn-ghost"><span class="material-symbols-outlined mi">print</span></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="rx-card" style="opacity:.65">
+          <div class="rx-top">
+            <div class="rx-source src-r">R</div>
+            <div class="rx-body">
+              <div class="rx-med" style="text-decoration:line-through">Omeprazol 20 mg cápsulas</div>
+              <div class="rx-meta">
+                <span class="rx-meta-item"><span class="material-symbols-outlined mi">person</span>Morales, Luis — DNI 24.123.678</span>
+              </div>
+            </div>
+          </div>
+          <div class="rx-bottom">
+            <div class="rx-tags"><span class="tag tag-err">Vencida</span></div>
+            <div class="rx-actions">
+              <button class="btn btn-ghost"><span class="material-symbols-outlined mi">print</span></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="rx-card">
+          <div class="rx-top">
+            <div class="rx-source src-a">A</div>
+            <div class="rx-body">
+              <div class="rx-med">Atorvastatina 20 mg comprimidos</div>
+              <div class="rx-meta">
+                <span class="rx-meta-item"><span class="material-symbols-outlined mi">person</span>Vega, Patricia — DNI 30.987.234</span>
+              </div>
+            </div>
+          </div>
+          <div class="rx-bottom">
+            <div class="rx-tags"><span class="tag tag-warn">Vence en 48 h</span></div>
+            <div class="rx-actions">
+              <button class="btn btn-ghost"><span class="material-symbols-outlined mi">print</span></button>
+              <button class="btn btn-prime"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ LUNES ══ -->
+    <div class="day-group">
+      <div class="day-header">
+        <span class="material-symbols-outlined chevron">chevron_right</span>
+        <span class="day-title">Lunes 3 de agosto</span>
+        <span class="day-count">3 recetas</span>
+      </div>
+      <div class="rx-grid" style="display:none">
+
+        <div class="rx-card">
+          <div class="rx-top">
+            <div class="rx-source src-r">R</div>
+            <div class="rx-body">
+              <div class="rx-med">Enalapril 10 mg comprimidos</div>
+              <div class="rx-meta">
+                <span class="rx-meta-item"><span class="material-symbols-outlined mi">person</span>Ramírez, Juana — DNI 18.563.452</span>
+              </div>
+            </div>
+          </div>
+          <div class="rx-bottom">
+            <div class="rx-tags"></div>
+            <div class="rx-actions">
+              <button class="btn btn-ghost"><span class="material-symbols-outlined mi">print</span></button>
+              <button class="btn btn-prime"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="rx-card dispensed">
+          <div class="rx-top">
+            <div class="rx-source src-a">A</div>
+            <div class="rx-body">
+              <div class="rx-med">Clonazepam 2 mg comprimidos</div>
+              <div class="rx-meta">
+                <span class="rx-meta-item"><span class="material-symbols-outlined mi">person</span>Castillo, Hugo — DNI 22.145.678</span>
+              </div>
+            </div>
+          </div>
+          <div class="rx-bottom">
+            <div class="rx-tags"><span class="tag tag-succ">Dispensado</span></div>
+            <div class="rx-actions">
+              <button class="btn btn-ghost"><span class="material-symbols-outlined mi">print</span></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="rx-card">
+          <div class="rx-top">
+            <div class="rx-source src-r">R</div>
+            <div class="rx-body">
+              <div class="rx-med">Tramadol 50 mg comprimidos</div>
+              <div class="rx-meta">
+                <span class="rx-meta-item"><span class="material-symbols-outlined mi">person</span>Ríos, Fabián — DNI 23.450.987</span>
+              </div>
+            </div>
+          </div>
+          <div class="rx-bottom">
+            <div class="rx-tags"><span class="tag tag-info">Duplicado</span></div>
+            <div class="rx-actions">
+              <button class="btn btn-ghost"><span class="material-symbols-outlined mi">print</span></button>
+              <button class="btn btn-prime"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- Toggle accordions -->
+<script>
+  document.querySelectorAll('.day-header').forEach(h => {
+    h.addEventListener('click', () => {
+      const grid = h.parentElement.querySelector('.rx-grid');
+      const open = grid.style.display !== 'none';
+      grid.style.display = open ? 'none' : 'grid';
+      h.classList.toggle('open', !open);
+    });
+  });
+</script>
+
+</body>
+</html>

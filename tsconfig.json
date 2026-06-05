@@ -35,6 +35,15 @@
       ],
       "@dashboard/*": [
         "app/features/dashboard/*"
+      ],
+      "@features/*": [
+        "app/features/*"
+      ],
+      "@models/*": [
+        "app/models/*"
+      ],
+      "@documents/*": [
+        "app/features/documents/*"
       ]
     },
     "outDir": "./dist/out-tsc",

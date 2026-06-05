@@ -1,0 +1,32 @@
+@use 'styles/variables' as *
+
+:host
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+
+.practice-form
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+
+.form-body
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+
+.detail-actions
+    display: flex
+    gap: var(--space-3)
+    padding-top: var(--space-4)
+    border-top: 1px solid var(--border-color)
+
+    @media (max-width: $small-devices)
+        flex-direction: column
+        gap: var(--space-3)
+
+        button
+            width: 100%
+            padding: var(--space-5) var(--space-4)
+            font-size: 16px
+            min-height: 52px

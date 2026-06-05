@@ -17,6 +17,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 
 // Validador personalizado para fechas
@@ -109,6 +111,8 @@ function isObraSocialOption(value: unknown): value is ObraSocialOption {
         MatDatepickerModule,
         MatNativeDateModule,
         MatProgressSpinnerModule,
+        MatIconModule,
+        MatTooltipModule,
         PatientNamePipe
     ]
 })

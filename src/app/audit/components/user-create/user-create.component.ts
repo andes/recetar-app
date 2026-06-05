@@ -15,6 +15,7 @@ interface ProfesionGradoEntry {
     profesion: string;
     codigoProfesion: string;
     numeroMatricula: string;
+    vencimiento?: string;
 }
 
 interface CreateUserPayload {
@@ -180,19 +181,24 @@ export class UserCreateComponent implements OnInit, OnDestroy {
             // Mongoose: { profesion: String, codigoProfesion: String, numeroMatricula: String }
             if (this.foundProfessionalData && this.foundProfessionalData.profesiones?.length > 0) {
                 const profesionGrado = this.foundProfessionalData.profesiones
-                    .flatMap((p: AndesProfessionalProfession) => {
+                    .flatMap((p: AndesProfessionalProfession): ProfesionGradoEntry[] => {
                         if (p.matriculacion && Array.isArray(p.matriculacion)) {
-                            // Obtener matrículas únicas para esta profesión (evita duplicados por historial de renovaciones)
-                            const uniqueMatriculas = Array.from(new Set(
-                                p.matriculacion
-                                    .filter((mat: AndesMatriculacion) => mat.matriculaNumero != null)
-                                    .map((mat: AndesMatriculacion) => mat.matriculaNumero.toString())
-                            ));
+                            // Última renovación por matrícula (evita duplicados por historial de renovaciones)
+                            const byMatricula = new Map<string, AndesMatriculacion>();
+                            for (const mat of p.matriculacion) {
+                                if (mat.matriculaNumero == null) { continue; }
+                                const key = mat.matriculaNumero.toString();
+                                const current = byMatricula.get(key);
+                                if (!current || new Date(mat.fin) >= new Date(current.fin)) {
+                                    byMatricula.set(key, mat);
+                                }
+                            }
 
-                            return uniqueMatriculas.map((matricula: string): ProfesionGradoEntry => ({
+                            return Array.from(byMatricula.values()).map((mat): ProfesionGradoEntry => ({
                                 profesion: p.profesion?.nombre || '',
                                 codigoProfesion: p.profesion?.codigo?.toString() || '',
-                                numeroMatricula: matricula
+                                numeroMatricula: mat.matriculaNumero.toString(),
+                                vencimiento: mat.fin || undefined
                             }));
                         }
                         return [];

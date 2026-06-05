@@ -17,7 +17,7 @@
   }
 </mat-form-field>
 
-<button mat-raised-button color="primary" type="button" (click)="openOrganizacionDialog()"
+<button matButton="raised" color="primary" type="button" (click)="openOrganizacionDialog()"
   [disabled]="disabled || isAddingOrganizacion">
   @if (isAddingOrganizacion) {
     <mat-spinner diameter="20" color="primary"></mat-spinner>

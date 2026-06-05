@@ -20,6 +20,7 @@ export class User {
         profesion: string;
         codigoProfesion: string;
         numeroMatricula: string;
+        vencimiento?: string;
     }>;
     organizaciones?: SubOrganizacion[];
 }

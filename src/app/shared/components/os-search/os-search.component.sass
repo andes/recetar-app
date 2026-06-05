@@ -1,0 +1,136 @@
+@use 'styles/variables' as *
+
+.os-section
+    display: flex
+    flex-direction: column
+    gap: var(--space-3)
+
+.os-bar-wrapper
+    position: relative
+
+.os-bar
+    display: flex
+    align-items: center
+    border: 1px solid var(--border-color)
+    border-radius: var(--radius-sm)
+    background: var(--bg-card)
+    transition: border-color .15s
+
+    &:focus-within
+        border-color: var(--secondary)
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, .1)
+
+    ui-toggle
+        flex-shrink: 0
+        padding-right: var(--space-2)
+
+    ::ng-deep ui-toggle .toggle-group
+        display: flex
+        gap: 2px
+
+.os-ui-select
+    flex: 1
+    min-width: 0
+    min-height: 58px
+    display: flex
+    align-items: center
+
+    &--empty
+        pointer-events: none
+
+    ::ng-deep .ui-select-trigger
+        height: 58px
+
+.os-input-wrap
+    flex: 1
+    min-width: 0
+    position: relative
+    display: flex
+    align-items: center
+
+.os-search-icon
+    position: absolute
+    left: var(--space-3)
+    top: 50%
+    transform: translateY(-50%)
+    color: var(--text-disabled)
+    font-size: 20px
+    height: 20px
+    pointer-events: none
+    z-index: 1
+
+.os-input
+    flex: 1
+    min-width: 0
+    height: 58px
+    padding: 0 var(--space-10) 0 var(--space-10)
+    border: none
+    font-family: inherit
+    font-size: .875rem
+    color: var(--text-primary)
+    background: transparent
+    outline: none
+
+    &::placeholder
+        color: var(--text-disabled)
+
+.os-spinner
+    position: absolute
+    right: var(--space-3)
+
+.os-results-panel
+    position: absolute
+    top: 100%
+    left: 0
+    right: 0
+    z-index: 10
+    background: var(--bg-card)
+    border: 1px solid var(--border-color)
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm)
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .12)
+    max-height: 220px
+    overflow-y: auto
+
+.os-result
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+    padding: 10px 12px
+    cursor: pointer
+    border-bottom: 1px solid var(--border-color)
+    transition: background .12s
+
+    &:last-child
+        border-bottom: none
+
+    &:hover
+        background: var(--hover-bg)
+
+    .os-result-name
+        flex: 1
+        font-size: 13px
+        font-weight: 500
+        min-width: 0
+
+    .os-result-code
+        font-size: 11px
+        color: var(--text-secondary)
+        font-family: monospace
+        flex-shrink: 0
+
+.os-selected
+    flex: 1
+    display: flex
+    align-items: center
+    gap: var(--space-3)
+    padding: var(--space-2) var(--space-3)
+    background: var(--secondary-50)
+    border: 1px solid var(--secondary-200)
+    border-radius: var(--radius-sm)
+    min-height: 42px
+
+    .os-actions
+        display: flex
+        align-items: center
+        gap: 4px
+        flex-shrink: 0

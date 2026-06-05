@@ -1,0 +1,124 @@
+<h2 mat-dialog-title>
+    <mat-icon>{{ mode === "confirm" ? "done_all" : "swap_horiz" }}</mat-icon>
+    {{
+        mode === "confirm" ? "Confirmar dispensacion" : "Reemplazar medicamento"
+    }}
+    <button
+        matIconButton
+        class="close-btn"
+        (click)="onCancel()"
+        aria-label="Cerrar"
+    >
+        <mat-icon>close</mat-icon>
+    </button>
+</h2>
+
+<mat-dialog-content>
+    <!-- Mode A: confirm -->
+    <ng-container *ngIf="mode === 'confirm'">
+        <div class="dialog-content">
+            <div class="hero">
+                <app-medication-item
+                    [medication]="data.medication"
+                    variant="search"
+                    [class.struck]="!!replacement"
+                />
+                <div class="qty">
+                    <span class="qty-num">{{ data.quantity }}</span>
+                    <span class="qty-unit">{{
+                        data.quantity === 1 ? "envase" : "envases"
+                    }}</span>
+                </div>
+            </div>
+            <div class="replacement" *ngIf="replacementMedication">
+                <div class="replacement-head">
+                    <mat-icon>swap_horiz</mat-icon>
+                    <span>Reemplazo seleccionado</span>
+                </div>
+                <div class="replacement-main">
+                    <app-medication-item
+                        [medication]="replacementMedication"
+                        variant="search"
+                    />
+                    <div class="qty">
+                        <span class="qty-num">{{
+                            replacement?.quantity || 1
+                        }}</span>
+                        <span class="qty-unit">{{
+                            replacement?.quantity === 1 ? "envase" : "envases"
+                        }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <button
+                matButton="outlined"
+                class="block change-btn"
+                (click)="onSwitchToReplace()"
+            >
+                <mat-icon>swap_horiz</mat-icon>
+                {{
+                    replacement
+                        ? "Cambiar medicamento"
+                        : "Buscar otro medicamento"
+                }}
+            </button>
+
+            <div class="delivery-for">
+                <mat-icon>person</mat-icon>
+                <span
+                    >Entrega para <strong>{{ patientName | titlecase }}</strong></span
+                >
+            </div>
+        </div>
+    </ng-container>
+
+    <!-- Mode B: replace -->
+    <ng-container *ngIf="mode === 'replace'">
+        <div class="dialog-content">
+            <button
+                matButton="outlined"
+                class="back-btn"
+                (click)="mode = 'confirm'"
+            >
+                <mat-icon>arrow_back</mat-icon>
+                Volver
+            </button>
+
+            <div>
+                <label
+                    >Seleccione un reemplazo para el medicamento actual.</label
+                >
+                <app-medication-search
+                    #medSearch
+                    [simplified]="true"
+                    (medicationAdded)="onReplacementConfirmed($event)"
+                >
+                </app-medication-search>
+            </div>
+        </div>
+    </ng-container>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button matButton="tonal" (click)="onCancel()" *ngIf="mode === 'confirm'">
+        Cancelar
+    </button>
+    <button
+        matButton="filled"
+        color="secondary"
+        (click)="onConfirm()"
+        *ngIf="mode === 'confirm'"
+    >
+        <mat-icon>done_all</mat-icon>
+        Dispensar
+    </button>
+    <button
+        matButton="filled"
+        (click)="onSelectReplacement()"
+        *ngIf="mode === 'replace'"
+    >
+        <mat-icon>check</mat-icon>
+        Seleccionar
+    </button>
+</mat-dialog-actions>

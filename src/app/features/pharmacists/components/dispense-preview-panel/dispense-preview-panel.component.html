@@ -1,0 +1,171 @@
+<div class="preview-card">
+    <div class="preview-empty" *ngIf="!prescription">
+        <mat-icon>visibility_off</mat-icon>
+        <p>Seleccioná una receta para ver su detalle</p>
+    </div>
+
+    <ng-container *ngIf="prescription">
+        <div class="top">
+            <div class="top-left">
+                <mat-chip
+                    class="status-badge"
+                    [class]="getStatusVariant(getStatus())"
+                >
+                    <span class="status-dot"></span
+                    >{{ getStatusLabel(getStatus()) }}
+                </mat-chip>
+                <ui-undo-countdown *ngIf="isDispensed()" [dispensedAt]="getDispensedAt()"></ui-undo-countdown>
+            </div>
+            <mat-chip class="info" [class]="getStatusVariant(getStatus())">
+                <strong class="mono text-sm">{{
+                    getPrescriptionDate() | date: "dd MMM yyyy"
+                }}</strong>
+            </mat-chip>
+        </div>
+
+        <div class="preview-scroll">
+            <div class="med">
+                <label>{{ andes ? "Genérico" : "Comercial" }}</label>
+                <h3 class="text-lg">{{ getMedicationName() | titlecase }}</h3>
+                <small class="med-brand" *ngIf="getMedicationDetail()">{{
+                    getMedicationDetail() | capitalize
+                }}</small>
+                <strong
+                    *ngIf="getMedicineType()"
+                    class="rx-type-indicator {{ getMedicineType() }}"
+                >
+                    {{ getMedicineType() | titlecase }}
+                </strong>
+
+                <div class="med-bottom">
+                    <div class="med-qty">
+                        <span class="text-2xl">{{ getQuantity() }}</span>
+                        <label>{{
+                            getQuantity() === 1 ? "envase" : "envases"
+                        }}</label>
+                    </div>
+                    <div class="med-qty" *ngIf="getUnits()">
+                        <span class="text-2xl">{{ getUnits() }}</span>
+                        <label>unidades</label>
+                    </div>
+                </div>
+
+                <div class="replacement" *ngIf="getReplacedMedicationName()">
+                    <label class="replacement-label">
+                        <mat-icon class="xs">swap_horiz</mat-icon>Reemplaza a
+                    </label>
+                    <small class="replacement-original">
+                        {{ getReplacedMedicationName() }}
+                        <span *ngIf="getReplacedMedicationQuantity() !== null">
+                            &middot;
+                            {{ getReplacedMedicationQuantity() }} envase(s)
+                        </span>
+                    </small>
+                </div>
+            </div>
+
+            <div class="section dispense-section" *ngIf="isDispensed()">
+                <label>Dispensación</label>
+                <div class="entity">
+                    <ui-icon icon="check_circle" variant="success"></ui-icon>
+                    <div class="entity-info">
+                        <strong class="text-sm">{{
+                            getDispensedAt() | date: "dd/MM/yyyy HH:mm"
+                        }}</strong>
+                        <small *ngIf="getDispensedByName()">{{
+                            getDispensedByName() | titlecase
+                        }}</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section dispense-section" *ngIf="isExpired()">
+                <label>Vencimiento</label>
+                <div class="entity">
+                    <ui-icon icon="event_busy" variant="error"></ui-icon>
+                    <div class="entity-info">
+                        <strong class="text-sm">{{
+                            getExpirationDate() | date: "dd/MM/yyyy"
+                        }}</strong>
+                        <small>Receta vencida</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="body">
+                <div class="section">
+                    <label>Paciente</label>
+                    <div class="entity">
+                        <ui-icon icon="person" variant="primary"></ui-icon>
+                        <div class="entity-info">
+                            <strong class="text-lg">{{
+                                getPatientName() | titlecase
+                            }}</strong>
+                            <small
+                                >DNI {{ getPatientDni()
+                                }}<ng-container *ngIf="getPatientSex()">
+                                    &middot; {{ getPatientSex() }}</ng-container
+                                ></small
+                            >
+                        </div>
+                    </div>
+                    <div
+                        class="p-fields"
+                        *ngIf="getPatientObraSocial() || getPatientAfiliado()"
+                    >
+                        <div class="p-field" *ngIf="getPatientObraSocial()">
+                            <span class="text-xs">Obra social</span>
+                            <strong class="text-sm">{{
+                                getPatientObraSocial() | titlecase
+                            }}</strong>
+                        </div>
+                        <div class="p-field" *ngIf="getPatientAfiliado()">
+                            <span class="text-xs">Nº afiliado</span>
+                            <strong class="text-sm">{{
+                                getPatientAfiliado()
+                            }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section " *ngIf="getDiagnosis()">
+                    <label>Diagnóstico</label>
+                    <p class="diagnostic-box text-sm">{{ getDiagnosis() | capitalize }}</p>
+                </div>
+
+                <div class="section" *ngIf="getIndications()">
+                    <label>Indicaciones</label>
+                    <p class="indications-box text-sm">{{ getIndications() | capitalize }}</p>
+                </div>
+
+                <div class="section">
+                    <label>Profesional</label>
+                    <div class="entity">
+                        <ui-icon icon="stethoscope"></ui-icon>
+                        <div class="entity-info">
+                            <strong class="text-sm">{{
+                                getProfessionalName() | titlecase
+                            }}</strong>
+                            <small
+                                >Matrícula
+                                {{ getProfessionalEnrollment() || "—" }}</small
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section" *ngIf="getOrganization()">
+                    <label>Organización</label>
+                    <div class="entity">
+                        <ui-icon icon="apartment"></ui-icon>
+                        <div class="entity-info">
+                            <strong class="text-sm">{{
+                                getOrganization() | titlecase
+                            }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+</div>

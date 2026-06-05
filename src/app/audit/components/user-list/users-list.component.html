@@ -10,12 +10,12 @@
           <mat-card-title class="header-title">Gestión de Usuarios</mat-card-title>
           <mat-card-subtitle class="header-subtitle">Administre los usuarios del sistema</mat-card-subtitle>
           <div class="header-actions">
-            <button *ngIf="showVolverButton() && !showCreateForm" mat-raised-button (click)="goBackToOtherRole()"
+            <button *ngIf="showVolverButton() && !showCreateForm" matButton="raised" (click)="goBackToOtherRole()"
               style="margin-right: 10px;">
               <mat-icon>arrow_back</mat-icon>
               Volver
             </button>
-            <button *ngIf="!showCreateForm" mat-raised-button (click)="showCreateUserForm()"
+            <button *ngIf="!showCreateForm" matButton="raised" (click)="showCreateUserForm()"
               style="background-color: #3f51b5; color: white;">
               <mat-icon>person_add</mat-icon>
               Crear usuario
@@ -151,13 +151,13 @@
                     <ng-container matColumnDef="isActive">
                       <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
                       <td mat-cell *matCellDef="let element" data-label="Estado">
-                        <button mat-icon-button color="primary" *ngIf="element.isActive === false"
+                        <button matIconButton color="primary" *ngIf="element.isActive === false"
                           matTooltip="Activar Usuario" (click)="activateUser(element)">
                           <mat-icon>person_add</mat-icon>
                         </button>
-                        <button mat-icon-button *ngIf="element.isActive === true" matTooltip="Desactivar Usuario"
+                        <button matIconButton *ngIf="element.isActive === true" matTooltip="Desactivar Usuario"
                           (click)="deactivateUser(element)" class="deactivate-button">
-                          <mat-icon color="warn">person_remove</mat-icon>
+                          <mat-icon class="mat-error">person_remove</mat-icon>
                         </button>
                       </td>
                     </ng-container>
@@ -174,18 +174,17 @@
                       <th mat-header-cell *matHeaderCellDef> Acciones </th>
                       <td mat-cell *matCellDef="let element" data-label="Acciones">
                         <div *ngIf="!isUserInEditMode(element)" class="action-buttons" fxLayout="row" fxLayoutGap="5px">
-                          <button mat-icon-button color="primary" matTooltip="Editar Usuario"
+                          <button matIconButton color="primary" matTooltip="Editar Usuario"
                             (click)="startEditMode(element)">
                             <mat-icon>edit</mat-icon>
                           </button>
                         </div>
 
                         <div *ngIf="isUserInEditMode(element)" class="action-buttons" fxLayout="row" fxLayoutGap="5px">
-                          <button mat-icon-button color="primary" matTooltip="Guardar Cambios"
-                            (click)="saveAllChanges()">
+                          <button matIconButton color="primary" matTooltip="Guardar Cambios" (click)="saveAllChanges()">
                             <mat-icon>check</mat-icon>
                           </button>
-                          <button mat-icon-button color="warn" matTooltip="Cancelar Edición" (click)="cancelEdit()">
+                          <button matIconButton class="mat-error" matTooltip="Cancelar Edición" (click)="cancelEdit()">
                             <mat-icon>close</mat-icon>
                           </button>
                         </div>

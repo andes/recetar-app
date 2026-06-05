@@ -55,10 +55,10 @@
               <!-- Botones -->
               @if (!isSubmitPractice) {
                 <div fxLayout="column" fxLayoutAlign="center" fxLayoutGap="20px" fxFlex="100">
-                  <button mat-raised-button color="primary" type="submit">
+                  <button matButton="raised" color="primary" type="submit">
                     Crear
                   </button>
-                  <button mat-raised-button type="button" (click)="clearPracticesForm(practicesNgForm)">
+                  <button matButton="raised" type="button" (click)="clearPracticesForm(practicesNgForm)">
                     Limpiar
                   </button>
                 </div>

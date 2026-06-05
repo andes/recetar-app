@@ -13,9 +13,10 @@ import { OrganizacionFormSessionService } from '@professionals/services/organiza
 import { AndesPrescriptionsService } from '@services/andesPrescription.service';
 import { CertificatesService } from '@services/certificates.service';
 import { PrescriptionsService } from '@services/prescriptions.service';
-import { SnomedSuppliesService } from '@services/snomedSupplies.service';
+import { SnomedSuppliesService, SnomedPaginatedResponse } from '@services/snomedSupplies.service';
 import { SuppliesService } from '@services/supplies.service';
 import { PatientFormComponent } from '@shared/components/patient-form/patient-form.component';
+import { NotificationService } from '@shared/services/notification.service';
 import { of, Subject, Subscription, Observable, forkJoin } from 'rxjs';
 import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap, take, takeUntil } from 'rxjs/operators';
 import { Patient } from '@interfaces/patients';
@@ -202,7 +203,8 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
         private certificateService: CertificatesService,
         private ambitoService: AmbitoService,
         private organizacionSessionService: OrganizacionFormSessionService,
-        private andesService: AndesPrescriptionsService
+        private andesService: AndesPrescriptionsService,
+        private notification: NotificationService,
     ) { }
 
     ngOnInit(): void {
@@ -580,6 +582,8 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
         this.subscribeToSupplyChanges(supplies, this.suppliesForm.length - 1);
         this.subscribeToTriplicateChanges(supplies, this.suppliesForm.length - 1);
         this.subscribeToDuplicateChanges(supplies, this.suppliesForm.length - 1);
+
+        this.notification.success('Medicamento agregado a la receta');
     }
 
     subscribeToMagistralChanges(control: FormGroup, index: number) {
@@ -673,11 +677,11 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
                     this.snomedSuppliesService.get(supply).pipe(
                         catchError(() => {
                             this.supplySpinner[index] = { show: false };
-                            return of([]);
+                            return of({ results: [], total: 0 } as SnomedPaginatedResponse);
                         })
                     ).subscribe((res) => {
                         this.supplySpinner[index] = { show: false };
-                        this.filteredSupplies = [...res];
+                        this.filteredSupplies = res.results;
                     });
                 }
             }

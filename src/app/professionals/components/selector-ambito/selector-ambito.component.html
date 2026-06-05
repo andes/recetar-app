@@ -6,13 +6,13 @@
         </mat-card-header>
         <mat-card-content>
             <div class="ambito-buttons">
-                <button mat-raised-button color="primary" type="button"
+                <button matButton="raised" color="primary" type="button"
                     [class.selected]="ambito === 'publico'"
                     (click)="seleccionarAmbito('publico')"
                 >
                     Público
                 </button>
-                <button mat-raised-button color="primary" type="button"
+                <button matButton="raised" color="primary" type="button"
                     [class.selected]="ambito === 'privado'"
                     (click)="seleccionarAmbito('privado')"
                 >

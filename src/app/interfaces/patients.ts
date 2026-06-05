@@ -20,6 +20,7 @@ export class Patient {
         },
         public idMPI?: string,
         public cuil?: string,
+        public estado?: string,
     ) { }
 }
 

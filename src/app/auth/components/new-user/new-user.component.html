@@ -7,9 +7,9 @@
     <form [formGroup]="newUserForm" #newUserNgForm="ngForm" (ngSubmit)="onSubmitEvent(newUserForm,newUserNgForm)"
       class="form-container">
       @if (error) {
-        <mat-error>
-          {{ error }}
-        </mat-error>
+      <mat-error>
+        {{ error }}
+      </mat-error>
       }
       <mat-card-title>
         <h2 class="text-center" fxLayoutAlign="center center">
@@ -28,9 +28,9 @@
           <mat-label>Profesión</mat-label>
           <mat-select formControlName="profesion" required>
             @for (prof of authorizedProfessions; track prof) {
-              <mat-option [value]="prof">
-                {{ prof.profesion }}
-              </mat-option>
+            <mat-option [value]="prof">
+              {{ prof.profesion }}
+            </mat-option>
             }
           </mat-select>
         </mat-form-field>
@@ -40,23 +40,23 @@
           <mat-label>DNI</mat-label>
           <input matInput formControlName="dni" required>
           @if (newUserForm.get('dni').errors) {
-            <mat-error>
-              Formato inválido
-            </mat-error>
+          <mat-error>
+            Formato inválido
+          </mat-error>
           }
         </mat-form-field>
         <mat-form-field appearance="fill" fxFlex>
           <mat-label>CUIL</mat-label>
           <input matInput type="text" formControlName="cuil">
           @if (newUserForm.get('cuil')?.errors?.required) {
-            <mat-error>El CUIL es obligatorio.</mat-error>
+          <mat-error>El CUIL es obligatorio.</mat-error>
           }
           @if (newUserForm.get('cuil')?.errors?.invalidFormat) {
-            <mat-error>Formato inválido (deben ser 11
+          <mat-error>Formato inválido (deben ser 11
             dígitos).</mat-error>
           }
           @if (newUserForm.get('cuil')?.errors?.invalidCuil) {
-            <mat-error>CUIL inválido (falla
+          <mat-error>CUIL inválido (falla
             verificación).</mat-error>
           }
         </mat-form-field>
@@ -64,9 +64,9 @@
           <mat-label>N° Matricula provincial</mat-label>
           <input matInput formControlName="enrollment" required>
           @if (newUserForm.get('enrollment').errors) {
-            <mat-error>
-              Formato inválido
-            </mat-error>
+          <mat-error>
+            Formato inválido
+          </mat-error>
           }
         </mat-form-field>
       </div>
@@ -78,22 +78,22 @@
           <mat-datepicker-toggle matSuffix [for]="fechaEgresoPicker"></mat-datepicker-toggle>
           <mat-datepicker #fechaEgresoPicker></mat-datepicker>
           @if (newUserForm.get('fechaEgreso').errors) {
-            <mat-error>
-              Fecha incorrecta debe ser una fecha válida
-            </mat-error>
+          <mat-error>
+            Fecha incorrecta debe ser una fecha válida
+          </mat-error>
           }
         </mat-form-field>
         <mat-form-field appearance="fill" fxFlex>
           <mat-label matTooltip="Refiere a la fecha de vencimiento de la última renovación">Fecha de
-          vecimiento de matrícula</mat-label>
+            vecimiento de matrícula</mat-label>
           <input matInput formControlName="fechaMatVencimiento" [matDatepicker]="fechaMatVencimientoPicker" readonly
             required>
           <mat-datepicker-toggle matSuffix [for]="fechaMatVencimientoPicker"></mat-datepicker-toggle>
           <mat-datepicker #fechaMatVencimientoPicker></mat-datepicker>
           @if (newUserForm.get('fechaMatVencimiento').errors) {
-            <mat-error>
-              Fecha incorrecta debe ser una fecha válida
-            </mat-error>
+          <mat-error>
+            Fecha incorrecta debe ser una fecha válida
+          </mat-error>
           }
         </mat-form-field>
       </div>
@@ -102,9 +102,9 @@
           <mat-label>Contraseña</mat-label>
           <input matInput formControlName="password" type="password" [pattern]="regexPassword" required>
           @if (newUserForm.get('password').errors) {
-            <mat-error>
-              Contraseña incorrecta debe contener una mayúscula, una minúscula y un número
-            </mat-error>
+          <mat-error>
+            Contraseña incorrecta debe contener una mayúscula, una minúscula y un número
+          </mat-error>
           }
         </mat-form-field>
         <mat-form-field appearance="fill" fxFlex>
@@ -117,8 +117,8 @@
         </ngx-turnstile>
       </div>
       <div class="botones" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="0.5rem">
-        <button mat-raised-button color="primary" type="submit" fxFlex.lg="25%" fxFlex.sm="100%">Crear</button>
-        <button mat-raised-button color="warn" (click)="cancelar()" fxFlex.lg="25%" fxFlex.sm="100%">
+        <button matButton="raised" color="primary" type="submit" fxFlex.lg="25%" fxFlex.sm="100%">Crear</button>
+        <button matButton="tonal" color="warn" (click)="cancelar()" fxFlex.lg="25%" fxFlex.sm="100%">
           Cancelar
         </button>
       </div>

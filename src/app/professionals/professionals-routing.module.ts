@@ -29,10 +29,6 @@ const routes: Routes = [
             {
                 path: 'seleccionador-ambito',
                 component: SelectorAmbitoComponent
-            },
-            {
-                path: 'editar-usuario',
-                loadComponent: () => import('@shared/components/edit-user-info/edit-user-info.component').then(m => m.EditUserInfoComponent)
             }
         ]
     }

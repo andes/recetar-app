@@ -10,10 +10,10 @@
   <!-- Error State -->
   @if (error && !loading) {
     <div class="error-container practice-content">
-      <mat-icon class="error-icon">error</mat-icon>
+      <mat-icon class="mat-error">error</mat-icon>
       <h2>Error</h2>
       <p>{{ error }}</p>
-      <button mat-raised-button color="primary" routerLink="/">
+      <button matButton="raised" color="primary" routerLink="/">
         Volver al inicio
       </button>
     </div>

@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable } from 'rxjs';
 import SnomedConcept from '@interfaces/snomedConcept';
-import { map, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 interface RawSnomedConcept {
     conceptId?: string;
@@ -14,17 +14,22 @@ interface RawSnomedConcept {
     semanticTag?: string;
 }
 
+interface RawSnomedPaginatedResponse {
+    results: RawSnomedConcept[];
+    total: number;
+}
+
+export interface SnomedPaginatedResponse {
+    results: SnomedConcept[];
+    total: number;
+}
+
 @Injectable({
     providedIn: 'root'
 })
 export class SnomedSuppliesService {
 
-    private mySupplies: BehaviorSubject<SnomedConcept[]>;
-    private suppliesArray: SnomedConcept[] = [];
-
-    constructor(private http: HttpClient) {
-        this.mySupplies = new BehaviorSubject<SnomedConcept[]>(this.suppliesArray);
-    }
+    constructor(private http: HttpClient) {}
 
     private normalizeConcept(item: RawSnomedConcept): SnomedConcept {
         return {
@@ -35,13 +40,15 @@ export class SnomedSuppliesService {
         };
     }
 
-    get(searchTerm: string): Observable<SnomedConcept[]> {
-        return this.http.get<RawSnomedConcept[]>(`${environment.API_END_POINT}/supplies/snomed?search=${searchTerm}`).pipe(
-            map((concepts: RawSnomedConcept[]) => concepts.map((concept) => this.normalizeConcept(concept))),
-            tap((concepts: SnomedConcept[]) => {
-                this.suppliesArray = concepts;
-                this.mySupplies.next(concepts);
-            })
+    get(searchTerm: string, offset: number = 0, limit: number = 10): Observable<SnomedPaginatedResponse> {
+        return this.http.get<RawSnomedPaginatedResponse>(
+            `${environment.API_END_POINT}/supplies/snomed`,
+            { params: { search: searchTerm, offset: String(offset), limit: String(limit) } }
+        ).pipe(
+            map((res) => ({
+                results: (res.results || []).map((c) => this.normalizeConcept(c)),
+                total: res.total || 0,
+            }))
         );
     }
 

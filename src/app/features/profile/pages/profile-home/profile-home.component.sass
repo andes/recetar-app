@@ -1,0 +1,359 @@
+@use 'styles/variables' as *
+
+.profile-container
+    display: flex
+    flex-direction: column
+    gap: $space-4
+    padding: $space-4
+
+    @media (min-width: $small-devices + 1px)
+        padding: $space-6
+
+.loading-container
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    gap: $space-4
+    padding: $space-12
+
+    p
+        margin: 0
+        color: var(--text-secondary)
+
+// ============================================
+// Hero de identidad
+// ============================================
+.identity-hero
+    ::ng-deep .ui-card-body
+        display: block
+        padding: 0
+
+.hero-body
+    display: flex
+    flex-direction: column
+    gap: $space-5
+    padding: $space-5
+
+    @media (min-width: $small-devices + 1px)
+        flex-direction: row
+        align-items: flex-start
+        gap: $space-6
+        padding: $space-6
+
+.hero-id
+    flex: 1
+    min-width: 0
+
+.hero-name
+    margin: 0
+
+.hero-tags
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    gap: $space-2
+    margin-top: $space-3
+
+.role-chip
+    gap: $space-2
+    background: var(--secondary-50)
+    border: 1px solid var(--secondary-200)
+    color: var(--secondary)
+
+    &::before
+        content: ''
+        width: 6px
+        height: 6px
+        border-radius: 50%
+        background: var(--secondary)
+
+.verified-chip
+    display: inline-flex
+    align-items: center
+    gap: $space-1
+    color: var(--success-text)
+
+.hero-meta
+    display: flex
+    flex-wrap: wrap
+    gap: $space-3
+    margin-top: $space-3
+
+.meta-item
+    display: inline-flex
+    align-items: center
+    gap: $space-1
+
+    mat-icon
+        color: var(--icon-muted)
+
+.hero-divider
+    display: none
+
+    @media (min-width: $small-devices + 1px)
+        display: block
+        width: 1px
+        align-self: stretch
+        background: var(--border-color)
+
+// ============================================
+// Resumen
+// ============================================
+.hero-summary
+    @media (min-width: $small-devices + 1px)
+        width: 320px
+        flex-shrink: 0
+
+.summary-head
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: $space-2
+
+.summary-label
+    color: var(--text-disabled)
+
+.summary-grid
+    display: grid
+    grid-template-columns: repeat(2, 1fr)
+    gap: $space-2
+    margin-top: $space-3
+
+.summary-card
+    display: flex
+    flex-direction: column
+    align-items: center
+    gap: $space-1
+    padding: $space-3 $space-2
+    background: var(--bg-over-body)
+    border: 1px solid var(--border-color)
+    border-radius: $radius-md
+    text-align: center
+
+    &.pin
+        background: var(--warning-bg)
+        border-color: var(--chip-warning-bg)
+        cursor: pointer
+        font-family: inherit
+        transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease
+
+        &.active
+            background: var(--success-bg)
+            border-color: var(--chip-success-bg)
+
+        &:hover
+            border-color: var(--warning-fill)
+            transform: translateY(-1px)
+
+        &.active:hover
+            border-color: var(--success-text)
+
+.summary-value
+    color: var(--text-primary)
+
+    &.pin
+        display: flex
+        align-items: center
+        gap: $space-1
+        // color: var(--text-primary)
+
+// .summary-sub
+//     .pin &
+//         color: var(--warning-fill)
+
+.summary-goto
+    display: inline-flex
+    align-items: center
+    gap: $space-1
+    margin-top: $space-1
+    color: var(--warning-fill)
+
+.summary-card.pin.active
+    .summary-goto
+        color: var(--success-text)
+
+.badge-dot
+    width: 6px
+    height: 6px
+    border-radius: 50%
+    background: var(--success-text)
+    margin-right: $space-1
+
+// ============================================
+// Matrículas
+// ============================================
+.matriculas-block
+    padding: $space-2 $space-5 $space-5
+
+    @media (min-width: $small-devices + 1px)
+        padding: 0 $space-6 $space-6
+
+.block-head
+    display: flex
+    align-items: center
+    gap: $space-3
+    margin-bottom: $space-3
+
+.block-title
+    color: var(--text-disabled)
+
+.block-line
+    flex: 1
+    height: 1px
+    background: var(--bg-over-body)
+
+.matriculas-grid
+    display: grid
+    grid-template-columns: 1fr
+    gap: $space-3
+
+    @media (min-width: $small-devices + 1px)
+        grid-template-columns: repeat(2, 1fr)
+
+    @media (min-width: $medium-devices + 1px)
+        grid-template-columns: repeat(3, 1fr)
+
+.matricula-card
+    ::ng-deep .ui-card-body
+        display: flex
+        align-items: center
+        gap: $space-3
+        padding: $space-3
+
+    &:hover ::ng-deep .ui-card
+        border-color: var(--secondary-200)
+        background: var(--secondary-50)
+
+.mc-info
+    flex: 1
+    min-width: 0
+
+.mc-title
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+    color: var(--text-primary)
+
+.mc-expiry
+    margin-top: $space-1
+
+    strong
+        color: var(--text-primary)
+
+.mc-vence
+    color: var(--success-text)
+
+    &.warning
+        color: var(--warning-fill)
+
+.mc-status
+    white-space: nowrap
+    flex-shrink: 0
+
+.mat-empty
+    border: 1px dashed var(--border-color)
+
+// ============================================
+// Configuración y seguridad
+// ============================================
+.section-head
+    display: flex
+    align-items: baseline
+    justify-content: space-between
+    gap: $space-3
+    margin-top: $space-2
+
+.section-title
+    margin: 0
+
+.section-subtitle
+    display: none
+
+    @media (min-width: $small-devices + 1px)
+        display: inline
+
+.settings
+    ::ng-deep .ui-card-body
+        display: flex
+        flex-direction: column
+        padding: 0
+
+    @media (min-width: $small-devices + 1px)
+        ::ng-deep .ui-card-body
+            flex-direction: row
+
+.menu
+    display: flex
+    gap: $space-1
+    padding: $space-3
+    overflow-x: auto
+    border-bottom: 1px solid var(--border-color)
+    background: var(--bg-over-body)
+
+    ui-alert
+        display: none
+
+        @media (min-width: $small-devices + 1px)
+            display: flex
+            margin-top: auto
+
+.menu-item
+    display: flex
+    align-items: center
+    gap: $space-3
+    flex-shrink: 0
+    padding: $space-2 $space-3
+    background: transparent
+    border: 1px solid transparent
+    border-radius: $radius-md
+    cursor: pointer
+    font-family: inherit
+    text-align: left
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease
+
+    &:hover
+        background: var(--bg-card)
+        border-color: var(--border-color)
+        color: var(--text-primary)
+
+    &.active
+        background: var(--bg-card)
+        border-color: var(--secondary-200)
+        color: var(--secondary)
+
+.menu-text
+    display: flex
+    flex-direction: column
+    gap: 2px
+    min-width: 0
+
+.menu-description
+    display: none
+
+    @media (min-width: $small-devices + 1px)
+        display: block
+
+.panel-wrap
+    flex: 1
+    min-width: 0
+    padding: $space-5
+
+    @media (min-width: $small-devices + 1px)
+        padding: $space-6
+
+@media (min-width: $small-devices + 1px)
+    .menu
+        flex-direction: column
+        width: 264px
+        min-width: 264px
+        padding: $space-3
+        overflow: visible
+        border-bottom: none
+        border-right: 1px solid var(--border-color)
+
+    .menu-item
+        width: 100%
+
+    .menu-description
+        display: block
