@@ -6,7 +6,7 @@
             <p>La receta se ha creado correctamente!</p>
         </div>
         <div mat-dialog-actions align="end">
-            <button mat-raised-button color="primary" style="background-color: green; color: white;"
+            <button matButton="raised" color="primary" style="background-color: green; color: white;"
                 (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div> <!-- End case noPrescriptions -->
@@ -17,7 +17,7 @@
             <p>El certificado se ha creado correctamente!</p>
         </div>
         <div mat-dialog-actions align="end">
-            <button mat-raised-button color="primary" style="background-color: green; color: white;"
+            <button matButton="raised" color="primary" style="background-color: green; color: white;"
                 (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div>
@@ -38,7 +38,7 @@
             <p>La receta se ha eliminado correctamente!</p>
         </div>
         <div mat-dialog-actions align="end">
-            <button mat-raised-button color="primary" style="background-color: green; color: white;"
+            <button matButton="raised" color="primary" style="background-color: green; color: white;"
                 (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div> <!-- End case deleted -->
@@ -50,8 +50,8 @@
             <p>Una vez eliminada no se podrá recuperar</p>
         </div>
         <div mat-dialog-actions fxLayoutAlign="space-around" align="end">
-            <button mat-button (click)="onNoClick()" cdkFocusInitial>Cancelar</button>
-            <button mat-raised-button color="warn" (click)="deletePrescription(data.item)">Confirmar</button>
+            <button matButton="tonal" (click)="onNoClick()" cdkFocusInitial>Cancelar</button>
+            <button matButton="tonal" color="warn" (click)="deletePrescription(data.item)">Confirmar</button>
         </div>
     </div> <!-- End case noPrescriptions -->
 
@@ -61,8 +61,8 @@
             <p>Una vez eliminado no se podrá recuperar</p>
         </div>
         <div mat-dialog-actions fxLayoutAlign="space-around" align="end">
-            <button mat-button (click)="onNoClick()" cdkFocusInitial>Cancelar</button>
-            <button mat-raised-button color="warn" mat-dialog-close="delete_insumo">Confirmar</button>
+            <button matButton="tonal" (click)="onNoClick()" cdkFocusInitial>Cancelar</button>
+            <button matButton="tonal" color="warn" mat-dialog-close="delete_insumo">Confirmar</button>
         </div>
     </div> <!-- End case delete_insumo -->
 
@@ -74,7 +74,7 @@
 
         </div>
         <div mat-dialog-actions align="end">
-            <button mat-raised-button color="primary" style="background-color: green; color: white;"
+            <button matButton="raised" color="primary" style="background-color: green; color: white;"
                 (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div>
@@ -95,7 +95,7 @@
             <p>Hubo un error al crear la práctica. Por favor, inténtelo nuevamente.</p>
         </div>
         <div mat-dialog-actions align="end">
-            <button mat-raised-button color="primary" style="background-color: green; color: white;"
+            <button matButton="raised" color="primary" style="background-color: green; color: white;"
                 (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div> <!-- End case practiceError -->
@@ -107,8 +107,8 @@
             <p>Una vez suspendida, la receta no podrá dispensarse</p>
         </div>
         <div mat-dialog-actions fxLayoutAlign="space-around" align="end">
-            <button mat-button (click)="onNoClick()" cdkFocusInitial>Cancelar</button>
-            <button mat-raised-button color="warn" (click)="confirmSuspendAndes()">Suspender</button>
+            <button matButton="tonal" (click)="onNoClick()" cdkFocusInitial>Cancelar</button>
+            <button matButton="tonal" color="warn" (click)="confirmSuspendAndes()">Suspender</button>
         </div>
     </div>
 
@@ -118,7 +118,7 @@
             <p>La receta se ha suspendido correctamente!</p>
         </div>
         <div mat-dialog-actions align="end">
-            <button mat-raised-button color="primary" style="background-color: green; color: white;"
+            <button matButton="raised" color="primary" style="background-color: green; color: white;"
                 (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div>
@@ -129,7 +129,7 @@
             <p>Hubo un error al suspender la receta. Por favor, inténtelo nuevamente.</p>
         </div>
         <div mat-dialog-actions align="end">
-            <button mat-raised-button color="primary" style="background-color: green; color: white;"
+            <button matButton="raised" color="primary" style="background-color: green; color: white;"
                 (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div>
@@ -137,11 +137,12 @@
     <div *ngSwitchCase="'andes_warning'">
         <h3 mat-dialog-title><mat-icon>warning</mat-icon> Atención</h3>
         <div mat-dialog-content>
-            <p>El paciente ya tiene una receta para uno o más de los medicamentos prescriptos en el ámbito público. Esta receta no se mostrará en Andes</p>
+            <p>El paciente ya tiene una receta para uno o más de los medicamentos prescriptos en el ámbito público. Esta
+                receta no se mostrará en Andes</p>
         </div>
         <div mat-dialog-actions align="end">
-            <button mat-raised-button color="primary" style="background-color: green; color: white;"
-                    (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
+            <button matButton="raised" color="primary" style="background-color: green; color: white;"
+                (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div>
 

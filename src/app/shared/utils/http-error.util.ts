@@ -30,6 +30,35 @@ function readNumber(record: Record<string, unknown> | null, key: string): number
     return typeof value === 'number' ? value : null;
 }
 
+function readRecord(record: Record<string, unknown> | null, key: string): Record<string, unknown> | null {
+    if (!record) {
+        return null;
+    }
+
+    const value = record[key];
+    return typeof value === 'object' && value !== null
+        ? value as Record<string, unknown>
+        : null;
+}
+
+function readErrorMessage(record: Record<string, unknown> | null): string | null {
+    if (!record) {
+        return null;
+    }
+
+    const mensaje = readString(record, 'mensaje');
+    if (mensaje) {
+        return mensaje;
+    }
+
+    const message = readString(record, 'message');
+    if (message) {
+        return message;
+    }
+
+    return null;
+}
+
 export function normalizeHttpError(err: HttpErrorResponse | unknown): NormalizedHttpError {
     if (!(err instanceof HttpErrorResponse)) {
         const errRecord = asRecord(err);
@@ -47,15 +76,18 @@ export function normalizeHttpError(err: HttpErrorResponse | unknown): Normalized
 
     let errorMessage = 'Server Error';
     const errorDataRecord = asRecord(err.error);
-    const mensaje = readString(errorDataRecord, 'mensaje');
-    const message = readString(errorDataRecord, 'message');
+    const topLevelMessage = readErrorMessage(errorDataRecord);
 
-    if (mensaje) {
-        errorMessage = mensaje;
-    } else if (message) {
-        errorMessage = message;
-    } else if (typeof err.error === 'string') {
-        errorMessage = err.error;
+    if (topLevelMessage) {
+        errorMessage = topLevelMessage;
+    } else {
+        // Formato ApiResponse.error: { status: 'error', error: { code, message } }
+        const nestedMessage = readErrorMessage(readRecord(errorDataRecord, 'error'));
+        if (nestedMessage) {
+            errorMessage = nestedMessage;
+        } else if (typeof err.error === 'string') {
+            errorMessage = err.error;
+        }
     }
 
     return {

@@ -1,7 +1,7 @@
 import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { MatPaginator, MatPaginatorIntl, PageEvent } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSelectChange } from '@angular/material/select';
 import { MatSelect } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -12,7 +12,6 @@ import { AuthService } from '@auth/services/auth.service';
 import { User } from '@interfaces/users';
 import { Role, RolesService } from '@services/roles.service';
 import { UserService } from '@services/users.service';
-import { SpanishPaginatorIntl } from '@shared/services/spanish-paginator-intl.service';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { PrescriptionPrinterComponent } from '../prescription-printer/prescription-printer.component';
@@ -26,8 +25,7 @@ import { PrescriptionPrinterComponent } from '../prescription-printer/prescripti
         arrowDirection
     ],
     providers: [
-        PrescriptionPrinterComponent,
-        { provide: MatPaginatorIntl, useClass: SpanishPaginatorIntl }
+        PrescriptionPrinterComponent
     ],
     standalone: false
 })

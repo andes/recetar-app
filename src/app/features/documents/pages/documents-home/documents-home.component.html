@@ -1,0 +1,556 @@
+<app-canvas [showSidebar]="true" [sidebarItems]="sidebarItems" [noCard]="true" pageTitle="Gestión de Documentos"
+    pageSubtitle="Busque, filtre y gestione recetas, certificados, prácticas e insumos">
+
+    <!-- TYPE TOGGLE -->
+    <div class="type-toggle-section">
+        <ui-toggle [options]="typeOptions" [value]="selectedType" (valueChange)="onTypeChange($event)" variant="big">
+        </ui-toggle>
+    </div>
+
+    <ui-empty-state *ngIf="!selectedType" icon="description">
+        Seleccione un tipo de documento para visualizar
+    </ui-empty-state>
+
+    <!-- Stats row -->
+    <div class="stats-row" *ngIf="selectedType && stats">
+        <ng-container *ngIf="selectedType === 'receta'">
+            <div class="stat-card">
+                <span class="stat-dot" style="background:var(--warning-bg);border:1px solid var(--warning-fill)"></span>
+                <small class="stat-label">Pendientes</small>
+                <small class="stat-value">{{ stats.prescriptions.pendiente }}</small>
+            </div>
+            <div class="stat-card">
+                <span class="stat-dot" style="background:var(--success-bg);border:1px solid var(--success-text)"></span>
+                <small class="stat-label">Dispensadas</small>
+                <small class="stat-value">{{ stats.prescriptions.dispensada }}</small>
+            </div>
+            <div class="stat-card">
+                <span class="stat-dot" style="background:var(--error-bg);border:1px solid var(--error-fill)"></span>
+                <small class="stat-label">Vencidas</small>
+                <small class="stat-value">{{ stats.prescriptions.vencida }}</small>
+            </div>
+        </ng-container>
+
+        <ng-container *ngIf="selectedType === 'certificados'">
+            <div class="stat-card">
+                <span class="stat-dot" style="background:var(--success-bg);border:1px solid var(--success-text)"></span>
+                <small class="stat-label">Vigentes</small>
+                <small class="stat-value">{{ stats.certificates.total - stats.certificates.anulados }}</small>
+            </div>
+            <div class="stat-card">
+                <span class="stat-dot" style="background:var(--error-bg);border:1px solid var(--error-fill)"></span>
+                <small class="stat-label">Anulados</small>
+                <small class="stat-value">{{ stats.certificates.anulados }}</small>
+            </div>
+        </ng-container>
+
+        <ng-container *ngIf="selectedType === 'practicas'">
+            <div class="stat-card">
+                <span class="stat-dot" style="background:var(--info-bg);border:1px solid var(--info-text)"></span>
+                <small class="stat-label">Activas</small>
+                <small class="stat-value">{{ stats.practices.active }}</small>
+            </div>
+            <div class="stat-card">
+                <span class="stat-dot" style="background:var(--success-bg);border:1px solid var(--success-text)"></span>
+                <small class="stat-label">Completadas</small>
+                <small class="stat-value">{{ stats.practices.completed }}</small>
+            </div>
+            <div class="stat-card">
+                <span class="stat-dot" style="background:var(--error-bg);border:1px solid var(--error-fill)"></span>
+                <small class="stat-label">Canceladas</small>
+                <small class="stat-value">{{ stats.practices.cancelled }}</small>
+            </div>
+        </ng-container>
+
+        <ng-container *ngIf="selectedType === 'insumos'">
+            <div class="stat-card">
+                <span class="stat-dot" style="background:var(--info-bg);border:1px solid var(--info-text)"></span>
+                <small class="stat-label">Total de insumos</small>
+                <small class="stat-value">{{ stats.totals.insumos }}</small>
+            </div>
+        </ng-container>
+    </div>
+
+    <!-- Unified results card -->
+    <div class="results-card" *ngIf="selectedType">
+        <div class="results-toolbar">
+            <div class="search-bar-wrap" [class.disabled]="hasActiveFilters">
+                <ui-search-bar [control]="searchControl"
+                    placeholder="Buscar por paciente, DNI, medicamento o código de receta..." [stretch]="true"
+                    [isLoading]="isLoading()">
+                </ui-search-bar>
+            </div>
+            <button matButton="tonal" class="filter-toggle-btn" [class.has-filters]="hasActiveFilters"
+                (click)="toggleFilters()">
+                <mat-icon>filter_list</mat-icon>
+                Filtros{{ activeFilterCount > 0 ? ' (' + activeFilterCount + ')' : '' }}
+            </button>
+        </div>
+
+        <div class="filter-panel" [hidden]="!showFilters">
+            <div class="filter-fields">
+                <div class="filter-group">
+                    <label>Fecha desde</label>
+                    <ui-date-field [control]="filterDateFrom" placeholder="DD/MM/AAAA"></ui-date-field>
+                </div>
+                <div class="filter-group">
+                    <label>Fecha hasta</label>
+                    <ui-date-field [control]="filterDateTo" placeholder="DD/MM/AAAA"></ui-date-field>
+                </div>
+                <div class="filter-group">
+                    <label>Estado</label>
+                    <select class="filter-input filter-select" [formControl]="filterStatus">
+                        <option value="">Todos</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="dispensada">Dispensada</option>
+                        <option value="activa">Activa</option>
+                        <option value="vencida">Vencida</option>
+                        <option value="anulada">Anulada</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-actions" fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px"
+                style="margin-top: 12px">
+                <button matButton="outlined" color="secondary" (click)="clearFilters()">
+                    <mat-icon>restart_alt</mat-icon> Limpiar
+                </button>
+                <button matButton="tonal" color="primary" (click)="applyFilters()">
+                    <mat-icon>search</mat-icon> Filtrar
+                </button>
+            </div>
+        </div>
+
+        <div class="results-count" *ngIf="selectedType && !isLoading() && totalResults > 0">
+            <span class="results-count-type">{{ resultsLabel }}</span>
+            <small class="results-count-range">Mostrando {{ resultsRange.from }}&ndash;{{ resultsRange.to }} de {{
+                totalResults }} resultados</small>
+        </div>
+
+        <!-- Recetas -->
+        <ng-container *ngIf="selectedType === 'receta'">
+            <div *ngIf="loadingPrescriptions" class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+            </div>
+            <div *ngIf="!loadingPrescriptions" class="table-container">
+                <table mat-table [dataSource]="dataSourcePrescriptions" matSort>
+                    <ng-container matColumnDef="fecha">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
+                        <td mat-cell *matCellDef="let item">
+                            <small>{{ isAndesPrescription(item) ? (item.fechaPrestacion || item.fechaRegistro |
+                                date:'dd/MM/yyyy')
+                                : (item.date | date:'dd/MM/yyyy') }}</small>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="paciente">
+                        <th mat-header-cell *matHeaderCellDef>Paciente</th>
+                        <td mat-cell *matCellDef="let item">
+                            {{ getPrescriptionPatientFullName(item) | titlecase }}<br>
+                            <small class="patient-dni">DNI: {{ getPrescriptionPatientDni(item) }}</small>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="medicamento">
+                        <th mat-header-cell *matHeaderCellDef>Medicamento</th>
+                        <td mat-cell *matCellDef="let item">
+                            <div class="medication-cell">
+                                <span class="medication-name">{{ getPrescriptionMedicamento(item) | titlecase }}</span>
+                                <small class="medication-type" *ngIf="getPrescriptionType(item) as type"
+                                    [ngClass]="type">
+                                    {{ type === 'duplicado' ? 'Duplicado' : 'Triplicado' }}
+                                </small>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="estado">
+                        <th mat-header-cell *matHeaderCellDef>Estado</th>
+                        <td mat-cell *matCellDef="let item">
+                            <mat-chip disableRipple [class]="getStatusVariant(getPrescriptionStatus(item)) + ' sm'"
+                                class="status-badge">
+                                {{ getStatusLabel(getPrescriptionStatus(item)) }}
+                            </mat-chip>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="acciones">
+                        <th mat-header-cell *matHeaderCellDef></th>
+                        <td mat-cell *matCellDef="let item">
+                            <button matIconButton (click)="openDrawer(item)" matTooltip="Ver detalle">
+                                <mat-icon>visibility</mat-icon>
+                            </button>
+                            <button matIconButton (click)="printPrescription(item)" matTooltip="Imprimir">
+                                <mat-icon>print</mat-icon>
+                            </button>
+                            <button matIconButton (click)="deletePrescription(item)" matTooltip="Eliminar">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="prescriptionColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: prescriptionColumns;"></tr>
+                </table>
+                <ui-paginator [length]="totalPrescriptions" [pageSize]="pageSize" [pageIndex]="pageIndex"
+                    [pageSizeOptions]="[5, 10, 25]" (page)="onPageChange($event)">
+                </ui-paginator>
+            </div>
+        </ng-container>
+
+        <!-- Certificados -->
+        <ng-container *ngIf="selectedType === 'certificados'">
+            <div *ngIf="loadingCertificates" class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+            </div>
+            <div *ngIf="!loadingCertificates" class="table-container">
+                <table mat-table [dataSource]="dataSourceCertificates" matSort>
+                    <ng-container matColumnDef="fecha">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
+                        <td mat-cell *matCellDef="let item">
+                            <small>{{ item.createdAt | date:'dd/MM/yyyy' }}</small>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="paciente">
+                        <th mat-header-cell *matHeaderCellDef>Paciente</th>
+                        <td mat-cell *matCellDef="let item">
+                            {{ getCertificatePatientFullName(item) | titlecase }}<br>
+                            <span class="patient-dni">DNI: {{ getCertificatePatientDni(item) }}</span>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="certificado">
+                        <th mat-header-cell *matHeaderCellDef>Certificado</th>
+                        <td mat-cell *matCellDef="let item">
+                            <span class="cell-text">{{ item.certificate }}</span>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="vigencia">
+                        <th mat-header-cell *matHeaderCellDef>Vigencia</th>
+                        <td mat-cell *matCellDef="let item">
+                            {{ item.cantDias }} día(s)
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="estado">
+                        <th mat-header-cell *matHeaderCellDef>Estado</th>
+                        <td mat-cell *matCellDef="let item">
+                            <mat-chip disableRipple [class]="getCertificateStatusVariant(item) + ' sm'"
+                                class="status-badge">
+                                {{ getCertificateStatusLabel(item) }}
+                            </mat-chip>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="acciones">
+                        <th mat-header-cell *matHeaderCellDef></th>
+                        <td mat-cell *matCellDef="let item">
+                            <button matIconButton (click)="openCertificateDrawer(item)" matTooltip="Ver detalle">
+                                <mat-icon>visibility</mat-icon>
+                            </button>
+                            <button matIconButton (click)="printCertificate(item)" matTooltip="Imprimir">
+                                <mat-icon>print</mat-icon>
+                            </button>
+                            <button matIconButton *ngIf="!item.anulateDate" (click)="anulateCertificate(item)"
+                                matTooltip="Anular">
+                                <mat-icon>block</mat-icon>
+                            </button>
+                        </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="certificateColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: certificateColumns;"></tr>
+                </table>
+                <ui-paginator [length]="totalCertificates" [pageSize]="pageSize" [pageIndex]="pageIndex"
+                    [pageSizeOptions]="[5, 10, 25]" (page)="onPageChange($event)">
+                </ui-paginator>
+            </div>
+        </ng-container>
+
+        <!-- Prácticas -->
+        <ng-container *ngIf="selectedType === 'practicas'">
+            <div *ngIf="loadingPractices" class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+            </div>
+            <div *ngIf="!loadingPractices" class="table-container">
+                <table mat-table [dataSource]="dataSourcePractices" matSort>
+                    <ng-container matColumnDef="fecha">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
+                        <td mat-cell *matCellDef="let item">
+                            <small>{{ item.date | date:'dd/MM/yyyy' }}</small>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="paciente">
+                        <th mat-header-cell *matHeaderCellDef>Paciente</th>
+                        <td mat-cell *matCellDef="let item">
+                            {{ getPracticePatientFullName(item) | titlecase }}<br>
+                            <span class="patient-dni">DNI: {{ getPracticePatientDni(item) }}</span>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="practica">
+                        <th mat-header-cell *matHeaderCellDef>Práctica</th>
+                        <td mat-cell *matCellDef="let item">
+                            <span class="cell-text">{{ item.practice }}</span>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="diagnostico">
+                        <th mat-header-cell *matHeaderCellDef>Diagnóstico</th>
+                        <td mat-cell *matCellDef="let item">
+                            <span class="cell-text">{{ item.diagnostic || '—' }}</span>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="estado">
+                        <th mat-header-cell *matHeaderCellDef>Estado</th>
+                        <td mat-cell *matCellDef="let item">
+                            <mat-chip disableRipple [class]="getStatusVariant(item.status || '') + ' sm'"
+                                class="status-badge">
+                                {{ getStatusLabel(item.status || '') }}
+                            </mat-chip>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="acciones">
+                        <th mat-header-cell *matHeaderCellDef></th>
+                        <td mat-cell *matCellDef="let item">
+                            <button matIconButton (click)="openPracticeDrawer(item)" matTooltip="Ver detalle">
+                                <mat-icon>visibility</mat-icon>
+                            </button>
+                            <button matIconButton (click)="printPractice(item)" matTooltip="Imprimir">
+                                <mat-icon>print</mat-icon>
+                            </button>
+                            <button matIconButton (click)="deletePractice(item)" matTooltip="Eliminar">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="practiceColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: practiceColumns;"></tr>
+                </table>
+                <ui-paginator [length]="totalPractices" [pageSize]="pageSize" [pageIndex]="pageIndex"
+                    [pageSizeOptions]="[5, 10, 25]" (page)="onPageChange($event)">
+                </ui-paginator>
+            </div>
+        </ng-container>
+
+        <!-- Insumos -->
+        <ng-container *ngIf="selectedType === 'insumos'">
+            <div *ngIf="loadingSupplies" class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+            </div>
+            <div *ngIf="!loadingSupplies" class="table-container">
+                <table mat-table [dataSource]="dataSourceSupplies" matSort>
+                    <ng-container matColumnDef="nombre">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre</th>
+                        <td mat-cell *matCellDef="let item">
+                            {{ item.name || item.insumo || item.supply || '—' }}
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="tipo">
+                        <th mat-header-cell *matHeaderCellDef>Tipo</th>
+                        <td mat-cell *matCellDef="let item">
+                            {{ formatTipoInsumo(item.tipo || item.type) }}
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="estado">
+                        <th mat-header-cell *matHeaderCellDef>Estado</th>
+                        <td mat-cell *matCellDef="let item">
+                            <mat-chip disableRipple [class]="getSupplyStatusVariant(item) + ' sm'" class="status-badge">
+                                {{ getSupplyStatusLabel(item) }}
+                            </mat-chip>
+                        </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="supplyColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: supplyColumns;"></tr>
+                </table>
+            </div>
+        </ng-container>
+    </div>
+
+    <!-- DRAWER -->
+    <div class="drawer-overlay" [class.open]="drawerOpen" (click)="closeDrawer()"></div>
+    <div class="drawer" [class.open]="drawerOpen">
+        <div class="drawer-header">
+            <div>
+                <h2>recetAR</h2>
+                <h3>{{ drawerDocumentType === 'prescription' ? 'Detalle de Receta' : drawerDocumentType ===
+                    'certificate' ? 'Detalle de Certificado' : 'Detalle de Práctica' }}</h3>
+            </div>
+            <button matIconButton (click)="closeDrawer()">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+        <div class="drawer-body">
+
+            <div class="receta-type-ribbon" *ngIf="drawerDocumentType === 'prescription' && drawerType"
+                [ngClass]="drawerType">
+                <mat-icon>{{ drawerType === 'duplicado' ? 'content_copy' : 'layers' }}</mat-icon>
+                {{ drawerType === 'duplicado' ? 'Receta Duplicado' : 'Receta Triplicado' }}
+            </div>
+
+            <div class="receta-header">
+                <span *ngIf="drawerPrescriptionId">Código: <span class="mono">{{ drawerPrescriptionId
+                        }}</span></span>
+                <mat-chip disableRipple [class]="getStatusVariant(drawerStatus) + ' sm'" class="status-badge">
+                    {{ drawerStatus }}
+                </mat-chip>
+            </div>
+
+            <div *ngIf="drawerDocumentType === 'prescription'">
+                <div class="receta-section">
+                    <h6>Datos del Paciente</h6>
+                    <div class="receta-field-row">
+                        <div class="receta-field">
+                            <label>Nombre</label>
+                            <span>{{ drawerPatientName | titlecase }}</span>
+                        </div>
+                        <div class="receta-field">
+                            <label>DNI</label>
+                            <span>{{ drawerPatientDni }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="receta-section">
+                    <h6>Datos del Profesional</h6>
+                    <div class="receta-field-row">
+                        <div class="receta-field">
+                            <label>Médico</label>
+                            <span>{{ (drawerProfessionalName | titlecase) || '—' }}</span>
+                        </div>
+                        <div class="receta-field">
+                            <label>Matrícula</label>
+                            <span>{{ drawerProfessionalEnrollment || '—' }}</span>
+                        </div>
+                        <div class="receta-field" *ngIf="drawerDate">
+                            <label>Fecha</label>
+                            <span>{{ drawerDate | date:'dd/MM/yyyy' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="receta-section">
+                    <h6>Medicación Prescripta</h6>
+                    <div class="receta-med-box">
+                        <p class="receta-med-name">{{ drawerMedName | titlecase }}</p>
+                        <small *ngIf="drawerMedDetail">{{ drawerMedDetail }}</small>
+                    </div>
+                </div>
+
+                <div class="receta-section" *ngIf="drawerDiagnosis">
+                    <h6>Diagnóstico</h6>
+                    <div class="receta-diagnostic-box">
+                        <p>{{ drawerDiagnosis }}</p>
+                    </div>
+                </div>
+
+                <div class="receta-section" *ngIf="drawerMedIndication">
+                    <h6>Indicaciones</h6>
+                    <div class="receta-indications-box">
+                        <p>{{ drawerMedIndication }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="drawerDocumentType === 'certificate'">
+                <div class="receta-section">
+                    <h6>Tipo</h6>
+                    <div class="receta-med-box cert-box">
+                        <p class="receta-med-name">{{ drawerCertTitle | titlecase }}</p>
+                    </div>
+                </div>
+
+                <div class="receta-section">
+                    <h6>Datos del Paciente</h6>
+                    <div class="receta-field-row">
+                        <div class="receta-field">
+                            <label>Nombre</label>
+                            <span>{{ drawerPatientName | titlecase }}</span>
+                        </div>
+                        <div class="receta-field">
+                            <label>DNI</label>
+                            <span>{{ drawerPatientDni }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="receta-section">
+                    <h6>Datos del Profesional</h6>
+                    <div class="receta-field-row">
+                        <div class="receta-field">
+                            <label>Médico</label>
+                            <span>{{ (drawerProfessionalName | titlecase) || '—' }}</span>
+                        </div>
+                        <div class="receta-field">
+                            <label>Matrícula</label>
+                            <span>{{ drawerProfessionalEnrollment || '—' }}</span>
+                        </div>
+                        <div class="receta-field" *ngIf="drawerDate">
+                            <label>Fecha de emisión</label>
+                            <span>{{ drawerDate | date:'dd/MM/yyyy' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="receta-section">
+                    <h6>Vigencia</h6>
+                    <div class="receta-med-box cert-box">
+                        <p>{{ drawerCertStartDate | date:'dd/MM/yyyy' }} – {{ drawerCertEndDate | date:'dd/MM/yyyy' }}
+                        </p>
+                        <small *ngIf="drawerCertCantDias">{{ drawerCertCantDias }} día(s)</small>
+                    </div>
+                </div>
+
+                <div class="receta-section" *ngIf="drawerCertAnulated">
+                    <h6>Anulación</h6>
+                    <div class="receta-diagnostic-box anulate-box">
+                        <p>{{ drawerCertAnulateLabel }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="drawerDocumentType === 'practice'">
+                <div class="receta-section">
+                    <h6>Práctica</h6>
+                    <div class="receta-med-box pract-box">
+                        <p class="receta-med-name">{{ drawerPractTitle | titlecase }}</p>
+                    </div>
+                </div>
+
+                <div class="receta-section">
+                    <h6>Datos del Paciente</h6>
+                    <div class="receta-field-row">
+                        <div class="receta-field">
+                            <label>Nombre</label>
+                            <span>{{ drawerPatientName | titlecase }}</span>
+                        </div>
+                        <div class="receta-field">
+                            <label>DNI</label>
+                            <span>{{ drawerPatientDni }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="receta-section">
+                    <h6>Datos del Profesional</h6>
+                    <div class="receta-field-row">
+                        <div class="receta-field">
+                            <label>Médico</label>
+                            <span>{{ (drawerProfessionalName | titlecase) || '—' }}</span>
+                        </div>
+                        <div class="receta-field">
+                            <label>Matrícula</label>
+                            <span>{{ drawerProfessionalEnrollment || '—' }}</span>
+                        </div>
+                        <div class="receta-field" *ngIf="drawerPractDate">
+                            <label>Fecha</label>
+                            <span>{{ drawerPractDate | date:'dd/MM/yyyy' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="receta-section" *ngIf="drawerPractDiagnostic">
+                    <h6>Diagnóstico</h6>
+                    <div class="receta-diagnostic-box">
+                        <p>{{ drawerPractDiagnostic }}</p>
+                    </div>
+                </div>
+
+                <div class="receta-section" *ngIf="drawerPractIndications">
+                    <h6>Indicaciones</h6>
+                    <div class="receta-indications-box">
+                        <p>{{ drawerPractIndications }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</app-canvas>

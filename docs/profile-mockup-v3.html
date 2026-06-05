@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi cuenta — RecetAR (mockup v3 · settings split)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..600,0..1,0" rel="stylesheet" />
+<style>
+  :root {
+    --primary: #1F2937; --primary-dark: #111827; --primary-light: #374151;
+    --secondary: #4F46E5; --secondary-dark: #3730A3;
+    --secondary-text: #4F46E5;
+    --secondary-soft: #EEF2FF; --secondary-soft-2: #E0E7FF;
+    --surface-base: #F8F9FB; --surface-card: #FFFFFF; --surface-raised: #EEF0F4;
+    --border-default: #D6DAE3; --border-strong: #B0B8C6;
+    --text-primary: #111821; --text-secondary: #556070; --text-disabled: #B0B8C6;
+    --success: #1A7A4A; --success-bg: #E8F6EF;
+    --info: #1D6F9E;    --info-bg: #E8F3FA;
+    --warning: #B85C00; --warning-bg: #FEF5E7;
+    --error: #C0392B;   --error-bg: #FEECEB;
+    --radius-md: 8px; --radius-lg: 12px; --radius-full: 9999px;
+    --elev-1: 0 1px 3px rgba(11,79,130,.08);
+    --elev-2: 0 2px 8px rgba(11,79,130,.12);
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    color-scheme: light;
+  }
+
+  body { --role-color:#0B4F82; --role-text:#0B4F82; --role-soft:rgba(11,79,130,.09); --role-soft-strong:rgba(11,79,130,.22); }
+  body.role-ph { --role-color:#4E6B1A; --role-text:#4E6B1A; --role-soft:rgba(78,107,26,.10); --role-soft-strong:rgba(78,107,26,.25); }
+
+  body.dark-mode {
+    --surface-base:#1A1D23; --surface-card:#23272E; --surface-raised:#2A2F38;
+    --border-default:#363B44; --border-strong:#4B5563;
+    --text-primary:#E4E7EB; --text-secondary:#9BA3B1; --text-disabled:#5B6472;
+    --secondary-text:#A5B4FC;
+    --secondary-soft:rgba(99,102,241,.16); --secondary-soft-2:rgba(99,102,241,.28);
+    --success:#5BC489; --success-bg:rgba(26,122,74,.16);
+    --info:#6FB1D8;    --info-bg:rgba(29,111,158,.18);
+    --warning:#E0A45C; --warning-bg:rgba(184,92,0,.16);
+    --error:#E58A7D;   --error-bg:rgba(192,57,43,.18);
+    --elev-1:0 1px 3px rgba(0,0,0,.30);
+    --elev-2:0 2px 10px rgba(0,0,0,.45);
+    color-scheme: dark;
+  }
+  body.dark-mode.role-pro { --role-text:#7FB2DC; --role-soft:rgba(127,178,220,.10); --role-soft-strong:rgba(127,178,220,.28); }
+  body.dark-mode.role-ph  { --role-text:#A6C257; --role-soft:rgba(166,194,87,.10); --role-soft-strong:rgba(166,194,87,.28); }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  [hidden] { display:none !important; }
+  body {
+    font-family:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
+    background:var(--surface-base); color:var(--text-primary);
+    font-size:14.5px; line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+    padding:16px 0 56px;
+  }
+  .mi { font-family:'Material Symbols Outlined'; font-weight:normal; font-style:normal; font-size:20px; line-height:1; display:inline-block; vertical-align:middle; font-variation-settings:'FILL' 0; user-select:none; }
+  .mono { font-family:var(--font-mono); }
+  button { font-family:inherit; cursor:pointer; }
+  :focus-visible { outline:2px solid var(--secondary-text); outline-offset:2px; border-radius:4px; }
+
+  /* ── Barra del mockup ── */
+  .mock-bar {
+    position:sticky; top:12px; z-index:50; width:fit-content; margin:0 auto 20px;
+    display:flex; align-items:center; gap:10px; padding:6px;
+    background:var(--surface-card); border:1px solid var(--border-default);
+    border-radius:var(--radius-full); box-shadow:var(--elev-2);
+  }
+  .mock-note { display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--text-secondary); padding:0 6px 0 12px; }
+  .mock-note .mi { font-size:17px; color:var(--info); }
+  .mock-sep { width:1px; height:20px; background:var(--border-default); }
+  .seg { display:flex; background:var(--surface-raised); border-radius:var(--radius-full); padding:3px; gap:2px; }
+  .seg button {
+    border:none; background:transparent; font-weight:600; font-size:12.5px; color:var(--text-secondary);
+    padding:6px 14px; border-radius:var(--radius-full); display:flex; align-items:center; gap:6px; transition:all .15s;
+  }
+  .seg button .mi { font-size:16px; }
+  .seg button.active { background:var(--surface-card); color:var(--text-primary); box-shadow:var(--elev-1); }
+  .icon-btn {
+    width:34px; height:34px; border:none; border-radius:50%; background:transparent; color:var(--text-secondary);
+    display:flex; align-items:center; justify-content:center; transition:background .15s;
+  }
+  .icon-btn:hover { background:var(--surface-raised); color:var(--text-primary); }
+  .icon-btn .mi { font-size:19px; }
+
+  .page { max-width:1080px; margin:0 auto; padding:0 16px; }
+
+  .page-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text-disabled); margin-bottom:10px; }
+
+  /* ── Banda de identidad: avatar + nombre + rol + matrículas en una fila ── */
+  .identity-band {
+    position:relative; overflow:hidden;
+    display:flex; align-items:center; flex-wrap:wrap; gap:16px 20px;
+    background:var(--surface-card); border:1px solid var(--border-default);
+    border-radius:var(--radius-lg); box-shadow:var(--elev-1);
+    padding:16px 20px; margin-bottom:26px;
+  }
+  .identity-band::before {
+    content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+    background:linear-gradient(180deg, var(--role-color), transparent 90%);
+  }
+  .avatar {
+    width:62px; height:62px; min-width:62px; border-radius:50%;
+    background:var(--primary); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:21px; letter-spacing:.02em;
+    box-shadow:0 0 0 3px var(--surface-card), 0 0 0 5px var(--role-color);
+  }
+  .id-block { min-width:190px; }
+  .id-name { font-size:18px; font-weight:700; letter-spacing:-.01em; }
+  .role-chip {
+    display:inline-flex; align-items:center; gap:6px; margin-top:5px;
+    font-size:11.5px; font-weight:600; color:var(--role-text);
+    background:var(--role-soft); border:1px solid var(--role-soft-strong);
+    padding:2px 10px; border-radius:var(--radius-full);
+  }
+  .role-chip .dot { width:6px; height:6px; border-radius:50%; background:var(--role-color); }
+  .band-sep { width:1px; align-self:stretch; background:var(--border-default); }
+  .mat-block { min-width:0; }
+  .mat-label { display:block; font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--text-disabled); margin-bottom:7px; }
+  .mat-chips { display:flex; flex-wrap:wrap; gap:8px; }
+  .mat-chip {
+    display:inline-flex; align-items:center; gap:7px;
+    font-size:12.5px; padding:6px 12px; border-radius:var(--radius-full);
+    background:var(--surface-raised); border:1px solid var(--border-default);
+  }
+  .mat-chip .mi { font-size:16px; color:var(--text-secondary); }
+  .mat-chip .state { font-size:11px; font-weight:600; color:var(--success); display:inline-flex; align-items:center; gap:4px; }
+  .mat-chip .state::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--success); }
+  .mat-empty {
+    display:inline-flex; align-items:center; gap:7px; font-size:12.5px; color:var(--text-secondary);
+    padding:6px 12px; border-radius:var(--radius-full); border:1.5px dashed var(--border-strong);
+  }
+  .mat-empty .mi { font-size:16px; color:var(--text-disabled); }
+
+  /* ── Encabezado de sección ── */
+  .section-head { display:flex; align-items:center; gap:14px; margin:0 0 14px; }
+  .section-head h2 { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text-secondary); }
+  .section-head .line { flex:1; height:1px; background:var(--border-default); }
+
+  /* ── Settings: menú lateral + panel de edición ── */
+  .settings {
+    display:flex; flex-direction:column;
+    background:var(--surface-card); border:1px solid var(--border-default);
+    border-radius:var(--radius-lg); box-shadow:var(--elev-1); overflow:hidden;
+  }
+  .menu { display:flex; gap:4px; padding:10px; overflow-x:auto; border-bottom:1px solid var(--border-default); }
+  .menu-item {
+    flex-shrink:0; display:flex; align-items:center; gap:10px;
+    border:none; background:transparent; text-align:left;
+    font-size:13.5px; font-weight:600; color:var(--text-secondary);
+    padding:9px 14px; border-radius:var(--radius-md); transition:all .15s;
+  }
+  .menu-item .mi { font-size:19px; }
+  .menu-item:hover { background:var(--surface-raised); color:var(--text-primary); }
+  .menu-item.active { background:var(--secondary-soft); color:var(--secondary-text); }
+  .panel-wrap { flex:1; min-width:0; }
+
+  .panel { display:none; padding:22px 20px 24px; }
+  .panel.active { display:block; animation:panel-in .18s ease; }
+  @keyframes panel-in { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+
+  .panel-head { margin-bottom:20px; }
+  .panel-head h3 { font-size:16px; font-weight:700; letter-spacing:-.01em; }
+  .panel-head p { font-size:13px; color:var(--text-secondary); margin-top:2px; }
+
+  /* Formularios */
+  .form { display:grid; gap:16px; max-width:640px; }
+  .row { display:grid; gap:16px; }
+  .field label { display:block; font-size:12.5px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; }
+  .input-wrap { position:relative; }
+  .text-input {
+    width:100%; height:44px; padding:0 14px;
+    font:inherit; font-size:14px; color:var(--text-primary);
+    background:var(--surface-raised); border:1px solid transparent; border-radius:var(--radius-md);
+    transition:all .15s;
+  }
+  .text-input::placeholder { color:var(--text-disabled); }
+  .text-input:hover { border-color:var(--border-default); }
+  .text-input:focus { outline:none; background:var(--surface-card); border-color:var(--secondary-text); box-shadow:0 0 0 3px var(--secondary-soft); }
+  .input-wrap .text-input { padding-right:46px; }
+  .eye {
+    position:absolute; right:6px; top:50%; transform:translateY(-50%);
+    width:34px; height:34px; border:none; border-radius:var(--radius-md);
+    background:transparent; color:var(--text-disabled);
+    display:flex; align-items:center; justify-content:center; transition:all .15s;
+  }
+  .eye:hover { color:var(--text-primary); background:var(--surface-card); }
+  .eye .mi { font-size:19px; }
+  .hint { font-size:12px; color:var(--text-secondary); margin-top:6px; }
+
+  .meter { display:flex; align-items:center; gap:8px; margin-top:8px; }
+  .meter .bars { display:flex; gap:4px; flex:1; }
+  .meter .bars i { height:4px; flex:1; border-radius:2px; background:var(--border-default); transition:background .2s; }
+  .meter .lbl { font-size:11.5px; font-weight:600; color:var(--text-disabled); min-width:64px; text-align:right; }
+  .meter[data-score="1"] .bars i:nth-child(1) { background:var(--error); }
+  .meter[data-score="2"] .bars i:nth-child(-n+2) { background:var(--warning); }
+  .meter[data-score="3"] .bars i:nth-child(-n+3) { background:var(--info); }
+  .meter[data-score="4"] .bars i { background:var(--success); }
+  .meter[data-score="1"] .lbl { color:var(--error); }
+  .meter[data-score="2"] .lbl { color:var(--warning); }
+  .meter[data-score="3"] .lbl { color:var(--info); }
+  .meter[data-score="4"] .lbl { color:var(--success); }
+
+  .actions {
+    display:flex; justify-content:flex-end; gap:10px;
+    margin-top:8px; padding-top:18px; border-top:1px solid var(--border-default);
+  }
+  .btn {
+    height:40px; padding:0 18px; border-radius:var(--radius-md);
+    font-size:13.5px; font-weight:600; border:none;
+    display:inline-flex; align-items:center; gap:7px; transition:all .15s;
+  }
+  .btn .mi { font-size:18px; }
+  .btn.ghost { background:transparent; color:var(--text-secondary); border:1px solid var(--border-default); }
+  .btn.ghost:hover { background:var(--surface-raised); color:var(--text-primary); }
+  .btn.primary { background:var(--secondary); color:#fff; }
+  .btn.primary:hover { background:var(--secondary-dark); }
+  .btn.tonal { background:var(--secondary-soft); color:var(--secondary-text); }
+  .btn.tonal:hover { background:var(--secondary-soft-2); }
+  .btn.success { background:var(--success); color:#fff; }
+
+  /* PIN */
+  .pin-group .pin-row { display:flex; gap:10px; }
+  .pin-box {
+    width:52px; height:56px; text-align:center;
+    font-family:var(--font-mono); font-size:22px; font-weight:600; color:var(--text-primary);
+    background:var(--surface-raised); border:1px solid transparent; border-radius:var(--radius-md);
+    transition:all .15s;
+  }
+  .pin-box:focus { outline:none; background:var(--surface-card); border-color:var(--secondary-text); box-shadow:0 0 0 3px var(--secondary-soft); }
+
+  /* Biometría */
+  .status-card {
+    display:flex; align-items:center; gap:12px;
+    background:var(--success-bg); border-radius:var(--radius-md); padding:13px 16px;
+  }
+  .status-card .mi { font-size:24px; color:var(--success); }
+  .status-card .t { font-size:14px; font-weight:600; color:var(--success); }
+  .status-card .s { font-size:12.5px; color:var(--text-secondary); }
+  .subhead { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-disabled); margin:22px 0 10px; }
+  .item-list { display:flex; flex-direction:column; }
+  .item { display:flex; align-items:center; gap:12px; padding:11px 0; }
+  .item + .item { border-top:1px solid var(--border-default); }
+  .item-ico {
+    width:38px; height:38px; min-width:38px; border-radius:var(--radius-md);
+    background:var(--surface-raised); color:var(--text-secondary);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .item-ico .mi { font-size:20px; }
+  .item-body { flex:1; min-width:0; }
+  .item-t { font-size:14px; font-weight:600; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .item-s { font-size:12.5px; color:var(--text-secondary); }
+  .tag-mini { font-size:10.5px; font-weight:600; color:var(--info); background:var(--info-bg); padding:1px 8px; border-radius:var(--radius-full); }
+  .del-btn {
+    width:34px; height:34px; border:none; border-radius:var(--radius-md);
+    background:transparent; color:var(--text-disabled);
+    display:flex; align-items:center; justify-content:center; transition:all .15s;
+  }
+  .del-btn:hover { background:var(--error-bg); color:var(--error); }
+  .del-btn .mi { font-size:19px; }
+  .empty-inline { display:flex; flex-direction:column; align-items:center; text-align:center; gap:2px; padding:20px 12px; }
+  .empty-inline .mi { font-size:26px; color:var(--text-disabled); margin-bottom:6px; }
+  .empty-inline .t { font-size:13.5px; font-weight:600; }
+  .empty-inline .s { font-size:12.5px; color:var(--text-secondary); }
+
+  /* Ámbito */
+  .amb-grid { display:grid; grid-template-columns:1fr; gap:10px; max-width:560px; }
+  .amb-opt {
+    display:flex; align-items:flex-start; gap:12px; text-align:left;
+    background:var(--surface-card); border:1.5px solid var(--border-default);
+    border-radius:var(--radius-md); padding:14px 16px; transition:all .15s;
+  }
+  .amb-opt .mi { font-size:22px; color:var(--text-secondary); margin-top:1px; }
+  .amb-opt .t { font-size:14px; font-weight:600; }
+  .amb-opt .s { font-size:12.5px; color:var(--text-secondary); margin-top:1px; }
+  .amb-opt:hover { border-color:var(--border-strong); }
+  .amb-opt.active { border-color:var(--secondary-text); background:var(--secondary-soft); }
+  .amb-opt.active .mi, .amb-opt.active .t { color:var(--secondary-text); }
+  .note {
+    display:flex; align-items:flex-start; gap:9px; max-width:560px;
+    font-size:12.5px; color:var(--text-secondary);
+    background:var(--info-bg); border-radius:var(--radius-md); padding:11px 14px;
+  }
+  .note .mi { font-size:18px; color:var(--info); flex-shrink:0; margin-top:1px; }
+
+  /* Footer */
+  .page-foot {
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    margin-top:30px; padding-top:16px; border-top:1px solid var(--border-default);
+    font-size:12.5px; color:var(--text-disabled);
+  }
+  .logout {
+    border:none; background:transparent; color:var(--text-secondary);
+    font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px;
+    padding:7px 14px; border-radius:var(--radius-full); transition:all .15s;
+  }
+  .logout .mi { font-size:17px; }
+  .logout:hover { background:var(--error-bg); color:var(--error); }
+
+  /* ── Desktop ── */
+  @media (min-width:769px) {
+    body { padding-top:24px; }
+    .page { padding:0 24px; }
+    .identity-band { padding:16px 24px; }
+    .settings { flex-direction:row; }
+    .menu { flex-direction:column; width:248px; min-width:248px; padding:12px; border-bottom:none; border-right:1px solid var(--border-default); overflow:visible; }
+    .panel { padding:24px 28px 28px; }
+    .row { grid-template-columns:1fr 1fr; }
+    .amb-grid { grid-template-columns:1fr 1fr; }
+  }
+  @media (max-width:900px) { .mock-note, .mock-sep { display:none; } }
+</style>
+</head>
+<body class="role-pro">
+
+<div class="mock-bar">
+  <span class="mock-note"><span class="mi">info</span> Mockup v3 · Mi cuenta con edición en panel</span>
+  <div class="mock-sep"></div>
+  <div class="seg" role="tablist">
+    <button id="btn-pro" class="active"><span class="mi">medical_services</span>Profesional</button>
+    <button id="btn-ph"><span class="mi">local_pharmacy</span>Farmacia</button>
+  </div>
+  <button id="btn-theme" class="icon-btn" title="Modo oscuro" aria-pressed="false"><span class="mi" id="theme-ico">dark_mode</span></button>
+</div>
+
+<main class="page">
+
+  <div class="page-label">Mi cuenta</div>
+
+  <!-- ══ IDENTIDAD + MATRÍCULAS EN UNA FILA ══ -->
+  <section class="identity-band">
+    <div class="avatar" data-pro>MG</div>
+    <div class="avatar" data-ph hidden>FS</div>
+
+    <div class="id-block">
+      <h1 class="id-name" data-pro>María Laura González</h1>
+      <h1 class="id-name" data-ph hidden>Farmacia San Martín S.R.L.</h1>
+      <span class="role-chip"><span class="dot"></span>
+        <span data-pro>Profesional Médico</span>
+        <span data-ph hidden>Profesional Farmacéutico</span>
+      </span>
+    </div>
+
+    <div class="band-sep"></div>
+
+    <div class="mat-block" data-pro>
+      <span class="mat-label">Matrículas</span>
+      <div class="mat-chips">
+        <span class="mat-chip mono"><span class="mi">workspace_premium</span>MP 45.321<span class="state">Vigente</span></span>
+        <span class="mat-chip mono"><span class="mi">psychiatry</span>ME 12.008<span class="state">Vigente</span></span>
+      </div>
+    </div>
+
+    <div class="mat-block" data-ph hidden>
+      <span class="mat-label">Matrícula y habilitación</span>
+      <div class="mat-chips">
+        <span class="mat-chip mono"><span class="mi">medication</span>DT 12.345<span class="state">Vigente</span></span>
+        <span class="mat-chip mono"><span class="mi">verified</span>DISPO-2020-1234<span class="state">14/03/2027</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ CONFIGURACIÓN Y SEGURIDAD ══ -->
+  <div class="section-head"><h2>Configuración y seguridad</h2><span class="line"></span></div>
+
+  <section class="settings">
+
+    <!-- Menú lateral -->
+    <nav class="menu">
+      <button class="menu-item active" data-target="cuenta"><span class="mi">manage_accounts</span>Datos de cuenta</button>
+      <button class="menu-item" data-target="password"><span class="mi">lock</span>Contraseña</button>
+      <button class="menu-item" data-target="pin" data-pro><span class="mi">pin</span>PIN de seguridad</button>
+      <button class="menu-item" data-target="bio"><span class="mi">fingerprint</span>Biometría</button>
+      <button class="menu-item" data-target="orgs" data-pro><span class="mi">corporate_fare</span>Organizaciones</button>
+      <button class="menu-item" data-target="ambito"><span class="mi">swap_horiz</span>Cambiar ámbito</button>
+    </nav>
+
+    <!-- Paneles de edición -->
+    <div class="panel-wrap">
+
+      <!-- DATOS DE CUENTA -->
+      <section class="panel active" id="panel-cuenta">
+        <header class="panel-head">
+          <h3>Datos de cuenta</h3>
+          <p>Actualizá tu nombre, usuario y correo electrónico.</p>
+        </header>
+        <form class="form" autocomplete="off" onsubmit="return false">
+          <div class="field">
+            <label for="acc-name" id="acc-name-label">Nombre</label>
+            <input class="text-input" id="acc-name" type="text" value="María Laura González">
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="acc-user">Nombre de usuario</label>
+              <input class="text-input mono" id="acc-user" type="text" value="mlgonzalez">
+            </div>
+            <div class="field">
+              <label for="acc-email">Correo electrónico</label>
+              <input class="text-input" id="acc-email" type="email" value="mlgonzalez@example.com">
+            </div>
+          </div>
+          <p class="hint" data-ph hidden><span class="mi" style="font-size:15px;vertical-align:-3px;color:var(--info)">info</span> Al modificar tu email, vas a recibir un enlace de confirmación.</p>
+          <div class="actions">
+            <button type="button" class="btn ghost">Cancelar</button>
+            <button type="submit" class="btn primary"><span class="mi">save</span>Guardar cambios</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- CONTRASEÑA -->
+      <section class="panel" id="panel-password">
+        <header class="panel-head">
+          <h3>Contraseña</h3>
+          <p>Cambiá tu contraseña de acceso a la plataforma.</p>
+        </header>
+        <form class="form" autocomplete="off" onsubmit="return false">
+          <div class="field">
+            <label for="pwd-cur">Contraseña actual</label>
+            <div class="input-wrap">
+              <input class="text-input" id="pwd-cur" type="password" placeholder="Tu contraseña actual">
+              <button type="button" class="eye" data-target="pwd-cur" title="Mostrar"><span class="mi">visibility_off</span></button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="pwd-new">Nueva contraseña</label>
+            <div class="input-wrap">
+              <input class="text-input" id="pwd-new" type="password" placeholder="Mínimo 8 caracteres">
+              <button type="button" class="eye" data-target="pwd-new" title="Mostrar"><span class="mi">visibility_off</span></button>
+            </div>
+            <div class="meter" id="pwd-meter" data-score="0">
+              <span class="bars"><i></i><i></i><i></i><i></i></span>
+              <span class="lbl" id="pwd-meter-lbl">Seguridad</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="pwd-conf">Confirmar contraseña</label>
+            <div class="input-wrap">
+              <input class="text-input" id="pwd-conf" type="password" placeholder="Repetí la nueva contraseña">
+              <button type="button" class="eye" data-target="pwd-conf" title="Mostrar"><span class="mi">visibility_off</span></button>
+            </div>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn ghost">Cancelar</button>
+            <button type="submit" class="btn primary"><span class="mi">lock_reset</span>Cambiar contraseña</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- PIN DE SEGURIDAD -->
+      <section class="panel" id="panel-pin" data-pro>
+        <header class="panel-head">
+          <h3>PIN de seguridad</h3>
+          <p>Tu PIN de 4 dígitos se solicita para firmar recetas.</p>
+        </header>
+        <form class="form" autocomplete="off" onsubmit="return false">
+          <div class="row">
+            <div class="field pin-group">
+              <label>Nuevo PIN</label>
+              <div class="pin-row">
+                <input class="pin-box" type="text" inputmode="numeric" maxlength="1">
+                <input class="pin-box" type="text" inputmode="numeric" maxlength="1">
+                <input class="pin-box" type="text" inputmode="numeric" maxlength="1">
+                <input class="pin-box" type="text" inputmode="numeric" maxlength="1">
+              </div>
+            </div>
+            <div class="field pin-group">
+              <label>Confirmar PIN</label>
+              <div class="pin-row">
+                <input class="pin-box" type="text" inputmode="numeric" maxlength="1">
+                <input class="pin-box" type="text" inputmode="numeric" maxlength="1">
+                <input class="pin-box" type="text" inputmode="numeric" maxlength="1">
+                <input class="pin-box" type="text" inputmode="numeric" maxlength="1">
+              </div>
+            </div>
+          </div>
+          <p class="hint"><span class="mi" style="font-size:15px;vertical-align:-3px;color:var(--info)">info</span> Si olvidás tu PIN, podés recuperarlo desde tu correo registrado.</p>
+          <div class="actions">
+            <button type="button" class="btn ghost">Cancelar</button>
+            <button type="submit" class="btn primary"><span class="mi">pin</span>Guardar PIN</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- BIOMETRÍA -->
+      <section class="panel" id="panel-bio">
+        <header class="panel-head">
+          <h3>Biometría</h3>
+          <p>Usá tu huella digital o reconocimiento facial para autorizar recetas.</p>
+        </header>
+        <div class="form">
+          <div class="status-card">
+            <span class="mi">fingerprint</span>
+            <div>
+              <div class="t">Biometría disponible en este dispositivo</div>
+              <div class="s">Es más rápida y segura que el PIN. Se te solicitará al emitir una receta.</div>
+            </div>
+          </div>
+          <div>
+            <button type="button" class="btn tonal"><span class="mi">add</span>Registrar nueva credencial</button>
+          </div>
+          <div>
+            <div class="subhead">Credenciales registradas</div>
+            <div class="item-list" id="cred-list">
+              <div class="item">
+                <span class="item-ico"><span class="mi">laptop_windows</span></span>
+                <div class="item-body">
+                  <div class="item-t">Notebook personal <span class="tag-mini">Con respaldo en la nube</span></div>
+                  <div class="item-s">Registrada 12/05/2026 · Último uso hoy 09:14</div>
+                </div>
+                <button type="button" class="del-btn cred-del" title="Eliminar credencial"><span class="mi">delete</span></button>
+              </div>
+              <div class="item">
+                <span class="item-ico"><span class="mi">smartphone</span></span>
+                <div class="item-body">
+                  <div class="item-t">Celular Galaxy S24</div>
+                  <div class="item-s">Registrada 03/07/2026 · Último uso ayer 18:42</div>
+                </div>
+                <button type="button" class="del-btn cred-del" title="Eliminar credencial"><span class="mi">delete</span></button>
+              </div>
+            </div>
+            <div class="empty-inline" id="cred-empty" hidden>
+              <span class="mi">fingerprint</span>
+              <p class="t">No tenés credenciales biométricas registradas</p>
+              <p class="s">Registrá una para autorizar recetas con tu huella o rostro.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ORGANIZACIONES -->
+      <section class="panel" id="panel-orgs" data-pro>
+        <header class="panel-head">
+          <h3>Organizaciones</h3>
+          <p>Administrá las organizaciones asociadas a tu usuario.</p>
+        </header>
+        <div class="form">
+          <div class="item-list" id="org-list">
+            <div class="item">
+              <span class="item-ico"><span class="mi">local_hospital</span></span>
+              <div class="item-body">
+                <div class="item-t">Hospital Regional Dr. Castro <span class="tag-mini">Principal</span></div>
+                <div class="item-s">Av. Siempre Viva 123 · Neuquén</div>
+              </div>
+              <button type="button" class="del-btn org-del" title="Eliminar organización"><span class="mi">close</span></button>
+            </div>
+            <div class="item">
+              <span class="item-ico"><span class="mi">medical_information</span></span>
+              <div class="item-body">
+                <div class="item-t">Centro Médico Los Álamos</div>
+                <div class="item-s">Belgrano 890 · Cipolletti</div>
+              </div>
+              <button type="button" class="del-btn org-del" title="Eliminar organización"><span class="mi">close</span></button>
+            </div>
+          </div>
+          <div class="empty-inline" id="org-empty" hidden>
+            <span class="mi">business</span>
+            <p class="t">No tenés organizaciones asociadas</p>
+            <p class="s">Agregá una organización para comenzar.</p>
+          </div>
+          <div>
+            <button type="button" class="btn tonal" id="org-add"><span class="mi">add</span>Agregar organización</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- CAMBIAR ÁMBITO -->
+      <section class="panel" id="panel-ambito">
+        <header class="panel-head">
+          <h3>Cambiar ámbito</h3>
+          <p>Alterná entre ámbito público y privado según donde ejercés.</p>
+        </header>
+        <div class="form">
+          <div class="amb-grid">
+            <button type="button" class="amb-opt active">
+              <span class="mi">public</span>
+              <span><span class="t">Ámbito público</span><span class="s">Efector público de gestión estatal</span></span>
+            </button>
+            <button type="button" class="amb-opt">
+              <span class="mi">domain</span>
+              <span><span class="t">Ámbito privado</span><span class="s">Clínicas y sanatorios privados</span></span>
+            </button>
+          </div>
+          <div class="note">
+            <span class="mi">info</span>
+            <span>El ámbito determina las organizaciones y recetarios disponibles en tu sesión. Podés cambiarlo cuando necesites.</span>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn primary" id="amb-apply"><span class="mi">swap_horiz</span>Aplicar cambio</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </section>
+
+  <footer class="page-foot">
+    <span>RecetAR · Mi cuenta</span>
+    <button class="logout"><span class="mi">logout</span>Cerrar sesión</button>
+  </footer>
+
+</main>
+
+<script>
+  const body = document.body;
+  const btnPro = document.getElementById('btn-pro');
+  const btnPh = document.getElementById('btn-ph');
+
+  /* ── Navegación del menú ── */
+  const menuItems = document.querySelectorAll('.menu-item');
+  const panels = document.querySelectorAll('.panel');
+
+  function selectPanel(target) {
+    menuItems.forEach(b => b.classList.toggle('active', b.dataset.target === target));
+    panels.forEach(p => p.classList.toggle('active', p.id === 'panel-' + target));
+  }
+  menuItems.forEach(b => b.addEventListener('click', () => selectPanel(b.dataset.target)));
+
+  /* ── Toggle de rol ── */
+  function setRole(role) {
+    const isPro = role === 'pro';
+    body.classList.toggle('role-pro', isPro);
+    body.classList.toggle('role-ph', !isPro);
+    btnPro.classList.toggle('active', isPro);
+    btnPh.classList.toggle('active', !isPro);
+    document.querySelectorAll('[data-pro]').forEach(el => el.hidden = !isPro);
+    document.querySelectorAll('[data-ph]').forEach(el => el.hidden = isPro);
+    document.getElementById('acc-name-label').textContent = isPro ? 'Nombre' : 'Nombre de fantasía';
+    const active = document.querySelector('.menu-item.active');
+    if (active && active.hidden) selectPanel('cuenta');
+  }
+  btnPro.addEventListener('click', () => setRole('pro'));
+  btnPh.addEventListener('click', () => setRole('ph'));
+
+  /* ── Modo oscuro ── */
+  const themeBtn = document.getElementById('btn-theme');
+  const themeIco = document.getElementById('theme-ico');
+  themeBtn.addEventListener('click', () => {
+    const dark = body.classList.toggle('dark-mode');
+    themeIco.textContent = dark ? 'light_mode' : 'dark_mode';
+    themeBtn.setAttribute('aria-pressed', String(dark));
+  });
+
+  /* ── Ver/ocultar contraseña ── */
+  document.querySelectorAll('.eye').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = document.getElementById(btn.dataset.target);
+      const show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      btn.querySelector('.mi').textContent = show ? 'visibility' : 'visibility_off';
+    });
+  });
+
+  /* ── Medidor de fuerza de contraseña ── */
+  const pwdNew = document.getElementById('pwd-new');
+  const meter = document.getElementById('pwd-meter');
+  const meterLbl = document.getElementById('pwd-meter-lbl');
+  const labels = ['Seguridad', 'Débil', 'Aceptable', 'Buena', 'Fuerte'];
+  pwdNew.addEventListener('input', () => {
+    const v = pwdNew.value;
+    let s = 0;
+    if (v.length >= 8) s++;
+    if (v.length >= 12) s++;
+    if (/[a-z]/.test(v) && /[A-Z]/.test(v)) s++;
+    if (/\d/.test(v) && /[^A-Za-z0-9]/.test(v)) s++;
+    meter.dataset.score = v ? Math.max(1, s) : 0;
+    meterLbl.textContent = labels[v ? Math.max(1, s) : 0];
+  });
+
+  /* ── Cajas de PIN: solo dígitos y auto-avance ── */
+  document.querySelectorAll('.pin-row').forEach(row => {
+    const boxes = [...row.querySelectorAll('.pin-box')];
+    boxes.forEach((box, i) => {
+      box.addEventListener('input', () => {
+        box.value = box.value.replace(/\D/g, '').slice(0, 1);
+        if (box.value && i < boxes.length - 1) boxes[i + 1].focus();
+      });
+      box.addEventListener('keydown', e => {
+        if (e.key === 'Backspace' && !box.value && i > 0) boxes[i - 1].focus();
+      });
+    });
+  });
+
+  /* ── Eliminar credenciales biométricas ── */
+  document.querySelectorAll('.cred-del').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.closest('.item').remove();
+      document.getElementById('cred-empty').hidden = document.getElementById('cred-list').children.length > 0;
+    });
+  });
+
+  /* ── Organizaciones: eliminar y agregar ── */
+  document.querySelectorAll('.org-del').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.closest('.item').remove();
+      document.getElementById('org-empty').hidden = document.getElementById('org-list').children.length > 0;
+    });
+  });
+  document.getElementById('org-add').addEventListener('click', () => {
+    document.getElementById('org-empty').hidden = true;
+    document.getElementById('org-list').insertAdjacentHTML('beforeend', `
+      <div class="item">
+        <span class="item-ico"><span class="mi">medical_information</span></span>
+        <div class="item-body">
+          <div class="item-t">Clínica del Sur</div>
+          <div class="item-s">Rinconada 500 · Neuquén</div>
+        </div>
+        <button type="button" class="del-btn org-del" title="Eliminar organización"><span class="mi">close</span></button>
+      </div>`);
+    const last = document.getElementById('org-list').lastElementChild;
+    last.querySelector('.org-del').addEventListener('click', () => {
+      last.remove();
+      document.getElementById('org-empty').hidden = document.getElementById('org-list').children.length > 0;
+    });
+  });
+
+  /* ── Ámbito ── */
+  document.querySelectorAll('.amb-opt').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.amb-opt').forEach(x => x.classList.toggle('active', x === b));
+    });
+  });
+  const ambApply = document.getElementById('amb-apply');
+  ambApply.addEventListener('click', () => {
+    ambApply.classList.add('success');
+    ambApply.innerHTML = '<span class="mi">check</span>Ámbito actualizado';
+    setTimeout(() => {
+      ambApply.classList.remove('success');
+      ambApply.innerHTML = '<span class="mi">swap_horiz</span>Aplicar cambio';
+    }, 1600);
+  });
+</script>
+
+</body>
+</html>

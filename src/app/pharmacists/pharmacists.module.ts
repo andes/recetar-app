@@ -33,7 +33,6 @@ import { PrescriptionUndoComponent } from './components/prescription-undo/prescr
 import { AndesPrescriptionPrinterComponent } from './components/andes-prescription-printer/andes-prescription-printer.component';
 import { FormatTimePipe } from './pipes/format-time.pipe';
 import { SharedModule } from '@shared/shared.module';
-import { EditUserInfoModule } from '@shared/components/edit-user-info/edit-user-info.module';
 
 @NgModule({
   declarations: [
@@ -70,7 +69,6 @@ import { EditUserInfoModule } from '@shared/components/edit-user-info/edit-user-
     MatProgressSpinnerModule,
     MatSortModule,
     MatPaginatorModule,
-    EditUserInfoModule,
     SharedModule
   ],
   exports: [

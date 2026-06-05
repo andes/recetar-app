@@ -1,4 +1,8 @@
 <aside class="sidebar" [class.collapsed]="collapsed" [class.overlay-open]="overlayOpen">
+  <div class="sidebar-brand" [class.collapsed]="collapsed">
+    <img [src]="logoPath$ | async" alt="RecetAR" class="sidebar-logo">
+  </div>
+
   <mat-nav-list>
     <a *ngFor="let item of items" mat-list-item
       [routerLink]="item.route"
@@ -9,15 +13,4 @@
       <span matListItemTitle [class.visually-hidden]="collapsed">{{ item.label }}</span>
     </a>
   </mat-nav-list>
-
-  <div class="sidebar-spacer"></div>
-
-  <div class="sidebar-footer">
-    <button class="theme-toggle-btn" (click)="toggleTheme()"
-      [matTooltip]="collapsed ? (isDark ? 'Modo claro' : 'Modo oscuro') : ''"
-      matTooltipPosition="right">
-      <mat-icon>{{ isDark ? 'light_mode' : 'dark_mode' }}</mat-icon>
-      <span [class.visually-hidden]="collapsed">{{ isDark ? 'Modo claro' : 'Modo oscuro' }}</span>
-    </button>
-  </div>
 </aside>

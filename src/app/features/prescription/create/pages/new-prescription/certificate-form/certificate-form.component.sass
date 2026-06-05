@@ -1,0 +1,56 @@
+@use 'styles/variables' as *
+
+:host
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+
+.certificate-form
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+
+.form-body
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+
+.form-row
+    display: flex
+    gap: var(--space-3)
+    align-items: flex-start
+    > *
+        flex: 1
+
+    @media (max-width: $small-devices)
+        flex-direction: column
+
+.form-field-wrap
+    display: flex
+    flex-direction: column
+    gap: 4px
+
+.form-label
+    font-size: 12px
+    font-weight: 500
+    color: var(--text-secondary)
+
+.form-error
+    font-size: 11px
+    color: var(--error-fill)
+
+.detail-actions
+    display: flex
+    gap: var(--space-3)
+    padding-top: var(--space-4)
+    border-top: 1px solid var(--border-color)
+
+    @media (max-width: $small-devices)
+        flex-direction: column
+        gap: var(--space-3)
+
+        button
+            width: 100%
+            padding: var(--space-5) var(--space-4)
+            font-size: 16px
+            min-height: 52px

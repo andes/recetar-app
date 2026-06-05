@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dispensar v3 — RecetAR</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+<style>
+  :root {
+    --bg-body: #f1f3f6;
+    --bg-card: #ffffff;
+    --bg-sidebar: #0f172a;
+    --border-color: #e2e5ea;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --text-hint: #94a3b8;
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --primary-soft: #eff6ff;
+    --success: #16a34a;
+    --success-soft: #f0fdf4;
+    --warning: #d97706;
+    --warning-soft: #fff7ed;
+    --error: #dc2626;
+    --error-soft: #fef2f2;
+    --andes: #be185d;
+    --andes-soft: #fdf2f8;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,.04), 0 1px 5px rgba(0,0,0,.03);
+    --panel-width: 340px;
+    --panel-collapsed: 48px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-body); color: var(--text);
+    font-size: 15px; display: flex; height: 100vh; overflow: hidden;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 220px; min-width: 220px; background: var(--bg-sidebar);
+    color: #fff; display: flex; flex-direction: column; padding: 20px 0;
+    overflow-y: auto;
+  }
+  .sb-brand {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 16px 18px; margin-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+  }
+  .sb-brand .logo {
+    width: 34px; height: 34px; background: var(--primary); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px;
+  }
+  .sb-brand strong { font-size: 15px; font-weight: 650; letter-spacing: -.01em; }
+  .sb-nav { padding: 4px 8px; }
+  .sb-nav a {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: 8px;
+    color: rgba(255,255,255,.5); font-size: 14px; font-weight: 500;
+    text-decoration: none; margin-bottom: 1px; transition: all .15s;
+  }
+  .sb-nav a:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.85); }
+  .sb-nav a.active { background: rgba(37,99,235,.22); color: #fff; }
+  .sb-nav a .mi { font-size: 20px; width: 22px; font-variation-settings: 'FILL' 1; }
+  .sb-foot {
+    margin-top: auto; padding: 14px 16px; border-top: 1px solid rgba(255,255,255,.07);
+    display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: rgba(255,255,255,.4);
+  }
+
+  /* ── Main wrapper ── */
+  .main-wrap { flex: 1; display: flex; overflow: hidden; }
+
+  /* ── Center content ── */
+  .center { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  .topbar {
+    background: var(--bg-card); border-bottom: 1px solid var(--border-color);
+    padding: 18px 28px; display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .topbar h1 { font-size: 22px; font-weight: 700; letter-spacing: -.02em; }
+  .topbar .hint { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .topbar .toggle-panel {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border: 1.5px solid var(--border-color); border-radius: var(--radius-sm);
+    background: var(--bg-card); font-size: 13px; font-weight: 600; color: var(--text-muted);
+    cursor: default; transition: all .15s; white-space: nowrap;
+  }
+  .topbar .toggle-panel:hover { border-color: var(--primary); color: var(--primary); }
+  .topbar .toggle-panel .mi { font-size: 20px; }
+  .topbar .toggle-panel .badge-count {
+    background: var(--primary); color: #fff; font-size: 11px; font-weight: 700;
+    padding: 2px 8px; border-radius: 999px; margin-left: 4px;
+  }
+
+  .content { padding: 24px 28px; flex: 1; overflow-y: auto; }
+
+  /* ── Search ── */
+  .search-wrap {
+    position: relative; margin-bottom: 18px;
+  }
+  .search-wrap input {
+    width: 100%; padding: 13px 18px 13px 48px;
+    border: 2px solid var(--border-color); border-radius: var(--radius);
+    background: var(--bg-card); font-size: 15px; outline: none;
+    transition: border .15s, box-shadow .15s; box-shadow: var(--shadow);
+  }
+  .search-wrap input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37,99,235,.08); }
+  .search-wrap input::placeholder { color: var(--text-hint); }
+  .search-wrap .mi {
+    position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+    font-size: 22px; color: var(--text-hint);
+  }
+
+  /* ── Filter chips ── */
+  .filter-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .filter-label { font-size: 12px; font-weight: 700; color: var(--text-hint); text-transform: uppercase; letter-spacing: .04em; }
+
+  .chip-group {
+    display: flex; gap: 0; background: var(--bg-card);
+    border: 1px solid var(--border-color); border-radius: var(--radius);
+    overflow: hidden; box-shadow: var(--shadow);
+  }
+  .chip-group button {
+    padding: 9px 18px; font-size: 13.5px; font-weight: 500;
+    border: none; background: transparent; color: var(--text-muted);
+    cursor: default; transition: all .15s; border-right: 1px solid #eef0f3;
+    white-space: nowrap;
+  }
+  .chip-group button:last-child { border-right: none; }
+  .chip-group button.active { background: var(--primary); color: #fff; font-weight: 600; }
+  .chip-group button .b {
+    font-size: 10px; padding: 1px 7px; border-radius: 999px; margin-left: 6px;
+  }
+  .chip-group button .b.light { background: rgba(255,255,255,.2); }
+  .chip-group button:not(.active) .b { background: #eef0f3; }
+
+  .sep-v { width: 1px; height: 18px; background: var(--border-color); margin: 0 4px; }
+
+  .quick-dates { display: flex; gap: 5px; margin-left: auto; }
+  .quick-dates button {
+    padding: 9px 14px; font-size: 13px; font-weight: 500;
+    border: 1px solid var(--border-color); border-radius: var(--radius);
+    background: var(--bg-card); color: var(--text-muted); cursor: default;
+    transition: all .15s; white-space: nowrap;
+  }
+  .quick-dates button.active {
+    background: var(--primary-soft); color: var(--primary);
+    border-color: var(--primary); font-weight: 600;
+  }
+
+  /* ── Summary ── */
+  .summary {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 16px; background: var(--primary-soft);
+    border-radius: var(--radius); margin-bottom: 20px;
+    font-size: 13.5px; font-weight: 500; color: var(--primary);
+  }
+  .summary .mi { font-size: 20px; }
+  .summary .dot { width: 4px; height: 4px; background: var(--primary); border-radius: 50%; opacity: .4; }
+
+  /* ── Day group / table ── */
+  .day-group { margin-bottom: 22px; }
+  .day-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px; cursor: default; border-radius: var(--radius-sm);
+    transition: background .12s; user-select: none; margin-bottom: 8px;
+  }
+  .day-header:hover { background: #f8fafc; }
+  .day-header .chevron { font-size: 20px; color: var(--text-hint); transition: transform .2s; }
+  .day-header.open .chevron { transform: rotate(90deg); }
+  .day-title { font-size: 14px; font-weight: 700; color: var(--text); }
+  .day-count { font-size: 12.5px; color: var(--text-hint); font-weight: 400; }
+
+  /* ── Table ── */
+  .rx-table {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    background: var(--bg-card); border: 1px solid var(--border-color);
+    border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow);
+  }
+  .rx-table thead th {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .04em; color: var(--text-hint);
+    background: var(--primary-soft); border-bottom: 1px solid var(--border-color);
+    padding: 10px 14px; text-align: left;
+  }
+  .rx-table tbody td {
+    padding: 12px 14px; font-size: 14px;
+    border-bottom: 1px solid #f1f3f6;
+  }
+  .rx-table tbody tr { transition: background .12s; cursor: default; }
+  .rx-table tbody tr:hover { background: #f8fafc; }
+  .rx-table tbody tr:last-child td { border-bottom: none; }
+  .rx-table tbody tr.dispensed { background: #fafffc; }
+  .rx-table tbody tr.expired { opacity: .5; }
+  .rx-table tbody tr.expired td:first-child { text-decoration: line-through; }
+
+  .cell-med { font-weight: 600; }
+  .cell-patient { font-size: 13.5px; }
+  .cell-patient .dni { color: var(--text-hint); font-size: 12px; margin-left: 4px; }
+  .cell-prof { font-size: 13px; color: var(--text-muted); }
+  .cell-qty { font-size: 13px; font-weight: 600; color: var(--text-muted); text-align: center; }
+
+  .source-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 6px;
+    font-size: 10px; font-weight: 800; margin-right: 8px; vertical-align: middle;
+  }
+  .src-r { background: var(--primary-soft); color: var(--primary); }
+  .src-a { background: var(--andes-soft); color: var(--andes); }
+
+  .tag {
+    display: inline-block; padding: 3px 9px; border-radius: 999px;
+    font-size: 11px; font-weight: 700; letter-spacing: .02em;
+    text-transform: uppercase; margin-right: 4px;
+  }
+  .tag-warn { background: var(--warning-soft); color: var(--warning); }
+  .tag-err  { background: var(--error-soft); color: var(--error); }
+  .tag-info { background: var(--primary-soft); color: var(--primary); }
+  .tag-succ { background: var(--success-soft); color: var(--success); }
+
+  .cell-actions { text-align: right; white-space: nowrap; }
+  .btn-sm {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 7px 14px; border-radius: var(--radius-sm);
+    font-size: 12.5px; font-weight: 600; cursor: default;
+    border: none; transition: all .15s; white-space: nowrap;
+  }
+  .btn-sm .mi { font-size: 18px; }
+  .btn-prime-sm {
+    background: var(--primary); color: #fff;
+    padding: 7px 18px;
+  }
+  .btn-prime-sm:hover { background: var(--primary-hover); }
+  .btn-ghost-sm {
+    background: transparent; color: var(--text-muted);
+    border: 1.5px solid var(--border-color); padding: 7px 10px;
+    margin-right: 6px;
+  }
+  .btn-ghost-sm:hover { background: #f8fafc; }
+
+  /* countdown inline in table */
+  .countdown-cell {
+    display: flex; align-items: center; gap: 10px; padding: 4px 0;
+  }
+  .countdown-cell .bar {
+    width: 80px; height: 4px; background: var(--border-color); border-radius: 2px; overflow: hidden;
+  }
+  .countdown-cell .bar .fill { height: 100%; background: var(--primary); width: 60%; border-radius: 2px; }
+  .countdown-cell .time { font-size: 12px; color: var(--text-muted); font-weight: 500; white-space: nowrap; }
+  .btn-undo-sm {
+    background: var(--warning-soft); color: var(--warning);
+    border: 1.5px solid var(--warning); padding: 5px 12px;
+    border-radius: var(--radius-sm); font-size: 12px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 5px; cursor: default;
+  }
+
+  /* ── RIGHT PANEL: Medicamentos del día ── */
+  .right-panel {
+    width: var(--panel-width); min-width: var(--panel-width);
+    background: var(--bg-card); border-left: 1px solid var(--border-color);
+    display: flex; flex-direction: column; overflow: hidden;
+    transition: width .25s ease, min-width .25s ease;
+  }
+  .right-panel.collapsed {
+    width: 0; min-width: 0; border-left: none;
+  }
+
+  .panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 20px; border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+  }
+  .panel-header h3 { font-size: 14px; font-weight: 700; }
+  .panel-header .close {
+    width: 28px; height: 28px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: default; color: var(--text-hint); transition: all .12s;
+    border: none; background: transparent;
+  }
+  .panel-header .close:hover { background: #f1f3f6; color: var(--text); }
+
+  .panel-stats {
+    display: flex; gap: 8px; padding: 14px 20px;
+    border-bottom: 1px solid var(--border-color); flex-shrink: 0;
+  }
+  .panel-stat {
+    flex: 1; text-align: center; padding: 10px 6px;
+    background: #f8fafc; border-radius: var(--radius-sm);
+  }
+  .panel-stat .n { font-size: 22px; font-weight: 800; color: var(--text); }
+  .panel-stat .l { font-size: 11px; color: var(--text-hint); text-transform: uppercase; font-weight: 600; letter-spacing: .03em; margin-top: 2px; }
+
+  .panel-body { flex: 1; overflow-y: auto; padding: 8px 0; }
+
+  .med-item {
+    border-bottom: 1px solid #f1f3f6;
+  }
+  .med-item-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 20px; cursor: default; transition: background .12s;
+  }
+  .med-item-header:hover { background: #f8fafc; }
+  .med-item-header .chevron {
+    font-size: 18px; color: var(--text-hint); transition: transform .2s;
+    flex-shrink: 0;
+  }
+  .med-item.open .med-item-header .chevron { transform: rotate(90deg); }
+
+  .med-info { flex: 1; min-width: 0; }
+  .med-name { font-size: 13.5px; font-weight: 600; line-height: 1.3; }
+  .med-sub { font-size: 12px; color: var(--text-hint); margin-top: 2px; }
+
+  .med-counter {
+    display: flex; flex-direction: column; align-items: center;
+    flex-shrink: 0;
+  }
+  .med-counter .num {
+    font-size: 20px; font-weight: 800; color: var(--primary);
+    line-height: 1;
+  }
+  .med-counter .lbl {
+    font-size: 10px; color: var(--text-hint); text-transform: uppercase;
+    font-weight: 600; letter-spacing: .03em;
+  }
+
+  .med-detail {
+    display: none; padding: 0 20px 14px 44px;
+  }
+  .med-item.open .med-detail { display: block; }
+
+  .med-detail-table {
+    width: 100%; border-collapse: collapse; font-size: 12.5px;
+  }
+  .med-detail-table th {
+    text-align: left; font-size: 10px; font-weight: 700;
+    color: var(--text-hint); text-transform: uppercase;
+    letter-spacing: .04em; padding: 6px 4px;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .med-detail-table td {
+    padding: 8px 4px; border-bottom: 1px solid #f1f3f6;
+    color: var(--text-muted);
+  }
+  .med-detail-table td:first-child { font-weight: 600; color: var(--text); }
+  .med-detail-table tr:last-child td { border-bottom: none; }
+
+  /* ── Empty state ── */
+  .empty { text-align: center; padding: 50px 20px; color: var(--text-hint); }
+  .empty .mi { font-size: 48px; margin-bottom: 10px; }
+  .empty p { font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════ Sidebar ══════════ -->
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="logo">R</div>
+    <strong>RecetAR</strong>
+  </div>
+  <div class="sb-nav">
+    <a href="#"><span class="material-symbols-outlined mi">home</span>Inicio</a>
+    <a href="#" class="active"><span class="material-symbols-outlined mi">medication</span>Dispensar</a>
+    <a href="#"><span class="material-symbols-outlined mi">description</span>Documentos</a>
+  </div>
+  <div class="sb-foot">
+    <span class="material-symbols-outlined" style="font-size:16px">storefront</span>
+    Farmacia Los Alamos
+  </div>
+</aside>
+
+<!-- ══════════ Main ══════════ -->
+<div class="main-wrap">
+
+  <!-- Center -->
+  <div class="center">
+
+    <div class="topbar">
+      <div>
+        <h1>Dispensar</h1>
+        <p class="hint">Busque y dispense recetas pendientes de sus pacientes</p>
+      </div>
+      <button class="toggle-panel" onclick="togglePanel()">
+        <span class="material-symbols-outlined mi">medication_liquid</span>
+        Medicamentos del día
+        <span class="badge-count">7</span>
+      </button>
+    </div>
+
+    <div class="content">
+
+      <!-- Search -->
+      <div class="search-wrap">
+        <span class="material-symbols-outlined mi">search</span>
+        <input type="text" placeholder="Buscar por DNI, nombre del paciente, medicamento o código de receta..." />
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-row">
+        <span class="filter-label">Estado</span>
+        <div class="chip-group">
+          <button class="active">Pendientes<span class="b light">12</span></button>
+          <button>Dispensadas<span class="b">8</span></button>
+          <button>Vencidas<span class="b">3</span></button>
+          <button>Todas<span class="b">23</span></button>
+        </div>
+        <div class="sep-v"></div>
+        <span class="filter-label">Período</span>
+        <div class="quick-dates">
+          <button class="active">Hoy</button>
+          <button>7 días</button>
+          <button>30 días</button>
+          <button>Personalizado</button>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="summary">
+        <span class="material-symbols-outlined mi">today</span>
+        12 recetas pendientes para hoy
+        <span class="dot"></span> 4 Andes <span class="dot"></span> 8 RecetAR
+      </div>
+
+      <!-- ══ HOY ══ -->
+      <div class="day-group">
+        <div class="day-header open">
+          <span class="material-symbols-outlined chevron">chevron_right</span>
+          <span class="day-title">Hoy — miércoles 5 de agosto</span>
+          <span class="day-count">5 recetas</span>
+        </div>
+
+        <table class="rx-table">
+          <thead>
+            <tr>
+              <th>Medicamento</th>
+              <th>Paciente</th>
+              <th>Profesional</th>
+              <th style="text-align:center">Cant.</th>
+              <th>Estado</th>
+              <th style="text-align:right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <!-- Row 1: Ibuprofeno - triplicado, near expiry -->
+            <tr>
+              <td class="cell-med"><span class="source-badge src-r">R</span>Ibuprofeno 600 mg</td>
+              <td class="cell-patient">González, María<span class="dni">DNI 28.456.123</span></td>
+              <td class="cell-prof">Dr. Martínez</td>
+              <td class="cell-qty">2 env.</td>
+              <td>
+                <span class="tag tag-warn">Vence en 24h</span>
+                <span class="tag tag-info">Triplicado</span>
+              </td>
+              <td class="cell-actions">
+                <button class="btn-sm btn-ghost-sm"><span class="material-symbols-outlined mi">print</span></button>
+                <button class="btn-sm btn-prime-sm"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+              </td>
+            </tr>
+
+            <!-- Row 2: Amlodipina -->
+            <tr>
+              <td class="cell-med"><span class="source-badge src-a">A</span>Amlodipina 10 mg</td>
+              <td class="cell-patient">Rodríguez, Carlos<span class="dni">DNI 31.987.234</span></td>
+              <td class="cell-prof">Dra. Fernández</td>
+              <td class="cell-qty">1 env.</td>
+              <td><span class="tag tag-info">Duplicado</span></td>
+              <td class="cell-actions">
+                <button class="btn-sm btn-ghost-sm"><span class="material-symbols-outlined mi">print</span></button>
+                <button class="btn-sm btn-prime-sm"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+              </td>
+            </tr>
+
+            <!-- Row 3: Metformina -->
+            <tr>
+              <td class="cell-med"><span class="source-badge src-r">R</span>Metformina 850 mg</td>
+              <td class="cell-patient">López, Ana<span class="dni">DNI 25.498.763</span></td>
+              <td class="cell-prof">Dr. Gutiérrez</td>
+              <td class="cell-qty">3 env.</td>
+              <td></td>
+              <td class="cell-actions">
+                <button class="btn-sm btn-ghost-sm"><span class="material-symbols-outlined mi">print</span></button>
+                <button class="btn-sm btn-prime-sm"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+              </td>
+            </tr>
+
+            <!-- Row 4: Losartan — just dispensed, countdown -->
+            <tr class="dispensed">
+              <td class="cell-med"><span class="source-badge src-r">R</span>Losartán 50 mg</td>
+              <td class="cell-patient">García, Jorge<span class="dni">DNI 22.783.456</span></td>
+              <td class="cell-prof">Dra. Ramírez</td>
+              <td class="cell-qty">2 env.</td>
+              <td>
+                <div class="countdown-cell">
+                  <span class="material-symbols-outlined" style="font-size:16px;color:var(--primary)">timer</span>
+                  <span class="time">1h 26m</span>
+                  <div class="bar"><div class="fill" style="width:60%"></div></div>
+                  <button class="btn-undo-sm"><span class="material-symbols-outlined mi" style="font-size:16px">undo</span>Deshacer</button>
+                </div>
+              </td>
+              <td class="cell-actions">
+                <button class="btn-sm btn-ghost-sm"><span class="material-symbols-outlined mi">print</span></button>
+              </td>
+            </tr>
+
+            <!-- Row 5: Paracetamol Andes -->
+            <tr>
+              <td class="cell-med"><span class="source-badge src-a">A</span>Paracetamol 500 mg</td>
+              <td class="cell-patient">Torres, Elena<span class="dni">DNI 27.654.123</span></td>
+              <td class="cell-prof">Dra. Ramírez</td>
+              <td class="cell-qty">1 env.</td>
+              <td></td>
+              <td class="cell-actions">
+                <button class="btn-sm btn-ghost-sm"><span class="material-symbols-outlined mi">print</span></button>
+                <button class="btn-sm btn-prime-sm"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ══ AYER ══ -->
+      <div class="day-group">
+        <div class="day-header">
+          <span class="material-symbols-outlined chevron">chevron_right</span>
+          <span class="day-title">Ayer — martes 4 de agosto</span>
+          <span class="day-count">4 recetas</span>
+        </div>
+
+        <table class="rx-table" style="display:none">
+          <thead>
+            <tr>
+              <th>Medicamento</th>
+              <th>Paciente</th>
+              <th>Profesional</th>
+              <th style="text-align:center">Cant.</th>
+              <th>Estado</th>
+              <th style="text-align:right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="cell-med"><span class="source-badge src-r">R</span>Levotiroxina 100 mcg</td>
+              <td class="cell-patient">Díaz, Pedro<span class="dni">DNI 29.876.234</span></td>
+              <td class="cell-prof">Dr. Álvarez</td>
+              <td class="cell-qty">1 env.</td>
+              <td></td>
+              <td class="cell-actions">
+                <button class="btn-sm btn-ghost-sm"><span class="material-symbols-outlined mi">print</span></button>
+                <button class="btn-sm btn-prime-sm"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+              </td>
+            </tr>
+            <tr class="dispensed">
+              <td class="cell-med"><span class="source-badge src-a">A</span>Salbutamol 100 mcg inhalador</td>
+              <td class="cell-patient">Silva, Marta<span class="dni">DNI 26.789.345</span></td>
+              <td class="cell-prof">Dra. López</td>
+              <td class="cell-qty">1 env.</td>
+              <td><span class="tag tag-err">Ventana cerrada</span></td>
+              <td class="cell-actions">
+                <button class="btn-sm btn-ghost-sm"><span class="material-symbols-outlined mi">print</span></button>
+              </td>
+            </tr>
+            <tr class="expired">
+              <td class="cell-med"><span class="source-badge src-r">R</span>Omeprazol 20 mg</td>
+              <td class="cell-patient">Morales, Luis<span class="dni">DNI 24.123.678</span></td>
+              <td class="cell-prof">Dr. Gutiérrez</td>
+              <td class="cell-qty">2 env.</td>
+              <td><span class="tag tag-err">Vencida</span></td>
+              <td class="cell-actions">
+                <button class="btn-sm btn-ghost-sm"><span class="material-symbols-outlined mi">print</span></button>
+              </td>
+            </tr>
+            <tr>
+              <td class="cell-med"><span class="source-badge src-a">A</span>Atorvastatina 20 mg</td>
+              <td class="cell-patient">Vega, Patricia<span class="dni">DNI 30.987.234</span></td>
+              <td class="cell-prof">Dr. Martínez</td>
+              <td class="cell-qty">1 env.</td>
+              <td><span class="tag tag-warn">Vence en 48h</span></td>
+              <td class="cell-actions">
+                <button class="btn-sm btn-ghost-sm"><span class="material-symbols-outlined mi">print</span></button>
+                <button class="btn-sm btn-prime-sm"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ══ LUNES ══ -->
+      <div class="day-group">
+        <div class="day-header">
+          <span class="material-symbols-outlined chevron">chevron_right</span>
+          <span class="day-title">Lunes 3 de agosto</span>
+          <span class="day-count">3 recetas</span>
+        </div>
+        <table class="rx-table" style="display:none">
+          <thead>
+            <tr>
+              <th>Medicamento</th>
+              <th>Paciente</th>
+              <th>Profesional</th>
+              <th style="text-align:center">Cant.</th>
+              <th>Estado</th>
+              <th style="text-align:right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="cell-med"><span class="source-badge src-r">R</span>Enalapril 10 mg</td>
+              <td class="cell-patient">Ramírez, Juana<span class="dni">DNI 18.563.452</span></td>
+              <td class="cell-prof">Dr. Torres</td>
+              <td class="cell-qty">2 env.</td>
+              <td></td>
+              <td class="cell-actions">
+                <button class="btn-sm btn-ghost-sm"><span class="material-symbols-outlined mi">print</span></button>
+                <button class="btn-sm btn-prime-sm"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+              </td>
+            </tr>
+            <tr class="dispensed">
+              <td class="cell-med"><span class="source-badge src-a">A</span>Clonazepam 2 mg</td>
+              <td class="cell-patient">Castillo, Hugo<span class="dni">DNI 22.145.678</span></td>
+              <td class="cell-prof">Dra. Fernández</td>
+              <td class="cell-qty">1 env.</td>
+              <td><span class="tag tag-succ">Dispensado</span></td>
+              <td class="cell-actions">
+                <button class="btn-sm btn-ghost-sm"><span class="material-symbols-outlined mi">print</span></button>
+              </td>
+            </tr>
+            <tr>
+              <td class="cell-med"><span class="source-badge src-r">R</span>Tramadol 50 mg</td>
+              <td class="cell-patient">Ríos, Fabián<span class="dni">DNI 23.450.987</span></td>
+              <td class="cell-prof">Dr. Gutiérrez</td>
+              <td class="cell-qty">1 env.</td>
+              <td><span class="tag tag-info">Duplicado</span></td>
+              <td class="cell-actions">
+                <button class="btn-sm btn-ghost-sm"><span class="material-symbols-outlined mi">print</span></button>
+                <button class="btn-sm btn-prime-sm"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════ RIGHT PANEL: Medicamentos del día ══════════ -->
+  <aside class="right-panel" id="rightPanel">
+
+    <div class="panel-header">
+      <h3>Medicamentos del día</h3>
+      <button class="close" onclick="togglePanel()">
+        <span class="material-symbols-outlined" style="font-size:18px">close</span>
+      </button>
+    </div>
+
+    <div class="panel-stats">
+      <div class="panel-stat">
+        <div class="n">7</div>
+        <div class="l">Únicos</div>
+      </div>
+      <div class="panel-stat">
+        <div class="n">12</div>
+        <div class="l">Total recetas</div>
+      </div>
+      <div class="panel-stat">
+        <div class="n">4</div>
+        <div class="l">Andes</div>
+      </div>
+    </div>
+
+    <div class="panel-body">
+
+      <!-- MED 1: Ibuprofeno — 3 recetas -->
+      <div class="med-item" onclick="toggleMed(this)">
+        <div class="med-item-header">
+          <span class="material-symbols-outlined chevron">chevron_right</span>
+          <div class="med-info">
+            <div class="med-name">Ibuprofeno 600 mg comprimidos</div>
+            <div class="med-sub">2× RecetAR &middot; 1× Andes</div>
+          </div>
+          <div class="med-counter">
+            <span class="num">3</span>
+            <span class="lbl">recetas</span>
+          </div>
+        </div>
+        <div class="med-detail">
+          <table class="med-detail-table">
+            <thead>
+              <tr><th>Receta</th><th>Paciente</th><th>Fecha</th><th>Env.</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>RX-01082</td><td>González, María</td><td>Hoy, 10:15</td><td>2</td></tr>
+              <tr><td>RX-01104</td><td>Álvarez, Juan</td><td>Hoy, 12:40</td><td>1</td></tr>
+              <tr><td>ANDES-8842</td><td>Navarro, Clara</td><td>Hoy, 08:00</td><td>1</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- MED 2: Metformina — 2 recetas -->
+      <div class="med-item" onclick="toggleMed(this)">
+        <div class="med-item-header">
+          <span class="material-symbols-outlined chevron">chevron_right</span>
+          <div class="med-info">
+            <div class="med-name">Metformina 850 mg comprimidos</div>
+            <div class="med-sub">2× RecetAR</div>
+          </div>
+          <div class="med-counter">
+            <span class="num">2</span>
+            <span class="lbl">recetas</span>
+          </div>
+        </div>
+        <div class="med-detail">
+          <table class="med-detail-table">
+            <thead>
+              <tr><th>Receta</th><th>Paciente</th><th>Fecha</th><th>Env.</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>RX-01092</td><td>López, Ana</td><td>Hoy, 11:20</td><td>3</td></tr>
+              <tr><td>RX-01112</td><td>Pérez, Roberto</td><td>Hoy, 16:00</td><td>2</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- MED 3: Amlodipina — 1 receta -->
+      <div class="med-item" onclick="toggleMed(this)">
+        <div class="med-item-header">
+          <span class="material-symbols-outlined chevron">chevron_right</span>
+          <div class="med-info">
+            <div class="med-name">Amlodipina 10 mg comprimidos</div>
+            <div class="med-sub">1× Andes</div>
+          </div>
+          <div class="med-counter">
+            <span class="num">1</span>
+            <span class="lbl">receta</span>
+          </div>
+        </div>
+        <div class="med-detail">
+          <table class="med-detail-table">
+            <thead>
+              <tr><th>Receta</th><th>Paciente</th><th>Fecha</th><th>Env.</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>ANDES-8801</td><td>Rodríguez, Carlos</td><td>Hoy, 07:45</td><td>1</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- MED 4: Losartán — 1 receta (dispensada) -->
+      <div class="med-item" onclick="toggleMed(this)" style="opacity:.7">
+        <div class="med-item-header">
+          <span class="material-symbols-outlined chevron">chevron_right</span>
+          <div class="med-info">
+            <div class="med-name">Losartán 50 mg comprimidos</div>
+            <div class="med-sub">1× RecetAR &middot; <span style="color:var(--success)">Dispensada</span></div>
+          </div>
+          <div class="med-counter">
+            <span class="num" style="color:var(--success)">1</span>
+            <span class="lbl">receta</span>
+          </div>
+        </div>
+        <div class="med-detail">
+          <table class="med-detail-table">
+            <thead>
+              <tr><th>Receta</th><th>Paciente</th><th>Fecha</th><th>Env.</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>RX-01100</td><td>García, Jorge</td><td>Hoy, 09:00</td><td>2</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- MED 5: Paracetamol — 2 recetas -->
+      <div class="med-item" onclick="toggleMed(this)">
+        <div class="med-item-header">
+          <span class="material-symbols-outlined chevron">chevron_right</span>
+          <div class="med-info">
+            <div class="med-name">Paracetamol 500 mg comprimidos</div>
+            <div class="med-sub">2× Andes</div>
+          </div>
+          <div class="med-counter">
+            <span class="num">2</span>
+            <span class="lbl">recetas</span>
+          </div>
+        </div>
+        <div class="med-detail">
+          <table class="med-detail-table">
+            <thead>
+              <tr><th>Receta</th><th>Paciente</th><th>Fecha</th><th>Env.</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>ANDES-8815</td><td>Torres, Elena</td><td>Hoy, 14:30</td><td>1</td></tr>
+              <tr><td>ANDES-8830</td><td>Sosa, Miguel</td><td>Hoy, 17:10</td><td>2</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- MED 6: Levotiroxina — 1 receta -->
+      <div class="med-item" onclick="toggleMed(this)">
+        <div class="med-item-header">
+          <span class="material-symbols-outlined chevron">chevron_right</span>
+          <div class="med-info">
+            <div class="med-name">Levotiroxina 100 mcg comprimidos</div>
+            <div class="med-sub">1× RecetAR</div>
+          </div>
+          <div class="med-counter">
+            <span class="num">1</span>
+            <span class="lbl">receta</span>
+          </div>
+        </div>
+        <div class="med-detail">
+          <table class="med-detail-table">
+            <thead>
+              <tr><th>Receta</th><th>Paciente</th><th>Fecha</th><th>Env.</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>RX-01055</td><td>Díaz, Pedro</td><td>Ayer, 15:00</td><td>1</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- MED 7: Enalapril — 1 receta -->
+      <div class="med-item" onclick="toggleMed(this)">
+        <div class="med-item-header">
+          <span class="material-symbols-outlined chevron">chevron_right</span>
+          <div class="med-info">
+            <div class="med-name">Enalapril 10 mg comprimidos</div>
+            <div class="med-sub">1× RecetAR</div>
+          </div>
+          <div class="med-counter">
+            <span class="num">1</span>
+            <span class="lbl">receta</span>
+          </div>
+        </div>
+        <div class="med-detail">
+          <table class="med-detail-table">
+            <thead>
+              <tr><th>Receta</th><th>Paciente</th><th>Fecha</th><th>Env.</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>RX-01048</td><td>Ramírez, Juana</td><td>Lunes, 09:30</td><td>2</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+</div>
+
+<script>
+  /* toggle accordions */
+  document.querySelectorAll('.day-header').forEach(h => {
+    h.addEventListener('click', () => {
+      const table = h.parentElement.querySelector('.rx-table');
+      const open = table.style.display !== 'none';
+      table.style.display = open ? 'none' : 'table';
+      h.classList.toggle('open', !open);
+    });
+  });
+
+  /* toggle med detail */
+  function toggleMed(el) {
+    el.classList.toggle('open');
+  }
+
+  /* toggle right panel */
+  function togglePanel() {
+    const panel = document.getElementById('rightPanel');
+    panel.classList.toggle('collapsed');
+  }
+</script>
+
+</body>
+</html>

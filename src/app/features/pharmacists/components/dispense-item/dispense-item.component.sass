@@ -1,0 +1,151 @@
+@use 'styles/variables' as *
+
+:host
+    display: flex
+    width: 100%
+    min-width: 0
+
+.dispense-item
+    cursor: pointer
+    text-align: left
+    min-width: 0
+
+    &.dispensed
+        h3
+            color: var(--success-text)
+
+    &.expired
+        h3
+            text-decoration: line-through
+
+    ::ng-deep
+        .ui-card
+            transition: border-color .12s, background-color .12s, box-shadow .12s
+
+        .ui-card-body
+            display: flex
+            padding: 0
+            min-width: 0
+
+    &:hover ::ng-deep .ui-card
+        box-shadow: var(--elevation-4)
+
+    &.selected ::ng-deep .ui-card
+        border: 1px solid var(--secondary)
+        box-shadow: var(--elevation-4)
+
+.di-content
+    flex: 1
+    min-width: 0
+    display: flex
+    flex-direction: column
+    gap: var(--space-2)
+    padding: var(--space-3) var(--space-4)
+
+.di-tags
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+    flex-wrap: wrap
+
+.rx-head
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+    min-width: 0
+
+    .mat-icon
+        color: var(--text-secondary)
+        font-size: 18px
+        width: 18px
+        height: 18px
+        line-height: 18px
+        flex-shrink: 0
+
+.rx-title
+    flex: 1
+    min-width: 0
+    display: flex
+    flex-direction: column
+    gap: 2px
+
+    h3
+        margin-bottom: 0
+        min-width: 0
+        overflow: hidden
+        text-overflow: ellipsis
+        white-space: nowrap
+
+.rx-type-indicator
+    font-size: 11px
+    font-weight: 600
+    line-height: 1.3
+
+    &.duplicado
+        color: var(--warning-fill)
+
+    &.triplicado
+        color: var(--error-fill)
+
+.di-patient
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+    min-width: 0
+
+    .mat-icon
+        color: var(--text-secondary)
+        font-size: 18px
+        width: 18px
+        height: 18px
+        line-height: 18px
+        flex-shrink: 0
+
+    strong
+        min-width: 0
+        overflow: hidden
+        text-overflow: ellipsis
+        white-space: nowrap
+
+    small
+        color: var(--text-secondary)
+        font-size: 12px
+        flex-shrink: 0
+
+.di-side
+    flex-shrink: 0
+    width: 220px
+    display: flex
+    flex-direction: column
+    justify-content: space-between
+    gap: var(--space-3)
+    padding: var(--space-4) var(--space-4) var(--space-3)
+
+.near-expiry
+    color: var(--warning-fill)
+    font-size: 11px
+
+.di-actions
+    display: flex
+    flex-direction: column
+    gap: var(--space-2)
+
+    .mat-icon
+        margin-right: 2px
+
+    .undo-btn-wrap
+        display: block
+
+@media (max-width: $small-devices)
+    :host ::ng-deep .ui-card-body
+        flex-direction: column
+
+    .di-side
+        width: 100%
+        border-left: none
+        border-top: 1px solid var(--border-color)
+        align-items: stretch
+
+    .di-actions
+        flex-direction: row
+        justify-content: flex-end

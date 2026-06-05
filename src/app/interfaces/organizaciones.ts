@@ -82,4 +82,5 @@ export interface SubOrganizacion {
     _id?: string;
     nombre: string;
     direccion: string;
+    provincia?: string;
 }

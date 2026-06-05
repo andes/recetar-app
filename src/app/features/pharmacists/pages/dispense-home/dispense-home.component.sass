@@ -1,0 +1,117 @@
+@use 'styles/variables' as *
+
+.dispense-main
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+
+.drawer-actions
+    display: flex
+    gap: var(--space-2)
+
+    .block
+        flex: 1
+
+    .undo-btn-wrap
+        flex: 1
+        display: block
+
+.search-card-wrap
+    flex: 0 0 auto
+    display: flex
+
+.table-card-wrap
+    flex: 1
+    flex-direction: column
+    min-height: 0
+    gap: var(--space-3)
+
+.results-toolbar
+    display: flex
+    align-items: center
+    gap: $space-3
+
+.search-bar-wrap
+    flex: 1
+
+.filter-toggle-btn
+    &.has-filters
+        border-color: var(--secondary)
+        color: var(--secondary)
+        background: var(--secondary-50)
+
+.filter-panel
+    padding-top: var(--space-4)
+
+.filter-fields
+    display: grid
+    grid-template-columns: 1fr
+    gap: $space-3
+
+.filter-group
+    display: flex
+    flex-direction: column
+    gap: 4px
+
+    label
+        color: var(--text-secondary)
+
+.filter-input
+    height: 38px
+    padding: 0 10px
+    border: 1px solid var(--border-color)
+    border-radius: var(--radius-sm)
+    color: var(--text-primary)
+    background: var(--bg-card)
+    outline: none
+    transition: border-color .15s
+
+    &:focus
+        border-color: var(--secondary)
+        box-shadow: var(--focus-ring)
+
+    &::placeholder
+        color: var(--text-disabled)
+
+.filter-select
+    appearance: auto
+
+.filter-actions
+    display: flex
+    justify-content: flex-end
+    gap: 8px
+    margin-top: 12px
+
+.results-count
+    display: flex
+    align-items: baseline
+    gap: var(--space-4)
+    margin-bottom: var(--space-4)
+
+.results-count-type
+    font-weight: 500
+
+.results-count-range,
+.results-count-sources
+    color: var(--text-secondary)
+
+@media (min-width: $small-devices + 1px)
+    .filter-fields
+        grid-template-columns: repeat(2, 1fr)
+
+@media (min-width: $medium-devices + 1px)
+    .filter-fields
+        grid-template-columns: repeat(4, 1fr)
+
+.loading-container
+    display: flex
+    justify-content: center
+    padding: var(--space-6)
+
+.empty-container
+    padding: var(--space-6)
+
+.dispense-items
+    display: flex
+    flex-direction: column
+    gap: var(--space-3)
