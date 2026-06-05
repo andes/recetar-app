@@ -1,0 +1,65 @@
+<div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+</div>
+
+<div *ngIf="!loading && items.length === 0" class="empty-container">
+    <ui-empty-state icon="medication">No se encontraron recetas</ui-empty-state>
+</div>
+
+<ui-table [dataSource]="items" [columns]="columns" [expandable]="false" [frameless]="true"
+    (rowClick)="onRowClick($event)">
+
+    <ng-template #fechaCell let-item>
+        <small>{{ getDate(item) | date:'dd/MM/yyyy' }}</small>
+    </ng-template>
+
+    <ng-template #medicamentoCell let-item>
+        <div class="medication-row">
+            <mat-chip disableRipple class="info sm status-badge">{{ getQuantity(item) }}</mat-chip>
+            <div class="medication-info">
+                <small class="medication-type" *ngIf="getMedicationType(item) as type" [ngClass]="type">
+                    {{ type === 'duplicado' ? 'Duplicado' : 'Triplicado' }}
+                </small>
+                <div class="medication-cell">
+                    <span class="medication-name">{{ getMedicationName(item) | titlecase }}</span>
+                </div>
+                <div class="patient-info">
+                    <span><mat-icon class="patient-icon">person</mat-icon>
+                        {{ getPatientFullName(item) | titlecase }}</span> <span><mat-icon
+                            class="patient-icon">medical_information</mat-icon> {{
+                        getPatientDni(item) }}</span>
+                </div>
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template #estadoCell let-item>
+        <mat-chip disableRipple [class]="getStatusVariant(getStatus(item)) + ' sm'" class="status-badge">
+            {{ getStatusLabel(getStatus(item)) }}
+        </mat-chip>
+
+        <small class="near-expiry" *ngIf="isNearExpiry(item)">Vence en 24h</small>
+
+        <div class="countdown-inline" *ngIf="canCounterDispense(item)">
+            <mat-icon class="countdown-icon">timer</mat-icon>
+            <span class="countdown-time">Ventana</span>
+            <div class="countdown-bar">
+                <div class="countdown-fill" [style.width]="'60%'"></div>
+            </div>
+            <button matButton="tonal" class="btn-undo" (click)="onCancelDispense(item)">
+                <mat-icon>undo</mat-icon>Deshacer
+            </button>
+        </div>
+    </ng-template>
+
+    <ng-template #accionesCell let-item>
+        <button matButton="filled" color="primary" *ngIf="isPending(item)" (click)="onDispense(item)">
+            <mat-icon>done_all</mat-icon>Dispensar
+        </button>
+    </ng-template>
+
+</ui-table>
+
+<ui-paginator [length]="total" [pageSize]="pageSize" [pageIndex]="pageIndex" [pageSizeOptions]="[5, 10, 25]"
+    (page)="onPage($event)">
+</ui-paginator>

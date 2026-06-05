@@ -1,0 +1,81 @@
+<div class="drawer-overlay" [class.open]="open" (click)="onOverlayClick()"></div>
+
+<div class="drawer" [class.open]="open">
+    <div class="drawer-header">
+        <h2>Detalle de receta</h2>
+        <button mat-icon-button class="drawer-close" (click)="close()">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <div class="drawer-body" *ngIf="prescription">
+        <div class="drawer-status-row">
+            <mat-chip class="sm" [class.success]="getSourceLabel() === 'RecetAR'"
+                [class.info]="getSourceLabel() === 'Andes'">
+                {{ getSourceLabel() }}
+            </mat-chip>
+            <code class="drawer-code">{{ getCode() }}</code>
+        </div>
+
+        <div class="drawer-section">
+            <h4>Paciente</h4>
+            <div class="drawer-field">
+                <label>Nombre</label>
+                <span>{{ getPatientName() }}</span>
+            </div>
+            <div class="drawer-field">
+                <label>DNI</label>
+                <span>{{ getPatientDni() }}</span>
+            </div>
+        </div>
+
+        <div class="drawer-section">
+            <h4>Profesional</h4>
+            <div class="drawer-field">
+                <label>Médico</label>
+                <span>{{ getProfessionalName() }}</span>
+            </div>
+            <div class="drawer-field">
+                <label>Matrícula</label>
+                <span>{{ getProfessionalEnrollment() || '—' }}</span>
+            </div>
+            <div class="drawer-field">
+                <label>Fecha de prescripción</label>
+                <span>{{ getPrescriptionDate() | date:'dd/MM/yyyy' }}</span>
+            </div>
+        </div>
+
+        <div class="drawer-section">
+            <h4>Medicación prescripta</h4>
+            <div class="drawer-med-box">
+                <div class="med-title">{{ getMedicationName() | titlecase }}</div>
+                <div class="med-detail-text">{{ getQuantity() }} envase(s)</div>
+            </div>
+        </div>
+
+        <div class="drawer-section" *ngIf="getDiagnosis()">
+            <h4>Diagnóstico</h4>
+            <div class="drawer-text-box">{{ getDiagnosis() }}</div>
+        </div>
+
+        <div class="drawer-section" *ngIf="getIndications()">
+            <h4>Indicaciones</h4>
+            <div class="drawer-text-box">{{ getIndications() }}</div>
+        </div>
+    </div>
+
+    <div class="drawer-footer" *ngIf="prescription">
+        <button matButton="tonal" (click)="onPrint()">
+            <mat-icon>print</mat-icon>
+            Imprimir
+        </button>
+        <button matButton="filled" color="secondary" *ngIf="isPending()" (click)="onDispense()">
+            <mat-icon>done_all</mat-icon>
+            Dispensar
+        </button>
+        <button matButton="tonal" *ngIf="isDispensed()" (click)="onCancelDispense()">
+            <mat-icon>undo</mat-icon>
+            Deshacer dispensación
+        </button>
+    </div>
+</div>

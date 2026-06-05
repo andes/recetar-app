@@ -1,18 +1,36 @@
-<app-header *ngIf="showHeader"
-    (menuClick)="toggleSidebar()">
+<app-header *ngIf="showHeader" (menuClick)="toggleSidebar()">
 </app-header>
 
 <div class="sidebar-backdrop" *ngIf="showSidebar && sidebarOpen" (click)="sidebarOpen = false"></div>
 
-<div class="canvas-body" [class.has-sidebar]="showSidebar">
-    <app-sidebar *ngIf="showSidebar"
-        [items]="sidebarItems"
-        [collapsed]="sidebarCollapsed"
-        [overlayOpen]="sidebarOpen"
-        (toggled)="sidebarCollapsed = !sidebarCollapsed">
-    </app-sidebar>
-    <main class="canvas-content">
-        <ng-content></ng-content>
+<app-sidebar *ngIf="showSidebar" [items]="sidebarItems" [collapsed]="sidebarCollapsed" [overlayOpen]="sidebarOpen"
+    (toggled)="sidebarCollapsed = !sidebarCollapsed">
+</app-sidebar>
+
+<div class="canvas-body" [class.has-sidebar]="showSidebar" [class.sidebar-collapsed]="sidebarCollapsed">
+    <main class="canvas-content" [class.adjust-content]="adjustContent">
+        <div class="canvas-content-inner" [class.no-card]="noCard">
+            <div class="page-header" *ngIf="pageTitle">
+                <div class="page-header-content">
+                    <h1>{{ pageTitle }}</h1>
+                    <p *ngIf="pageSubtitle">{{ pageSubtitle }}</p>
+                </div>
+                <div class="page-header-actions">
+                    <ng-content select="[pageActions]"></ng-content>
+                </div>
+            </div>
+            <ng-template #projectedTpl>
+                <ng-content></ng-content>
+            </ng-template>
+            <mat-card *ngIf="!noCard" class="canvas-card">
+                <mat-card-content class="canvas-card-content">
+                    <ng-container *ngTemplateOutlet="projectedTpl"></ng-container>
+                </mat-card-content>
+            </mat-card>
+            <ng-container *ngIf="noCard">
+                <ng-container *ngTemplateOutlet="projectedTpl"></ng-container>
+            </ng-container>
+        </div>
     </main>
 </div>
 

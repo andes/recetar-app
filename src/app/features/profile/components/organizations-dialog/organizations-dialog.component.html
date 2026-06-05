@@ -1,0 +1,16 @@
+<h2 mat-dialog-title>Agregar organizaci&oacute;n</h2>
+
+<mat-dialog-content>
+  <ui-autocomplete [items]="filteredOrganizations" [loading]="isLoading" [(searchText)]="searchText"
+    (searchTextChange)="onSearchTextChange()" placeholder="Busc&aacute; una organizaci&oacute;n..."
+    icon="corporate_fare" [displayFn]="orgDisplayFn" [subtitleFn]="orgSubtitleFn"
+    (selectedChange)="onOrganizationSelected($event)">
+  </ui-autocomplete>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button matButton="tonal" type="button" (click)="onCancel()">Cancelar</button>
+  <button matButton="raised" color="primary" type="button" (click)="onSubmit()" [disabled]="!selectedCodigo">
+    Agregar
+  </button>
+</mat-dialog-actions>

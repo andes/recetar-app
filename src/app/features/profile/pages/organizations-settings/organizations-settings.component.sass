@@ -1,0 +1,118 @@
+@use 'styles/variables' as *
+
+.orgs-container
+    display: flex
+    justify-content: center
+    padding: $space-4
+
+    @media (min-width: $small-devices + 1px)
+        padding: $space-6
+
+.orgs-card
+    width: 100%
+    max-width: 600px
+
+    mat-card-header
+        margin-bottom: $space-6
+
+        mat-card-title
+            font-size: 1.5rem
+            font-weight: 600
+            color: var(--text-primary)
+
+        mat-card-subtitle
+            color: var(--text-secondary)
+
+.loading-container
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    padding: $space-12
+    gap: $space-4
+
+    p
+        color: var(--text-secondary)
+        margin: 0
+
+.empty-state
+    display: flex
+    flex-direction: column
+    align-items: center
+    padding: $space-10 $space-4
+    text-align: center
+
+    .empty-icon
+        font-size: 3rem
+        width: 3rem
+        height: 3rem
+        color: var(--text-secondary)
+        margin-bottom: $space-3
+
+    p
+        margin: 0
+        color: var(--text-secondary)
+
+    .empty-hint
+        font-size: 0.875rem
+        margin-top: $space-2
+        color: var(--text-secondary)
+
+.orgs-list
+    display: flex
+    flex-direction: column
+    gap: $space-2
+
+.org-item
+    display: flex
+    align-items: center
+    justify-content: space-between
+    padding: $space-3 $space-4
+    border: 1px solid var(--border-color)
+    border-radius: $radius-md
+    transition: background-color 0.2s ease
+
+    &:hover
+        background: var(--hover-bg)
+
+.org-info
+    display: flex
+    align-items: center
+    gap: $space-3
+    min-width: 0
+    flex: 1
+
+.org-icon
+    color: var(--text-secondary)
+    flex-shrink: 0
+
+.org-details
+    display: flex
+    flex-direction: column
+    min-width: 0
+
+    .org-name
+        font-weight: 500
+        color: var(--text-primary)
+        white-space: nowrap
+        overflow: hidden
+        text-overflow: ellipsis
+
+    .org-address
+        font-size: 0.8rem
+        color: var(--text-secondary)
+        white-space: nowrap
+        overflow: hidden
+        text-overflow: ellipsis
+
+.org-remove-btn
+    flex-shrink: 0
+    color: var(--text-secondary)
+
+    &:hover
+        color: var(--error-color)
+
+.orgs-actions
+    margin-top: $space-6
+    display: flex
+    justify-content: center

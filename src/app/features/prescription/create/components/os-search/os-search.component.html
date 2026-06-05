@@ -1,0 +1,57 @@
+<div class="os-section">
+    <div class="os-bar-wrapper" *ngIf="!selectedOs">
+        <div class="os-bar">
+            <ng-container *ngIf="osSearchMode === 'own'">
+                    <ui-select
+                        [items]="patientObrasSociales"
+                        [selected]="selectedOs"
+                        [placeholder]="patientObrasSociales.length > 0 ? 'Seleccionar obra social' : 'El paciente no tiene obras sociales'"
+                        icon="health_and_safety_outlined"
+                        [displayFn]="osDisplayFn"
+                        [subtitleFn]="osSubtitleFn"
+                        [trackByFn]="osTrackByFn"
+                        [borderless]="true"
+                        [class.os-ui-select--empty]="patientObrasSociales.length === 0"
+                        (selectedChange)="selectOsItem($event)"
+                        class="os-ui-select">
+                    </ui-select>
+                </ng-container>
+
+                <ng-container *ngIf="osSearchMode === 'other'">
+                    <div class="os-input-wrap">
+                        <mat-icon class="os-search-icon">search</mat-icon>
+                        <input class="os-input" [formControl]="osSearchCtrl" type="text" placeholder="Buscar obra social..."
+                            autocomplete="off">
+                        <mat-spinner *ngIf="isSearchingOS" diameter="18" class="os-spinner"></mat-spinner>
+                    </div>
+                </ng-container>
+
+                <ui-toggle [options]="toggleOptions" [value]="osSearchMode" (valueChange)="onModeChange($event)">
+                </ui-toggle>
+            </div>
+
+            <div class="os-results-panel" *ngIf="osSearchMode === 'other' && (osSearchResults.length > 0 || osNotFound)"
+                (mousedown)="$event.preventDefault()">
+                <ui-empty-state *ngIf="osNotFound && !isSearchingOS" icon="health_and_safety">
+                    No se encontraron obras sociales con ese término.
+                </ui-empty-state>
+                <div class="os-result" *ngFor="let os of osSearchResults" (mousedown)="selectOsItem(os)">
+                    <div class="os-result-name">{{ os.nombre }}</div>
+                    <div class="os-result-code" *ngIf="os.codigoPuco">PUCO {{ os.codigoPuco }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="os-selected" *ngIf="selectedOsItemData">
+            <app-os-item [obraSocial]="selectedOsItemData"></app-os-item>
+            <div class="os-actions">
+                <button matButton="outlined" class="mat-error" matTooltip="Quitar obra social"
+                    (click)="clearSelectedOs()">
+                    Quitar
+                </button>
+            </div>
+        </div>
+
+        <app-form-field type="text" label="N.&ordm; de afiliado" [control]="numAfiliadoCtrl">
+        </app-form-field>
+</div>

@@ -1,10 +1,11 @@
-import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter, Inject } from '@angular/core';
 import { BreakpointService } from '@shared/services/breakpoint.service';
 import { AuthService } from '@auth/services/auth.service';
 import { Router, RouterModule } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
+import { TitleCasePipe } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,15 +13,17 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { UserService } from '@services/users.service';
+import { ThemeService } from '@shared/services/theme.service';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.sass'],
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
+    imports: [
+        CommonModule,
+        TitleCasePipe,
+        RouterModule,
     FlexLayoutModule,
     MatToolbarModule,
     MatButtonModule,
@@ -39,6 +42,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   userInitials = '';
   userMatricula = '';
   menuOpen = false;
+  logoPath$: Observable<string>;
 
   private destroy$ = new Subject<void>();
 
@@ -46,13 +50,17 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private router: Router,
     private userService: UserService,
-    private breakpointService: BreakpointService
+    private breakpointService: BreakpointService,
+    private themeService: ThemeService
   ) { }
 
   ngOnInit(): void {
     this.isLoggedIn$ = this.authService.isLoggedIn;
     this.businessName$ = this.authService.getBusinessName;
     this.isProfessionalBothRoles$ = this.authService.getIsProfessionalBothRoles;
+    this.logoPath$ = this.themeService.isDarkMode$.pipe(
+      map(isDark => isDark ? 'assets/logo-light.svg' : 'assets/logo.svg')
+    );
 
     this.editProfileLink$ = this.isLoggedIn$.pipe(
       map(isLoggedIn => {

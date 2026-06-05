@@ -1,0 +1,61 @@
+<ui-card *ngIf="prescription" class="dispense-item" [class.expired]="isExpired" [class.dispensed]="isDispensed"
+    (click)="onSelect()">
+
+    <div class="di-content">
+        <div class="di-tags">
+            <mat-chip class="sm" [class]="getStatusVariant(status)">
+                {{ getStatusLabel(status) }}
+            </mat-chip>
+        </div>
+
+        <div class="rx-head">
+            <mat-icon>pill</mat-icon>
+            <h3>{{ medicineName | titlecase }}</h3>
+        </div>
+
+        <div class="di-patient">
+            <mat-icon>person</mat-icon>
+            <strong>{{ patientFullName | titlecase }}</strong>
+            <small *ngIf="patientDni">&middot; DNI {{ patientDni }}</small>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="di-meta">
+            <small>
+                <mat-icon>calendar_today</mat-icon>
+                Emision {{ date | date: 'dd/MM/yyyy' }}
+            </small>
+            <small>
+                <mat-icon>inventory_2</mat-icon>
+                {{ quantity }} envase{{ quantity !== 1 ? 's' : '' }}
+            </small>
+        </div>
+    </div>
+
+    <div class="di-side">
+        <div class="di-side-top">
+            <small class="near-expiry" *ngIf="isNearExpiry">Vence en 24h</small>
+        </div>
+
+        <div class="di-countdown" *ngIf="canCancelDispense">
+            <mat-icon class="countdown-icon">timer</mat-icon>
+            <span class="countdown-time">Ventana de deshacer</span>
+            <div class="countdown-bar">
+                <div class="countdown-fill" [style.width]="'60%'"></div>
+            </div>
+        </div>
+
+        <div class="di-actions" (click)="$event.stopPropagation()">
+            <button matButton="tonal" class="block" (click)="onPrint()">
+                <mat-icon>print</mat-icon> Imprimir
+            </button>
+            <button matButton="filled" color="secondary" class="block" *ngIf="isPending" (click)="onDispense()">
+                <mat-icon>done_all</mat-icon> Dispensar
+            </button>
+            <button matButton="tonal" class="block" *ngIf="isDispensed" (click)="onCancelDispense()">
+                <mat-icon>undo</mat-icon> Deshacer
+            </button>
+        </div>
+    </div>
+</ui-card>

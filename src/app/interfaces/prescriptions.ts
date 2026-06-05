@@ -55,6 +55,11 @@ export class Prescriptions {
             serie: string;
             numero: number;
         };
+        obraSocial?: {
+            nombre?: string;
+            codigoPuco?: string;
+            numeroAfiliado?: string;
+        };
     }>;
     status: string;
     date: Date;

@@ -1,0 +1,118 @@
+<!-- <div class="section-subtitle">Buscá por nombre genérico o comercial</div> -->
+
+<ui-empty-state *ngIf="disabled" icon="person_outline">
+    Primero seleccioná un paciente para buscar medicamentos.
+</ui-empty-state>
+
+<ng-container *ngIf="!disabled">
+
+    <!-- VISTA BÚSQUEDA -->
+    <ng-container *ngIf="!showMedDetail">
+        <div class="search-bar-wrapper">
+            <ui-search-bar [control]="medicationCtrl" placeholder="Buscar medicamento…" [isLoading]="isSearchingMed"
+                [showToggle]="true" [toggleOptions]="toggleOptions" [(toggleValue)]="searchMode"
+                (toggleValueChange)="onModeChange()" [stretch]="true">
+            </ui-search-bar>
+        </div>
+
+        <div class="search-results" *ngIf="showMedResults && filteredMedications?.length">
+            <div class="search-result" *ngFor="let med of filteredMedications; trackBy: trackByMed"
+                (mousedown)="selectMedication(med)">
+                <app-medication-item [medication]="med" variant="search" />
+                <mat-icon class="result-chevron">chevron_right</mat-icon>
+            </div>
+
+            <mat-paginator *ngIf="totalResults > pageSize" [length]="totalResults" [pageSize]="pageSize"
+                [pageIndex]="currentPage" [pageSizeOptions]="[10, 20, 30]" (page)="onPageChange($event)"
+                class="results-paginator">
+            </mat-paginator>
+        </div>
+        <ui-empty-state *ngIf="medNotFound" icon="medication">
+            No se encontraron medicamentos con ese término.
+        </ui-empty-state>
+
+        <!-- Medicamentos frecuentes -->
+        <ng-container *ngIf="showFrequentMedications">
+            <ui-section-divider *ngIf="frequentMedications.length > 0">Medicamentos frecuentes</ui-section-divider>
+            <div class="freq-med-grid" *ngIf="frequentMedications.length > 0">
+                <ui-card *ngFor="let med of frequentMedications; trackBy: trackByFreqMed" [stretch]="true"
+                    [bordered]="true" (click)="selectFrequentMedication(med)">
+                    <app-medication-item [medication]="med" />
+                </ui-card>
+            </div>
+        </ng-container>
+    </ng-container>
+
+    <!-- VISTA DETALLE DEL MEDICAMENTO -->
+    <ng-container *ngIf="showMedDetail && pendingMedication">
+
+        <div class="detail-toolbar">
+            <div class="detail-header">
+                <app-medication-item [medication]="pendingMedication!" variant="search" />
+                <button matButton="filled" class="btn-secondary" matTooltip="Cambiar medicamento"
+                    (click)="cancelMedicationDetail()">
+                    Cambiar
+                </button>
+            </div>
+        </div>
+
+        <div class="detail-form">
+            <div>
+                <label>Obra social</label>
+                <app-os-search [patientDni]="patientDni" [patientSex]="patientSex"
+                    [patientObraSocial]="patientObraSocial" [patientObrasSociales]="patientObrasSociales"
+                    [initialObraSocial]="obraSocialInfo" [initialNumeroAfiliado]="obraSocialInfo?.numeroAfiliado || ''"
+                    (obraSocialChange)="onOsChanged($event)">
+                </app-os-search>
+            </div>
+
+            <div class="detail-form-row">
+                <app-form-field type="number" label="Cantidad" [control]="detailForm.get('quantity')" min="1"
+                    [errors]="{ required: 'Debe ingresar una cantidad', min: 'Mínimo 1' }">
+                </app-form-field>
+            </div>
+
+            <app-form-field type="textarea" label="Diagnóstico / indicación terapéutica"
+                [control]="detailForm.get('diagnostic')" fullwidth
+                [errors]="{ required: 'El diagnóstico es requerido', whitespace: 'El diagnóstico no puede estar vacío' }">
+            </app-form-field>
+
+            <app-form-field type="textarea" label="Indicaciones / posología" [control]="detailForm.get('indication')"
+                fullwidth>
+            </app-form-field>
+
+            <div class="detail-checkboxes">
+                <label class="check-label" [class.active]="medDuplicate">
+                    <input type="checkbox" [checked]="medDuplicate"
+                        (change)="onDuplicateChange(!!($any($event.target).checked))">
+                    Duplicado
+                </label>
+                <label class="check-label" [class.active]="medTriplicate">
+                    <input type="checkbox" [checked]="medTriplicate"
+                        (change)="onTriplicateChange(!!($any($event.target).checked))">
+                    Triplicado / Receta oficial
+                </label>
+            </div>
+
+            <div class="triplicate-fields" *ngIf="medTriplicate">
+                <app-form-field type="text" label="Serie" [control]="detailForm.get('serie')"
+                    [errors]="{ required: 'La serie es requerida', maxlength: 'Debe ser 1 carácter', pattern: 'Debe ser una letra (A-Z)' }">
+                </app-form-field>
+                <app-form-field type="text" label="Número" [control]="detailForm.get('numero')"
+                    [errors]="{ required: 'El número es requerido' }">
+                </app-form-field>
+            </div>
+
+            <div class="detail-actions">
+                <button matButton="filled" (click)="confirmMedication()">
+                    <mat-icon>{{ editMedicationIndex != null ? 'save' : 'add_circle' }}</mat-icon>
+                    {{ editMedicationIndex != null ? 'Guardar cambios' : 'Agregar a la receta' }}
+                </button>
+                <button matButton="tonal" (click)="cancelMedicationDetail()">
+                    {{ editMedicationIndex != null ? 'Cancelar edición' : 'Cancelar' }}
+                </button>
+            </div>
+        </div>
+    </ng-container>
+
+</ng-container>

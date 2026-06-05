@@ -1,0 +1,87 @@
+<div class="sidebar-card">
+    <div class="sidebar-header">
+        <ui-icon size="sm" variant="neutral" icon="medication_liquid"></ui-icon>
+        <span class="sidebar-title">Medicamentos del día</span>
+        <button matIconButton class="sidebar-refresh" (click)="onRefresh()" matTooltip="Actualizar"
+            [disabled]="loading">
+            <mat-icon>refresh</mat-icon>
+        </button>
+    </div>
+
+    <div *ngIf="loading" class="sidebar-loading">
+        <mat-spinner diameter="24" color="primary"></mat-spinner>
+    </div>
+
+    <div *ngIf="!loading && medications.length === 0" class="sidebar-empty">
+        <mat-icon>medication_liquid</mat-icon>
+        <p>Sin medicamentos</p>
+    </div>
+
+    <div class="sidebar-items" *ngIf="!loading && medications.length > 0">
+
+        <!-- Pendientes -->
+        <ng-container *ngIf="pendingMeds.length > 0">
+            <div class="sidebar-section-label">Pendientes</div>
+            <div class="sidebar-item" *ngFor="let med of pendingMeds" [class.active]="selectedMedication === med.name"
+                (click)="selectMedication(med)">
+                <mat-chip class="sm secondary">{{ med.count }}</mat-chip>
+                <div class="sidebar-item-body">
+                    <div class="sidebar-item-head">
+                        <span class="sidebar-item-name">{{ med.name | titlecase }}</span>
+                    </div>
+                    <div class="sidebar-item-detail">
+                        {{ med.sources?.recetar || 0 }} RecetAR &middot; {{ med.sources?.andes || 0 }} Andes
+                    </div>
+                </div>
+                <mat-icon class="sidebar-item-chevron">chevron_right</mat-icon>
+            </div>
+        </ng-container>
+
+        <!-- Dispensadas -->
+        <ng-container *ngIf="dispensedMeds.length > 0">
+            <div class="sidebar-section-label muted">Dispensadas</div>
+            <div class="sidebar-item done" *ngFor="let med of dispensedMeds"
+                [class.active]="selectedMedication === med.name" (click)="selectMedication(med)">
+                <mat-chip class="sm success"><mat-icon class="sm">done</mat-icon></mat-chip>
+                <div class="sidebar-item-body">
+                    <div class="sidebar-item-head">
+                        <span class="sidebar-item-name">{{ med.name | titlecase }}</span>
+                    </div>
+                    <div class="sidebar-item-detail">
+                        {{ med.count }} receta{{ med.count !== 1 ? 's' : '' }}
+                    </div>
+                </div>
+                <mat-icon class="sidebar-item-chevron">chevron_right</mat-icon>
+            </div>
+        </ng-container>
+
+        <!-- Vencidas -->
+        <ng-container *ngIf="expiredMeds.length > 0">
+            <div class="sidebar-section-label error">Vencidas</div>
+            <div class="sidebar-item expired" *ngFor="let med of expiredMeds"
+                [class.active]="selectedMedication === med.name" (click)="selectMedication(med)">
+                <mat-chip class="sm error"><mat-icon class="sm">close</mat-icon></mat-chip>
+                <div class="sidebar-item-body">
+                    <div class="sidebar-item-head">
+                        <span class="sidebar-item-name">{{ med.name | titlecase }}</span>
+                    </div>
+                    <div class="sidebar-item-detail">
+                        {{ med.count }} receta{{ med.count !== 1 ? 's' : '' }}
+                    </div>
+                </div>
+                <mat-icon class="sidebar-item-chevron">chevron_right</mat-icon>
+            </div>
+        </ng-container>
+    </div>
+
+    <div class="sidebar-summary" *ngIf="!loading && medications.length > 0">
+        <div class="summary-cell">
+            <span class="summary-label">Total recetas</span>
+            <span class="summary-value">{{ totalRecipes }}</span>
+        </div>
+        <div class="summary-cell">
+            <span class="summary-label">Pendientes</span>
+            <span class="summary-value">{{ pendingCount }}</span>
+        </div>
+    </div>
+</div>

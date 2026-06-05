@@ -18,10 +18,25 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatListModule } from '@angular/material/list';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { PatientNamePipe } from './pipes/patient-name.pipe';
+import { TitleCasePipe } from './pipes/titlecase.pipe';
+import { UppercasePipe } from './pipes/uppercase.pipe';
 import { PatientFormComponent } from './components/patient-form/patient-form.component';
 import { CanvasComponent } from './components/layout/canvas/canvas.component';
 import { SidebarComponent } from './components/layout/sidebar/sidebar.component';
+import { UiIconComponent } from './ui/icon.component';
+import { UiEmptyStateComponent } from './ui/empty-state.component';
+import { UiAvatarComponent } from './ui/avatar.component';
+import { UiItemCardComponent } from './ui/item-card.component';
+import { UiCardComponent } from './ui/card.component';
+import { UiSearchBarComponent } from './ui/search-bar.component';
+import { UiSectionDividerComponent } from './ui/section-divider.component';
+import { UiDocumentListComponent } from './ui/document-list.component';
+import { UiTableComponent, UiTableDetailDirective } from './ui/table.component';
+import { UiAccordionComponent } from './ui/accordion.component';
+import { UiPaginatorComponent } from './ui/paginator.component';
+import { UiDraftTagComponent } from './ui/draft-tag.component';
 
 const MATERIAL_MODULES = [
     MatFormFieldModule,
@@ -39,6 +54,7 @@ const MATERIAL_MODULES = [
     MatChipsModule,
     MatListModule,
     MatTooltipModule,
+    MatSnackBarModule,
 ];
 
 @NgModule({
@@ -48,16 +64,46 @@ const MATERIAL_MODULES = [
         RouterModule,
         FlexLayoutModule,
         PatientNamePipe,
+        TitleCasePipe,
+        UppercasePipe,
         PatientFormComponent,
         CanvasComponent,
         SidebarComponent,
+        UiIconComponent,
+        UiEmptyStateComponent,
+        UiAvatarComponent,
+        UiItemCardComponent,
+        UiCardComponent,
+        UiSearchBarComponent,
+        UiSectionDividerComponent,
+        UiDocumentListComponent,
+        UiTableComponent,
+        UiTableDetailDirective,
+        UiAccordionComponent,
+        UiPaginatorComponent,
+        UiDraftTagComponent,
         ...MATERIAL_MODULES,
     ],
     exports: [
         PatientNamePipe,
+        TitleCasePipe,
+        UppercasePipe,
         PatientFormComponent,
         CanvasComponent,
         SidebarComponent,
+        UiIconComponent,
+        UiEmptyStateComponent,
+        UiAvatarComponent,
+        UiItemCardComponent,
+        UiCardComponent,
+        UiSearchBarComponent,
+        UiSectionDividerComponent,
+        UiDocumentListComponent,
+        UiTableComponent,
+        UiTableDetailDirective,
+        UiAccordionComponent,
+        UiPaginatorComponent,
+        UiDraftTagComponent,
         FlexLayoutModule,
         ...MATERIAL_MODULES,
     ]

@@ -18,6 +18,10 @@ import { AuditModule } from '@audit/audit.module';
 import { PharmacistsModule } from '@pharmacists/pharmacists.module';
 import { ProfessionalsModule } from '@professionals/professionals.module';
 import { DashboardModule } from '@dashboard/dashboard.module';
+import { PrescriptionCreateModule } from './features/prescription/create/prescription-create.module';
+import { ProfileModule } from './features/profile/profile.module';
+import { DocumentsModule } from '@features/documents/documents.module';
+import { PharmacistsModule as PharmacistsFeatureModule } from './features/pharmacists/pharmacists.module';
 // flex-layout
 import { FlexLayoutModule } from '@angular/flex-layout';
 // material
@@ -26,6 +30,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
+import { MAT_ICON_DEFAULT_OPTIONS } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MAT_MOMENT_DATE_FORMATS, MomentDateAdapter } from '@angular/material-moment-adapter';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
@@ -33,6 +38,7 @@ import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/materia
 // component
 import { DatePipe } from '@angular/common';
 import { SharedModule } from '@shared/shared.module';
+import { ServiceWorkerModule } from '@angular/service-worker';
 
 @NgModule({
     declarations: [
@@ -45,6 +51,10 @@ import { SharedModule } from '@shared/shared.module';
         ProfessionalsModule,
         AuditModule,
         DashboardModule,
+        PrescriptionCreateModule,
+        ProfileModule,
+        DocumentsModule,
+        PharmacistsFeatureModule,
         AppRoutingModule,
         HttpClientModule,
         BrowserAnimationsModule,
@@ -56,7 +66,8 @@ import { SharedModule } from '@shared/shared.module';
         MatProgressSpinnerModule,
         MatIconModule,
         MatChipsModule,
-        SharedModule
+        SharedModule,
+        ServiceWorkerModule.register('ngsw-worker.js')
     ],
     providers: [
         {
@@ -70,6 +81,7 @@ import { SharedModule } from '@shared/shared.module';
         { provide: MAT_DATE_LOCALE, useValue: 'es-AR' },
         { provide: DateAdapter, useClass: MomentDateAdapter, deps: [MAT_DATE_LOCALE] },
         { provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS },
+        { provide: MAT_ICON_DEFAULT_OPTIONS, useValue: { fontSet: 'material-symbols-outlined' } },
     ],
     bootstrap: [AppComponent]
 })

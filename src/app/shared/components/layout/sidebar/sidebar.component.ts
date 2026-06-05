@@ -37,6 +37,10 @@ export class SidebarComponent {
         return this.overlayOpen;
     }
 
+    @HostBinding('class.sidebar-host-collapsed') get isCollapsed() {
+        return this.collapsed;
+    }
+
     toggle(): void {
         this.toggled.emit();
     }

@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dispensar v4 — RecetAR</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+<style>
+  :root {
+    --bg-body: #f1f3f6;
+    --bg-card: #ffffff;
+    --bg-sidebar: #0f172a;
+    --border-color: #e2e5ea;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --text-hint: #94a3b8;
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --primary-soft: #eff6ff;
+    --success: #16a34a;
+    --success-soft: #f0fdf4;
+    --warning: #d97706;
+    --warning-soft: #fff7ed;
+    --error: #dc2626;
+    --error-soft: #fef2f2;
+    --andes: #be185d;
+    --andes-soft: #fdf2f8;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,.04), 0 1px 5px rgba(0,0,0,.03);
+    --panel-width: 320px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-body); color: var(--text);
+    font-size: 15px; display: flex; height: 100vh; overflow: hidden;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 220px; min-width: 220px; background: var(--bg-sidebar);
+    color: #fff; display: flex; flex-direction: column; padding: 20px 0;
+    overflow-y: auto; z-index: 10;
+  }
+  .sb-brand {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 16px 18px; margin-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+  }
+  .sb-brand .logo {
+    width: 34px; height: 34px; background: var(--primary); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px;
+  }
+  .sb-brand strong { font-size: 15px; font-weight: 650; letter-spacing: -.01em; }
+  .sb-nav { padding: 4px 8px; }
+  .sb-nav a {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: 8px;
+    color: rgba(255,255,255,.5); font-size: 14px; font-weight: 500;
+    text-decoration: none; margin-bottom: 1px; transition: all .15s;
+  }
+  .sb-nav a:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.85); }
+  .sb-nav a.active { background: rgba(37,99,235,.22); color: #fff; }
+  .sb-nav a .mi { font-size: 20px; width: 22px; font-variation-settings: 'FILL' 1; }
+  .sb-foot {
+    margin-top: auto; padding: 14px 16px; border-top: 1px solid rgba(255,255,255,.07);
+    display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: rgba(255,255,255,.4);
+  }
+
+  /* ── Main wrapper ── */
+  .main-wrap { flex: 1; display: flex; overflow: hidden; }
+
+  /* ── Center content ── */
+  .center { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+  .topbar {
+    background: var(--bg-card); border-bottom: 1px solid var(--border-color);
+    padding: 18px 28px; display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .topbar h1 { font-size: 22px; font-weight: 700; letter-spacing: -.02em; }
+  .topbar .hint { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  .content { padding: 24px 28px; flex: 1; overflow-y: auto; }
+
+  /* ── Search ── */
+  .search-wrap {
+    position: relative; margin-bottom: 16px;
+  }
+  .search-wrap input {
+    width: 100%; padding: 14px 20px 14px 50px;
+    border: 2px solid var(--border-color); border-radius: var(--radius);
+    background: var(--bg-card); font-size: 16px; outline: none;
+    transition: border .15s, box-shadow .15s; box-shadow: var(--shadow);
+  }
+  .search-wrap input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37,99,235,.08); }
+  .search-wrap input::placeholder { color: var(--text-hint); }
+  .search-wrap .mi {
+    position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+    font-size: 22px; color: var(--text-hint);
+  }
+
+  /* ── Filters ── */
+  .filters-bar {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .filter-group { display: flex; align-items: center; gap: 8px; }
+  .filter-group label {
+    font-size: 12.5px; font-weight: 600; color: var(--text-muted); white-space: nowrap;
+  }
+  .filter-input {
+    padding: 9px 14px; border: 1.5px solid var(--border-color); border-radius: var(--radius-sm);
+    background: var(--bg-card); font-size: 13.5px; color: var(--text);
+    outline: none; transition: border .15s; min-width: 150px;
+    box-shadow: var(--shadow);
+  }
+  .filter-input:focus { border-color: var(--primary); }
+
+  .filter-select {
+    appearance: none; -webkit-appearance: none;
+    padding-right: 32px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%2394a3b8' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+  }
+
+  .filter-actions { display: flex; gap: 8px; margin-left: auto; }
+  .btn-outline {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px; border: 1.5px solid var(--border-color); border-radius: var(--radius-sm);
+    background: var(--bg-card); font-size: 13px; font-weight: 600; color: var(--text-muted);
+    cursor: default; transition: all .15s; white-space: nowrap;
+  }
+  .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+  .btn-flat {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 20px; border: none; border-radius: var(--radius-sm);
+    background: var(--primary); color: #fff; font-size: 13px; font-weight: 600;
+    cursor: default; transition: all .15s; white-space: nowrap;
+  }
+  .btn-flat:hover { background: var(--primary-hover); }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px; border: none; border-radius: var(--radius-sm);
+    background: transparent; color: var(--text-muted); font-size: 13px; font-weight: 600;
+    cursor: default; transition: all .15s; white-space: nowrap;
+  }
+  .btn-ghost:hover { background: #f1f3f6; }
+  .mi { vertical-align: middle; }
+
+  /* ── Results count ── */
+  .results-info {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 12px; font-size: 13px; color: var(--text-hint);
+  }
+  .results-info strong { color: var(--text); }
+
+  /* ── Table ── */
+  .rx-table {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    background: var(--bg-card); border: 1px solid var(--border-color);
+    border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow);
+  }
+  .rx-table thead th {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .04em; color: var(--text-hint);
+    background: var(--primary-soft); border-bottom: 1px solid var(--border-color);
+    padding: 11px 14px; text-align: left;
+  }
+  .rx-table tbody td {
+    padding: 13px 14px; font-size: 14px;
+    border-bottom: 1px solid #f1f3f6;
+  }
+  .rx-table tbody tr { transition: background .12s; cursor: default; }
+  .rx-table tbody tr:hover { background: #f8fafc; }
+  .rx-table tbody tr.selected { background: var(--primary-soft); outline: 2px solid var(--primary); outline-offset: -2px; border-radius: 4px; }
+  .rx-table tbody tr:last-child td { border-bottom: none; }
+  .rx-table tbody tr.dispensed { background: #fafffc; }
+
+  .cell-med { font-weight: 600; }
+  .cell-patient .dni { color: var(--text-hint); font-size: 12.5px; margin-left: 6px; }
+  .cell-qty { text-align: center; font-weight: 600; color: var(--text-muted); }
+  .cell-prof { font-size: 13px; color: var(--text-muted); }
+
+  .source-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 6px;
+    font-size: 10px; font-weight: 800; margin-right: 8px; vertical-align: middle;
+  }
+  .src-r { background: var(--primary-soft); color: var(--primary); }
+  .src-a { background: var(--andes-soft); color: var(--andes); }
+
+  .tag {
+    display: inline-block; padding: 3px 9px; border-radius: 999px;
+    font-size: 11px; font-weight: 700; letter-spacing: .02em;
+    text-transform: uppercase; margin-right: 4px;
+  }
+  .tag-warn { background: var(--warning-soft); color: var(--warning); }
+  .tag-err  { background: var(--error-soft); color: var(--error); }
+  .tag-info { background: var(--primary-soft); color: var(--primary); }
+  .tag-succ { background: var(--success-soft); color: var(--success); }
+
+  .cell-actions { white-space: nowrap; }
+  .btn-sm {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 7px 14px; border-radius: var(--radius-sm);
+    font-size: 12.5px; font-weight: 600; cursor: default;
+    border: none; transition: all .15s; white-space: nowrap;
+  }
+  .btn-prime-sm { background: var(--primary); color: #fff; padding: 7px 18px; }
+  .btn-prime-sm:hover { background: var(--primary-hover); }
+  .btn-ghost-sm {
+    background: transparent; color: var(--text-muted);
+    border: 1.5px solid var(--border-color); padding: 7px 10px;
+    margin-right: 6px;
+  }
+  .btn-ghost-sm:hover { background: #f8fafc; }
+
+  .countdown-inline {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .countdown-inline .bar {
+    width: 70px; height: 4px; background: var(--border-color); border-radius: 2px; overflow: hidden;
+  }
+  .countdown-inline .bar .fill { height: 100%; background: var(--primary); border-radius: 2px; }
+  .countdown-inline .time { font-size: 12px; color: var(--text-muted); font-weight: 500; white-space: nowrap; }
+  .btn-undo-sm {
+    background: var(--warning-soft); color: var(--warning);
+    border: 1.5px solid var(--warning); padding: 5px 12px;
+    border-radius: var(--radius-sm); font-size: 12px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 5px; cursor: default;
+  }
+
+  /* ── RIGHT PANEL: Medicamentos ── */
+  .right-panel {
+    width: var(--panel-width); min-width: var(--panel-width);
+    background: var(--bg-card); border-left: 1px solid var(--border-color);
+    display: flex; flex-direction: column; overflow: hidden;
+    transition: width .25s ease, min-width .25s ease;
+  }
+
+  .panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+  }
+  .panel-header h3 { font-size: 14px; font-weight: 700; }
+
+  .panel-body { flex: 1; overflow-y: auto; padding: 6px 0; }
+
+  .med-item { border-bottom: 1px solid #f1f3f6; }
+  .med-item-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 20px; cursor: default; transition: background .12s;
+  }
+  .med-item-header:hover { background: #f8fafc; }
+  .med-item.selected .med-item-header { background: var(--primary-soft); }
+  .med-item.selected .med-name { color: var(--primary); }
+
+  .med-info { flex: 1; min-width: 0; }
+  .med-name { font-size: 13.5px; font-weight: 600; line-height: 1.3; transition: color .15s; }
+  .med-sub { font-size: 12px; color: var(--text-hint); margin-top: 2px; }
+
+  .med-counter { flex-shrink: 0; text-align: center; }
+  .med-counter .num { font-size: 22px; font-weight: 800; color: var(--primary); line-height: 1; }
+  .med-counter .lbl { font-size: 10px; color: var(--text-hint); text-transform: uppercase; font-weight: 600; letter-spacing: .03em; }
+
+  .med-chevron { font-size: 18px; color: var(--text-hint); transition: transform .2s; flex-shrink: 0; }
+  .med-item.expanded .med-chevron { transform: rotate(90deg); }
+
+  .med-detail { display: none; padding: 0 20px 14px 20px; }
+  .med-item.expanded .med-detail { display: block; }
+  .med-detail-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; border-radius: var(--radius-sm); margin-bottom: 4px;
+    font-size: 13px; cursor: default; transition: background .12s;
+  }
+  .med-detail-row:hover { background: var(--primary-soft); color: var(--primary); }
+  .med-detail-row strong { flex: 1; font-weight: 500; }
+  .med-detail-row span { font-size: 12px; color: var(--text-hint); }
+
+  /* ── DRAWER ── */
+  .drawer-overlay {
+    position: fixed; inset: 0; background: rgba(15,23,42,.3);
+    z-index: 50; opacity: 0; pointer-events: none; transition: opacity .25s;
+  }
+  .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+
+  .drawer {
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: 420px; background: var(--bg-card);
+    z-index: 60; transform: translateX(100%);
+    transition: transform .3s cubic-bezier(.4,0,.2,1);
+    display: flex; flex-direction: column; box-shadow: -4px 0 20px rgba(0,0,0,.08);
+  }
+  .drawer.open { transform: translateX(0); }
+
+  .drawer-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px; border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+  }
+  .drawer-header h2 { font-size: 18px; font-weight: 700; }
+  .drawer-header .close-drawer {
+    width: 34px; height: 34px; border-radius: 8px; border: none; background: transparent;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-hint); cursor: default; transition: all .12s;
+  }
+  .drawer-header .close-drawer:hover { background: #f1f3f6; color: var(--text); }
+
+  .drawer-body { flex: 1; overflow-y: auto; padding: 24px; }
+
+  .drawer-section { margin-bottom: 24px; }
+  .drawer-section h4 {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .05em; color: var(--text-hint); margin-bottom: 10px;
+  }
+  .drawer-field {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 8px 0; border-bottom: 1px solid #f1f3f6; font-size: 14px;
+  }
+  .drawer-field label { color: var(--text-muted); font-size: 13px; flex-shrink: 0; margin-right: 16px; }
+  .drawer-field span { text-align: right; font-weight: 500; word-break: break-word; }
+  .drawer-field code { font-size: 13px; color: var(--text-muted); font-family: 'SF Mono','Fira Code',monospace; font-weight: 400; }
+
+  .drawer-med-box {
+    background: var(--primary-soft); border: 1px solid #dbeafe;
+    border-radius: var(--radius); padding: 16px;
+  }
+  .drawer-med-box .med-title { font-size: 15px; font-weight: 700; }
+  .drawer-med-box .med-detail-text { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+  .drawer-diagnostic-box {
+    background: #f8fafc; border: 1px solid var(--border-color);
+    border-radius: var(--radius); padding: 14px; font-size: 14px;
+  }
+
+  .drawer-actions {
+    display: flex; gap: 10px; padding: 20px 24px;
+    border-top: 1px solid var(--border-color); flex-shrink: 0;
+  }
+  .btn-drawer {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 12px 20px; border-radius: var(--radius-sm);
+    font-size: 14px; font-weight: 600; cursor: default; border: none; transition: all .15s;
+  }
+  .btn-drawer-print {
+    background: var(--bg-card); color: var(--text); border: 1.5px solid var(--border-color);
+  }
+  .btn-drawer-print:hover { background: #f8fafc; }
+  .btn-drawer-dispense {
+    background: var(--primary); color: #fff;
+  }
+  .btn-drawer-dispense:hover { background: var(--primary-hover); }
+
+  .drawer-status-row {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+  }
+
+  /* ── Empty ── */
+  .empty { text-align: center; padding: 50px 20px; color: var(--text-hint); }
+  .empty .mi { font-size: 48px; margin-bottom: 10px; }
+  .empty p { font-size: 14px; }
+
+  /* Responsive */
+  @media (max-width: 960px) {
+    .right-panel { display: none; }
+    .drawer { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ Sidebar ══════════ -->
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="logo">R</div>
+    <strong>RecetAR</strong>
+  </div>
+  <div class="sb-nav">
+    <a href="#"><span class="material-symbols-outlined mi">home</span>Inicio</a>
+    <a href="#" class="active"><span class="material-symbols-outlined mi">medication</span>Dispensar</a>
+    <a href="#"><span class="material-symbols-outlined mi">description</span>Documentos</a>
+  </div>
+  <div class="sb-foot">
+    <span class="material-symbols-outlined" style="font-size:16px">storefront</span>
+    Farmacia Los Alamos
+  </div>
+</aside>
+
+<!-- ══════════ Main ══════════ -->
+<div class="main-wrap">
+
+  <div class="center">
+    <div class="topbar">
+      <div>
+        <h1>Dispensar</h1>
+        <p class="hint">Busque y dispense recetas pendientes</p>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ═══ SEARCH ═══ -->
+      <div class="search-wrap">
+        <span class="material-symbols-outlined mi">search</span>
+        <input type="text" placeholder="Buscar por DNI, nombre del paciente o código de receta..." />
+      </div>
+
+      <!-- ═══ FILTERS ═══ -->
+      <div class="filters-bar">
+        <div class="filter-group">
+          <label>Desde</label>
+          <input type="date" class="filter-input" style="min-width:140px" />
+        </div>
+        <div class="filter-group">
+          <label>Hasta</label>
+          <input type="date" class="filter-input" style="min-width:140px" />
+        </div>
+        <div class="filter-group">
+          <label>Estado</label>
+          <select class="filter-input filter-select" style="min-width:170px">
+            <option value="">Todos los estados</option>
+            <option value="vigente">Vigente / Pendiente</option>
+            <option value="dispensada">Dispensada</option>
+            <option value="vencida">Vencida</option>
+            <option value="finalizada">Finalizada</option>
+            <option value="suspendida">Suspendida</option>
+            <option value="rechazada">Rechazada</option>
+          </select>
+        </div>
+        <div class="filter-actions">
+          <button class="btn-ghost"><span class="material-symbols-outlined mi">restart_alt</span>Limpiar</button>
+          <button class="btn-flat"><span class="material-symbols-outlined mi">search</span>Filtrar</button>
+        </div>
+      </div>
+
+      <!-- ═══ RESULTS ═══ -->
+      <div class="results-info">
+        <strong>12</strong> recetas encontradas
+        <span style="opacity:.7">&middot; 4 Andes &middot; 8 RecetAR</span>
+      </div>
+
+      <!-- ═══ TABLE ═══ -->
+      <table class="rx-table" id="rxTable">
+        <thead>
+          <tr>
+            <th>Medicamento</th>
+            <th>Paciente</th>
+            <th>Profesional</th>
+            <th style="text-align:center">Env.</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- Row 1 -->
+          <tr data-id="RX-01082" onclick="openDrawer(this)" data-med="Ibuprofeno 600 mg" data-rx="RX-01082" data-date="05/08/2026" data-diagnostico="Lumbalgia aguda" data-indicaciones="1 comprimido cada 8 horas por 5 días" data-prof="Dr. Martínez" data-mat="MN 78412">
+            <td class="cell-med"><span class="source-badge src-r">R</span>Ibuprofeno 600 mg</td>
+            <td class="cell-patient">González, María<span class="dni">28.456.123</span></td>
+            <td class="cell-prof">Dr. Martínez</td>
+            <td class="cell-qty">2</td>
+            <td><span class="tag tag-warn">Vence en 24h</span><span class="tag tag-info">Triplicado</span></td>
+            <td class="cell-actions">
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation();openDrawer(this.closest('tr'))"><span class="material-symbols-outlined mi">visibility</span></button>
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation()"><span class="material-symbols-outlined mi">print</span></button>
+              <button class="btn-sm btn-prime-sm" onclick="event.stopPropagation()"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+            </td>
+          </tr>
+
+          <!-- Row 2 -->
+          <tr data-id="ANDES-8801" onclick="openDrawer(this)" data-med="Amlodipina 10 mg" data-rx="ANDES-8801" data-date="05/08/2026" data-diagnostico="Hipertensión arterial esencial" data-indicaciones="1 comprimido por día por la mañana" data-prof="Dra. Fernández" data-mat="MN" data-origen="Andes">
+            <td class="cell-med"><span class="source-badge src-a">A</span>Amlodipina 10 mg</td>
+            <td class="cell-patient">Rodríguez, Carlos<span class="dni">31.987.234</span></td>
+            <td class="cell-prof">Dra. Fernández</td>
+            <td class="cell-qty">1</td>
+            <td><span class="tag tag-info">Duplicado</span></td>
+            <td class="cell-actions">
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation();openDrawer(this.closest('tr'))"><span class="material-symbols-outlined mi">visibility</span></button>
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation()"><span class="material-symbols-outlined mi">print</span></button>
+              <button class="btn-sm btn-prime-sm" onclick="event.stopPropagation()"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+            </td>
+          </tr>
+
+          <!-- Row 3 -->
+          <tr data-id="RX-01092" onclick="openDrawer(this)" data-med="Metformina 850 mg" data-rx="RX-01092" data-date="05/08/2026" data-diagnostico="Diabetes mellitus tipo 2" data-indicaciones="1 comprimido cada 12 horas con las comidas" data-prof="Dr. Gutiérrez" data-mat="MN 45231">
+            <td class="cell-med"><span class="source-badge src-r">R</span>Metformina 850 mg</td>
+            <td class="cell-patient">López, Ana<span class="dni">25.498.763</span></td>
+            <td class="cell-prof">Dr. Gutiérrez</td>
+            <td class="cell-qty">3</td>
+            <td></td>
+            <td class="cell-actions">
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation();openDrawer(this.closest('tr'))"><span class="material-symbols-outlined mi">visibility</span></button>
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation()"><span class="material-symbols-outlined mi">print</span></button>
+              <button class="btn-sm btn-prime-sm" onclick="event.stopPropagation()"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+            </td>
+          </tr>
+
+          <!-- Row 4 – dispensed -->
+          <tr class="dispensed" data-id="RX-01100" onclick="openDrawer(this)" data-med="Losartán 50 mg" data-rx="RX-01100" data-date="05/08/2026" data-diagnostico="Hipertensión arterial" data-indicaciones="1 comprimido por día" data-prof="Dra. Ramírez" data-mat="MN 56230" data-dispensed="true">
+            <td class="cell-med"><span class="source-badge src-r">R</span>Losartán 50 mg</td>
+            <td class="cell-patient">García, Jorge<span class="dni">22.783.456</span></td>
+            <td class="cell-prof">Dra. Ramírez</td>
+            <td class="cell-qty">2</td>
+            <td>
+              <div class="countdown-inline">
+                <span class="material-symbols-outlined" style="font-size:16px;color:var(--primary)">timer</span>
+                <span class="time">1h 26m</span>
+                <div class="bar"><div class="fill" style="width:60%"></div></div>
+                <button class="btn-undo-sm" onclick="event.stopPropagation()"><span class="material-symbols-outlined mi" style="font-size:16px">undo</span>Deshacer</button>
+              </div>
+            </td>
+            <td class="cell-actions">
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation();openDrawer(this.closest('tr'))"><span class="material-symbols-outlined mi">visibility</span></button>
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation()"><span class="material-symbols-outlined mi">print</span></button>
+            </td>
+          </tr>
+
+          <!-- Row 5 -->
+          <tr data-id="ANDES-8815" onclick="openDrawer(this)" data-med="Paracetamol 500 mg" data-rx="ANDES-8815" data-date="05/08/2026" data-diagnostico="Cefalea tensional" data-indicaciones="1 comprimido cada 6 horas según dolor" data-prof="Dra. Ramírez" data-mat="" data-origen="Andes">
+            <td class="cell-med"><span class="source-badge src-a">A</span>Paracetamol 500 mg</td>
+            <td class="cell-patient">Torres, Elena<span class="dni">27.654.123</span></td>
+            <td class="cell-prof">Dra. Ramírez</td>
+            <td class="cell-qty">1</td>
+            <td></td>
+            <td class="cell-actions">
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation();openDrawer(this.closest('tr'))"><span class="material-symbols-outlined mi">visibility</span></button>
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation()"><span class="material-symbols-outlined mi">print</span></button>
+              <button class="btn-sm btn-prime-sm" onclick="event.stopPropagation()"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+            </td>
+          </tr>
+
+          <!-- Row 6 -->
+          <tr data-id="RX-01112" onclick="openDrawer(this)" data-med="Metformina 850 mg" data-rx="RX-01112" data-date="05/08/2026" data-diagnostico="Diabetes mellitus tipo 2" data-indicaciones="1 comprimido cada 12 horas" data-prof="Dr. Gutiérrez" data-mat="MN 45231">
+            <td class="cell-med"><span class="source-badge src-r">R</span>Metformina 850 mg</td>
+            <td class="cell-patient">Pérez, Roberto<span class="dni">19.876.543</span></td>
+            <td class="cell-prof">Dr. Gutiérrez</td>
+            <td class="cell-qty">2</td>
+            <td></td>
+            <td class="cell-actions">
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation();openDrawer(this.closest('tr'))"><span class="material-symbols-outlined mi">visibility</span></button>
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation()"><span class="material-symbols-outlined mi">print</span></button>
+              <button class="btn-sm btn-prime-sm" onclick="event.stopPropagation()"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+            </td>
+          </tr>
+
+          <!-- Row 7 -->
+          <tr data-id="RX-01104" onclick="openDrawer(this)" data-med="Ibuprofeno 600 mg" data-rx="RX-01104" data-date="05/08/2026" data-diagnostico="Artritis reumatoide" data-indicaciones="1 comprimido cada 8 horas" data-prof="Dr. Álvarez" data-mat="MN 60342">
+            <td class="cell-med"><span class="source-badge src-r">R</span>Ibuprofeno 600 mg</td>
+            <td class="cell-patient">Álvarez, Juan<span class="dni">33.210.987</span></td>
+            <td class="cell-prof">Dr. Álvarez</td>
+            <td class="cell-qty">1</td>
+            <td></td>
+            <td class="cell-actions">
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation();openDrawer(this.closest('tr'))"><span class="material-symbols-outlined mi">visibility</span></button>
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation()"><span class="material-symbols-outlined mi">print</span></button>
+              <button class="btn-sm btn-prime-sm" onclick="event.stopPropagation()"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+            </td>
+          </tr>
+
+          <!-- Row 8 – expired -->
+          <tr style="opacity:.5" data-id="RX-00980" onclick="openDrawer(this)" data-med="Omeprazol 20 mg" data-rx="RX-00980" data-date="01/08/2026" data-diagnostico="Reflujo gastroesofágico" data-indicaciones="1 cápsula en ayunas" data-prof="Dr. Gutiérrez" data-mat="MN 45231">
+            <td class="cell-med" style="text-decoration:line-through"><span class="source-badge src-r">R</span>Omeprazol 20 mg</td>
+            <td class="cell-patient">Morales, Luis<span class="dni">24.123.678</span></td>
+            <td class="cell-prof">Dr. Gutiérrez</td>
+            <td class="cell-qty">2</td>
+            <td><span class="tag tag-err">Vencida</span></td>
+            <td class="cell-actions">
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation();openDrawer(this.closest('tr'))"><span class="material-symbols-outlined mi">visibility</span></button>
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation()"><span class="material-symbols-outlined mi">print</span></button>
+            </td>
+          </tr>
+
+          <!-- Row 9 -->
+          <tr data-id="RX-01122" onclick="openDrawer(this)" data-med="Levotiroxina 100 mcg" data-rx="RX-01122" data-date="04/08/2026" data-diagnostico="Hipotiroidismo primario" data-indicaciones="1 comprimido en ayunas, 30 min antes del desayuno" data-prof="Dr. Álvarez" data-mat="MN 60342">
+            <td class="cell-med"><span class="source-badge src-r">R</span>Levotiroxina 100 mcg</td>
+            <td class="cell-patient">Díaz, Pedro<span class="dni">29.876.234</span></td>
+            <td class="cell-prof">Dr. Álvarez</td>
+            <td class="cell-qty">1</td>
+            <td></td>
+            <td class="cell-actions">
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation();openDrawer(this.closest('tr'))"><span class="material-symbols-outlined mi">visibility</span></button>
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation()"><span class="material-symbols-outlined mi">print</span></button>
+              <button class="btn-sm btn-prime-sm" onclick="event.stopPropagation()"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+            </td>
+          </tr>
+
+          <!-- Row 10 -->
+          <tr data-id="ANDES-8842" onclick="openDrawer(this)" data-med="Ibuprofeno 600 mg" data-rx="ANDES-8842" data-date="05/08/2026" data-diagnostico="Dolor postoperatorio" data-indicaciones="1 comprimido cada 12 horas" data-prof="Dra. Navarro" data-mat="" data-origen="Andes">
+            <td class="cell-med"><span class="source-badge src-a">A</span>Ibuprofeno 600 mg</td>
+            <td class="cell-patient">Navarro, Clara<span class="dni">30.112.345</span></td>
+            <td class="cell-prof">Dra. Navarro</td>
+            <td class="cell-qty">1</td>
+            <td></td>
+            <td class="cell-actions">
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation();openDrawer(this.closest('tr'))"><span class="material-symbols-outlined mi">visibility</span></button>
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation()"><span class="material-symbols-outlined mi">print</span></button>
+              <button class="btn-sm btn-prime-sm" onclick="event.stopPropagation()"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+            </td>
+          </tr>
+
+          <!-- Row 11 -->
+          <tr data-id="RX-01048" onclick="openDrawer(this)" data-med="Enalapril 10 mg" data-rx="RX-01048" data-date="03/08/2026" data-diagnostico="Hipertensión arterial" data-indicaciones="1 comprimido cada 12 horas" data-prof="Dr. Torres" data-mat="MN 50893">
+            <td class="cell-med"><span class="source-badge src-r">R</span>Enalapril 10 mg</td>
+            <td class="cell-patient">Ramírez, Juana<span class="dni">18.563.452</span></td>
+            <td class="cell-prof">Dr. Torres</td>
+            <td class="cell-qty">2</td>
+            <td></td>
+            <td class="cell-actions">
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation();openDrawer(this.closest('tr'))"><span class="material-symbols-outlined mi">visibility</span></button>
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation()"><span class="material-symbols-outlined mi">print</span></button>
+              <button class="btn-sm btn-prime-sm" onclick="event.stopPropagation()"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+            </td>
+          </tr>
+
+          <!-- Row 12 -->
+          <tr data-id="RX-01130" onclick="openDrawer(this)" data-med="Tramadol 50 mg" data-rx="RX-01130" data-date="03/08/2026" data-diagnostico="Dolor crónico lumbar" data-indicaciones="1 comprimido cada 12 horas según necesidad" data-prof="Dr. Gutiérrez" data-mat="MN 45231">
+            <td class="cell-med"><span class="source-badge src-r">R</span>Tramadol 50 mg</td>
+            <td class="cell-patient">Ríos, Fabián<span class="dni">23.450.987</span></td>
+            <td class="cell-prof">Dr. Gutiérrez</td>
+            <td class="cell-qty">1</td>
+            <td><span class="tag tag-info">Duplicado</span></td>
+            <td class="cell-actions">
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation();openDrawer(this.closest('tr'))"><span class="material-symbols-outlined mi">visibility</span></button>
+              <button class="btn-sm btn-ghost-sm" onclick="event.stopPropagation()"><span class="material-symbols-outlined mi">print</span></button>
+              <button class="btn-sm btn-prime-sm" onclick="event.stopPropagation()"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <!-- ══════════ RIGHT PANEL: Medicamentos ══════════ -->
+  <aside class="right-panel" id="rightPanel">
+
+    <div class="panel-header">
+      <h3>Medicamentos del día</h3>
+    </div>
+
+    <div class="panel-body">
+
+      <!-- MED 1: Ibuprofeno -->
+      <div class="med-item" id="med-panel-ibuprofeno" onclick="highlightAndDrawer('Ibuprofeno', this)">
+        <div class="med-item-header">
+          <div class="med-info">
+            <div class="med-name">Ibuprofeno 600 mg</div>
+            <div class="med-sub">2× RecetAR &middot; 1× Andes</div>
+          </div>
+          <div class="med-counter">
+            <span class="num">3</span>
+            <span class="lbl">recetas</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MED 2: Metformina -->
+      <div class="med-item" id="med-panel-metformina" onclick="highlightAndDrawer('Metformina', this)">
+        <div class="med-item-header">
+          <div class="med-info">
+            <div class="med-name">Metformina 850 mg</div>
+            <div class="med-sub">2× RecetAR</div>
+          </div>
+          <div class="med-counter">
+            <span class="num">2</span>
+            <span class="lbl">recetas</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MED 3: Amlodipina -->
+      <div class="med-item" id="med-panel-amlodipina" onclick="highlightAndDrawer('Amlodipina', this)">
+        <div class="med-item-header">
+          <div class="med-info">
+            <div class="med-name">Amlodipina 10 mg</div>
+            <div class="med-sub">1× Andes</div>
+          </div>
+          <div class="med-counter">
+            <span class="num">1</span>
+            <span class="lbl">receta</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MED 4: Losartán -->
+      <div class="med-item" id="med-panel-losartan" onclick="highlightAndDrawer('Losartán', this)" style="opacity:.8">
+        <div class="med-item-header">
+          <div class="med-info">
+            <div class="med-name">Losartán 50 mg</div>
+            <div class="med-sub">1× RecetAR &middot; <span style="color:var(--success)">Dispensada</span></div>
+          </div>
+          <div class="med-counter">
+            <span class="num" style="color:var(--success)">1</span>
+            <span class="lbl">receta</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MED 5: Paracetamol -->
+      <div class="med-item" id="med-panel-paracetamol" onclick="highlightAndDrawer('Paracetamol', this)">
+        <div class="med-item-header">
+          <div class="med-info">
+            <div class="med-name">Paracetamol 500 mg</div>
+            <div class="med-sub">1× Andes</div>
+          </div>
+          <div class="med-counter">
+            <span class="num">1</span>
+            <span class="lbl">receta</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MED 6: Levotiroxina -->
+      <div class="med-item" id="med-panel-levotiroxina" onclick="highlightAndDrawer('Levotiroxina', this)">
+        <div class="med-item-header">
+          <div class="med-info">
+            <div class="med-name">Levotiroxina 100 mcg</div>
+            <div class="med-sub">1× RecetAR</div>
+          </div>
+          <div class="med-counter">
+            <span class="num">1</span>
+            <span class="lbl">receta</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MED 7: Enalapril -->
+      <div class="med-item" id="med-panel-enalapril" onclick="highlightAndDrawer('Enalapril', this)">
+        <div class="med-item-header">
+          <div class="med-info">
+            <div class="med-name">Enalapril 10 mg</div>
+            <div class="med-sub">1× RecetAR</div>
+          </div>
+          <div class="med-counter">
+            <span class="num">1</span>
+            <span class="lbl">receta</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MED 8: Tramadol -->
+      <div class="med-item" id="med-panel-tramadol" onclick="highlightAndDrawer('Tramadol', this)">
+        <div class="med-item-header">
+          <div class="med-info">
+            <div class="med-name">Tramadol 50 mg</div>
+            <div class="med-sub">1× RecetAR</div>
+          </div>
+          <div class="med-counter">
+            <span class="num">1</span>
+            <span class="lbl">receta</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MED 9: Omeprazol (vencida) -->
+      <div class="med-item" id="med-panel-omeprazol" onclick="highlightAndDrawer('Omeprazol', this)" style="opacity:.5">
+        <div class="med-item-header">
+          <div class="med-info">
+            <div class="med-name" style="text-decoration:line-through">Omeprazol 20 mg</div>
+            <div class="med-sub">1× RecetAR &middot; <span style="color:var(--error)">Vencida</span></div>
+          </div>
+          <div class="med-counter">
+            <span class="num" style="color:var(--error)">1</span>
+            <span class="lbl">receta</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+</div>
+
+<!-- ══════════ DRAWER ══════════ -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <h2>Detalle de receta</h2>
+    <button class="close-drawer" onclick="closeDrawer()">
+      <span class="material-symbols-outlined" style="font-size:20px">close</span>
+    </button>
+  </div>
+
+  <div class="drawer-body">
+    <!-- Status + code -->
+    <div class="drawer-status-row">
+      <span class="tag tag-info" id="drawerOrigen" style="display:none"></span>
+      <code id="drawerCode" style="font-size:13px;color:var(--text-muted)"></code>
+    </div>
+
+    <!-- Paciente -->
+    <div class="drawer-section">
+      <h4>Paciente</h4>
+      <div class="drawer-field">
+        <label>Nombre</label>
+        <span id="drawerPatient"></span>
+      </div>
+      <div class="drawer-field">
+        <label>DNI</label>
+        <span id="drawerDni"></span>
+      </div>
+    </div>
+
+    <!-- Profesional -->
+    <div class="drawer-section">
+      <h4>Profesional</h4>
+      <div class="drawer-field">
+        <label>Médico</label>
+        <span id="drawerProf"></span>
+      </div>
+      <div class="drawer-field">
+        <label>Matrícula</label>
+        <span id="drawerMat"></span>
+      </div>
+      <div class="drawer-field">
+        <label>Fecha de prescripción</label>
+        <span id="drawerDate"></span>
+      </div>
+    </div>
+
+    <!-- Medicacion -->
+    <div class="drawer-section">
+      <h4>Medicación prescripta</h4>
+      <div class="drawer-med-box">
+        <div class="med-title" id="drawerMed"></div>
+        <div class="med-detail-text" id="drawerMedDetail"></div>
+      </div>
+    </div>
+
+    <!-- Diagnostico -->
+    <div class="drawer-section">
+      <h4>Diagnóstico</h4>
+      <div class="drawer-diagnostic-box" id="drawerDiag"></div>
+    </div>
+
+    <!-- Indicaciones -->
+    <div class="drawer-section">
+      <h4>Indicaciones</h4>
+      <div class="drawer-diagnostic-box" id="drawerInd"></div>
+    </div>
+  </div>
+
+  <!-- Acciones -->
+  <div class="drawer-actions">
+    <button class="btn-drawer btn-drawer-print"><span class="material-symbols-outlined mi">print</span>Imprimir</button>
+    <button class="btn-drawer btn-drawer-dispense"><span class="material-symbols-outlined mi">done_all</span>Dispensar</button>
+  </div>
+</div>
+
+<script>
+  let currentSelected = null;
+
+  function openDrawer(row) {
+    // Deselect previous
+    if (currentSelected) currentSelected.classList.remove('selected');
+    currentSelected = row;
+    row.classList.add('selected');
+
+    const d = row.dataset;
+    document.getElementById('drawerCode').textContent = d.rx;
+    document.getElementById('drawerMed').textContent = d.med;
+    document.getElementById('drawerMedDetail').textContent = 'Envases: ' + row.querySelector('.cell-qty').textContent;
+    document.getElementById('drawerDate').textContent = d.date;
+    document.getElementById('drawerProf').textContent = d.prof;
+    document.getElementById('drawerMat').textContent = d.mat || '—';
+    document.getElementById('drawerDiag').textContent = d.diagnostico || '—';
+    document.getElementById('drawerInd').textContent = d.indicaciones || '—';
+
+    // Patient from cell
+    const patCell = row.querySelector('.cell-patient');
+    const name = patCell ? patCell.childNodes[0].textContent.trim() : '';
+    const dniEl = patCell ? patCell.querySelector('.dni') : null;
+    const dni = dniEl ? dniEl.textContent.trim() : '';
+    document.getElementById('drawerPatient').textContent = name;
+    document.getElementById('drawerDni').textContent = dni;
+
+    // Origen
+    const orgTag = document.getElementById('drawerOrigen');
+    if (d.origen === 'Andes') {
+      orgTag.textContent = 'Andes';
+      orgTag.style.display = 'inline-block';
+      orgTag.className = 'tag tag-info';
+    } else {
+      orgTag.textContent = 'RecetAR';
+      orgTag.style.display = 'inline-block';
+      orgTag.className = 'tag tag-succ';
+    }
+
+    // show drawer
+    document.getElementById('drawerOverlay').classList.add('open');
+    document.getElementById('drawer').classList.add('open');
+  }
+
+  function closeDrawer() {
+    document.getElementById('drawerOverlay').classList.remove('open');
+    document.getElementById('drawer').classList.remove('open');
+    if (currentSelected) {
+      currentSelected.classList.remove('selected');
+      currentSelected = null;
+    }
+    // Clear panel selection
+    document.querySelectorAll('.med-item.selected').forEach(el => el.classList.remove('selected'));
+  }
+
+  function highlightAndDrawer(medName, panelEl) {
+    // Clear previous selections
+    document.querySelectorAll('.med-item.selected').forEach(el => el.classList.remove('selected'));
+    if (currentSelected) currentSelected.classList.remove('selected');
+
+    // Highlight panel item
+    panelEl.classList.add('selected');
+
+    // Find first matching row
+    const rows = document.querySelectorAll('#rxTable tbody tr');
+    let found = null;
+    for (const row of rows) {
+      if (row.dataset.med && row.dataset.med.includes(medName) && !row.classList.contains('dispensed') && row.style.opacity !== '0.5') {
+        found = row;
+        break;
+      }
+    }
+    if (!found) {
+      for (const row of rows) {
+        if (row.dataset.med && row.dataset.med.includes(medName)) { found = row; break; }
+      }
+    }
+    if (found) {
+      found.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      openDrawer(found);
+    }
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+<app-canvas [showSidebar]="true" [sidebarItems]="sidebarItems">
+  <div class="orgs-container">
+    <mat-card class="orgs-card">
+      <mat-card-header>
+        <mat-card-title>Organizaciones</mat-card-title>
+        <mat-card-subtitle>Administr&aacute; las organizaciones asociadas a tu usuario</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (isLoading) {
+        <div class="loading-container">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Cargando organizaciones...</p>
+        </div>
+        }
+
+        @if (!isLoading) {
+        @if (organizaciones.length === 0) {
+        <ui-empty-state icon="business">
+          <p>No tenés organizaciones asociadas</p>
+          <p class="empty-hint">Agregá una organización para comenzar</p>
+        </ui-empty-state>
+        }
+
+        @if (organizaciones.length > 0) {
+        <div class="orgs-list">
+          @for (org of organizaciones; track org._id || org.nombre) {
+          <div class="org-item">
+            <div class="org-info">
+              <mat-icon class="org-icon">corporate_fare</mat-icon>
+              <div class="org-details">
+                <span class="org-name">{{ org.nombre }}</span>
+                @if (org.direccion || org.provincia) {
+                <span class="org-address">{{ org.direccion }}{{ org.direccion && org.provincia ? ', ' : '' }}{{
+                  org.provincia }}</span>
+                }
+              </div>
+            </div>
+            <button matIconButton class="org-remove-btn" (click)="removeOrganization(org)" [disabled]="isSaving"
+              matTooltip="Eliminar organizaci&oacute;n" aria-label="Eliminar organizaci&oacute;n">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+          }
+        </div>
+        }
+
+        <div class="orgs-actions">
+          <button matButton="tonal" (click)="openAddDialog()" [disabled]="isSaving">
+            <mat-icon>add</mat-icon>
+            Agregar organizaci&oacute;n
+          </button>
+        </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+</app-canvas>

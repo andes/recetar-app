@@ -1,0 +1,57 @@
+<h2 mat-dialog-title>
+    <mat-icon>lock</mat-icon>
+    {{ data?.title || 'Confirmar operación' }}
+</h2>
+
+<mat-dialog-content>
+    @if (isAuthenticatingBiometric) {
+        <div class="biometric-loading">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Usá tu huella digital o reconocimiento facial...</p>
+        </div>
+    }
+
+    @if (!isAuthenticatingBiometric) {
+        @if (data?.message) {
+            <p>{{ data.message }}</p>
+        } @else if (!errorMessage) {
+            @if (isBiometricAvailable) {
+                <p>Ingresá tu PIN de 4 dígitos o usá biometría para confirmar.</p>
+            } @else {
+                <p>Ingresá tu PIN de 4 dígitos para confirmar la operación.</p>
+            }
+        }
+
+        <form [formGroup]="pinForm" (ngSubmit)="onSubmit()" autocomplete="off">
+            <div class="pin-field-wrapper">
+                <app-form-field
+                    type="text"
+                    label="PIN de seguridad"
+                    [control]="pinForm.controls.pin"
+                    placeholder="&bull;&bull;&bull;&bull;"
+                    [maxlength]="4"
+                    inputmode="numeric"
+                    autocomplete="off"
+                    [errors]="pinErrors"
+                    [submitted]="submitted">
+                </app-form-field>
+            </div>
+
+            @if (errorMessage) {
+                <div class="error-message">
+                    <mat-icon>error</mat-icon>
+                    <span>{{ errorMessage }}</span>
+                </div>
+            }
+        </form>
+    }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    @if (!isAuthenticatingBiometric) {
+        <button matButton="outlined" (click)="onCancel()">Cancelar</button>
+        <button matButton="filled" (click)="onSubmit()" [disabled]="!pinForm?.valid">
+            Confirmar con PIN
+        </button>
+    }
+</mat-dialog-actions>

@@ -1,0 +1,386 @@
+@use 'styles/variables' as *
+
+\:host
+    display: block
+    height: 100%
+
+.type-toggle-section
+    margin-bottom: var(--space-4)
+
+.stats-row
+    display: flex
+    gap: 0
+    border: 1px solid var(--border-color)
+    border-radius: var(--radius-md)
+    overflow: hidden
+    margin-bottom: var(--space-4)
+
+.stat-card
+    flex: 1
+    padding: var(--space-3) var(--space-4)
+    display: flex
+    align-items: center
+    gap: 8px
+    background: var(--bg-card)
+
+.stat-dot
+    width: 7px
+    height: 7px
+    border-radius: 50%
+    flex-shrink: 0
+
+.stat-label
+    color: var(--text-secondary)
+
+.stat-value
+    color: var(--text-primary)
+
+.stat-label, .stat-value
+    margin-left: 0
+    margin-right: 0
+
+.results-card
+    border: 1px solid var(--border-color)
+    border-radius: $radius-lg
+    background: var(--bg-card)
+    overflow: hidden
+    box-shadow: $elevation-1
+    display: flex
+    flex-direction: column
+
+.results-toolbar
+    display: flex
+    align-items: center
+    gap: $space-3
+    padding: $space-3
+
+    .search-bar-wrap
+        flex: 1
+
+        &.disabled
+            opacity: .65
+            pointer-events: none
+            border-radius: $radius-sm
+
+            ::ng-deep .search-bar
+                background: var(--primary-100)
+
+.filter-toggle-btn
+    &.has-filters
+        border-color: var(--secondary)
+        color: var(--secondary)
+        background: var(--secondary-50)
+
+.filter-panel
+    padding: $space-3
+    border-top: 1px solid var(--border-color)
+    background: var(--bg-over-body)
+
+    .filter-fields
+        display: grid
+        grid-template-columns: 1fr 1fr
+        gap: $space-3
+
+.results-count
+    display: flex
+    align-items: center
+    padding: $space-2 $space-4
+    gap: $space-4
+    border-top: 1px solid var(--border-color)
+
+    &-type
+        font-weight: 500
+
+    &-range
+        color: var(--text-secondary)
+
+.filter-group
+    display: flex
+    flex-direction: column
+    gap: 4px
+
+    label
+        color: var(--text-secondary)
+
+.filter-input
+    height: 38px
+    padding: 0 10px
+    border: 1px solid var(--border-color)
+    border-radius: var(--radius-sm)
+    color: var(--text-primary)
+    background: var(--bg-card)
+    outline: none
+    transition: border-color .15s
+
+    &:focus
+        border-color: var(--secondary)
+        box-shadow: var(--focus-ring)
+
+    &::placeholder
+        color: var(--text-disabled)
+
+.filter-select
+    appearance: none
+    padding-right: 28px
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%236f7c95' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E")
+    background-repeat: no-repeat
+    background-position: right 10px center
+    cursor: pointer
+
+.medication-cell
+    display: flex
+    flex-direction: column
+    gap: 2px
+
+.medication-name
+    color: var(--text-primary)
+
+.medication-type
+    display: inline-flex
+    align-items: center
+    gap: 4px
+
+    &.duplicado
+        color: var(--warning-fill)
+
+    &.triplicado
+        color: var(--error-fill)
+
+.patient-dni
+    color: var(--text-secondary)
+
+.cell-text
+    display: block
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+.status-badge
+    display: inline-flex
+
+.mat-column-acciones
+    width: 140px
+    text-align: center
+    white-space: nowrap
+
+.mat-column-paciente
+    flex: 2
+    min-width: 160px
+
+.mat-column-certificado,
+.mat-column-practica,
+.mat-column-diagnostico
+    flex: 1
+    max-width: 180px
+    min-width: 0
+
+.table-container
+    overflow-x: auto
+
+    table
+        width: 100%
+
+        p, span
+            font-size: 0.85rem
+
+    .mat-mdc-row
+        cursor: default
+
+        &:hover
+            background: var(--hover-bg)
+
+.loading-container
+    display: flex
+    justify-content: center
+    padding: var(--space-6)
+
+.expanded-detail
+    padding: var(--space-3) var(--space-5)
+    background: var(--bg-over-body)
+    font-size: .8125rem
+
+.detail-label
+    font-weight: 600
+    color: var(--text-secondary)
+    margin-right: var(--space-1)
+
+.detail-value
+    color: var(--text-primary)
+
+.mobile-label
+    display: none
+    font-weight: 600
+    font-size: .75rem
+    color: var(--text-secondary)
+
+.drawer-overlay
+    display: block
+    position: fixed
+    inset: 0
+    background: rgba(11, 18, 32, .4)
+    z-index: 200
+    opacity: 0
+    visibility: hidden
+    transition: opacity .25s, visibility .25s
+
+    &.open
+        opacity: 1
+        visibility: visible
+
+.drawer
+    display: flex
+    flex-direction: column
+    position: fixed
+    top: 0
+    right: 0
+    bottom: 0
+    width: 520px
+    max-width: 100vw
+    background: var(--bg-card)
+    z-index: 210
+    box-shadow: var(--shadow-lg)
+    transform: translateX(100%)
+    transition: transform .3s cubic-bezier(.22, 1, .36, 1)
+
+    &.open
+        transform: translateX(0)
+
+.drawer-header
+    display: flex
+    align-items: center
+    justify-content: space-between
+    padding: var(--space-5) var(--space-6)
+    border-bottom: 1px solid var(--border-color)
+    flex-shrink: 0
+
+.drawer-body
+    flex: 1
+    overflow-y: auto
+    padding: var(--space-6)
+
+.receta-type-ribbon
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+    padding: var(--space-2) var(--space-4)
+    border-radius: var(--radius-sm)
+    margin-bottom: var(--space-4)
+
+    &.duplicado
+        background: var(--warning-bg)
+        color: var(--warning-fill)
+        border: 1px solid var(--warning-fill)
+
+    &.triplicado
+        background: var(--error-bg)
+        color: var(--error-fill)
+        border: 1px solid var(--error-fill)
+
+.receta-header
+    display: flex
+    justify-content: space-between
+    align-items: center
+    padding-bottom: var(--space-4)
+    border-bottom: 2px solid var(--primary)
+    margin-bottom: var(--space-5)
+
+.receta-id
+    color: var(--text-disabled)
+
+.receta-section
+    margin-bottom: var(--space-5)
+
+    h6
+        margin: 0 0 var(--space-2)
+        color: var(--text-disabled)
+
+.receta-field-row
+    display: flex
+    gap: var(--space-8)
+
+.receta-field
+    flex: 1
+
+    label
+        display: block
+        margin: 0 0 var(--space-1)
+        color: var(--text-secondary)
+
+.receta-med-box
+    background: var(--primary-50)
+    border: 1px solid var(--border-color)
+    border-radius: var(--radius-md)
+    padding: var(--space-4)
+
+    p
+        margin: 0 0 var(--space-1)
+
+.receta-med-name
+    font-family: var(--font-mono)
+
+.receta-indications-box, .receta-diagnostic-box
+    background: var(--secondary-50)
+    border-radius: var(--radius-sm)
+    padding: var(--space-3)
+
+    p
+        margin: 0
+        font-size: 0.85rem
+
+.cert-box
+    background: var(--cert-bg)
+    border-color: var(--cert-icon)
+
+.pract-box
+    background: var(--pract-bg)
+    border-color: var(--pract-icon)
+
+.anulate-box
+    background: var(--error-bg)
+    color: var(--error-fill)
+
+    p
+        color: var(--error-fill)
+        font-weight: 500
+
+.receta-diagnostic-box
+    background: var(--primary-50)
+
+.receta-signature
+    text-align: center
+
+.receta-signature-line
+    height: 1px
+    background: var(--border-strong)
+    margin: 0 auto var(--space-2)
+    width: 180px
+
+.receta-qr-box
+    width: 72px
+    height: 72px
+    border: 2px dashed var(--border-color)
+    border-radius: var(--radius-sm)
+    display: flex
+    align-items: center
+    justify-content: center
+    color: var(--text-disabled)
+
+.mat-column-diagnostico,
+.mat-column-vigencia,
+.mat-column-tipo
+    display: none
+
+@media (min-width: $small-devices + 1px)
+    .mat-column-diagnostico,
+    .mat-column-vigencia,
+    .mat-column-tipo
+        display: table-cell
+
+    .filter-panel .filter-fields
+        grid-template-columns: repeat(3, 1fr)
+
+    .drawer-overlay
+        display: block
+
+    .drawer
+        display: flex

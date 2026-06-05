@@ -53,7 +53,7 @@
                                     <div matSuffix *ngIf="!dateShowSpinner">
                                         <mat-datepicker-toggle [for]="picker1"
                                             *ngIf="!dateFilter.value"></mat-datepicker-toggle>
-                                        <button type="button" mat-icon-button *ngIf="dateFilter.value"
+                                        <button type="button" matIconButton *ngIf="dateFilter.value"
                                             (click)="cleanDateEvent()">
                                             <mat-icon>close</mat-icon>
                                         </button>
@@ -66,7 +66,7 @@
                                 </mat-form-field>
 
                                 <!-- Botón de búsqueda -->
-                                <button mat-raised-button color="primary" type="button" (click)="searchPrescriptions()"
+                                <button matButton="raised" color="primary" type="button" (click)="searchPrescriptions()"
                                     [disabled]="!prescriptionForm.valid">
                                     Buscar
                                 </button>

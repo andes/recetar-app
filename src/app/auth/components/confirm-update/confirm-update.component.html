@@ -8,13 +8,13 @@
                 <mat-spinner *ngIf="isLoading" diameter="50"></mat-spinner>
 
                 <mat-icon *ngIf="isSuccess" class="success-icon">check_circle</mat-icon>
-                <mat-icon *ngIf="!isSuccess && !isLoading" class="error-icon">error</mat-icon>
+                <mat-icon *ngIf="!isSuccess && !isLoading" class="mat-error">error</mat-icon>
 
                 <p>{{ message }}</p>
             </div>
 
             <div class="form-actions">
-                <button mat-raised-button color="primary" [routerLink]="['/auth/login']">Volver al Login</button>
+                <button matButton="raised" color="primary" [routerLink]="['/auth/login']">Volver al Login</button>
             </div>
         </mat-card-content>
     </mat-card>

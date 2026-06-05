@@ -2,14 +2,12 @@
   <div class="header-container">
     <div class="header-left-section">
       <div class="menu-area">
-        <button mat-icon-button class="menu-button" (click)="menuClick.emit()"
-          matTooltip="Menú">
+        <button matIconButton class="menu-button" (click)="menuClick.emit()" matTooltip="Menú">
           <mat-icon>menu</mat-icon>
         </button>
       </div>
       <div class="brand">
-        <mat-icon class="brand-icon">medication</mat-icon>
-        <span class="brand-title">RecetAR</span>
+        <img [src]="logoPath$ | async" alt="RecetAR" class="brand-logo">
       </div>
     </div>
 
@@ -18,19 +16,21 @@
         <button class="user-trigger" [matMenuTriggerFor]="menu">
           <span class="user-avatar">{{ userInitials }}</span>
           <span class="user-info">
-            <span class="user-info-name">{{ businessName$ | async }}</span>
+            <span class="user-info-name">{{ businessName$ | async | titlecase }}</span>
             <span *ngIf="roleLabel" class="user-info-role">{{ roleLabel }}</span>
           </span>
           <span class="user-chevron">
-            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+            <svg viewBox="0 0 24 24" width="16" height="16">
+              <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
+            </svg>
           </span>
         </button>
-        <mat-menu #menu="matMenu" panelClass="user-menu-panel"
-          (menuOpened)="toggleMenu(true)" (menuClosed)="toggleMenu(false)">
+        <mat-menu #menu="matMenu" panelClass="user-menu-panel" (menuOpened)="toggleMenu(true)"
+          (menuClosed)="toggleMenu(false)">
           <div class="menu-header" *ngIf="isMobile">
             <span class="menu-avatar">{{ userInitials }}</span>
             <div>
-              <div class="menu-user-name">{{ businessName$ | async }}</div>
+              <div class="menu-user-name">{{ businessName$ | async | titlecase }}</div>
               <div *ngIf="roleLabel" class="menu-user-role">{{ roleLabel }}</div>
             </div>
           </div>
@@ -38,6 +38,22 @@
           <button mat-menu-item [routerLink]="['/auth/reset-password']">
             <mat-icon matMenuItemIcon>lock</mat-icon>
             <span>Cambiar contraseña</span>
+          </button>
+          <button mat-menu-item [routerLink]="['/perfil']">
+            <mat-icon matMenuItemIcon>manage_accounts</mat-icon>
+            <span>Mi perfil</span>
+          </button>
+          <button mat-menu-item [routerLink]="['/perfil/seguridad']">
+            <mat-icon matMenuItemIcon>security</mat-icon>
+            <span>Seguridad</span>
+          </button>
+          <button mat-menu-item [routerLink]="['/perfil/biometria']">
+            <mat-icon matMenuItemIcon>fingerprint</mat-icon>
+            <span>Biometría</span>
+          </button>
+          <button mat-menu-item [routerLink]="['/perfil/organizaciones']">
+            <mat-icon matMenuItemIcon>corporate_fare</mat-icon>
+            <span>Organizaciones</span>
           </button>
           <button mat-menu-item [routerLink]="editProfileLink$ | async">
             <mat-icon matMenuItemIcon>person</mat-icon>

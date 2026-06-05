@@ -1,0 +1,97 @@
+<app-canvas [showSidebar]="true" [sidebarItems]="sidebarItems" [noCard]="true" pageTitle="Dispensar"
+    pageSubtitle="Busque y dispense recetas pendientes">
+
+    <div class="dispense-layout">
+        <div class="dispense-main">
+
+            <div class="search-card-wrap">
+                <ui-card>
+                    <div class="results-toolbar">
+                        <div class="search-bar-wrap">
+                            <ui-search-bar [control]="searchControl"
+                                placeholder="Buscar por DNI, nombre del paciente o código de receta..." [stretch]="true"
+                                (keydown.enter)="onSearch()">
+                            </ui-search-bar>
+                        </div>
+                        <button matButton="tonal" class="filter-toggle-btn" [class.has-filters]="hasActiveFilters"
+                            (click)="showFilters = !showFilters">
+                            <mat-icon>filter_list</mat-icon>
+                            Filtros{{ activeFilterCount > 0 ? ' (' + activeFilterCount + ')' : '' }}
+                        </button>
+                        <button matIconButton (click)="onRefresh()" matTooltip="Actualizar datos">
+                            <mat-icon>refresh</mat-icon>
+                        </button>
+                    </div>
+
+                    <div class="filter-panel" [hidden]="!showFilters">
+                        <div class="filter-fields">
+                            <div class="filter-group">
+                                <label>Fecha desde</label>
+                                <ui-date-field [control]="dateFromControl" placeholder="DD/MM/AAAA"></ui-date-field>
+                            </div>
+                            <div class="filter-group">
+                                <label>Fecha hasta</label>
+                                <ui-date-field [control]="dateToControl" placeholder="DD/MM/AAAA"></ui-date-field>
+                            </div>
+                            <div class="filter-group">
+                                <label>Estado</label>
+                                <select class="filter-input filter-select" [formControl]="statusControl">
+                                    <option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="filter-actions">
+                            <button matButton="tonal" (click)="onClear()">
+                                <mat-icon>restart_alt</mat-icon> Limpiar
+                            </button>
+                            <button matButton="tonal" color="primary" (click)="onSearch()">
+                                <mat-icon>search</mat-icon> Filtrar
+                            </button>
+                        </div>
+                    </div>
+                </ui-card>
+            </div>
+
+            <div class="table-card-wrap">
+                <!-- <ui-card [bordered]="false"> -->
+                <div class="results-count" *ngIf="(total$ | async) !== null && !(loading$ | async)">
+                    <span class="results-count-type">Recetas</span>
+                    <small class="results-count-range">
+                        Mostrando {{ resultsFrom }}&ndash;{{ resultsTo }} de {{ total$ | async }} resultados
+                    </small>
+                </div>
+
+                <div *ngIf="loading$ | async" class="loading-container">
+                    <mat-spinner diameter="40"></mat-spinner>
+                </div>
+
+                <div *ngIf="!(loading$ | async) && (prescriptions$ | async)?.length === 0" class="empty-container">
+                    <ui-empty-state icon="medication">No se encontraron recetas</ui-empty-state>
+                </div>
+
+                <div class="dispense-items" *ngIf="!(loading$ | async) && (prescriptions$ | async)?.length > 0">
+                    <app-dispense-item *ngFor="let p of prescriptions$ | async" [prescription]="p"
+                        [selected]="isSelected(p)" (select)="openDrawer($event)" (print)="onPrint($event)"
+                        (dispense)="onDispense($event)" (cancelDispense)="onCancelDispense($event)">
+                    </app-dispense-item>
+                </div>
+
+                <ui-paginator [length]="(total$ | async) || 0" [pageSize]="pageSize" [pageIndex]="pageIndex"
+                    [pageSizeOptions]="[5, 10, 25]" (page)="onPageChange($event)">
+                </ui-paginator>
+                <!-- </ui-card> -->
+            </div>
+        </div>
+
+        <app-dispense-medications-panel class="dispense-panel" [medications]="medications$ | async"
+            [loading]="medicationsLoading$ | async" (refresh)="onMedicationsRefresh()"
+            (medicationSelect)="onMedicationClick($event)">
+        </app-dispense-medications-panel>
+    </div>
+
+    <app-dispense-drawer [prescription]="selectedPrescription" [open]="drawerOpen" (closed)="closeDrawer()"
+        (print)="onPrint($event)" (dispense)="onDispenseFromDrawer($event)" (cancelDispense)="onCancelDispense($event)">
+    </app-dispense-drawer>
+
+</app-canvas>

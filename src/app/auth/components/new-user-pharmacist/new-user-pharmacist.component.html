@@ -7,9 +7,9 @@
     <form [formGroup]="newUserForm" #newUserNgForm="ngForm" (ngSubmit)="onSubmitEvent(newUserForm,newUserNgForm)"
       class="form-container">
       @if (error) {
-        <mat-error>
-          {{ error }}
-        </mat-error>
+      <mat-error>
+        {{ error }}
+      </mat-error>
       }
       <mat-card-title>
         <h2 class="text-center" fxLayoutAlign="center center">
@@ -37,13 +37,14 @@
         <!-- Fecha de vencimiento -->
         <mat-form-field appearance="fill" fxFlex>
           <mat-label>Fecha vencimiento de habilitación</mat-label>
-          <input matInput [min]="minDate" formControlName="vencimientoHabilitacion" [matDatepicker]="vencimientoHabilitacionPicker" readonly required>
+          <input matInput [min]="minDate" formControlName="vencimientoHabilitacion"
+            [matDatepicker]="vencimientoHabilitacionPicker" readonly required>
           <mat-datepicker-toggle matSuffix [for]="vencimientoHabilitacionPicker"></mat-datepicker-toggle>
           <mat-datepicker #vencimientoHabilitacionPicker></mat-datepicker>
           @if (newUserForm.get('vencimientoHabilitacion').errors) {
-            <mat-error>
-              Fecha incorrecta debe ser una fecha de vencimiento válida
-            </mat-error>
+          <mat-error>
+            Fecha incorrecta debe ser una fecha de vencimiento válida
+          </mat-error>
           }
         </mat-form-field>
         <!-- Matricula DT Farmacia -->
@@ -58,9 +59,9 @@
           <mat-label>Contraseña</mat-label>
           <input matInput formControlName="password" type="password" [pattern]="regexPassword" required>
           @if (newUserForm.get('password').errors) {
-            <mat-error>
-              Contraseña incorrecta debe contener una mayúscula, una minúscula y un número
-            </mat-error>
+          <mat-error>
+            Contraseña incorrecta debe contener una mayúscula, una minúscula y un número
+          </mat-error>
           }
         </mat-form-field>
         <!-- Email -->
@@ -70,17 +71,12 @@
         </mat-form-field>
       </div>
       <div fxLayout="row">
-        <ngx-turnstile
-          [siteKey]="siteKey"
-          formControlName="captcha"
-          theme="light"
-          required
-          >
+        <ngx-turnstile [siteKey]="siteKey" formControlName="captcha" theme="light" required>
         </ngx-turnstile>
       </div>
       <div class="botones" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="0.5rem">
-        <button mat-raised-button color="primary" type="submit" fxFlex.lg="25%" fxFlex.sm="100%">Crear</button>
-        <button mat-raised-button color="warn" (click)="cancelar()" fxFlex.lg="25%" fxFlex.sm="100%">
+        <button matButton="raised" color="primary" type="submit" fxFlex.lg="25%" fxFlex.sm="100%">Crear</button>
+        <button matButton="tonal" color="warn" (click)="cancelar()" fxFlex.lg="25%" fxFlex.sm="100%">
           Cancelar
         </button>
       </div>

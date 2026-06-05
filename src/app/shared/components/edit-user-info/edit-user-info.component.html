@@ -10,31 +10,30 @@
           <mat-label>Correo electrónico</mat-label>
           <input matInput type="email" formControlName="email" placeholder="ejemplo@correo.com" required>
           @if (email?.hasError('required')) {
-            <mat-error>
-              El correo electrónico es requerido
-            </mat-error>
+          <mat-error>
+            El correo electrónico es requerido
+          </mat-error>
           }
           @if (email?.hasError('email')) {
-            <mat-error>
-              Ingrese un correo electrónico válido
-            </mat-error>
+          <mat-error>
+            Ingrese un correo electrónico válido
+          </mat-error>
           }
         </mat-form-field>
 
         <div class="form-actions">
-          <button mat-raised-button color="primary" type="submit"
-            [disabled]="editUserForm.invalid || isLoading">
+          <button matButton="raised" color="primary" type="submit" [disabled]="editUserForm.invalid || isLoading">
             @if (isLoading) {
-              <mat-spinner diameter="20"></mat-spinner>
+            <mat-spinner diameter="20"></mat-spinner>
             }
             @if (!isLoading) {
-              <span>Actualizar</span>
+            <span>Actualizar</span>
             }
             @if (isLoading) {
-              <span>Actualizando...</span>
+            <span>Actualizando...</span>
             }
           </button>
-          <button mat-button type="button" (click)="cancelar()">
+          <button matButton="tonal" type="button" (click)="cancelar()">
             Cancelar
           </button>
         </div>

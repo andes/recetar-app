@@ -1,0 +1,88 @@
+.loading-container
+    display: flex
+    justify-content: center
+    padding: var(--space-6)
+
+.empty-container
+    padding: var(--space-6)
+
+.medication-row
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+
+.medication-cell
+    display: flex
+    flex-direction: column
+    gap: 2px
+
+.medication-name
+    font-weight: 500
+    color: var(--text-primary)
+
+.medication-type
+    font-weight: 500
+
+    &.duplicado
+        color: var(--warning-fill)
+
+    &.triplicado
+        color: var(--error-fill)
+
+.medication-info
+    flex: 1
+    min-width: 0
+
+.patient-info
+    color: var(--text-secondary)
+    margin-top: var(--space-2)
+    gap: var(--space-2)
+    display: flex
+    align-items: center
+
+    span
+        align-items: center
+        display: flex
+
+.patient-icon
+    font-size: 14px
+    width: 14px
+    height: 14px
+    vertical-align: middle
+    margin-right: 2px
+    color: var(--text-secondary)
+
+.status-badge
+    display: inline-flex
+
+.near-expiry
+    display: block
+    color: var(--warning-fill)
+    margin-top: 2px
+
+.countdown-inline
+    display: flex
+    align-items: center
+    gap: 8px
+    margin-top: 4px
+
+.countdown-icon
+    width: 16px
+    height: 16px
+    font-size: 16px
+
+.countdown-bar
+    width: 60px
+    height: 4px
+    overflow: hidden
+    border-radius: 2px
+    background: var(--border-color)
+
+.countdown-fill
+    height: 100%
+    background: var(--primary)
+    border-radius: 2px
+
+.btn-undo
+    padding-left: 10px
+    padding-right: 10px
