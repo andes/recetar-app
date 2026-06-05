@@ -4,7 +4,6 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, Subject, of, timer } from 'rxjs';
 import { Prescriptions, PrescriptionsAdapter, PrescriptionsResponse } from '../interfaces/prescriptions';
 import { tap, mapTo, map, switchMap, takeUntil } from 'rxjs/operators';
-
 import { AmbitoService } from '../auth/services/ambito.service';
 import AndesPrescriptions from '@interfaces/andesPrescriptions';
 

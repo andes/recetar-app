@@ -29,6 +29,7 @@ Usá esta skill cuando la tarea sea refactorizar `recetar-app` usando el contrat
 - `src/app/services/prescriptions.service.ts` contiene un flujo de búsqueda conocido con `setTimeout`, seguimiento manual de suscripciones y tipado `any` que debería refactorizarse de forma incremental.
 - La carpeta `src/app/utils/custome-validators/` está mal escrita a propósito; no la renombres de forma oportunista.
 - Los estilos de componentes usan `.sass`.
+- Todos los iconos de Material Design deben usar `<mat-icon>` en lugar de `<span class="material-icons">` para mejor accesibilidad, tamaño consistente (`1.125rem`) e integración con Angular Material.
 
 ## Objetivos Del Refactor
 

@@ -43,7 +43,6 @@ export class CertificatesService {
     }
 
     getByUserId(userId: string, params?: { offset?: number; limit?: number }): Observable<{ certificates: Certificate[]; total: number; offset: number; limit: number }> {
-        const queryParams = { userId, ...params };
         const httpParams: any = { userId };
         if (params?.offset !== undefined) { httpParams.skip = params.offset; }
         if (params?.limit !== undefined) { httpParams.limit = params.limit; }

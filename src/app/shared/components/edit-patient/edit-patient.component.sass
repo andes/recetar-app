@@ -1,0 +1,52 @@
+@use 'styles/variables' as *
+
+.edit-patient-card
+    animation: fadeIn .25s ease
+    padding: var(--space-4, 16px)
+    margin-bottom: 4px
+
+    @media (min-width: $small-devices + 1px)
+        padding: var(--space-5, 20px)
+
+.edit-patient-header
+    display: flex
+    align-items: center
+    gap: var(--space-2, 8px)
+    font-weight: 500
+    margin-bottom: var(--space-4, 16px)
+    color: var(--text-primary)
+
+    .mat-icon
+        color: var(--secondary)
+
+.edit-patient-form
+    display: flex
+    flex-direction: column
+    gap: var(--space-3, 12px)
+
+.form-row
+    display: flex
+    flex-direction: column
+    gap: var(--space-3, 12px)
+
+    @media (min-width: $small-devices + 1px)
+        flex-direction: row
+
+.edit-patient-actions
+    display: flex
+    align-items: center
+    gap: var(--space-2, 8px)
+    margin-top: var(--space-2, 8px)
+    padding-top: var(--space-3, 12px)
+    border-top: 1px solid var(--border-color)
+
+    .btn-spinner
+        margin-right: 4px
+
+@keyframes fadeIn
+    from
+        opacity: 0
+        transform: translateY(-4px)
+    to
+        opacity: 1
+        transform: translateY(0)

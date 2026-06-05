@@ -1,0 +1,160 @@
+<div class="section-label">
+    <mat-icon class="sm">medication_liquid</mat-icon>
+    Seleccionar medicamento
+</div>
+<div class="section-subtitle">Buscá por nombre genérico o comercial</div>
+
+<div class="disabled-msg" *ngIf="disabled">
+    <mat-icon>person_outline</mat-icon>
+    Primero seleccioná un paciente para buscar medicamentos.
+</div>
+
+<ng-container *ngIf="!disabled">
+
+    <!-- VISTA BÚSQUEDA -->
+    <ng-container *ngIf="!showMedDetail">
+        <div class="search-bar-wrapper">
+            <ui-search-bar [control]="medicationCtrl" placeholder="Buscar medicamento…" [isLoading]="isSearchingMed"
+                [showToggle]="true" [toggleOptions]="toggleOptions" [(toggleValue)]="searchMode"
+                (toggleValueChange)="onModeChange()">
+            </ui-search-bar>
+        </div>
+
+        <div class="search-results" *ngIf="showMedResults && filteredMedications?.length">
+            <div class="search-result" *ngFor="let med of filteredMedications; trackBy: trackByMed"
+                (mousedown)="selectMedication(med)">
+                <div class="result-avatar" [class.commercial]="med.kind === 'commercial'"
+                    [class.generic]="med.kind === 'generic'">
+                    <mat-icon *ngIf="med.kind === 'commercial'">medication</mat-icon>
+                    <mat-icon *ngIf="med.kind === 'generic'">science</mat-icon>
+                </div>
+                <div class="result-info">
+                    <div class="result-name" *ngIf="med.kind === 'commercial'">{{ med.entry.nombre }}</div>
+                    <div class="result-name" *ngIf="med.kind === 'generic'">{{ med.concept.term }}</div>
+                    <div class="result-detail" *ngIf="med.kind === 'commercial'">
+                        {{ med.entry.accion_descrip }}
+                        <span *ngIf="med.entry.accion_descrip && med.entry.presentacion"> | </span>
+                        {{ med.entry.presentacion }}
+                        <span *ngIf="med.entry.presentacion && med.entry.precio != null"> | </span>
+                        <span class="mono" *ngIf="med.entry.precio != null">${{ med.entry.precio.toFixed(2)
+                            }}</span>
+                    </div>
+                    <div class="result-detail" *ngIf="med.kind === 'generic'">
+                        {{ med.concept.fsn }}
+                    </div>
+                </div>
+                <mat-icon class="result-chevron">chevron_right</mat-icon>
+            </div>
+
+            <mat-paginator *ngIf="totalResults > pageSize" [length]="totalResults" [pageSize]="pageSize"
+                [pageIndex]="currentPage" [pageSizeOptions]="[10, 20, 30]" (page)="onPageChange($event)"
+                class="results-paginator">
+            </mat-paginator>
+        </div>
+        <div class="patient-empty" *ngIf="medNotFound">
+            <mat-icon>medication</mat-icon>
+            <p>No se encontraron medicamentos con ese término.</p>
+        </div>
+
+        <!-- Medicamentos frecuentes -->
+        <ng-container *ngIf="showFrequentMedications">
+            <div class="section-label" *ngIf="frequentMedications.length > 0" style="margin-top:var(--space-5)">
+                <mat-icon class="sm star">star</mat-icon>
+                Medicamentos frecuentes
+            </div>
+
+            <div class="freq-list" *ngIf="frequentMedications.length > 0">
+                <ui-item-card *ngFor="let med of frequentMedications; trackBy: trackByFreqMed"
+                    (selected)="selectFrequentMedication(med)">
+                    <ng-container *ngIf="med.kind === 'generic';
+                        then genericIcon; else commercialIcon"></ng-container>
+                    <ng-template #genericIcon>
+                        <mat-icon cardIcon>science</mat-icon>
+                    </ng-template>
+                    <ng-template #commercialIcon>
+                        <mat-icon cardIcon>medication</mat-icon>
+                    </ng-template>
+                    <span cardTitle>{{ med.name }}</span>
+                    <span cardMeta>{{ med.presentation }}
+                        <ui-badge *ngIf="med.price" size="sm">
+                            <span class="mono">${{ med.price.toFixed(2) }}</span>
+                        </ui-badge>
+                    </span>
+                </ui-item-card>
+            </div>
+        </ng-container>
+    </ng-container>
+
+    <!-- VISTA DETALLE DEL MEDICAMENTO -->
+    <ng-container *ngIf="showMedDetail && pendingMedication">
+        <ui-card>
+            <div class="detail-header">
+                <div class="detail-header-info">
+                    <div class="detail-name" *ngIf="pendingMedication.kind === 'commercial'">{{
+                        pendingMedication.entry.nombre }}</div>
+                    <div class="detail-name" *ngIf="pendingMedication.kind === 'generic'">{{
+                        pendingMedication.concept.term }}</div>
+                    <div class="detail-meta" *ngIf="pendingMedication.kind === 'commercial'">
+                        {{ pendingMedication.entry.presentacion }}
+                        <span *ngIf="pendingMedication.entry.precio != null"> · ${{
+                            pendingMedication.entry.precio.toFixed(2) }}</span>
+                    </div>
+                    <div class="detail-meta" *ngIf="pendingMedication.kind === 'generic'">
+                        {{ pendingMedication.concept.fsn }}
+                        <span *ngIf="pendingMedication.concept.semanticTag"> · {{
+                            pendingMedication.concept.semanticTag }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-form">
+                <div class="detail-form-row">
+                    <app-form-field type="number" label="Cantidad" [control]="detailForm.get('quantity')"
+                        min="1"
+                        [errors]="{ required: 'Debe ingresar una cantidad', min: 'Mínimo 1' }">
+                    </app-form-field>
+                </div>
+
+                <app-form-field type="textarea" label="Diagnóstico / indicación terapéutica"
+                    [control]="detailForm.get('diagnostic')" fullwidth
+                    [errors]="{ required: 'El diagnóstico es requerido', whitespace: 'El diagnóstico no puede estar vacío' }">
+                </app-form-field>
+
+                <app-form-field type="textarea" label="Indicaciones / posología"
+                    [control]="detailForm.get('indication')" fullwidth>
+                </app-form-field>
+
+                <div class="detail-checkboxes">
+                    <label class="check-label" [class.active]="medDuplicate">
+                        <input type="checkbox" [checked]="medDuplicate"
+                            (change)="onDuplicateChange(!!($any($event.target).checked))">
+                        Duplicado
+                    </label>
+                    <label class="check-label" [class.active]="medTriplicate">
+                        <input type="checkbox" [checked]="medTriplicate"
+                            (change)="onTriplicateChange(!!($any($event.target).checked))">
+                        Triplicado / Receta oficial
+                    </label>
+                </div>
+
+                <div class="triplicate-fields" *ngIf="medTriplicate">
+                    <app-form-field type="text" label="Serie" [control]="detailForm.get('serie')"
+                        [errors]="{ required: 'La serie es requerida', maxlength: 'Debe ser 1 carácter', pattern: 'Debe ser una letra (A-Z)' }">
+                    </app-form-field>
+                    <app-form-field type="text" label="Número" [control]="detailForm.get('numero')"
+                        [errors]="{ required: 'El número es requerido' }">
+                    </app-form-field>
+                </div>
+
+                <div class="detail-actions">
+                    <button matButton="filled" (click)="confirmMedication()">
+                        <mat-icon>add_circle</mat-icon>
+                        Agregar a la receta
+                    </button>
+                    <button mat-stroked-button (click)="cancelMedicationDetail()">Cancelar</button>
+                </div>
+            </div>
+        </ui-card>
+    </ng-container>
+
+</ng-container>

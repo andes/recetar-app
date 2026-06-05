@@ -10,14 +10,12 @@ import { InsurancesService } from '@services/insurance.service';
 // Interfaces
 import { Patient } from '@interfaces/patients';
 import { Prescriptions } from '@interfaces/prescriptions';
-import { Insurances } from '@interfaces/insurances';
 
 // Material
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogComponent } from '@audit/components/dialog/dialog.component';
 import { ThemePalette } from '@angular/material/core';
-import { duration } from 'moment';
 
 
 @Component({
@@ -47,7 +45,7 @@ export class AuditFormComponent implements OnInit, OnDestroy {
         private apiInsurances: InsurancesService,
         public dialog: MatDialog,
         private _snackBar: MatSnackBar,
-    ) {}
+    ) { }
 
     ngOnInit(): void {
         this.initFilterPrescriptionForm();
@@ -55,7 +53,7 @@ export class AuditFormComponent implements OnInit, OnDestroy {
         this.prescriptionForm.valueChanges.pipe(
             takeUntil(this.destroy$),
             switchMap(values => {
-                if (typeof(values.pharmacy_cuit) !== 'undefined' && values.pharmacy_cuit >= 10) {
+                if (typeof (values.pharmacy_cuit) !== 'undefined' && values.pharmacy_cuit >= 10) {
                     this.cuitShowSpinner = this.lastCuit !== values.pharmacy_cuit;
                     return this.apiPrescriptions.getPrescriptions({ dispensedBy: values.pharmacy_cuit });
                 }

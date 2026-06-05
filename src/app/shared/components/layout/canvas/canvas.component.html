@@ -1,0 +1,27 @@
+<app-header *ngIf="showHeader" (menuClick)="toggleSidebar()">
+</app-header>
+
+<div class="sidebar-backdrop" *ngIf="showSidebar && sidebarOpen" (click)="sidebarOpen = false"></div>
+
+<div class="canvas-body" [class.has-sidebar]="showSidebar">
+    <app-sidebar *ngIf="showSidebar" [items]="sidebarItems" [collapsed]="sidebarCollapsed" [overlayOpen]="sidebarOpen"
+        (toggled)="sidebarCollapsed = !sidebarCollapsed">
+    </app-sidebar>
+    <main class="canvas-content" [class.adjust-content]="adjustContent">
+        <div class="canvas-content-inner" [class.no-card]="noCard">
+            <ng-template #projectedTpl>
+                <ng-content></ng-content>
+            </ng-template>
+            <mat-card *ngIf="!noCard" class="canvas-card">
+                <mat-card-content class="canvas-card-content">
+                    <ng-container *ngTemplateOutlet="projectedTpl"></ng-container>
+                </mat-card-content>
+            </mat-card>
+            <ng-container *ngIf="noCard">
+                <ng-container *ngTemplateOutlet="projectedTpl"></ng-container>
+            </ng-container>
+        </div>
+    </main>
+</div>
+
+<app-footer *ngIf="showFooter"></app-footer>

@@ -1,14 +1,184 @@
-// // my awesome screen sizes!!!!!
+$font-mono: 'JetBrains Mono', 'SFMono-Regular', Menlo, monospace
 
+// Breakpoints
+$x-small-devices: 320px
+$small-devices: 768px
+$medium-devices: 992px
+$larger-devices: 1200px
+$x-larger-devices: 1440px
+$xx-larger-devices: 1680px
+$xxx-larger-devices: 1920px
 
-$x-small-devices: 320px                  // (smartphones)
-$small-devices: 768px                  // (smartphones)
-$medium-devices: 992px                 // (medium devices)
-$larger-devices: 1200px            // (large devices)
-$x-larger-devices: 1440px          // (large devices)
-$xx-larger-devices: 1680px         // (large devices)
-$xxx-larger-devices: 1920px        // (large devices)
+// ========================================
+// Spacing scale (4px base)
+// ========================================
+$space-1: 4px
+$space-2: 8px
+$space-3: 12px
+$space-4: 16px
+$space-5: 20px
+$space-6: 24px
+$space-8: 32px
+$space-10: 40px
+$space-12: 48px
+$space-16: 64px
+$space-20: 80px
+$space-24: 96px
 
-$header-height: 54px
-$footer-height: 40px
+// ========================================
+// Radius scale
+// ========================================
+$radius-xs: 4px
+$radius-sm: 8px
+$radius-md: 12px
+$radius-lg: 16px
+$radius-xl: 20px
+$radius-2xl: 24px
+$radius-full: 9999px
+
+// ========================================
+// Layout dimensions
+// ========================================
+$header-height: 64px
+$footer-height: 80px
+$sidebar-width: 256px
+$sidebar-collapsed: 72px
+$size-input: 48px
+$size-btn: 40px
+$size-touch: 44px
 $app-component: 20px
+
+// ========================================
+// Primary palette — Carbon (#1F2937)
+// ========================================
+$primary: #1F2937
+$primary-dark: #111827
+$primary-light: #374151
+
+// ========================================
+// Button colors
+// ========================================
+$btn-base-bg: #1F2937
+$btn-base-hover: #374151
+$btn-base-text: #fff
+
+$icon-btn-bg: #f1f5f9
+$icon-btn-hover: #e2e8f0
+
+$primary-50: #F9FAFB
+$primary-100: #F3F4F6
+$primary-200: #E5E7EB
+$primary-300: #D1D5DB
+$primary-400: #9CA3AF
+$primary-500: #6B7280
+$primary-600: #4B5563
+$primary-700: #374151
+
+// ========================================
+// Secondary palette — Azul Indigo (#4F46E5)
+$secondary: #4F46E5
+$secondary-dark: #2c249d
+$secondary-light: #6366F1
+$secondary-50: #EEF2FF
+$secondary-100: #E0E7FF
+$secondary-200: #C7D2FE
+$secondary-300: #A5B4FC
+$secondary-400: #818CF8
+$secondary-500: #6366F1
+$secondary-600: #4F46E5
+
+// ========================================
+// Highlight color — Rosa Suave (#F472B6)
+$highlight: #F472B6
+$highlight-light: #FCE7F6
+$highlight-dark: #EC4899
+
+// ========================================
+// Neutral surfaces & text
+// ========================================
+$bg-body: #f5f7fb
+$bg-card: #FFFFFF
+$bg-raised: #FFFFFF
+$text-primary: #212026
+$text-primary-light: #ffffff
+$text-secondary: #64748b
+$text-disabled: #94A3B8
+$icon-muted: #9ca3af
+$border-color: #e0e0e0
+$border-strong: #cbd5e1
+$hover-bg: #e8e9eb
+$footer-bg: #e2e8f0
+$icon-muted: #94A3B8
+
+// ========================================
+// Status colors
+// ========================================
+$error-bg: #FEF2F2
+$error-text: #991B1B
+$warning-bg: #FFFBEB
+$warning-text: #92400E
+$success-bg: #d3f6dd
+$success-text: #6ab084
+$info-bg: #EFF6FF
+$info-text: #1E40AF
+
+// ========================================
+// Role identity colors
+// ========================================
+$role-pharmacist: #4E6B1A
+$role-pharmacist-accent: #A6C257
+$role-auditor: #3E1D90
+
+// ========================================
+// Elevation (primary-based shadows)
+// ========================================
+$elevation-0: none
+$elevation-1: 0 1px 2px rgba($primary, 0.08), 0 1px 3px rgba($primary, 0.06)
+$elevation-2: 0 2px 4px rgba($primary, 0.08), 0 1px 6px rgba($primary, 0.06)
+$elevation-3: 0 4px 8px rgba($primary, 0.10), 0 2px 12px rgba($primary, 0.08)
+$elevation-4: 0 8px 16px rgba($primary, 0.12), 0 4px 20px rgba($primary, 0.10)
+
+// Aliases for backward compatibility
+$shadow-sm: $elevation-1
+$shadow-lg: $elevation-3
+
+// ========================================
+// Dark mode tokens
+// ========================================
+$bg-body-dark: #0f172a
+$bg-card-dark: #1e293b
+$bg-raised-dark: #334155
+$text-primary-dark: #f8fafc
+$text-secondary-dark: #cbd5e1
+$text-disabled-dark: #64748b
+$icon-muted-dark: #94a3b8
+$border-color-dark: #334155
+$border-strong-dark: #475569
+$hover-bg-dark: #e8e9eb
+$footer-bg-dark: #020617
+
+$error-bg-dark: #450A0A
+$error-text-dark: #FCA5A5
+$warning-bg: #eebd39
+$warning-bg-dark: #451A03
+$warning-text-dark: #FCD34D
+$success-bg-dark: #54b37c
+$success-text-dark: #d9ffe7
+$info-bg-dark: #172554
+$info-text-dark: #93C5FD
+
+$elevation-0-dark: none
+$elevation-1-dark: 0 1px 2px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.25)
+$elevation-2-dark: 0 2px 4px rgba(0, 0, 0, 0.35), 0 1px 6px rgba(0, 0, 0, 0.25)
+$elevation-3-dark: 0 4px 8px rgba(0, 0, 0, 0.40), 0 2px 12px rgba(0, 0, 0, 0.30)
+$elevation-4-dark: 0 8px 16px rgba(0, 0, 0, 0.45), 0 4px 20px rgba(0, 0, 0, 0.35)
+
+$shadow-sm-dark: $elevation-1-dark
+$shadow-lg-dark: $elevation-3-dark
+
+$btn-base-bg-dark: #e2e2ea
+$btn-base-hover-dark: darken($btn-base-bg-dark, 8%)
+$btn-base-text-dark: #21222d
+
+$icon-btn-bg-dark: #253348
+$icon-btn-hover-dark: #334155

@@ -1,0 +1,177 @@
+@use 'styles/variables' as *
+
+:host
+    display: block
+    height: 100%
+
+    ::ng-deep .canvas-body
+        padding: 0 !important
+        gap: 0
+
+    ::ng-deep .canvas-content-inner
+        max-width: none !important
+        padding: 0
+
+// ==================== LAYOUT ====================
+
+.split-layout
+    display: grid
+    grid-template-columns: 1fr 1fr
+    min-height: 100vh
+
+    @media (max-width: $small-devices)
+        grid-template-columns: 1fr
+
+// ==================== FORM PANEL ====================
+
+.form-panel
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    padding: var(--space-12) var(--space-8)
+    background: var(--bg-body)
+
+    @media (max-width: $small-devices)
+        padding: var(--space-10) var(--space-6)
+
+.form-wrapper
+    width: 100%
+    max-width: 400px
+
+.logo-area
+    display: flex
+    flex-direction: column
+    align-items: center
+    gap: var(--space-1)
+    margin-bottom: var(--space-10)
+
+.logo-img
+    width: 80px
+    height: 80px
+    margin-bottom: var(--space-4)
+
+.brand-subtitle
+    color: var(--text-secondary)
+
+// ==================== FORM ====================
+
+.form-header
+    p
+        color: var(--text-secondary)
+
+// ==================== PASSWORD TOGGLE ====================
+
+.input-wrap
+    display: flex
+    align-items: stretch
+    border: 1px solid var(--border-color)
+    border-radius: var(--radius-sm)
+    background: var(--bg-card)
+    transition: border-color 0.15s
+
+    &:focus-within
+        border-color: var(--secondary)
+        box-shadow: var(--focus-ring)
+
+    input
+        flex: 1
+        height: 44px
+        padding: 0 var(--space-2) 0 var(--space-3)
+        border: none
+        border-radius: var(--radius-sm)
+        background: transparent
+        box-shadow: none
+
+        &:focus
+            border-color: transparent
+            box-shadow: none
+
+.input-toggle
+    display: flex
+    align-items: center
+    justify-content: center
+    width: 36px
+    flex-shrink: 0
+    border: none
+    border-radius: 6px
+    background: transparent
+    color: var(--text-disabled)
+    cursor: pointer
+    padding: 0
+    margin: 4px
+
+    &:hover
+        color: var(--text-secondary)
+        background: var(--hover-bg)
+
+    .mat-icon
+        width: 20px
+        height: 20px
+        font-size: 20px
+
+// ==================== FOOTER ====================
+
+.form-footer
+    display: flex
+    flex-direction: column
+    align-items: center
+    gap: var(--space-3)
+    margin-top: var(--space-2)
+
+    a
+        color: var(--secondary)
+        cursor: pointer
+        text-decoration: none
+
+        &:hover
+            text-decoration: underline
+
+.register-links
+    display: flex
+    flex-direction: column
+    gap: var(--space-2)
+    width: 100%
+
+    button
+        width: 100%
+
+// ==================== INSTITUTIONAL PANEL ====================
+
+.inst-panel
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    padding: var(--space-16)
+    background: linear-gradient(160deg, var(--secondary-dark) 0%, var(--primary-dark) 100%)
+    color: var(--text-primary-light)
+    overflow: hidden
+
+    @media (max-width: $small-devices)
+        display: none
+
+.inst-content
+    text-align: center
+    max-width: 440px
+
+    p
+        color: var(--primary-400)
+
+.inst-logo
+    width: 90px
+    height: 90px
+    margin-bottom: var(--space-8)
+    filter: brightness(0) invert(1)
+    opacity: 0.9
+
+.inst-stat
+    display: flex
+    flex-direction: column
+    align-items: center
+    gap: var(--space-1)
+
+.inst-footer
+    position: absolute
+    bottom: var(--space-8)
+    color: var(--text-secondary)

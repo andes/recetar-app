@@ -1,51 +1,583 @@
-/* You can add global styles to this file, and also import other style files */
 @use 'styles/variables' as *
 
-@font-face
-  src: url(assets/fonts/RobotoCondensed-Regular.ttf) format("opentype")
+:root
+  // Primary palette
+  --primary: #{$primary}
+  --primary-dark: #{$primary-dark}
+  --primary-light: #{$primary-light}
+  --primary-50: #{$primary-50}
+  --primary-100: #{$primary-100}
+  --primary-200: #{$primary-200}
+  --primary-300: #{$primary-300}
+  --primary-400: #{$primary-400}
+  --primary-500: #{$primary-500}
+  --primary-600: #{$primary-600}
+  --primary-700: #{$primary-700}
+
+  // Secondary palette
+  --secondary: #{$secondary}
+  --secondary-dark: #{$secondary-dark}
+  --secondary-light: #{$secondary-light}
+  --secondary-50: #{$secondary-50}
+  --secondary-100: #{$secondary-100}
+  --secondary-200: #{$secondary-200}
+  --secondary-300: #{$secondary-300}
+  --secondary-400: #{$secondary-400}
+  --secondary-500: #{$secondary-500}
+  --secondary-600: #{$secondary-600}
+
+  // Highlight accent (Coral)
+  --highlight: #{$highlight}
+  --highlight-light: #{$highlight-light}
+  --highlight-dark: #{$highlight-dark}
+
+  // Neutral surfaces & text
+  --bg-body: #{$bg-body}
+  --bg-card: #{$bg-card}
+  --bg-raised: #{$bg-raised}
+  --text-primary: #{$text-primary}
+  --text-primary-light: #{$text-primary-light}
+  --text-secondary: #{$text-secondary}
+  --text-disabled: #{$text-disabled}
+  --icon-muted: #{$icon-muted}
+  --border-color: #{$border-color}
+  --border-strong: #{$border-strong}
+  --hover-bg: #{$hover-bg}
+  --footer-bg: #{$footer-bg}
+  --icon-muted: #{$icon-muted}
+
+  // Status colors
+  --error-bg: #{$error-bg}
+  --error-text: #{$error-text}
+  --warning-bg: #{$warning-bg}
+  --warning-text: #{$warning-text}
+  --success-bg: #{$success-bg}
+  --success-text: #{$success-text}
+  --info-bg: #{$info-bg}
+  --info-text: #{$info-text}
+
+  // Button colors
+  --btn-base-bg: #{$btn-base-bg}
+  --btn-base-hover: #{$btn-base-hover}
+  --btn-base-text: #{$btn-base-text}
+
+  --icon-btn-bg: #{$icon-btn-bg}
+  --icon-btn-hover: #{$icon-btn-hover}
+
+  // Role identity
+  --role-pharmacist: #{$role-pharmacist}
+  --role-pharmacist-accent: #{$role-pharmacist-accent}
+  --role-auditor: #{$role-auditor}
+
+  // Radius scale
+  --radius-xs: #{$radius-xs}
+  --radius-sm: #{$radius-sm}
+  --radius-md: #{$radius-md}
+  --radius-lg: #{$radius-lg}
+  --radius-xl: #{$radius-xl}
+  --radius-2xl: #{$radius-2xl}
+  --radius-full: #{$radius-full}
+
+  // Elevation
+  --elevation-0: #{$elevation-0}
+  --elevation-1: #{$elevation-1}
+  --elevation-2: #{$elevation-2}
+  --elevation-3: #{$elevation-3}
+  --elevation-4: #{$elevation-4}
+
+  // Layout
+  --header-height: #{$header-height}
+  --sidebar-width: #{$sidebar-width}
+  --sidebar-collapsed: #{$sidebar-collapsed}
+
+  // Spacing
+  --space-1: #{$space-1}
+  --space-2: #{$space-2}
+  --space-3: #{$space-3}
+  --space-4: #{$space-4}
+  --space-5: #{$space-5}
+  --space-6: #{$space-6}
+  --space-8: #{$space-8}
+  --space-10: #{$space-10}
+  --space-12: #{$space-12}
+  --space-16: #{$space-16}
+  --space-20: #{$space-20}
+  --space-24: #{$space-24}
+
+  // --shadow-* aliases (backward compat)
+  --shadow-sm: #{$shadow-sm}
+  --shadow-lg: #{$shadow-lg}
+
+  // Fonts
+  --font-mono: #{$font-mono}
+
+  // Focus ring
+  --focus-ring: 0 0 0 3px rgba(79, 70, 229, 0.12)
+
+// ---- Form elements ----
+label
+  display: flex
+  flex-direction: column
+  font-size: 13px
+  gap: var(--space-1)
+
+input[type="text"],
+input[type="password"],
+input[type="number"],
+input[type="email"],
+textarea
+  height: 46px
+  padding: 0 var(--space-3)
+  border: 1px solid var(--border-color)
+  border-radius: var(--radius-sm)
+  background: var(--bg-card)
+  color: var(--text-primary)
+  outline: none
+  transition: border-color .15s
+
+  &:focus
+    border-color: var(--secondary)
+
+  &::placeholder
+    color: var(--text-disabled)
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus
+  box-shadow: 0 0 0 30px var(--bg-card) inset !important
+  -webkit-text-fill-color: var(--text-primary) !important
+
+textarea
+  height: auto
+  padding: var(--space-3)
+  resize: vertical
+
+form
+  display: flex
+  flex-direction: column
+  gap: var(--space-5)
+
+// ---- Typography resets ----
+h1, h2, h3, h4, h5, h6
+  margin-top: 0
+  margin-bottom: 10px
+
+p
+  font-size: 14px
+  line-height: 20px
+
+small
+  font-size: 12px
+
+// ---- Button base tokens ----
+.mat-mdc-button-base,
+.mdc-button
+  transition: all .3s ease !important
+
+.mat-mdc-button
+  --mat-button-text-container-shape: var(--radius-md)
+  --mat-button-text-label-text-weight: 400
+  --mat-button-text-label-text-size: 0.8125rem
+
+.mat-mdc-outlined-button
+  --mat-button-outlined-container-shape: var(--radius-md)
+  --mat-button-outlined-label-text-weight: 400
+  --mat-button-outlined-label-text-size: 0.8125rem
+  --mat-button-outlined-outline-color: var(--primary-400)
+  --mat-button-outlined-label-text-color: var(--text-primary)
+
+  background: var(--bg-card) !important
+  transition: background .3s ease, border-color .3s ease, color .3s ease !important
+
+  &:hover
+    --mat-button-outlined-outline-color: var(--secondary)
+    --mat-button-outlined-label-text-color: var(--secondary)
+    background: var(--secondary-50) !important
+    transition: background .3s ease, border-color .3s ease, color .3s ease !important
+
+.mat-mdc-unelevated-button
+  --mdc-filled-button-container-shape: var(--radius-md)
+  --mat-button-filled-container-shape: var(--radius-md)
+  --mdc-filled-button-container-color: var(--btn-base-bg)
+  --mat-button-filled-container-color: var(--btn-base-bg)
+  --mat-button-filled-label-text-color: var(--btn-base-text)
+  --mat-button-filled-label-text-weight: 400
+  --mat-button-filled-label-text-size: 0.8125rem
+
+  &:hover
+    --mdc-filled-button-container-color: var(--btn-base-hover)
+    --mat-button-filled-container-color: var(--btn-base-hover)
+
+.mat-mdc-raised-button
+  --mat-button-protected-container-shape: var(--radius-md)
+  --mat-button-protected-label-text-weight: 400
+  --mat-button-protected-label-text-size: 0.8125rem
+
+.mat-tonal-button
+  --mat-button-tonal-container-color: var(--primary-100)
+  --mat-button-tonal-label-text-color: var(--primary)
+  --mat-button-tonal-container-shape: var(--radius-md)
+  --mat-button-tonal-label-text-weight: 400
+
+.mat-tonal-button.btn-info
+
+  &:hover
+    --mat-button-tonal-label-text-color: #4f46e5
+    --mat-button-tonal-container-color: #dbe4ff
+
+.mat-tonal-button.btn-warn
+
+  &:hover
+    --mat-button-tonal-label-text-color: #dc2626
+    --mat-button-tonal-container-color: #ffdbdb
+
+.mat-tonal-button.btn-icon
+  padding: var(--space-2)
+  min-width: auto
+
+  .mat-icon
+    margin: 0
+
+.mat-mdc-button-base
+  .mdc-button__label
+    align-items: center
+    display: flex
+    gap: var(--space-2)
+
+  .mat-icon
+    font-size: 18px
+    width: 18px
+    height: 18px
+    line-height: 18px
+
+// Icon button — square with rounded corners, light neutral background
+.mat-mdc-icon-button
+  --mat-icon-button-state-layer-shape: var(--radius-md)
+  border-radius: var(--radius-md)
+  background: var(--primary-100)
+  transition: background .15s
+
+  &:hover
+    background: var(--icon-btn-hover)
+
+// Block button
+.mat-mdc-button-base.block
+  width: 100%
+
+// Standalone mat-icon sizes (for use outside icon buttons)
+.mat-icon.sm
+  font-size: 20px
+  width: 20px
+  height: 20px
+
+.mat-icon.xs
+  font-size: 16px
+  width: 16px
+  height: 16px
+
+// Chip variants (display badges, non-interactive)
+.mat-mdc-standard-chip:not(.mdc-evolution-chip--disabled)
+  pointer-events: none
+
+  .mat-mdc-chip-action-label
+    display: flex
+    align-items: center
+    gap: var(--space-1)
+
+  &.success
+    background-color: var(--success-bg)
+
+    .mat-mdc-chip-action-label
+      color: var(--success-text)
+      font-weight: 500
+
+// Small chip variant
+.mat-mdc-chip.sm
+  height: 24px
+  font-size: 11px
+  --mdc-chip-container-height: 24px
+  --mat-chip-label-text-size: 12px
+
+  .mat-mdc-chip-action
+    padding-left: 8px
+    padding-right: 8px
+
+  .mat-icon
+    font-size: 18px
+    width: 18px
+    height: 18px
+    line-height: normal
+
+// ---- Material card global styles ----
+.mat-mdc-card.mat-mdc-card
+  border-radius: #{$radius-md}
+  border: 1px solid var(--card-border, var(--border-color))
+  background-color: var(--card-bg, var(--bg-card))
+  color: var(--text-primary)
+  --mat-card-elevated-container-elevation: var(--elevation-0)
+  box-shadow: var(--elevation-0)
+
+// ---- Notification snackbar styles ----
+.notification-success
+  .mat-mdc-snackbar-surface
+    background: var(--success-bg)
+
+  .mdc-snackbar__label
+    color: var(--success-text)
+
+  .mat-mdc-snackbar-action
+    button
+      color: var(--success-text)
+
+.notification-error
+  .mat-mdc-snackbar-surface
+    background: var(--error-bg)
+
+  .mdc-snackbar__label
+    color: var(--error-text)
+
+  .mat-mdc-snackbar-action
+    button
+      color: var(--error-text)
+
+.notification-warning
+  .mat-mdc-snackbar-surface
+    background: var(--warning-bg)
+
+  .mdc-snackbar__label
+    color: var(--warning-text)
+
+  .mat-mdc-snackbar-action
+    button
+      color: var(--warning-text)
+
+.notification-info
+  .mat-mdc-snackbar-surface
+    background: var(--info-bg)
+
+  .mdc-snackbar__label
+    color: var(--info-text)
+
+  .mat-mdc-snackbar-action
+    button
+      color: var(--info-text)
+
+.mat-mdc-snackbar-surface
+  border-radius: var(--radius-lg)
+
+.mdc-snackbar__label
+  white-space: pre-wrap
+
+.dark-mode
+  --bg-body: #{$bg-body-dark}
+  --bg-card: #{$bg-card-dark}
+  --bg-raised: #{$bg-raised-dark}
+  --text-primary: #{$text-primary-dark}
+  --text-secondary: #{$text-secondary-dark}
+  --text-disabled: #{$text-disabled-dark}
+  --icon-muted: #{$icon-muted-dark}
+  --border-color: #{$border-color-dark}
+  --border-strong: #{$border-strong-dark}
+  --hover-bg: #{$hover-bg-dark}
+  --footer-bg: #{$footer-bg-dark}
+
+  --error-bg: #{$error-bg-dark}
+  --error-text: #{$error-text-dark}
+  --warning-bg: #{$warning-bg}
+  --warning-text: #{$warning-text-dark}
+  --success-bg: #{$success-bg}
+  --success-text: #{$success-text}
+  --success-bg-dark: #{$success-bg-dark}
+  --success-text-dark: #{$success-text-dark}
+  --info-bg: #{$info-bg-dark}
+  --info-text: #{$info-text-dark}
+
+  --elevation-0: #{$elevation-0-dark}
+  --elevation-1: #{$elevation-1-dark}
+  --elevation-2: #{$elevation-2-dark}
+  --elevation-3: #{$elevation-3-dark}
+  --elevation-4: #{$elevation-4-dark}
+
+  --shadow-sm: #{$shadow-sm-dark}
+  --shadow-lg: #{$shadow-lg-dark}
+
+  --secondary-100: #312E81
+
+  --highlight-light: #831843
+
+  --btn-base-bg: #{$btn-base-bg-dark}
+  --btn-base-hover: #{$btn-base-hover-dark}
+  --btn-base-text: #{$btn-base-text-dark}
+
+  --icon-btn-bg: #{$icon-btn-bg-dark}
+  --icon-btn-hover: #{$icon-btn-hover-dark}
+
+  input
+    color: #fff
+    caret-color: #fff
+
+  // ---- Material component overrides ----
+  .mat-mdc-standard-chip:not(.mdc-evolution-chip--disabled)
+    &.success
+      background-color: var(--success-bg-dark)
+
+      .mat-mdc-chip-action-label
+        color: var(--success-text-dark)
+
+  .mat-mdc-menu-panel
+    background-color: var(--bg-card)
+    border-color: var(--border-color)
+
+    .mat-mdc-menu-item
+      color: var(--text-primary)
+
+      &:hover:not([disabled])
+        background-color: var(--hover-bg)
+
+      .mat-icon
+        color: var(--text-secondary)
+
+  .mat-mdc-dialog-container
+    background-color: var(--bg-card)
+    color: var(--text-primary)
+
+    .mat-mdc-dialog-title
+      color: var(--text-primary)
+
+    .mat-mdc-dialog-content
+      color: var(--text-secondary)
+
+  .mat-mdc-table
+    background-color: var(--bg-card)
+    color: var(--text-primary)
+
+    .mat-mdc-header-cell
+      color: var(--text-primary)
+
+    .mat-mdc-cell
+      color: var(--text-primary)
+
+    .mat-mdc-row:hover
+      background-color: var(--hover-bg)
+
+  .mat-mdc-paginator
+    background-color: var(--bg-card)
+    color: var(--text-primary)
+
+  .mat-mdc-form-field
+    .mat-mdc-text-field-wrapper
+      background-color: var(--bg-card)
+
+    .mdc-floating-label
+      color: var(--text-secondary)
+
+  .mat-mdc-dialog-actions
+    border-top-color: var(--border-color)
+
+  .notification-success
+    .mat-mdc-snackbar-surface
+      background: var(--success-bg-dark)
+
+    .mdc-snackbar__label
+      color: var(--success-text-dark)
+
+    .mat-mdc-snackbar-action
+      button
+        color: var(--success-text-dark)
+
+  .notification-error
+    .mat-mdc-snackbar-surface
+      background: var(--error-bg-dark)
+
+    .mdc-snackbar__label
+      color: var(--error-text-dark)
+
+    .mat-mdc-snackbar-action
+      button
+        color: var(--error-text-dark)
+
+  .notification-warning
+    .mat-mdc-snackbar-surface
+      background: var(--warning-bg-dark)
+
+    .mdc-snackbar__label
+      color: var(--warning-text-dark)
+
+    .mat-mdc-snackbar-action
+      button
+        color: var(--warning-text-dark)
+
+  .notification-info
+    .mat-mdc-snackbar-surface
+      background: var(--info-bg-dark)
+
+    .mdc-snackbar__label
+      color: var(--info-text-dark)
+
+    .mat-mdc-snackbar-action
+      button
+        color: var(--info-text-dark)
+
 body
   margin: 0
   padding: 0
-  background-color: #303030
-  font-family: roboto
+  background-color: var(--bg-body)
+
+  &.mat-typography
+    font-family: Inter, sans-serif
+    font-size: 16px
+    font-weight: 400
+    line-height: normal
+
+  @media (max-width: $small-devices)
+    overflow-x: hidden
+
+.mono
+  font-family: var(--font-mono)
+  line-height: normal
+  color: var(--text-primary)
+
+.form-field
+  flex: 1
+  min-width: 0
 
 .wrapper
-    width: 80%
-    height: auto
-    margin: auto
-    @media (min-width: $xx-larger-devices) and (max-width: $xxx-larger-devices)
-        min-width: calc(#{$xx-larger-devices} - 20px)
-        max-width: calc(#{$xxx-larger-devices} - 20px)
+  width: 80%
+  height: auto
+  margin: auto
+  @media (min-width: $xx-larger-devices) and (max-width: $xxx-larger-devices)
+    min-width: calc(#{$xx-larger-devices} - 20px)
+    max-width: calc(#{$xxx-larger-devices} - 20px)
 
     @media (min-width: $x-larger-devices) and (max-width: $xx-larger-devices)
-        width: 90%
-        min-width: calc(#{$x-larger-devices} - 20px)
-        max-width: calc(#{$xx-larger-devices} - 20px)
+      width: 90%
+      min-width: calc(#{$x-larger-devices} - 20px)
+      max-width: calc(#{$xx-larger-devices} - 20px)
 
     @media (min-width: $larger-devices) and (max-width: $x-larger-devices)
-        min-width: calc(#{$larger-devices} - 20px)
-        max-width: calc(#{$x-larger-devices} - 20px)
+      min-width: calc(#{$larger-devices} - 20px)
+      max-width: calc(#{$x-larger-devices} - 20px)
 
     @media (min-width: $medium-devices) and (max-width: $larger-devices)
-        min-width: calc(#{$medium-devices} - 20px)
-        max-width: calc(#{$larger-devices} - 20px)
+      min-width: calc(#{$medium-devices} - 20px)
+      max-width: calc(#{$larger-devices} - 20px)
 
     @media (min-width: $small-devices) and (max-width: $medium-devices)
-        min-width: calc(#{$small-devices} - 20px)
-        max-width: calc(#{$medium-devices} - 20px)
+      min-width: calc(#{$small-devices} - 20px)
+      max-width: calc(#{$medium-devices} - 20px)
 
     @media (min-width: $x-small-devices) and (max-width: $small-devices)
-        width: calc( 100% - 10px)
-        min-width: calc(#{$x-small-devices} - 20px)
-        max-width: calc(#{$small-devices} - 20px)
+      width: calc( 100% - 10px)
+      min-width: calc(#{$x-small-devices} - 20px)
+      max-width: calc(#{$small-devices} - 20px)
 
 .text-center
   text-align: center
 
 .mat-dialog-container
-    max-height: 80vh!important
+  max-height: 80vh
 
 .cdk-global-scrollblock
-    position: initial
-    width: initial
-    overflow: hidden
+  position: initial
+  width: initial
+  overflow: hidden

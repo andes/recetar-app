@@ -1,39 +1,237 @@
 @use 'styles/variables' as *
 
+$danger: #EF4444
+
 :host
-  display: block
-  height: $header-height
+    display: block
 
-  @media (min-width: $x-small-devices) and (max-width: $small-devices)
-    height: auto
-
-mat-toolbar
-  background: #4c4c4c
-  color: #ffffff
-
-  .container-header
+.header-toolbar
+    background: var(--bg-card)
+    color: var(--text-primary)
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04)
+    height: 60px
+    min-height: 60px
+    padding: 0 !important
+    margin: 0
     width: 100%
+    box-sizing: border-box
+    border: none
+    border-bottom: 1px solid var(--border-color)
 
-.icon-navbar
-  width: 40px
-  height: 40px
-  margin-right: 6px
+    @media (min-width: $small-devices + 1px)
+        height: 70px
+        min-height: 70px
+        margin: 16px 16px 0 16px
+        width: calc(100% - 32px)
+        border-radius: $radius-md
+        border: 1px solid var(--border-color)
 
-.brand-button,
-.user-button
-  color: #ffffff !important
+.header-container
+    display: flex
+    align-items: center
+    justify-content: space-between
+    width: 100%
+    height: 100%
 
-.brand-button
-  padding: 0
+.header-left-section
+    display: flex
+    align-items: center
+    padding: 0
+    height: 100%
+    box-sizing: border-box
+    width: auto
+    border-right: none
 
-.brand-title
-  color: #ffffff
-  font-size: 1.5rem
-  font-weight: 600
-  letter-spacing: 0.02em
+    @media (min-width: $small-devices + 1px)
+        width: 260px
+        border-right: 1px solid var(--border-color)
 
-:host ::ng-deep .container-header .mat-mdc-button,
-:host ::ng-deep .container-header .mdc-button,
-:host ::ng-deep .container-header .mat-mdc-button .mdc-button__label,
-:host ::ng-deep .container-header .mat-toolbar a.mat-mdc-button
-  color: #ffffff !important
+.menu-area
+    display: flex
+    align-items: center
+    justify-content: center
+    width: 64px
+    min-width: 64px
+    height: 100%
+    flex-shrink: 0
+
+.menu-button
+    color: var(--text-primary)
+
+    &:hover
+        background: var(--hover-bg) !important
+
+.brand
+    display: flex
+    align-items: center
+    padding: 0 24px 0 16px
+
+    .brand-logo
+        height: 28px
+        width: auto
+        display: block
+
+        @media (min-width: $small-devices + 1px)
+            height: 32px
+
+.header-right-section
+    display: flex
+    align-items: center
+    padding-right: 8px
+    height: 100%
+
+    @media (min-width: $small-devices + 1px)
+        padding-right: 24px
+
+.user-trigger
+    display: flex
+    align-items: center
+    gap: 10px
+    padding: 4px
+    border-radius: $radius-md
+    border: none
+    background: transparent
+    cursor: pointer
+    transition: all 0.15s ease
+    font-family: inherit
+    font-size: inherit
+    line-height: inherit
+    color: inherit
+
+    &:hover
+        border-color: var(--primary)
+        background: var(--hover-bg)
+
+    @media (min-width: $small-devices + 1px)
+        padding: 8px 12px
+        border: 1px solid var(--border-color)
+
+    .user-avatar
+        display: inline-flex
+        align-items: center
+        justify-content: center
+        width: 32px
+        height: 32px
+        border-radius: 50%
+        background: var(--secondary)
+        color: #ffffff
+        font-size: 0.75rem
+        flex-shrink: 0
+
+    .user-info
+        display: none
+
+        @media (min-width: $small-devices + 1px)
+            display: flex
+            flex-direction: column
+            align-items: flex-start
+            line-height: 1.2
+
+        .user-info-name
+            font-size: 0.8125rem
+            color: var(--text-primary)
+            white-space: nowrap
+            font-weight: 500
+
+        .user-info-role
+            font-size: 0.6875rem
+            color: var(--text-secondary)
+            margin-top: 1px
+            white-space: nowrap
+
+    .user-chevron
+        display: none
+        align-items: center
+        transition: transform 0.25s ease
+
+        @media (min-width: $small-devices + 1px)
+            display: inline-flex
+
+        svg
+            fill: var(--text-secondary)
+            width: 16px
+            height: 16px
+
+.user-menu-wrapper.open .user-chevron
+    transform: rotate(180deg)
+
+// ============ DROPDOWN PANEL ============
+::ng-deep .user-menu-panel
+    min-width: 240px !important
+    max-width: 280px !important
+    margin-top: 8px !important
+    border-radius: $radius-md !important
+    border: 1px solid var(--border-color) !important
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04) !important
+    background: var(--bg-card) !important
+    overflow: hidden
+
+    .mat-mdc-menu-content
+        padding: 8px 0 !important
+
+    .menu-header
+        display: flex
+        align-items: center
+        gap: 12px
+        padding: 16px
+        border-bottom: 1px solid var(--border-color)
+
+        .menu-avatar
+            display: inline-flex
+            align-items: center
+            justify-content: center
+            width: 40px
+            height: 40px
+            border-radius: 50%
+            background: var(--primary)
+            color: #ffffff
+            font-size: 0.875rem
+            flex-shrink: 0
+
+        .menu-user-name
+            font-size: 0.875rem
+            color: var(--text-primary)
+
+        .menu-user-role
+            font-size: 0.75rem
+            color: var(--text-secondary)
+            margin-top: 2px
+
+    .mat-mdc-menu-item
+        min-height: 40px
+        font-size: 0.8125rem
+        color: var(--text-primary)
+        transition: background 0.15s ease
+
+        &:hover
+            background: var(--hover-bg) !important
+
+        .mat-icon
+            font-size: 18px
+            width: 18px
+            height: 18px
+            color: var(--text-secondary)
+            margin-right: 12px
+
+        &.danger-item
+            color: $danger
+
+            &:hover
+                background: color-mix(in srgb, $danger 8%, transparent) !important
+
+            .mat-icon
+                color: $danger
+
+    .menu-divider
+        margin: 4px 0
+        border-top-color: var(--border-color) !important
+
+:host-context(.dark-mode)
+    .menu-button:hover
+        background: var(--primary-700) !important
+        color: #ffffff !important
+
+    .user-trigger:hover
+        background: var(--primary-700) !important
+        border-color: var(--primary-700) !important
+        color: #ffffff !important

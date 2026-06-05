@@ -1,0 +1,78 @@
+<app-canvas [showHeader]="false" [showSidebar]="false" [showFooter]="false" [noCard]="true">
+
+    <div class="split-layout">
+
+        <div class="form-panel">
+            <div class="form-wrapper">
+
+                <div class="logo-area">
+                    <h1>RecetAR</h1>
+                    <span class="brand-subtitle">Receta Electrónica de Neuquén</span>
+                </div>
+
+                <form [formGroup]="loginForm" #loginNgForm="ngForm" (ngSubmit)="onSubmitEvent(loginForm, loginNgForm)"
+                    autocomplete="off" novalidate>
+
+                    <div class="form-header">
+                        <h2>Iniciar sesión</h2>
+                        <p><small>Ingresá tus credenciales para acceder al sistema</small></p>
+                    </div>
+
+                    <label>
+                        Usuario
+                        <input type="text" formControlName="identifier" placeholder="Tu nombre de usuario"
+                            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                    </label>
+
+                    <label>
+                        Contraseña
+                        <div class="input-wrap">
+                            <input #passwordInput formControlName="password" type="password" placeholder="••••••••"
+                                autocomplete="off" (focus)="updateInputType(passwordInput)"
+                                (input)="updateInputType(passwordInput)">
+                            <button type="button" class="input-toggle" (click)="toggleVisibility(passwordInput)"
+                                [attr.aria-label]="hide ? 'Mostrar contraseña' : 'Ocultar contraseña'">
+                                <mat-icon>{{ hide ? 'visibility_off' : 'visibility' }}</mat-icon>
+                            </button>
+                        </div>
+                    </label>
+
+                    @if (showSubmit) {
+                    <mat-spinner [color]="spinnerColor" [diameter]="spinnerDiameter"></mat-spinner>
+                    }
+                    @if (!showSubmit) {
+                    <button type="submit" mat-flat-button>Iniciar sesión</button>
+                    }
+
+                    <div class="form-footer">
+                        <small><a (click)="forgot()">Olvidé mi contraseña</a></small>
+
+                        <div class="register-links">
+                            <button matButton="outlined" (click)="newUser()">
+                                Registrarse como Profesional
+                            </button>
+                            <button matButton="outlined" (click)="newUserPharmacist()">
+                                Registrarse como Farmacia
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+        <div class="inst-panel">
+            <div class="inst-content">
+                <h3>Receta Electrónica</h3>
+                <p>
+                    En el marco de la Ley Nacional de Receta Electrónica, el Ministerio de Salud de la
+                    Provincia de Neuquén pone en funcionamiento <strong>RecetAR</strong>,
+                    accesible para profesionales de la salud y farmacias, tanto públicas como privadas.
+                </p>
+            </div>
+            <span class="inst-footer"><small>Ministerio de Salud · Provincia de Neuquén</small></span>
+        </div>
+
+    </div>
+
+</app-canvas>

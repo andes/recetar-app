@@ -225,6 +225,22 @@ export class AuthService {
         return payLoadJwt?.rl || [];
     }
 
+    getRoleLabel(): string {
+        if (this.isProfessionalRole() || this.isProfessionalPublicRole()) {
+            return 'Profesional Médico';
+        }
+        if (this.isPharmacistsRole() || this.isPharmacistsPublicRole()) {
+            return 'Profesional Farmacéutico';
+        }
+        if (this.isAuditRole()) {
+            return 'Auditor';
+        }
+        if (this.isAdminRole()) {
+            return 'Administrador';
+        }
+        return '';
+    }
+
     // Metodo que invoca a la api para realizar el recovering de la password
     setValidationTokenAndNotify(payload: { usuario: string }): Observable<ForgotPasswordResponse> {
         return this.http.post<ForgotPasswordResponse>(`${this.apiEndPoint}/auth/setValidationTokenAndNotify`, payload);

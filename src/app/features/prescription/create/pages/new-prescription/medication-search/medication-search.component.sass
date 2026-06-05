@@ -1,0 +1,257 @@
+@use 'styles/variables' as *
+
+.section-label
+    display: flex
+    align-items: center
+    gap: 6px
+    font-size: 11px
+    font-weight: 500
+    color: var(--text-secondary)
+    text-transform: uppercase
+    letter-spacing: .6px
+    margin: 0 0 var(--space-3) 0
+
+    .mat-icon
+        color: var(--secondary)
+
+        &.star
+            color: var(--warning-bg)
+
+.section-subtitle
+    font-size: 12px
+    color: var(--text-disabled)
+    margin: calc(-1 * var(--space-3) + 4px) 0 var(--space-3) 0
+
+.search-bar-wrapper
+    display: flex
+    align-items: center
+    border: 1px solid var(--border-color)
+    border-radius: var(--radius-sm)
+    background: var(--bg-card)
+    transition: border-color .15s, box-shadow .15s
+    margin-bottom: var(--space-4)
+
+    &:focus-within
+        border-color: var(--secondary)
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, .1)
+
+    ui-search-bar
+        flex: 1
+        min-width: 0
+
+    ::ng-deep .search-bar
+        border: none !important
+        background: transparent
+        margin-bottom: 0
+        border-radius: var(--radius-sm)
+        box-shadow: none !important
+
+        &:focus-within
+            border-color: transparent !important
+            box-shadow: none !important
+
+.freq-list
+    display: grid
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+    gap: var(--space-3)
+
+    @media (max-width: $small-devices)
+        grid-template-columns: 1fr
+
+.patient-empty
+    display: flex
+    flex-direction: column
+    align-items: center
+    padding: 28px 16px
+    color: var(--text-disabled)
+
+    .mat-icon
+        font-size: 36px
+        margin-bottom: 8px
+        color: var(--border-color)
+
+    p
+        font-size: 13px
+
+.search-results
+    margin: 6px 0 0
+    background: var(--bg-card)
+    border: 1px solid var(--border-color)
+    border-radius: var(--radius-lg)
+    box-shadow: var(--elevation-3)
+    overflow: hidden
+    animation: fadeIn .2s ease
+
+.disabled-msg
+    text-align: center
+    padding: var(--space-6) var(--space-4)
+    color: var(--text-disabled)
+    font-size: 13px
+
+    .mat-icon
+        font-size: 32px
+        display: block
+        margin-bottom: 6px
+        color: var(--border-color)
+
+// ==================== SEARCH RESULTS ====================
+
+.search-result
+    display: flex
+    align-items: center
+    gap: var(--space-3)
+    padding: 14px 16px
+    cursor: pointer
+    border-bottom: 1px solid var(--border-color)
+    transition: background .12s
+
+    &:last-child
+        border-bottom: none
+
+    &:active
+        background: var(--hover-bg)
+
+.result-avatar
+    width: 36px
+    height: 36px
+    flex-shrink: 0
+    border-radius: var(--radius-md)
+    display: flex
+    align-items: center
+    justify-content: center
+
+    &.commercial
+        background: var(--info-bg)
+        color: var(--info-text)
+
+    &.generic
+        background: var(--success-bg)
+        color: var(--success-text)
+
+    .mat-icon
+        font-size: 18px
+        width: 18px
+        height: 18px
+
+.result-info
+    flex: 1
+    min-width: 0
+
+.result-name
+    font-size: 13px
+    font-weight: 500
+    overflow: hidden
+    white-space: nowrap
+    text-overflow: ellipsis
+    text-transform: uppercase
+
+.result-detail
+    font-size: 12px
+    color: var(--text-secondary)
+    margin-top: 2px
+    overflow: hidden
+    white-space: nowrap
+    text-overflow: ellipsis
+    text-transform: capitalize
+
+.result-chevron
+    color: var(--border-color)
+    font-size: 20px
+    flex-shrink: 0
+
+// ==================== PAGINATOR ====================
+
+.results-paginator
+    border-top: 1px solid var(--border-color)
+    font-size: 0.8125rem
+
+// ==================== DETAIL VIEW ====================
+
+.detail-header
+    display: flex
+    align-items: flex-start
+    gap: var(--space-3)
+    padding: 0 0 var(--space-4) 0
+    margin-bottom: var(--space-4)
+    border-bottom: 1px solid var(--border-color)
+
+    .detail-header-info
+        flex: 1
+
+        .detail-name
+            font-size: 14px
+            font-weight: 500
+            text-transform: uppercase
+
+        .detail-meta
+            font-size: 12px
+            color: var(--text-secondary)
+            margin-top: 2px
+            text-transform: capitalize
+
+.detail-form
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+
+.detail-form-row
+    display: grid
+    grid-template-columns: 1fr 1fr
+    gap: var(--space-3)
+
+.detail-checkboxes
+    display: flex
+    gap: var(--space-5)
+    align-items: center
+    flex-wrap: wrap
+    padding: 2px 0
+
+.check-label
+    display: flex
+    align-items: center
+    gap: 6px
+    font-size: 13px
+    cursor: pointer
+    user-select: none
+    color: var(--text-secondary)
+
+    input[type="checkbox"]
+        width: 16px
+        height: 16px
+        accent-color: var(--secondary)
+        cursor: pointer
+        margin: 0
+
+    &.active
+        color: var(--secondary)
+        font-weight: 500
+
+.triplicate-fields
+    display: grid
+    grid-template-columns: 1fr 2fr
+    gap: var(--space-3)
+    padding-left: 24px
+
+.detail-actions
+    display: flex
+    gap: var(--space-3)
+    padding-top: var(--space-4)
+    border-top: 1px solid var(--border-color)
+
+    @media (max-width: $small-devices)
+        flex-direction: column
+        gap: var(--space-3)
+
+        button
+            width: 100%
+            padding: var(--space-5) var(--space-4)
+            font-size: 16px
+            min-height: 52px
+
+@keyframes fadeIn
+    from
+        opacity: 0
+        transform: translateY(8px)
+    to
+        opacity: 1
+        transform: translateY(0)

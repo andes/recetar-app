@@ -17,6 +17,8 @@ import { AuthModule } from '@auth/auth.module';
 import { AuditModule } from '@audit/audit.module';
 import { PharmacistsModule } from '@pharmacists/pharmacists.module';
 import { ProfessionalsModule } from '@professionals/professionals.module';
+import { DashboardModule } from '@dashboard/dashboard.module';
+import { PrescriptionCreateModule } from './features/prescription/create/prescription-create.module';
 // flex-layout
 import { FlexLayoutModule } from '@angular/flex-layout';
 // material
@@ -30,14 +32,13 @@ import { MAT_MOMENT_DATE_FORMATS, MomentDateAdapter } from '@angular/material-mo
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 
 // component
-import { HeaderComponent } from '@shared/layouts/header/header.component';
-import { FooterComponent } from './shared/layouts/footer/footer.component';
 import { DatePipe } from '@angular/common';
 import { SharedModule } from '@shared/shared.module';
+import { ServiceWorkerModule } from '@angular/service-worker';
 
 @NgModule({
     declarations: [
-        AppComponent,
+        AppComponent
     ],
     imports: [
         BrowserModule,
@@ -45,6 +46,8 @@ import { SharedModule } from '@shared/shared.module';
         PharmacistsModule,
         ProfessionalsModule,
         AuditModule,
+        DashboardModule,
+        PrescriptionCreateModule,
         AppRoutingModule,
         HttpClientModule,
         BrowserAnimationsModule,
@@ -57,8 +60,7 @@ import { SharedModule } from '@shared/shared.module';
         MatIconModule,
         MatChipsModule,
         SharedModule,
-        HeaderComponent,
-        FooterComponent,
+        ServiceWorkerModule.register('ngsw-worker.js')
     ],
     providers: [
         {

@@ -2,30 +2,48 @@
 
 :host
   display: block
-  height: $footer-height !important
-  @media (min-width: $x-small-devices) and (max-width: $small-devices)
-    height: auto
-
-.logo-01, .logo-02, .logo-03
-  max-height: 45px
-  width: auto
-  object-fit: contain
-  
-  @media (max-width: $medium-devices)
-    max-height: 35px
-    
-  @media (max-width: $small-devices)
-    max-height: 30px
+  background: var(--footer-bg)
 
 footer
-  width: 100%
-  padding: 10px 0
+  display: flex
+  flex-direction: column
   align-items: center
-  min-height: 60px
-  max-height: 80px
-  
-  img
-    max-height: 50px
-    width: auto
-    object-fit: contain
-    margin: 0 10px
+  justify-content: center
+  gap: $space-2
+  height: auto
+  min-height: $footer-height
+  padding: $space-3 $space-6
+  margin: 0
+  box-sizing: border-box
+
+  @media (min-width: $small-devices + 1px)
+    flex-direction: row
+    justify-content: space-between
+    height: $footer-height
+    padding: 0 $space-6
+
+.footer-copyright
+  font-size: 13px
+  color: var(--text-primary)
+  white-space: nowrap
+
+.footer-logos
+  display: flex
+  align-items: center
+  justify-content: center
+  gap: $space-8
+  flex: 1
+  min-width: 0
+
+.footer-logo
+  display: block
+  height: 30px
+  max-width: 33%
+
+  width: auto
+  flex-shrink: 1
+  filter: brightness(0)
+
+:host-context(.dark-mode)
+  .footer-logo
+    filter: none

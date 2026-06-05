@@ -1,0 +1,99 @@
+:host
+    display: block
+    flex: 1
+    min-width: 0
+
+    &.fullwidth
+        flex: 1 1 100%
+
+label
+    display: block
+    font-size: .8125rem
+    font-weight: 500
+    color: var(--text-secondary)
+    margin-bottom: var(--space-1)
+
+.input-wrap
+    display: flex
+    align-items: center
+    position: relative
+    height: 48px
+    border: 1px solid var(--border-color)
+    border-radius: var(--radius-sm)
+    background: var(--bg-card)
+    transition: border-color .15s, box-shadow .15s
+    cursor: text
+
+    &:focus-within
+        border-color: var(--secondary)
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, .1)
+
+    &.disabled
+        background: var(--primary-100)
+        opacity: .65
+        cursor: not-allowed
+
+    &.error
+        border-color: var(--error-text)
+
+    input,
+    select,
+    textarea
+        width: 100%
+        height: 100%
+        padding: 0 var(--space-3)
+        border: none
+        outline: none
+        font-family: inherit
+        font-size: .875rem
+        color: var(--text-primary)
+        background: transparent
+        resize: none
+
+        &::placeholder
+            color: var(--text-disabled)
+
+        &:disabled
+            color: var(--text-disabled)
+            cursor: not-allowed
+
+    select
+        appearance: none
+        cursor: pointer
+        padding-right: var(--space-8)
+
+    textarea
+        height: auto
+        min-height: 56px
+        padding: var(--space-2) var(--space-3)
+        resize: vertical
+
+    &.textarea
+        height: auto
+
+    .field-icon
+        position: absolute
+        right: var(--space-3)
+        color: var(--text-secondary)
+        font-size: 20px
+        width: 20px
+        height: 20px
+        line-height: 20px
+        pointer-events: none
+
+.select-wrap::after
+    content: ''
+    position: absolute
+    right: 14px
+    width: 0
+    height: 0
+    border-left: 5px solid transparent
+    border-right: 5px solid transparent
+    border-top: 5px solid var(--text-secondary)
+    pointer-events: none
+
+.field-error
+    display: block
+    font-size: .75rem
+    color: var(--error-text)
+    margin-top: var(--space-1)
