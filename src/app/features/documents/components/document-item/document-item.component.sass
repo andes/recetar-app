@@ -1,0 +1,159 @@
+@use 'styles/variables' as *
+
+:host
+    display: flex
+    width: 100%
+    min-width: 0
+
+.document-item
+    cursor: pointer
+    text-align: left
+    min-width: 0
+
+    ::ng-deep
+        .ui-card
+            transition: border-color .12s, background-color .12s, box-shadow .12s
+
+        .ui-card-body
+            display: flex
+            align-items: center
+            padding: 0
+            min-width: 0
+
+    &:hover ::ng-deep .ui-card
+        box-shadow: var(--elevation-4)
+
+    &.selected ::ng-deep .ui-card
+        border: 1px solid var(--secondary)
+        box-shadow: var(--elevation-4)
+
+.di-info
+    flex: 1
+    min-width: 0
+    display: flex
+    flex-direction: column
+    gap: var(--space-2)
+    padding: var(--space-2) var(--space-4)
+
+.di-row-top
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+    flex-wrap: wrap
+
+.di-row-two
+    display: grid
+    grid-template-columns: 1fr 1fr
+    align-items: start
+    gap: var(--space-3)
+
+.rx-head
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+    min-width: 0
+
+    .mat-icon
+        color: var(--text-secondary)
+        font-size: 18px
+        width: 18px
+        height: 18px
+        line-height: 18px
+        flex-shrink: 0
+
+.di-cell-patient,
+.di-cell-med
+    display: flex
+    flex-direction: column
+    gap: 2px
+    min-width: 0
+
+.di-patient-name
+    min-width: 0
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+.di-patient-dni
+    color: var(--text-secondary)
+    font-size: 12px
+    padding-left: calc(18px + var(--space-2))
+    min-width: 0
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+.rx-title
+    flex: 1
+    min-width: 0
+    display: flex
+    flex-direction: column
+    gap: 2px
+
+    h3
+        margin-bottom: 0
+        min-width: 0
+        overflow: hidden
+        text-overflow: ellipsis
+        white-space: nowrap
+
+.rx-subline
+    display: flex
+    align-items: baseline
+    gap: var(--space-2)
+    min-width: 0
+
+.rx-type-indicator
+    font-size: 11px
+    font-weight: 600
+    line-height: 1.3
+    flex-shrink: 0
+
+    &.duplicado
+        color: var(--warning-fill)
+
+    &.triplicado
+        color: var(--error-fill)
+
+.di-med-detail,
+.di-med-subtitle
+    color: var(--text-secondary)
+    font-size: 12px
+    min-width: 0
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+.di-side
+    flex-shrink: 0
+    display: flex
+    flex-direction: column
+    justify-content: center
+    padding: var(--space-2) var(--space-4)
+
+.di-actions
+    display: flex
+    flex-direction: row
+    gap: var(--space-1)
+
+    .mat-icon
+        margin-right: 0
+
+@media (max-width: $small-devices)
+    :host ::ng-deep .ui-card-body
+        flex-direction: column
+        align-items: stretch
+
+    .di-row-two
+        grid-template-columns: 1fr
+
+    .di-side
+        width: 100%
+        border-left: none
+        border-top: 1px solid var(--border-color)
+        align-items: stretch
+        justify-content: flex-end
+
+    .di-actions
+        flex-direction: row
+        justify-content: flex-end

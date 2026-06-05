@@ -44,7 +44,6 @@ import { StockComponent } from './components/stock/stock.component';
 import { StockDialogComponent } from './components/stock/stock-dialog/stock-dialog.component';
 import { StockListComponent } from './components/stock/list/stock-list.component';
 import { StockPrinterComponent } from './components/stock/printer/stock-printer.component';
-import { EditUserInfoModule } from '@shared/components/edit-user-info/edit-user-info.module';
 
 @NgModule({
     declarations: [
@@ -90,7 +89,6 @@ import { EditUserInfoModule } from '@shared/components/edit-user-info/edit-user-
         MatSlideToggleModule,
         PharmacistsModule,
         SharedModule,
-        EditUserInfoModule,
         MatDialogModule,
         MatListModule,
         MatTabsModule

@@ -20,6 +20,8 @@ export class User {
         profesion: string;
         codigoProfesion: string;
         numeroMatricula: string;
+        vencimiento?: string;
+        estado?: 'vigente' | 'vencida' | 'suspendida' | 'inhabilitada' | 'baja';
     }>;
     organizaciones?: SubOrganizacion[];
 }

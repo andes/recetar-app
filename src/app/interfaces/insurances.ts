@@ -1,5 +1,5 @@
 export class Insurances {
-    codigoPuco: string;
+    codigoPuco: number;
     nombre: string;
     financiador: string;
     lastName: string;

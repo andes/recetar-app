@@ -1,9 +1,9 @@
 <div class="custom-tab-link-bar" [class.three-elements]="isAmbitoPublico()" [class.four-elements]="!isAmbitoPublico()">
-    <button mat-flat-button (click)="showForm()">Medicamentos</button>
-    <button mat-flat-button (click)="showInsumos()" *ngIf="isAmbitoPublico()">Insumos</button>
-    <button mat-flat-button (click)="showPractices()" *ngIf="!isAmbitoPublico()">Prácticas</button>
-    <button mat-flat-button (click)="showCertificados()" *ngIf="!isAmbitoPublico()">Certificados</button>
-    <button mat-flat-button (click)="showList()">Mis documentos</button>
+    <button matButton="tonal" (click)="showForm()">Medicamentos</button>
+    <button matButton="tonal" (click)="showInsumos()" *ngIf="isAmbitoPublico()">Insumos</button>
+    <button matButton="tonal" (click)="showPractices()" *ngIf="!isAmbitoPublico()">Prácticas</button>
+    <button matButton="tonal" (click)="showCertificados()" *ngIf="!isAmbitoPublico()">Certificados</button>
+    <button matButton="tonal" (click)="showList()">Mis documentos</button>
 </div>
 <div class="link-bar-indicator-container">
     <div class="indicator" [@stepLink]="isAmbitoPublico() ?
@@ -76,7 +76,7 @@
                                         fxLayout="row" fxLayoutGap="10px">
                                         <mat-card class="supply-card" fxFlex="100">
                                             <div *ngIf="i>0" fxLayout="row" class="btnDelete">
-                                                <button mat-icon-button color="warn" (click)="deleteSupply(i)">
+                                                <button matIconButton class="mat-error" (click)="deleteSupply(i)">
                                                     <mat-icon>delete</mat-icon>
                                                 </button>
                                             </div>
@@ -286,7 +286,7 @@
                                         </mat-card>
                                     </div>
                                 </div>
-                                <button mat-raised-button color="primary" type="button" (click)="addSupply()"
+                                <button matButton="raised" color="primary" type="button" (click)="addSupply()"
                                     *ngIf="suppliesForm.controls.length < maxQSupplies">
                                     Agregar medicamento
                                 </button>
@@ -295,12 +295,12 @@
                             <div fxLayout="row" fxLayoutAlign="center">
                                 <div fxLayout="row" fxLayoutAlign="center" fxLayoutGap="20px" *ngIf="!isSubmit"
                                     fxFlex="100%">
-                                    <button mat-raised-button type="button" *ngIf="isEdit" fxFlex="100%"
+                                    <button matButton="raised" type="button" *ngIf="isEdit" fxFlex="100%"
                                         (click)="clearForm(professionalNgForm)">
                                         Cancelar
                                     </button>
 
-                                    <button mat-raised-button color="primary" type="submit" fxFlex="100%">
+                                    <button matButton="raised" color="primary" type="submit" fxFlex="100%">
                                         Crear
                                     </button>
                                 </div>

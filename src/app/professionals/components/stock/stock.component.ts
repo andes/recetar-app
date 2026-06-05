@@ -14,7 +14,7 @@ import { StockDialogComponent } from './stock-dialog/stock-dialog.component';
 
 interface CoverageOption {
   nombre: string;
-  codigoPuco?: string;
+  codigoPuco?: number;
   numeroAfiliado?: string;
 }
 
@@ -399,7 +399,7 @@ export class StockComponent implements OnInit, OnDestroy {
       otraOS: [{ value: false, disabled: true }],
       os: this.fBuilder.group({
         nombre: [''],
-        codigoPuco: [''],
+        codigoPuco: [null],
         numeroAfiliado: [{ value: '', disabled: true }, [Validators.required, Validators.pattern('^[0-9]*$')]]
       }),
     });
@@ -447,7 +447,7 @@ export class StockComponent implements OnInit, OnDestroy {
         this.patientsService.getPatientOSByDni(dniValue, this.patientSex.value).subscribe(
           res => {
             if (Array.isArray(res)) {
-              this.obraSocial = res;
+              this.obraSocial = res as CoverageOption[];
             } else {
               this.obraSocial = [];
             }

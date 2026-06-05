@@ -1,0 +1,42 @@
+<div class="filters-wrapper">
+    <div class="results-toolbar">
+        <ui-search-bar [control]="searchControl" placeholder="Buscar por DNI, nombre del paciente o código de receta..."
+            [stretch]="true" (keydown.enter)="onSearch()">
+        </ui-search-bar>
+        <button matButton="tonal" class="filter-toggle-btn" [class.has-filters]="hasActiveFilters"
+            (click)="showFilters = !showFilters">
+            <mat-icon>filter_list</mat-icon>
+            Filtros{{ activeFilterCount > 0 ? ' (' + activeFilterCount + ')' : '' }}
+        </button>
+        <button matIconButton class="refresh-btn" (click)="onRefresh()" matTooltip="Actualizar datos">
+            <mat-icon>refresh</mat-icon>
+        </button>
+    </div>
+
+    <div class="filter-panel" [hidden]="!showFilters">
+        <div class="filter-fields">
+            <div class="filter-group">
+                <label>Fecha desde</label>
+                <ui-date-field [control]="dateFromControl" placeholder="DD/MM/AAAA"></ui-date-field>
+            </div>
+            <div class="filter-group">
+                <label>Fecha hasta</label>
+                <ui-date-field [control]="dateToControl" placeholder="DD/MM/AAAA"></ui-date-field>
+            </div>
+            <div class="filter-group">
+                <label>Estado</label>
+                <select class="filter-select" [formControl]="statusControl">
+                    <option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</option>
+                </select>
+            </div>
+        </div>
+        <div class="filter-actions">
+            <button matButton="tonal" class="btn-clear" (click)="onClear()">
+                <mat-icon>restart_alt</mat-icon> Limpiar
+            </button>
+            <button matButton="tonal" color="primary" class="btn-filter" (click)="onSearch()">
+                <mat-icon>search</mat-icon> Filtrar
+            </button>
+        </div>
+    </div>
+</div>

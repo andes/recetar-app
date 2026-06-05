@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, Subject, of, timer } from 'rxjs';
 import { Prescriptions, PrescriptionsAdapter, PrescriptionsResponse } from '../interfaces/prescriptions';
 import { tap, mapTo, map, switchMap, takeUntil } from 'rxjs/operators';
@@ -112,11 +112,16 @@ export class PrescriptionsService {
         );
     }
 
-    getByUserId(userId: string, params?: { offset?: number; limit?: number }): Observable<PrescriptionsResponse> {
-        const queryParams = {
-            ...(params || {}),
+    getByUserId(userId: string, params?: { offset?: number; limit?: number; patient?: string; dateFrom?: string; dateTo?: string; status?: string }): Observable<PrescriptionsResponse> {
+        const queryParams: Record<string, any> = {
+            skip: params?.offset || 0,
+            limit: params?.limit || 10,
             ambito: this.ambitoService.getAmbito() || 'privado'
         };
+        if (params?.patient) { queryParams.patient = params.patient; }
+        if (params?.dateFrom) { queryParams.dateFrom = params.dateFrom; }
+        if (params?.dateTo) { queryParams.dateTo = params.dateTo; }
+        if (params?.status) { queryParams.status = params.status; }
         return this.http.get<PrescriptionsResponse>(`${environment.API_END_POINT}/prescriptions/user/${userId}`, { params: queryParams }).pipe(
             map((response) => ({
                 ...response,
@@ -160,8 +165,12 @@ export class PrescriptionsService {
         );
     }
 
-    newPrescription(prescription: Prescriptions): Observable<Boolean> {
-        return this.http.post<Prescriptions>(`${environment.API_END_POINT}/prescriptions`, prescription).pipe(
+    newPrescription(prescription: Prescriptions, securityPin?: string): Observable<Boolean> {
+        let headers: HttpHeaders | undefined;
+        if (securityPin) {
+            headers = new HttpHeaders({ 'X-Security-Pin': securityPin });
+        }
+        return this.http.post<Prescriptions>(`${environment.API_END_POINT}/prescriptions`, prescription, { headers }).pipe(
             map((newPrescriptionItem: Prescriptions) => this.prescriptionsAdapter.adapt(newPrescriptionItem)),
             tap((newPrescriptionItem: Prescriptions) => this.addPrescription([newPrescriptionItem])),
             mapTo(true)

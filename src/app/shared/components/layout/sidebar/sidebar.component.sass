@@ -4,149 +4,137 @@
     position: fixed !important
     top: 0
     left: 0
-    width: 260px
+    width: var(--sidebar-width)
     height: 100vh
     z-index: 1000
-    transform: translateX(-100%)
-    transition: transform 0.2s ease
     background: var(--bg-card)
-    border-right: 1px solid var(--border-color)
+    display: flex
+    flex-direction: column
+    overflow: hidden
+    transform: translateX(-100%)
+    transition: transform 0.2s ease, width 0.2s ease
+
+    @media (min-width: $small-devices + 1px)
+        top: 8px
+        bottom: 8px
+        left: 8px
+        height: auto
+        border-radius: $radius-md
+        box-shadow: var(--elevation-3)
+        transform: translateX(0)
 
 :host.sidebar-host-overlay-open
     transform: translateX(0)
 
-.sidebar
-    width: 100%
-    height: 100%
-    border: none
-    border-radius: 0
-    transition: none
-    display: flex
-    flex-direction: column
+:host.sidebar-host-collapsed
+    width: var(--sidebar-collapsed-width)
 
-    &.collapsed
-        width: 100%
-
-        .visually-hidden
-            display: flex
-
-        ::ng-deep
-            .mdc-list-item__content
-                display: flex
-
-            .mdc-list-item__start
-                margin-right: 12px
-
-.visually-hidden
-    display: none
-
-::ng-deep .sidebar .mat-mdc-list-item
-    height: 40px !important
-    padding-left: 17px !important
-    margin: 0 5px !important
-    border-radius: $radius-md !important
-    width: auto
-
-    .mdc-list-item__primary-text
-        color: var(--text-primary)
-        font-size: 0.9rem
+// Shared visual base for all sidebar clickable items
+@mixin nav-item-base
+    height: 40px
+    margin: 0 12px
+    border-radius: $radius-sm
+    border: 1px solid transparent
+    color: var(--text-primary)
+    font-size: 0.9rem
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease
 
     .mat-icon
         color: var(--text-primary)
         font-size: 20px
         width: 20px
         height: 20px
-        margin-left: 0
+        line-height: 20px
+        flex-shrink: 0
 
-    .mdc-list-item__start
-        margin-right: 12px
+    &:focus, &:hover
+        background: var(--primary-200)
 
-    &:hover
-        background: var(--hover-bg) !important
+    &.active-item
+        background: var(--btn-base-bg)
+        color: var(--btn-base-text)
+        --mdc-list-list-item-hover-label-text-color: var(--btn-base-text)
+        --mdc-list-list-item-label-text-color: var(--btn-base-text)
 
-        .mdc-list-item__primary-text,
         .mat-icon
-            color: var(--primary)
+            color: var(--btn-base-text)
 
-.sidebar-spacer
+        .mdc-list-item__primary-text
+            color: var(--btn-base-text)
+
+.sidebar
+    width: 100%
     flex: 1
+    min-height: 0
+    overflow-y: auto
+    box-sizing: border-box
+    border: none
+    border-radius: 0
+    transition: none
+    display: flex
+    flex-direction: column
 
-.sidebar-footer
-    padding: 8px 0
-    border-top: 1px solid var(--border-color)
-    margin-top: 8px
-
-    .theme-toggle-btn
+    .mat-mdc-list-base
+        gap: 5px
         display: flex
-        align-items: center
-        gap: 12px
-        width: calc(100% - 10px)
-        margin: 0 5px
-        padding: 0 12px 0 17px
-        height: 40px
-        border: none
-        background: none
-        cursor: pointer
-        font-family: inherit
-        font-size: inherit
-        border-radius: $radius-md
-        color: var(--text-primary)
+        flex-direction: column
+
+    ::ng-deep .mat-mdc-list-item
+        @include nav-item-base
+        width: auto
+        --mdc-list-list-item-hover-state-layer-color: transparent
+        --mdc-list-list-item-focus-state-layer-color: transparent
+        --mat-list-list-item-hover-state-layer-color: transparent
+        --mat-list-list-item-focus-state-layer-color: transparent
+        --mdc-list-list-item-pressed-state-layer-color: transparent
+
+        .mdc-list-item__primary-text
+            font-size: 0.85rem
 
         .mat-icon
-            font-size: 20px
-            width: 20px
-            height: 20px
-            color: var(--text-primary)
-            flex-shrink: 0
-            margin-left: 0
+            margin: 0 15px
 
-        span
-            font-size: 0.9rem
-            white-space: nowrap
-            overflow: hidden
-            text-overflow: ellipsis
+.sidebar-brand
+    display: flex
+    align-items: center
+    height: var(--header-height)
+    min-height: var(--header-height)
+    padding: 0 var(--space-5)
+    border-bottom: 1px solid var(--border-color)
+    flex-shrink: 0
+    box-sizing: border-box
 
-        &:hover
-            background: var(--hover-bg)
-            color: var(--primary)
+    .sidebar-logo
+        max-width: 100px
+        width: auto
+        height: 20px
+        display: block
 
-            .mat-icon
-                color: var(--primary)
+        @media (min-width: $small-devices + 1px)
+            height: 22px
 
-:host-context(.dark-mode)
-    ::ng-deep .sidebar .mat-mdc-list-item:hover
-        background: var(--primary-700) !important
+    &.collapsed
+        justify-content: center
+        padding: 0
 
-        .mdc-list-item__primary-text,
-        .mat-icon
-            color: #ffffff !important
+        .sidebar-logo
+            width: 32px
+            height: 32px
+            object-fit: cover
+            object-position: left center
 
-    .sidebar-footer .theme-toggle-btn:hover
-        background: var(--primary-700) !important
-        color: #ffffff !important
-
-        .mat-icon
-            color: #ffffff !important
+.visually-hidden
+    display: none
 
 @media (min-width: $small-devices + 1px)
     :host
-        position: static !important
-        width: auto
-        height: auto
-        transform: none
-        transition: none
-        background: none
-        border-right: none
-        z-index: auto
+        width: var(--sidebar-width)
 
-    :host.sidebar-host-overlay-open
-        transform: none
+    :host.sidebar-host-collapsed
+        width: var(--sidebar-collapsed-width)
 
     .sidebar
-        width: 260px
-        height: 100%
-        border-radius: $radius-md
-        border: 1px solid var(--border-color)
+        width: 100%
         background: var(--bg-card)
         overflow-y: auto
         display: flex
@@ -154,17 +142,9 @@
         transition: width 0.2s ease
 
         &.collapsed
-            width: 64px
-
             .visually-hidden
                 display: none !important
 
-            .sidebar-footer
-                border-top: none
-
-            ::ng-deep
+            ::ng-deep .mat-mdc-list-item
                 .mdc-list-item__content
                     display: none !important
-
-                .mdc-list-item__start
-                    margin-right: 0 !important

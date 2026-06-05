@@ -197,7 +197,7 @@ Elegir la verificación más chica que cubra el cambio:
   - El adapter centraliza normalizacion de fechas de usuario (`authorizationExpiration`, `lastLogin`, `createdAt`, `updatedAt`) y mantiene la forma actual de modelo.
   - `UserService` integra el adapter en operaciones de lectura/escritura principales:
     - `getUserById`, `getUsers`, `searchUsers`;
-    - `createUser`, `updateUser`, `updateUserOrganizaciones`.
+    - `createUser`, `updateUser`, `updateUserOrganizations`.
   - Se mantiene enfoque incremental y de bajo riesgo: sin cambios de rutas, sin mudanzas de estructura y con paridad funcional de respuestas.
 
 - **Quinto incremento de adapters/models en dominio `supply`**:
@@ -473,7 +473,7 @@ Elegir la verificación más chica que cubra el cambio:
   - `src/app/professionals/services/organizacion-form-session.service.ts`:
     - `commitChanges()` pasó de `Observable<any>` a `Observable<SubOrganizacion[] | null>`;
     - se agregó tipo explícito para payload de servidor (`ServerSubOrganizacionPayload`) y `prepareOrganizacionForServer()` dejó de retornar `any`.
-  - Se ajustó el flujo de commit para mapear respuesta de `updateUserOrganizaciones` a `SubOrganizacion[]`, actualizar snapshot/working state y devolver una copia clonada tipada.
+  - Se ajustó el flujo de commit para mapear respuesta de `updateUserOrganizations` a `SubOrganizacion[]`, actualizar snapshot/working state y devolver una copia clonada tipada.
   - Se mantiene paridad funcional de la sesión (initialize/mark/add/commit/rollback), con mayor precisión de contrato y sin cambios de comportamiento UI.
 
 - **Etapa 01 - Paso 8 (`turnstile` CVA + `patient-name` pipe tipados)**:

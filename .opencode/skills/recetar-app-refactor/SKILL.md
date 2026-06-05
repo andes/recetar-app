@@ -29,6 +29,7 @@ Usá esta skill cuando la tarea sea refactorizar `recetar-app` usando el contrat
 - `src/app/services/prescriptions.service.ts` contiene un flujo de búsqueda conocido con `setTimeout`, seguimiento manual de suscripciones y tipado `any` que debería refactorizarse de forma incremental.
 - La carpeta `src/app/utils/custome-validators/` está mal escrita a propósito; no la renombres de forma oportunista.
 - Los estilos de componentes usan `.sass`.
+- Todos los iconos de Material Design deben usar `<mat-icon>` en lugar de `<span class="material-icons">` para mejor accesibilidad, tamaño consistente (`1.125rem`) e integración con Angular Material.
 
 ## Objetivos Del Refactor
 
@@ -65,6 +66,17 @@ Usá esta skill cuando la tarea sea refactorizar `recetar-app` usando el contrat
 4. Extendé los adapters y la organización de models.
 5. Introducí límites de frontend más claros de forma incremental.
 6. Migrá gradualmente a componentes standalone.
+
+## Checklist Para Feature Nuevo (NgModule)
+
+Cuando se crea una feature desde cero en `features/` sin migrar código legacy:
+
+1. Crear `features/{name}/` con `{name}.module.ts`, `{name}-routing.module.ts`, `pages/` y `components/` según necesite
+2. Routing: `RouterModule.forChild(routes)`, exportar array `routingComponents`, proteger rutas con `AuthGuard`
+3. Módulo: importar `SharedModule` más los módulos Material/standalone que `SharedModule` no cubra (ej: `MatTableModule`, `MatCardModule`, `UiToggleComponent`)
+4. Componentes standalone internos (dialogs, sub-componentes) van en `imports` del módulo, no en `declarations`
+5. Registrar en `app.module.ts` (eager import), agregar alias en `tsconfig.json` y actualizar `docs/features-migration-tracker.md`
+6. Sidebar: agregar ítem en `SidebarService.getItems()` filtrando por rol
 
 ## Checklist De Ejecución
 
@@ -134,6 +146,8 @@ Objetivo concreto del repo:
 
 - `src/app/services/prescriptions.service.ts#searchByTerm` debería dejar atrás el timeout y la cancelación manual para pasar a un flujo de búsqueda guiado por streams.
 
+**Patrón de carga para páginas de listado:** centralizar los disparos (búsqueda, cambio de tipo, paginación, post-delete) en un `Subject<void>` con `switchMap` + `catchError`. El `catchError` es crítico: sin él, un error HTTP rompe el pipeline y los siguientes `next()` no producen efecto.
+
 ### 6. Migración A Standalone
 
 - Migrá gradualmente, feature por feature.
@@ -147,6 +161,14 @@ Objetivo concreto del repo:
 - Agregá comentarios cortos solo donde el refactor introduzca una estructura no obvia.
 - Preferí nombres autoexplicativos antes que comentarios explicativos.
 - Si durante el refactor se introduce una convención nueva, reflejala en la documentación del repo cuando se pida o cuando la tarea incluya actualización de documentación.
+
+### 8. Verificación De Endpoints Legacy
+
+Antes de consumir un método de `src/app/services/`, verificá que el endpoint de backend existe:
+
+- Leé `recetar-api/src/modules/{modulo}/{modulo}.routes.ts`
+- Compará la URL construida por el servicio con las rutas registradas
+- Si el endpoint no existe: usá un método alternativo del mismo servicio y aplicá filtrado client-side como fallback. Si la API usa paginación server-side, el filtrado local solo aplica sobre la página actual; considerá solicitar el endpoint al equipo de backend.
 
 ## Restricciones
 
@@ -167,6 +189,7 @@ Ejecutá la verificación útil más chica que coincida con el alcance del refac
 
 ## Tareas Típicas Que Deberían Activar Esta Skill
 
+- Crear una feature nueva en `features/` sin migrar código legacy.
 - Migrar una feature basada en módulos hacia componentes standalone.
 - Reorganizar `interfaces/` en límites más claros entre models, DTOs y adapters.
 - Refactorizar flujos de servicios que usan control async manual en lugar de operadores de RxJS.

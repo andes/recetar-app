@@ -15,7 +15,7 @@ export class Practice {
         otraOS?: boolean;
         obraSocial?: {
             nombre: string;
-            codigoPuco: string;
+            codigoPuco: number;
             numeroAfiliado: string;
         };
     };
@@ -47,7 +47,7 @@ export class Practice {
             otraOS?: boolean;
             obraSocial?: {
                 nombre: string;
-                codigoPuco: string;
+                codigoPuco: number;
                 numeroAfiliado: string;
             };
         },

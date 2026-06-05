@@ -15,11 +15,12 @@ export class Patient {
         public obraSocial?: {
             _id?: string;
             nombre?: string;
-            codigoPuco?: string;
+            codigoPuco?: number;
             numeroAfiliado?: string;
         },
         public idMPI?: string,
         public cuil?: string,
+        public estado?: string,
     ) { }
 }
 

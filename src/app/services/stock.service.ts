@@ -11,6 +11,7 @@ export interface Insumo {
     insumo: string;
     supply?: string;
     name?: string;
+    nombre?: string;
     term?: string;
     type?: string;
     tipo?: string;
@@ -66,14 +67,19 @@ export class StockService {
         const normalizedType = adaptedSupply.type === 'nutrition'
             ? 'nutricion'
             : (adaptedSupply.type === 'device' ? 'dispositivo' : ((sourceItem.tipo as string) || adaptedSupply.type));
+        const displayName = adaptedSupply.name
+            || (sourceItem.nombre as string)
+            || (sourceItem.term as string)
+            || '';
 
         return {
             _id: adaptedSupply._id || sourceItem._id || sourceItem.id,
             id: sourceItem.id,
-            insumo: sourceItem.insumo || sourceItem.supply || adaptedSupply.name,
-            supply: sourceItem.supply || adaptedSupply.name,
-            name: adaptedSupply.name,
-            term: sourceItem.term || adaptedSupply.name,
+            insumo: sourceItem.insumo || sourceItem.supply || displayName,
+            supply: sourceItem.supply || displayName,
+            name: displayName,
+            nombre: (sourceItem.nombre as string) || displayName,
+            term: sourceItem.term || displayName,
             type: adaptedSupply.type,
             tipo: normalizedType,
             requiresSpecification: adaptedSupply.requiresSpecification,
@@ -131,11 +137,12 @@ export class StockService {
     }
 
     /**
-     * Buscar insumos usando GET con query parameter
+     * Buscar insumos usando GET con query parameter.
      * Ejemplo: GET /api/stock?query=Dispositivo
+     * `tipos` permite filtrar por tipo de insumo (dispositivo, nutricion, magistral).
      */
-    search(query: string): Observable<Insumo[]> {
-        const url = `${this.API_URL}/andes?insumo=${encodeURIComponent(query)}&tipos=dispositivo,nutricion`;
+    search(query: string, tipos: string = 'dispositivo,nutricion'): Observable<Insumo[]> {
+        const url = `${this.API_URL}/andes?insumo=${encodeURIComponent(query)}&tipos=${encodeURIComponent(tipos)}`;
         return this.http.get<Insumo[]>(url).pipe(
             map((insumos) => insumos.map((insumo) => this.normalizeToInsumo(insumo)))
         );

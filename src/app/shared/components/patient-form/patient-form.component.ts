@@ -17,6 +17,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 
 // Validador personalizado para fechas
@@ -51,14 +53,14 @@ function validDateValidator(): ValidatorFn {
 
 interface ObraSocialOption {
     nombre: string;
-    codigoPuco?: string;
+    codigoPuco?: number;
     numeroAfiliado?: string;
     [key: string]: unknown;
 }
 
 interface PatientOsFormValue {
     nombre: string | ObraSocialOption;
-    codigoPuco: string;
+    codigoPuco: number;
     numeroAfiliado: string;
 }
 
@@ -109,6 +111,8 @@ function isObraSocialOption(value: unknown): value is ObraSocialOption {
         MatDatepickerModule,
         MatNativeDateModule,
         MatProgressSpinnerModule,
+        MatIconModule,
+        MatTooltipModule,
         PatientNamePipe
     ]
 })
@@ -215,7 +219,7 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
                         // Limpiar los campos de obra social para permitir seleccionar otra
                         osGroup.patchValue({
                             nombre: '',
-                            codigoPuco: ''
+                            codigoPuco: null
                         });
                     } else {
                         // Cuando otraOS está desactivado, restablecer valores
@@ -276,7 +280,7 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
             otraOS: [{ value: false, disabled: true }],
             os: this.fBuilder.group({
                 nombre: [''],
-                codigoPuco: [''],
+                codigoPuco: [null],
                 numeroAfiliado: [{ value: '', disabled: true }, [Validators.required, Validators.pattern('^[0-9]*$')]]
             })
         };
@@ -389,7 +393,7 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
                                 // Limpiar los campos para que el usuario seleccione manualmente
                                 osGroup.patchValue({
                                     nombre: '',
-                                    codigoPuco: '',
+                                    codigoPuco: null,
                                     numeroAfiliado: ''
                                 });
                             }

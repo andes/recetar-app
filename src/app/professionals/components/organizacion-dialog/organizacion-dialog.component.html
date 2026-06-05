@@ -7,41 +7,41 @@
       <input matInput formControlName="nombre" placeholder="Escriba al menos 3 caracteres"
         [matAutocomplete]="organizacionAutocomplete" (input)="onNombreInput()">
       @if (spinnerLoading) {
-        <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20"></mat-spinner>
+      <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20"></mat-spinner>
       }
       <mat-autocomplete #organizacionAutocomplete="matAutocomplete" [displayWith]="displayOrganizacion"
         (optionSelected)="onOrganizacionSelected($event)">
         @for (organizacion of filteredOrganizaciones; track organizacion) {
-          <mat-option [value]="organizacion">
-            {{ organizacion.nombre }}
-            @if (getDireccionTexto(organizacion)) {
-              <span> - {{ getDireccionTexto(organizacion) }}</span>
-            }
-          </mat-option>
+        <mat-option [value]="organizacion">
+          {{ organizacion.nombre }}
+          @if (getDireccionTexto(organizacion)) {
+          <span> - {{ getDireccionTexto(organizacion) }}</span>
+          }
+        </mat-option>
         }
       </mat-autocomplete>
       @if (nombre?.hasError('required')) {
-        <mat-error>
-          El nombre es requerido
-        </mat-error>
+      <mat-error>
+        El nombre es requerido
+      </mat-error>
       }
       @if (nombre?.hasError('minlength')) {
-        <mat-error>
-          El nombre debe tener al menos 3 caracteres
-        </mat-error>
+      <mat-error>
+        El nombre debe tener al menos 3 caracteres
+      </mat-error>
       }
       @if (nombre?.hasError('invalidSelection')) {
-        <mat-error>
-          Debe seleccionar una organización de la lista
-        </mat-error>
+      <mat-error>
+        Debe seleccionar una organización de la lista
+      </mat-error>
       }
     </mat-form-field>
   </form>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button type="button" (click)="onCancel()">Cancelar</button>
-  <button mat-raised-button color="primary" type="button" (click)="onSubmit()" [disabled]="organizacionForm.invalid">
+  <button matButton="tonal" type="button" (click)="onCancel()">Cancelar</button>
+  <button matButton="raised" color="primary" type="button" (click)="onSubmit()" [disabled]="organizacionForm.invalid">
     Guardar
   </button>
 </mat-dialog-actions>

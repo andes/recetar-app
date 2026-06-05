@@ -126,7 +126,7 @@
               </div>
             </div>
 
-            <button mat-icon-button type="button" (click)="clearFoundData()" class="clear-data-button"
+            <button matIconButton type="button" (click)="clearFoundData()" class="clear-data-button"
               aria-label="Buscar otro profesional">
               <mat-icon>clear</mat-icon>
             </button>
@@ -178,7 +178,7 @@
               </div>
             </div>
 
-            <button mat-icon-button type="button" (click)="clearFoundData()" class="clear-data-button"
+            <button matIconButton type="button" (click)="clearFoundData()" class="clear-data-button"
               aria-label="Buscar otra farmacia">
               <mat-icon>clear</mat-icon>
             </button>
@@ -236,12 +236,12 @@
 
     <mat-card-actions class="card-actions">
       <div class="actions-container">
-        <button mat-stroked-button type="button" (click)="onCancel()" [disabled]="isLoading" class="cancel-button">
+        <button matButton="tonal" type="button" (click)="onCancel()" [disabled]="isLoading" class="cancel-button">
           <mat-icon>close</mat-icon>
           Cancelar
         </button>
 
-        <button mat-icon-button type="button" (click)="onSave()" [disabled]="isLoading || userForm.invalid"
+        <button matIconButton type="button" (click)="onSave()" [disabled]="isLoading || userForm.invalid"
           class="save-button" [style.background-color]="(isLoading || userForm.invalid) ? '#969696' : '#3f51b5'"
           [style.color]="'white'">
           <div class="button">

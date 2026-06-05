@@ -1,0 +1,56 @@
+<ui-card
+    *ngIf="document"
+    class="document-item"
+    [class.selected]="selected"
+    (click)="onSelect()"
+>
+    <div class="di-info">
+        <div class="di-row-top">
+            <div class="rx-head" *ngIf="date">
+                <mat-icon>event</mat-icon>
+                <strong class="text-sm">{{ date | date: "d MMM yyyy" }}</strong>
+            </div>
+            <mat-chip class="sm" [class]="statusVariant">{{ statusLabel }}</mat-chip>
+        </div>
+
+        <div class="di-row-two">
+            <div class="di-cell-patient" *ngIf="hasPatient">
+                <div class="rx-head">
+                    <mat-icon>person</mat-icon>
+                    <strong class="di-patient-name">{{ patientFullName | titlecase }}</strong>
+                </div>
+                <small class="di-patient-dni" *ngIf="patientDni">DNI {{ patientDni }}</small>
+            </div>
+
+            <div class="di-cell-med">
+                <div class="rx-head">
+                    <mat-icon size="sm" color="neutral">{{ icon }}</mat-icon>
+                    <div class="rx-title">
+                        <h3>{{ title | titlecase }}</h3>
+                        <div class="rx-subline" *ngIf="medicineType || medicationDetail || subtitle">
+                            <strong *ngIf="medicineType" class="rx-type-indicator {{ medicineType }}">
+                                {{ medicineType | titlecase }}
+                            </strong>
+                            <small class="di-med-detail" *ngIf="medicationDetail">{{ medicationDetail | capitalize }}</small>
+                            <small class="di-med-subtitle" *ngIf="!medicationDetail && subtitle">{{ subtitle | titlecase }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="di-side">
+        <div class="di-actions" (click)="$event.stopPropagation()">
+            <button matIconButton *ngIf="canPrint" matTooltip="Imprimir" (click)="onPrint()">
+                <mat-icon>print</mat-icon>
+            </button>
+            <button matIconButton *ngIf="canAnulate" matTooltip="Anular" (click)="onAnulate()">
+                <mat-icon>block</mat-icon>
+            </button>
+            <button matIconButton *ngIf="canRemove" matTooltip="Eliminar" (click)="onRemove()">
+                <mat-icon>delete</mat-icon>
+            </button>
+        </div>
+    </div>
+</ui-card>
