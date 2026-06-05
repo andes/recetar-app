@@ -1,0 +1,62 @@
+<div class="edit-patient-header">
+    <span>{{ isCreate ? 'Crear paciente' : 'Editar paciente' }}</span>
+    <span *ngIf="validationStatus" class="validation-badge" [class.status-validated]="validationStatus === 'validado'"
+        [class.status-temporal]="validationStatus === 'temporal'">
+        <mat-icon>{{ validationStatus === 'validado' ? 'verified_user' : 'warning' }}</mat-icon>
+        {{ validationStatus === 'validado' ? 'Validado' : 'Sin validar' }}
+    </span>
+    <button *ngIf="!validationStatus || validationStatus === 'temporal'" mat-icon-button type="button"
+        class="validation-btn" (click)="onValidate()" [disabled]="isValidating"
+        matTooltip="Validar con RENAPER">
+        <mat-spinner *ngIf="isValidating" diameter="18" class="btn-spinner"></mat-spinner>
+        <mat-icon *ngIf="!isValidating">fact_check</mat-icon>
+    </button>
+</div>
+
+<form [formGroup]="editForm" class="edit-patient-form">
+    <div class="form-row">
+        <app-form-field type="text" label="DNI" [control]="editForm.get('dni')" [submitted]="submitted" fullwidth
+            suffixIcon="badge" placeholder="DNI" maxlength="8" inputmode="numeric"
+            [errors]="{ required: 'Debe ingresar el DNI', minlength: 'El DNI debe tener al menos 6 dígitos', pattern: 'El DNI debe contener solo números', duplicateDni: 'Ya existe un paciente con ese DNI' }">
+        </app-form-field>
+
+        <app-form-field type="select" label="Sexo" [control]="editForm.get('sex')" [submitted]="submitted" fullwidth
+            [options]="sexOptions" [errors]="{ required: 'Debe seleccionar el sexo' }">
+        </app-form-field>
+    </div>
+
+    <div class="form-row">
+        <app-form-field type="text" label="Apellido" [control]="editForm.get('lastName')" [submitted]="submitted"
+            fullwidth placeholder="Apellido" [errors]="{ required: 'Debe ingresar el apellido' }">
+        </app-form-field>
+
+        <app-form-field type="text" label="Nombre" [control]="editForm.get('firstName')" [submitted]="submitted"
+            fullwidth placeholder="Nombre" [errors]="{ required: 'Debe ingresar el nombre' }">
+        </app-form-field>
+    </div>
+
+    <div class="form-row">
+        <app-form-field type="text" label="Nombre autopercibido" [control]="editForm.get('nombreAutopercibido')"
+            [submitted]="submitted" fullwidth placeholder="Nombre autopercibido">
+        </app-form-field>
+
+        <app-form-field *ngIf="showFechaNac" type="date" label="Fecha de nacimiento" [submitted]="submitted" fullwidth
+            [control]="editForm.get('fechaNac')" [min]="minDateStr" [max]="maxDateStr"
+            [errors]="{ required: 'Debe ingresar la fecha de nacimiento', invalidDate: 'Fecha inválida', futureDate: 'La fecha no puede ser futura', tooOldDate: 'La fecha debe ser posterior a 1900' }">
+        </app-form-field>
+    </div>
+
+    <div class="edit-patient-actions">
+        <button matButton="filled" type="button" (click)="onSubmit()" [disabled]="isSubmit">
+            <mat-spinner *ngIf="isSubmit" diameter="20" class="btn-spinner"></mat-spinner>
+            <ng-container *ngIf="!isSubmit">
+                <mat-icon>save</mat-icon>
+                {{ isCreate ? 'Crear' : 'Guardar cambios' }}
+            </ng-container>
+        </button>
+        <button matButton="tonal" type="button" (click)="onCancel()" [disabled]="isSubmit">
+            <mat-icon>close</mat-icon>
+            Cancelar
+        </button>
+    </div>
+</form>

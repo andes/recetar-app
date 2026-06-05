@@ -46,3 +46,15 @@
 - Ese contrato es la referencia local vigente para alcance, orden y criterios del proceso de refactorización de `recetar-app`.
 - Activala para migraciones de Angular de módulos a standalone, limpieza de servicios y RxJS, reorganización de adapters/models y manejo centralizado de errores HTTP.
 - Mantené los refactors incrementales y no mezcles refactors de frontend y backend en el mismo cambio salvo que se pida explícitamente.
+
+## Features Migration Tracker
+
+- Al crear, modificar o eliminar cualquier cosa en `src/app/features/`, actualizá `docs/features-migration-tracker.md`.
+- Ese tracker mantiene 3 tablas: estado de features nuevas, matriz de uso de `shared/`, y checklist de código legacy a eliminar.
+- Consultalo antes de cada cambio para saber qué shared components ya están en uso y qué código viejo va quedando obsoleto.
+
+## Respetar cambios manuales del usuario al revertir
+
+- Cuando el usuario pida revertir un cambio mío, **nunca debo reemplazar archivos completos ni bloques grandes**. Debo leer el estado actual del archivo y revertir **solo las líneas que yo introduje**, preservando cualquier modificación manual que el usuario haya hecho después.
+- Antes de cualquier revert, leer el archivo con `Read` para ver si el usuario lo modificó. Si detecto cambios que no hice yo, no sobreescribirlos.
+- Aplicar reversiones con `Edit` oldString/newString apuntando exactamente al contenido que yo introduje, no a bloques enteros del archivo.

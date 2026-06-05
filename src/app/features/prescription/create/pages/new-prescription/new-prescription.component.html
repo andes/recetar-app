@@ -1,0 +1,334 @@
+<app-canvas [noCard]="true" [showSidebar]="true" [sidebarItems]="sidebarItems">
+    <div class="page-title">
+        <span>Nueva receta</span>
+    </div>
+
+    <div class="content-row">
+
+        <!-- Mobile sidebar modal -->
+        <div class="sidebar-modal-overlay hide-on-desktop" *ngIf="sidebarOpen" (click)="sidebarOpen = false"></div>
+        <div class="sidebar-modal hide-on-desktop" *ngIf="sidebarOpen">
+            <div class="sidebar-modal-header">
+                <mat-icon>list_alt</mat-icon>
+                EN LA RECETA
+                <button mat-icon-button class="sidebar-modal-close" (click)="sidebarOpen = false">
+                    <mat-icon>close</mat-icon>
+                </button>
+            </div>
+            <div class="sidebar-modal-scroll">
+                <ng-container *ngTemplateOutlet="sidebarContent"></ng-container>
+            </div>
+            <div class="sidebar-modal-footer">
+                <button matButton="tonal" class="block secondary" (click)="finalizePrescription()"
+                    [disabled]="!canFinalize">
+                    Finalizar {{ documentTypeLabel }}
+                </button>
+            </div>
+        </div>
+
+        <!-- ==================== COLUMNA PRINCIPAL ==================== -->
+        <div class="main-col">
+
+            <!-- ==================== CARD PASO 1 — PACIENTE ==================== -->
+            <ui-card [title]="'Paso 1: Paciente'"
+                [subtitle]="draft.patient ? 'Paciente seleccionado' : 'Buscar o crear un paciente'"
+                [dashed]="!draft.patient" class="step-card">
+                <span cardIcon class="step-card-icon" [class.completed]="draft.patient">
+                    <mat-icon *ngIf="draft.patient; else step1num" class="sm">check</mat-icon>
+                    <ng-template #step1num>1</ng-template>
+                </span>
+
+                <span cardAction *ngIf="draft.patient && !editingPatient">
+                    <div class="patient-card-actions-desktop">
+                        <button matButton="tonal" class="btn-icon btn-info" matTooltip="Editar paciente"
+                            (click)="editPatient()">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button matButton="tonal" class="btn-icon btn-warn" matTooltip="Quitar paciente"
+                            (click)="removePatient()">
+                            <mat-icon>person_off</mat-icon>
+                        </button>
+                    </div>
+                    <div class="patient-card-actions-mobile">
+                        <button matButton="tonal" class="btn-info" matTooltip="Editar paciente" (click)="editPatient()">
+                            <mat-icon>edit</mat-icon>
+                            <span>Editar</span>
+                        </button>
+                        <button matButton="tonal" class="btn-icon btn-warn" matTooltip="Quitar paciente"
+                            (click)="removePatient()">
+                            <mat-icon>person_off</mat-icon>
+                        </button>
+                    </div>
+                </span>
+
+                <!-- Modo crear paciente -->
+                <ng-container *ngIf="!draft.patient && creatingPatient">
+                    <app-edit-patient mode="create" [patient]="emptyPatient" [prefillDni]="getSearchDni()"
+                        (saved)="onPatientCreated($event)" (cancelled)="creatingPatient = false">
+                    </app-edit-patient>
+                </ng-container>
+
+                <!-- Modo búsqueda de paciente -->
+                <ng-container *ngIf="!draft.patient && !creatingPatient">
+                    <ui-search-bar [control]="$any(patientSearchForm).controls.patientTerm"
+                        placeholder="Buscar por DNI, nombre o apellido…" [isLoading]="isSearchingPatient"
+                        [stretch]="true" class="patient-search-bar">
+                        <button matButton="tonal" searchAction (click)="creatingPatient = true">
+                            <mat-icon>person_add</mat-icon>
+                            Crear
+                        </button>
+                    </ui-search-bar>
+
+                    <div class="search-results" *ngIf="showPatientResults && patientResults?.length">
+                        <div class="search-result" *ngFor="let p of patientResults; trackBy: trackByPatient"
+                            (click)="selectPatient(p)">
+                            <app-patient-item [patient]="p" />
+                            <mat-icon class="result-chevron">chevron_right</mat-icon>
+                        </div>
+                    </div>
+                    <div class="patient-empty" *ngIf="patientNotFound">
+                        <mat-icon class="sm">person_off</mat-icon>
+                        <p>No se encontraron pacientes con ese término.</p>
+                    </div>
+
+                    <!-- Pacientes frecuentes -->
+                    <ng-container *ngIf="showFrequentPatients">
+                        <ui-section-divider>Pacientes frecuentes</ui-section-divider>
+
+                        <div class="freq-grid">
+                            <ui-card *ngFor="let fp of frequentPatients; trackBy: trackByFrequent" [stretch]="true"
+                                (click)="selectPatient(fp)">
+                                <app-patient-item [patient]="fp" />
+                            </ui-card>
+                        </div>
+                    </ng-container>
+                </ng-container>
+
+                <!-- Modo editar paciente -->
+                <ng-container *ngIf="draft.patient && editingPatient">
+                    <app-edit-patient [patient]="draft.patient" (saved)="onPatientSaved($event)"
+                        (cancelled)="onPatientEditCancelled()">
+                    </app-edit-patient>
+                </ng-container>
+
+                <!-- Paciente seleccionado -->
+                <ng-container *ngIf="draft.patient && !editingPatient">
+                    <div class="patient-selected-inner">
+                        <div class="patient-selected-body">
+                            <div mat-card-avatar class="patient-avatar desktop-flex" [class.female]="isPatientFemale"
+                                [class.other]="isPatientOther">
+                                <mat-icon>{{ patientAvatarIcon }}</mat-icon>
+                            </div>
+                            <div class="info">
+                                <div class="name">
+                                    <span class="name-text">
+                                        <span>{{ formatName(draft.patient) }}</span>
+                                        <span class="autopercibido" *ngIf="draft.patient.nombreAutopercibido">
+                                            &mdash; {{ formatName(draft.patient, true) }}
+                                        </span>
+                                    </span>
+                                    <mat-icon *ngIf="validationStatus === 'validado'" class="validated-icon verified" matTooltip="Validado RENAPER">verified_user</mat-icon>
+                                    <mat-icon *ngIf="validationStatus === 'temporal'" class="validated-icon temporal" matTooltip="Paciente temporal">warning</mat-icon>
+                                </div>
+                                <div class="detail">
+                                    <span class="patient-meta-item" *ngIf="draft.patient.dni">
+                                        <mat-icon>badge</mat-icon>
+                                        <span class="mono">
+                                            {{ formatDni(draft.patient.dni)}}
+                                        </span>
+                                    </span>
+                                    <span class="patient-meta-item" *ngIf="draft.patient.sex">
+                                        <mat-icon>wc</mat-icon>
+                                        <span class="mono">{{ draft.patient.sex }}</span>
+                                    </span>
+                                    <span class="patient-meta-item" *ngIf="getAge(draft.patient.fechaNac) != null">
+                                        <mat-icon>cake</mat-icon>
+                                        <span class="mono">{{ getAge(draft.patient.fechaNac) }} años</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+            </ui-card>
+
+            <!-- ==================== CARD PASO 2 — DOCUMENTOS ==================== -->
+            <ui-card title="Paso 2: Documento"
+                [subtitle]="draft.patient ? 'Armá los medicamentos y completá los datos antes de emitir la receta.' : 'Requiere paciente seleccionado'"
+                [dashed]="!draft.patient" [disabled]="!draft.patient" class="step-card">
+                <span cardIcon class="step-card-icon" [class.completed]="canFinalize">
+                    <mat-icon *ngIf="canFinalize; else step2num" class="sm">check</mat-icon>
+                    <ng-template #step2num>2</ng-template>
+                </span>
+
+                <!-- Form overlay when creating -->
+                <ng-container *ngIf="creatingDocument">
+                    <button mat-button class="back-btn" (click)="backToDocuments()">
+                        <mat-icon>arrow_back</mat-icon>
+                        Volver
+                    </button>
+
+                    <!-- PRESCRIPTION -->
+                    <ng-container *ngIf="creatingDocument === 'prescription'">
+                        <ng-container *ngIf="editingMedicationIndex === null">
+                            <app-medication-search
+                                (medicationAdded)="addMedicationToDraft($event)">
+                            </app-medication-search>
+                        </ng-container>
+                        <ng-container *ngIf="editingMedicationIndex !== null">
+                            <app-medication-search
+                                [editMedicationIndex]="editingMedicationIndex"
+                                [editMedication]="editingMedication"
+                                (medicationUpdated)="onMedicationUpdated($event)"
+                                (editCancelled)="cancelEditMedication()">
+                            </app-medication-search>
+                        </ng-container>
+                    </ng-container>
+
+                    <!-- CERTIFICATE -->
+                    <ng-container *ngIf="creatingDocument === 'certificate'">
+                        <app-certificate-form
+                            [data]="editingCertificate ? draft.certificateData : null"
+                            (saved)="onCertificateSaved($event)"
+                            (cancelled)="cancelCertificateEdit()">
+                        </app-certificate-form>
+                    </ng-container>
+
+                    <!-- PRACTICE -->
+                    <ng-container *ngIf="creatingDocument === 'practice'">
+                        <app-practice-form
+                            [data]="editingPractice ? draft.practiceData : null"
+                            (saved)="onPracticeSaved($event)"
+                            (cancelled)="cancelPracticeEdit()">
+                        </app-practice-form>
+                    </ng-container>
+                </ng-container>
+
+                <!-- Document tabs (hidden when creating) -->
+                <app-document-tabs *ngIf="!creatingDocument"
+                    [disabled]="!draft.patient"
+                    [patient]="draft.patient"
+                    [draftMedications]="draft.medications"
+                    [draftCertificate]="draft.certificateData"
+                    [draftPractice]="draft.practiceData"
+                    (createDocument)="showForm($event)"
+                    (duplicateDocument)="duplicateDocument($event)"
+                    (editMedication)="editMedication($event)"
+                    (removeMedication)="removeMedication($event)"
+                    (editCertificate)="editCertificate()"
+                    (removeCertificate)="removeCertificate()"
+                    (editPractice)="editPractice()"
+                    (removePractice)="removePractice()"
+                    (finalizeDraft)="onFinalizeFromTabs()">
+                </app-document-tabs>
+            </ui-card>
+
+        </div><!-- /main-col -->
+
+        <!-- ==================== SIDEBAR ==================== -->
+        <div class="sidebar-col">
+            <div class="sidebar-card">
+                <ng-container *ngTemplateOutlet="sidebarContent"></ng-container>
+                <div class="sidebar-footer">
+                    <button matButton="filled" class="block" (click)="finalizePrescription()" [disabled]="!canFinalize">
+                        Finalizar {{ documentTypeLabel }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /content-row -->
+
+    <!-- Template reutilizable del contenido del sidebar -->
+    <ng-template #sidebarContent>
+        <div class="sidebar-header">
+            <mat-icon size="sm">fact_check</mat-icon>
+            <span class="sidebar-title">{{ draft.type === 'prescription' ? 'Receta' : draft.type === 'certificate' ?
+                'Certificado' : 'Práctica' }} actual</span>
+            <ui-badge size="sm">{{ draft.type === 'prescription' ? draft.medications.length : draft.type ===
+                'certificate' ? (draft.certificateData ? 1 : 0) : (draft.practiceData ? 1 : 0) }}</ui-badge>
+        </div>
+
+        <!-- Prescription summary -->
+        <ng-container *ngIf="draft.type === 'prescription'">
+            <div class="sidebar-empty" *ngIf="draft.medications.length === 0">
+                <mat-icon>playlist_add</mat-icon>
+                Agregá medicamentos desde la sección principal.
+            </div>
+
+            <div class="sidebar-items" *ngIf="draft.medications.length > 0">
+                <div class="sidebar-item" *ngFor="let item of draft.medications; let i = index">
+                    <div class="sidebar-item-body">
+                        <div class="sidebar-item-head">
+                            <div class="sidebar-item-name">{{ item.supply?.nombre || item.snomedConcept?.term ||
+                                'Medicamento' }}</div>
+                            <ui-badge *ngIf="item.supply?.precio != null" size="sm" class="sidebar-item-price">
+                                <strong class="mono">${{ item.supply.precio.toFixed(2) }}</strong>
+                            </ui-badge>
+                        </div>
+                        <div class="sidebar-item-detail">
+                            <span>{{ item.supply?.presentacion || item.snomedConcept?.fsn || '' }}</span>
+                            <span> · {{ item.quantity }} unid.</span>
+                            <span *ngIf="item.supply?.accion_descrip"> · {{ item.supply.accion_descrip }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-summary">
+                    <div class="summary-cell">
+                        <span class="summary-label">Ítems</span>
+                        <span class="summary-value">{{ draft.medications.length }}</span>
+                    </div>
+                    <div class="summary-cell" style="text-align: right;">
+                        <span class="summary-label">Unidades</span>
+                        <span class="summary-value">{{ getTotalQuantity() }}</span>
+                    </div>
+                    <div class="summary-cell total-cell">
+                        <span class="summary-label">Total estimado</span>
+                        <span class="summary-value">${{ getTotalPrice().toFixed(2) }}</span>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
+
+        <!-- Certificate summary -->
+        <div class="sidebar-empty" *ngIf="draft.type === 'certificate' && !draft.certificateData">
+            <mat-icon>description</mat-icon>
+            Completá los datos del certificado.
+        </div>
+        <div class="sidebar-item" *ngIf="draft.type === 'certificate' && draft.certificateData">
+            <div class="sidebar-item-body">
+                <div class="sidebar-item-head">
+                    <div class="sidebar-item-name">{{ draft.certificateData.certificate }}</div>
+                </div>
+                <div class="sidebar-item-detail">
+                    {{ draft.certificateData.startDate | date:'dd/MM/yyyy' }} · {{ draft.certificateData.cantDias }}
+                    día(s)
+                </div>
+            </div>
+        </div>
+
+        <!-- Practice summary -->
+        <div class="sidebar-empty" *ngIf="draft.type === 'practice' && !draft.practiceData">
+            <mat-icon>stethoscope</mat-icon>
+            Completá los datos de la práctica.
+        </div>
+        <div class="sidebar-item" *ngIf="draft.type === 'practice' && draft.practiceData">
+            <div class="sidebar-item-body">
+                <div class="sidebar-item-head">
+                    <div class="sidebar-item-name">{{ draft.practiceData.practice }}</div>
+                </div>
+                <div class="sidebar-item-detail" *ngIf="draft.practiceData.diagnostic">
+                    {{ draft.practiceData.diagnostic }}
+                </div>
+            </div>
+        </div>
+    </ng-template>
+</app-canvas>
+
+<button mat-fab class="mobile-fab hide-on-desktop" (click)="sidebarOpen = true"
+    [matBadge]="draft.type === 'prescription' ? draft.medications.length : (draft.certificateData || draft.practiceData ? 1 : 0)"
+    matBadgeColor="primary"
+    [matBadgeHidden]="draft.type === 'prescription' ? draft.medications.length === 0 : !(draft.certificateData || draft.practiceData)">
+    <mat-icon>list_alt</mat-icon>
+</button>

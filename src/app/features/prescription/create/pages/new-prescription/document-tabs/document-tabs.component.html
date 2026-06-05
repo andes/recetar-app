@@ -1,0 +1,267 @@
+<ng-template #fechaCell let-p>
+    <span class="mono">{{ p.date | date:'dd/MM/yyyy' }}</span>
+</ng-template>
+
+<ng-template #medCell let-p>
+    <div class="h-med-name">{{ getPrescriptionMedName(p) }}</div>
+</ng-template>
+
+<ng-template #estadoCell let-p>
+    <ui-badge
+        [variant]="p.status === 'activa' ? 'success' : p.status === 'pendiente' ? 'warning' : 'info'"
+        size="sm">{{ p.status }}</ui-badge>
+</ng-template>
+
+<ng-template #accionesCell let-p>
+    <button matButton="filled" class="btn-secondary btn-sm"
+        (click)="$event.stopPropagation(); duplicateDocument.emit({ type: 'prescription', document: p })">
+        Duplicar
+    </button>
+</ng-template>
+
+<div class="disabled-msg" *ngIf="disabled">
+    <mat-icon>person_outline</mat-icon>
+    Primero seleccioná un paciente para ver documentos.
+</div>
+
+<ng-container *ngIf="!disabled">
+
+    <div class="type-cards">
+        <button class="type-card" [class.active]="activeType === 'prescription'" (click)="selectType('prescription')">
+            <mat-icon class="card-icon">medication</mat-icon>
+            <span class="card-label">Recetas</span>
+            <span class="card-count">{{ prescriptions.length + draftMedications.length }}</span>
+        </button>
+        <button class="type-card" [class.active]="activeType === 'certificate'" (click)="selectType('certificate')">
+            <mat-icon class="card-icon">description</mat-icon>
+            <span class="card-label">Certificados</span>
+            <span class="card-count">{{ certificates.length + (draftCertificate ? 1 : 0) }}</span>
+        </button>
+        <button class="type-card" [class.active]="activeType === 'practice'" (click)="selectType('practice')">
+            <mat-icon class="card-icon">biotech</mat-icon>
+            <span class="card-label">Prácticas</span>
+            <span class="card-count">{{ practices.length + (draftPractice ? 1 : 0) }}</span>
+        </button>
+    </div>
+
+    <div class="loading-bar" *ngIf="isLoading">
+        <mat-icon class="spin">sync</mat-icon>
+        Cargando documentos previos…
+    </div>
+
+    <ng-container *ngIf="!isLoading">
+
+        <div class="draft-toolbar" *ngIf="activeType === 'prescription'">
+            <div class="draft-toolbar-left">
+                <h3>Receta en construcción</h3>
+                <p>Editá cantidades o quitá medicamentos antes de emitir.</p>
+            </div>
+            <button matButton="filled" class="create-btn" (click)="createDocument.emit('prescription')">
+                <mat-icon>add</mat-icon>
+                Agregar medicamento
+            </button>
+        </div>
+
+        <div class="history-head" *ngIf="activeType !== 'prescription'">
+            <h3>
+                {{ activeType === 'certificate' ? 'Últimos certificados emitidos' :
+                'Últimas prácticas emitidas' }}
+            </h3>
+            <button matButton="filled" class="create-btn" (click)="createDocument.emit(activeType)">
+                <mat-icon>add</mat-icon>
+                {{ activeType === 'certificate' ? 'Crear certificado' :
+                'Crear práctica' }}
+            </button>
+        </div>
+
+        <div class="history-list" *ngIf="activeType === 'prescription'">
+            <div class="draft-section" *ngIf="draftMedications.length > 0">
+                <div class="draft-banner">
+                    <span class="pulse-dot"></span>
+                    <span>Borrador · no emitido</span>
+                    <span class="banner-hint">Aún no fue firmado ni enviado al paciente.</span>
+                </div>
+
+                <div class="draft-list">
+                    <div class="history-item draft-item" *ngFor="let item of draftMedications; let i = index">
+                        <div class="item-icon-box draft">
+                            <mat-icon class="sm">medication</mat-icon>
+                        </div>
+                        <div class="item-body">
+                            <div class="item-title">{{ item.supply?.nombre || item.snomedConcept?.term || 'Medicamento'
+                                }}</div>
+                            <div class="item-meta">
+                                <span>{{ item.supply?.presentacion || item.snomedConcept?.fsn || '' }}</span>
+                                <span *ngIf="item.supply?.precio != null" class="item-price"> · ${{
+                                    item.supply.precio.toFixed(2) }}</span>
+                            </div>
+                            <div class="item-meta diagnostic-text" *ngIf="item.diagnostic">
+                                Diagnóstico: {{ item.diagnostic }}
+                            </div>
+                        </div>
+                        <div class="draft-item-footer">
+                            <div class="qty" role="group">
+                                <button class="qty-btn" (click)="$event.stopPropagation(); changeQuantity(i, -1)">
+                                    <mat-icon>remove</mat-icon>
+                                </button>
+                                <span class="qty-value">{{ item.quantity }}</span>
+                                <button class="qty-btn" (click)="$event.stopPropagation(); changeQuantity(i, 1)">
+                                    <mat-icon>add</mat-icon>
+                                </button>
+                            </div>
+                            <div class="draft-actions">
+                                <button matButton="tonal" class="btn-icon btn-info" matTooltip="Editar"
+                                    (click)="$event.stopPropagation(); editMedication.emit(i)">
+                                    <mat-icon>edit</mat-icon>
+                                </button>
+                                <button matButton="tonal" class="btn-icon btn-warn" matTooltip="Quitar"
+                                    (click)="$event.stopPropagation(); removeMedication.emit(i)">
+                                    <mat-icon>delete_outline</mat-icon>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="draft-empty" *ngIf="draftMedications.length === 0">
+                Usá el botón <a (click)="createDocument.emit('prescription')">Agregar medicamento</a> para empezar una
+                receta nueva.
+            </div>
+
+            <ui-section-divider *ngIf="prescriptions.length > 0">Historial</ui-section-divider>
+
+            <ui-table [dataSource]="prescriptions" [columns]="prescriptionColumns" dense
+                *ngIf="prescriptions.length > 0">
+
+                <ng-template uiTableDetail let-element>
+                    <div class="h-detail-grid">
+                        <div class="h-detail-item">
+                            <span class="h-detail-label">Medicamento</span>
+                            <span class="h-detail-value">{{ getPrescriptionMedName(element) }}</span>
+                        </div>
+                        <div class="h-detail-item">
+                            <span class="h-detail-label">Estado</span>
+                            <span class="h-detail-value">{{ element.status }}</span>
+                        </div>
+                        <div class="h-detail-item">
+                            <span class="h-detail-label">Medicamentos</span>
+                            <span class="h-detail-value mono">{{ element.supplies?.length || 0 }}</span>
+                        </div>
+                        <div class="h-detail-item">
+                            <span class="h-detail-label">Emitida</span>
+                            <span class="h-detail-value">{{ element.date | date:'dd/MM/yyyy HH:mm' }}
+                                hs</span>
+                        </div>
+                    </div>
+                </ng-template>
+            </ui-table>
+
+            <div class="history-empty" *ngIf="prescriptions.length === 0">
+                No hay recetas previas para este paciente
+            </div>
+        </div>
+
+        <div class="history-list" *ngIf="activeType === 'certificate'">
+            <!-- Draft certificate (being added right now) -->
+            <div class="history-item draft-item" *ngIf="draftCertificate">
+                <div class="draft-tag">Borrador</div>
+                <div class="item-icon-box draft">
+                    <mat-icon class="sm">description</mat-icon>
+                </div>
+                <div class="item-body">
+                    <div class="item-title">{{ draftCertificate.certificate }}</div>
+                    <div class="item-meta">
+                        <span>{{ draftCertificate.startDate | date:'dd/MM/yyyy' }}</span>
+                        <span *ngIf="draftCertificate.cantDias"> · {{ draftCertificate.cantDias }} día(s)</span>
+                    </div>
+                </div>
+                <div class="draft-actions">
+                    <button matButton="tonal" class="btn-icon btn-info" matTooltip="Editar"
+                        (click)="$event.stopPropagation(); editCertificate.emit()">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                    <button matButton="tonal" class="btn-icon btn-warn" matTooltip="Quitar"
+                        (click)="$event.stopPropagation(); removeCertificate.emit()">
+                        <mat-icon>delete_outline</mat-icon>
+                    </button>
+                </div>
+            </div>
+
+            <ui-section-divider *ngIf="draftCertificate && certificates.length > 0">Historial</ui-section-divider>
+
+            <div class="history-item" *ngFor="let c of certificates">
+                <div class="item-icon-box">
+                    <mat-icon class="sm">description</mat-icon>
+                </div>
+                <div class="item-body">
+                    <div class="item-title">{{ c.certificate }}</div>
+                    <div class="item-meta">
+                        <span>{{ c.startDate | date:'dd/MM/yyyy' }}</span>
+                        <span *ngIf="c.cantDias"> · {{ c.cantDias }} día(s)</span>
+                    </div>
+                </div>
+                <ui-badge variant="success" size="sm">{{ c.status || 'activo' }}</ui-badge>
+                <button matButton="tonal" class="btn-icon btn-neutral" matTooltip="Duplicar certificado"
+                    (click)="$event.stopPropagation(); duplicateDocument.emit({ type: 'certificate', document: c })">
+                    <mat-icon>file_copy</mat-icon>
+                </button>
+            </div>
+            <div class="history-empty" *ngIf="certificates.length === 0 && !draftCertificate">
+                No hay certificados previos para este paciente
+            </div>
+        </div>
+
+        <div class="history-list" *ngIf="activeType === 'practice'">
+            <!-- Draft practice (being added right now) -->
+            <div class="history-item draft-item" *ngIf="draftPractice">
+                <div class="draft-tag">Borrador</div>
+                <div class="item-icon-box draft">
+                    <mat-icon class="sm">stethoscope</mat-icon>
+                </div>
+                <div class="item-body">
+                    <div class="item-title">{{ draftPractice.practice }}</div>
+                    <div class="item-meta" *ngIf="draftPractice.diagnostic">
+                        {{ draftPractice.diagnostic }}
+                    </div>
+                </div>
+                <div class="draft-actions">
+                    <button matButton="tonal" class="btn-icon btn-info" matTooltip="Editar"
+                        (click)="$event.stopPropagation(); editPractice.emit()">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                    <button matButton="tonal" class="btn-icon btn-warn" matTooltip="Quitar"
+                        (click)="$event.stopPropagation(); removePractice.emit()">
+                        <mat-icon>delete_outline</mat-icon>
+                    </button>
+                </div>
+            </div>
+
+            <ui-section-divider *ngIf="draftPractice && practices.length > 0">Historial</ui-section-divider>
+
+            <div class="history-item" *ngFor="let p of practices">
+                <div class="item-icon-box">
+                    <mat-icon class="sm">stethoscope</mat-icon>
+                </div>
+                <div class="item-body">
+                    <div class="item-title">{{ p.practice }}</div>
+                    <div class="item-meta">
+                        <span>{{ p.date | date:'dd/MM/yyyy' }}</span>
+                        <span *ngIf="p.diagnostic"> · {{ p.diagnostic }}</span>
+                    </div>
+                </div>
+                <ui-badge [variant]="p.status === 'activa' ? 'success' : p.status === 'pendiente' ? 'warning' : 'info'"
+                    size="sm">{{ p.status }}</ui-badge>
+                <button matButton="tonal" class="btn-icon btn-neutral" matTooltip="Duplicar práctica"
+                    (click)="$event.stopPropagation(); duplicateDocument.emit({ type: 'practice', document: p })">
+                    <mat-icon>file_copy</mat-icon>
+                </button>
+            </div>
+            <div class="history-empty" *ngIf="practices.length === 0 && !draftPractice">
+                No hay prácticas previas para este paciente
+            </div>
+        </div>
+
+    </ng-container>
+
+</ng-container>

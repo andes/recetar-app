@@ -1,0 +1,33 @@
+<div class="form-field">
+    <label>{{ label }}</label>
+    <div class="input-wrap"
+        [class.error]="control?.invalid && control?.touched"
+        [class.select-wrap]="type === 'select'"
+        [class.textarea]="type === 'textarea'">
+
+        <ng-container [ngSwitch]="type">
+            <select *ngSwitchCase="'select'" [formControl]="control">
+                <option value="" disabled hidden>Seleccionar</option>
+                <option *ngFor="let opt of options" [value]="opt">{{ opt }}</option>
+            </select>
+
+            <textarea *ngSwitchCase="'textarea'" [formControl]="control"
+                [placeholder]="placeholder || ''"></textarea>
+
+            <input *ngSwitchDefault [formControl]="control"
+                [type]="type" [placeholder]="placeholder || ''"
+                [maxlength]="maxlength" [attr.inputmode]="inputmode"
+                [min]="min" [max]="max" />
+        </ng-container>
+
+        <button *ngIf="suffixIcon" type="button" class="field-icon-btn" (click)="suffixClick.emit()" tabindex="-1">
+            <mat-icon>{{ suffixIcon }}</mat-icon>
+        </button>
+    </div>
+
+    <ng-container *ngFor="let entry of errors | keyvalue">
+        <span class="field-error" *ngIf="control?.hasError(entry.key) && (control?.touched || submitted)">
+            {{ entry.value }}
+        </span>
+    </ng-container>
+</div>

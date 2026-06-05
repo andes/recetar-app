@@ -1,0 +1,22 @@
+<div class="certificate-form">
+    <app-form-field type="text" label="Tipo de certificado" [control]="form.get('certificate')"
+        [errors]="{ required: 'Debe ingresar el tipo de certificado' }">
+    </app-form-field>
+
+    <div class="form-row">
+        <app-form-field type="date" label="Fecha de inicio" [control]="form.get('startDate')"
+            [errors]="{ required: 'Debe seleccionar una fecha' }">
+        </app-form-field>
+        <app-form-field type="number" label="Cantidad de días" [control]="form.get('cantDias')"
+            [errors]="{ required: 'Debe ingresar la cantidad de días', min: 'Mínimo 1 día' }">
+        </app-form-field>
+    </div>
+
+    <div class="form-actions">
+        <button matButton="filled" (click)="save()">
+            <mat-icon>{{ data ? 'save' : 'add_circle' }}</mat-icon>
+            {{ data ? 'Guardar cambios' : 'Agregar certificado' }}
+        </button>
+        <button mat-stroked-button *ngIf="data" (click)="cancel()">Cancelar edición</button>
+    </div>
+</div>

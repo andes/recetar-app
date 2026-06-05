@@ -1,0 +1,228 @@
+<app-canvas [showSidebar]="true" [sidebarItems]="sidebarItems" [noCard]="true">
+    <ui-card icon="description" title="Documentos"
+        subtitle="Visualización de recetas, certificados, prácticas e insumos">
+        <div class="search-section">
+            <ui-search-bar [control]="searchControl" placeholder="Filtrar por nombre o documento" [stretch]="true"
+                [isLoading]="isLoading()">
+            </ui-search-bar>
+            <div class="type-row">
+                <ui-toggle [options]="typeOptions" [value]="selectedType" (valueChange)="onTypeChange($event)">
+                </ui-toggle>
+            </div>
+        </div>
+    </ui-card>
+
+    <div *ngIf="!selectedType" class="empty-state">
+        <ui-icon icon="description" variant="primary" size="lg"></ui-icon>
+        <p>Seleccione un tipo de documento para visualizar</p>
+    </div>
+
+    <!-- Medicamentos -->
+    <ui-card *ngIf="selectedType === 'receta'" icon="medication" title="Medicamentos"
+        class="results-section">
+        <div *ngIf="loadingPrescriptions" class="loading-container">
+            <mat-spinner diameter="40"></mat-spinner>
+        </div>
+        <div *ngIf="!loadingPrescriptions" class="table-container">
+            <table mat-table [dataSource]="dataSourcePrescriptions" matSort>
+                <ng-container matColumnDef="fecha">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
+                    <td mat-cell *matCellDef="let item">
+                        {{ isAndesPrescription(item) ? (item.fechaPrestacion || item.fechaRegistro | date:'dd/MM/yyyy') : (item.date | date:'dd/MM/yyyy') }}
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="paciente">
+                    <th mat-header-cell *matHeaderCellDef>Paciente</th>
+                    <td mat-cell *matCellDef="let item">
+                        {{ getPrescriptionPatient(item) | patientName }}
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="medicamento">
+                    <th mat-header-cell *matHeaderCellDef>Medicamento</th>
+                    <td mat-cell *matCellDef="let item">
+                        {{ getPrescriptionMedicamento(item) }}
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="estado">
+                    <th mat-header-cell *matHeaderCellDef>Estado</th>
+                    <td mat-cell *matCellDef="let item">
+                        <ui-badge [variant]="getStatusVariant(getPrescriptionStatus(item))" class="status-badge">
+                            {{ getStatusLabel(getPrescriptionStatus(item)) }}
+                        </ui-badge>
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef></th>
+                    <td mat-cell *matCellDef="let item">
+                        <button mat-icon-button (click)="printPrescription(item)" matTooltip="Imprimir">
+                            <mat-icon>print</mat-icon>
+                        </button>
+                        <button mat-icon-button (click)="deletePrescription(item)" matTooltip="Eliminar">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="prescriptionColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: prescriptionColumns;"></tr>
+            </table>
+            <mat-paginator [length]="totalPrescriptions" [pageSize]="pageSize" [pageIndex]="pageIndex"
+                [pageSizeOptions]="[5, 10, 25]" (page)="onPageChange($event)">
+            </mat-paginator>
+        </div>
+    </ui-card>
+
+    <!-- Certificados -->
+    <ui-card *ngIf="selectedType === 'certificados'" icon="assignment" title="Certificados"
+        class="results-section">
+        <div *ngIf="loadingCertificates" class="loading-container">
+            <mat-spinner diameter="40"></mat-spinner>
+        </div>
+        <div *ngIf="!loadingCertificates" class="table-container">
+            <table mat-table [dataSource]="dataSourceCertificates" matSort>
+                <ng-container matColumnDef="fecha">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
+                    <td mat-cell *matCellDef="let item">
+                        {{ item.createdAt | date:'dd/MM/yyyy' }}
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="paciente">
+                    <th mat-header-cell *matHeaderCellDef>Paciente</th>
+                    <td mat-cell *matCellDef="let item">
+                        {{ item.patient | patientName }}
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="certificado">
+                    <th mat-header-cell *matHeaderCellDef>Certificado</th>
+                    <td mat-cell *matCellDef="let item">
+                        {{ item.certificate }}
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="vigencia">
+                    <th mat-header-cell *matHeaderCellDef>Vigencia</th>
+                    <td mat-cell *matCellDef="let item">
+                        {{ item.startDate | date:'dd/MM/yyyy' }} — {{ item.endDate | date:'dd/MM/yyyy' }}
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="estado">
+                    <th mat-header-cell *matHeaderCellDef>Estado</th>
+                    <td mat-cell *matCellDef="let item">
+                        <ui-badge [variant]="getCertificateStatusVariant(item)" class="status-badge">
+                            {{ getCertificateStatusLabel(item) }}
+                        </ui-badge>
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef></th>
+                    <td mat-cell *matCellDef="let item">
+                        <button mat-icon-button (click)="printCertificate(item)" matTooltip="Imprimir">
+                            <mat-icon>print</mat-icon>
+                        </button>
+                        <button mat-icon-button *ngIf="!item.anulateDate" (click)="anulateCertificate(item)"
+                            matTooltip="Anular">
+                            <mat-icon>block</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="certificateColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: certificateColumns;"></tr>
+            </table>
+            <mat-paginator [length]="totalCertificates" [pageSize]="pageSize" [pageIndex]="pageIndex"
+                [pageSizeOptions]="[5, 10, 25]" (page)="onPageChange($event)">
+            </mat-paginator>
+        </div>
+    </ui-card>
+
+    <!-- Prácticas -->
+    <ui-card *ngIf="selectedType === 'practicas'" icon="biotech" title="Prácticas"
+        class="results-section">
+        <div *ngIf="loadingPractices" class="loading-container">
+            <mat-spinner diameter="40"></mat-spinner>
+        </div>
+        <div *ngIf="!loadingPractices" class="table-container">
+            <table mat-table [dataSource]="dataSourcePractices" matSort>
+                <ng-container matColumnDef="fecha">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
+                    <td mat-cell *matCellDef="let item">
+                        {{ item.date | date:'dd/MM/yyyy' }}
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="paciente">
+                    <th mat-header-cell *matHeaderCellDef>Paciente</th>
+                    <td mat-cell *matCellDef="let item">
+                        {{ item.patient | patientName }}
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="practica">
+                    <th mat-header-cell *matHeaderCellDef>Práctica</th>
+                    <td mat-cell *matCellDef="let item">
+                        {{ item.practice }}
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="diagnostico">
+                    <th mat-header-cell *matHeaderCellDef>Diagnóstico</th>
+                    <td mat-cell *matCellDef="let item">
+                        {{ item.diagnostic || '—' }}
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="estado">
+                    <th mat-header-cell *matHeaderCellDef>Estado</th>
+                    <td mat-cell *matCellDef="let item">
+                        <ui-badge [variant]="getStatusVariant(item.status || '')" class="status-badge">
+                            {{ getStatusLabel(item.status || '') }}
+                        </ui-badge>
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef></th>
+                    <td mat-cell *matCellDef="let item">
+                        <button mat-icon-button (click)="printPractice(item)" matTooltip="Imprimir">
+                            <mat-icon>print</mat-icon>
+                        </button>
+                        <button mat-icon-button (click)="deletePractice(item)" matTooltip="Eliminar">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="practiceColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: practiceColumns;"></tr>
+            </table>
+            <mat-paginator [length]="totalPractices" [pageSize]="pageSize" [pageIndex]="pageIndex"
+                [pageSizeOptions]="[5, 10, 25]" (page)="onPageChange($event)">
+            </mat-paginator>
+        </div>
+    </ui-card>
+
+    <!-- Insumos -->
+    <ui-card *ngIf="selectedType === 'insumos'" icon="inventory_2" title="Insumos"
+        class="results-section">
+        <div *ngIf="loadingSupplies" class="loading-container">
+            <mat-spinner diameter="40"></mat-spinner>
+        </div>
+        <div *ngIf="!loadingSupplies" class="table-container">
+            <table mat-table [dataSource]="dataSourceSupplies" matSort>
+                <ng-container matColumnDef="nombre">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre</th>
+                    <td mat-cell *matCellDef="let item">
+                        {{ item.name || item.insumo || item.supply || '—' }}
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="tipo">
+                    <th mat-header-cell *matHeaderCellDef>Tipo</th>
+                    <td mat-cell *matCellDef="let item">
+                        {{ formatTipoInsumo(item.tipo || item.type) }}
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="estado">
+                    <th mat-header-cell *matHeaderCellDef>Estado</th>
+                    <td mat-cell *matCellDef="let item">
+                        <ui-badge [variant]="getSupplyStatusVariant(item)" class="status-badge">
+                            {{ getSupplyStatusLabel(item) }}
+                        </ui-badge>
+                    </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="supplyColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: supplyColumns;"></tr>
+            </table>
+        </div>
+    </ui-card>
+</app-canvas>

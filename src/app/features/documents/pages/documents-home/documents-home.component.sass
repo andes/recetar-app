@@ -1,0 +1,85 @@
+@use 'styles/variables' as *
+
+\:host
+    display: block
+    height: 100%
+
+.search-section
+    display: flex
+    flex-direction: column
+    gap: var(--space-3)
+
+    @media (min-width: 769px)
+        flex-direction: row
+        align-items: center
+
+.results-section
+    margin-top: var(--space-4)
+
+.type-row
+    display: flex
+    align-items: center
+    justify-content: flex-start
+
+.empty-state
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    gap: var(--space-4)
+    padding: var(--space-10) var(--space-4)
+    color: var(--text-secondary)
+
+    p
+        margin: 0
+        font-size: .875rem
+
+.table-container
+    overflow-x: auto
+
+    table
+        width: 100%
+
+    .mat-mdc-row
+        cursor: default
+
+        &:hover
+            background: var(--hover-bg)
+
+.mat-column-acciones
+    width: 100px
+    text-align: center
+    white-space: nowrap
+
+.status-badge
+    display: inline-flex
+
+.loading-container
+    display: flex
+    justify-content: center
+    padding: var(--space-6)
+
+.expanded-detail
+    padding: var(--space-3) var(--space-5)
+    background: var(--bg-over-body)
+    font-size: .8125rem
+
+.detail-label
+    font-weight: 600
+    color: var(--text-secondary)
+    margin-right: var(--space-1)
+
+.detail-value
+    color: var(--text-primary)
+
+.mobile-label
+    display: none
+    font-weight: 600
+    font-size: .75rem
+    color: var(--text-secondary)
+
+@media (max-width: 768px)
+    .mat-column-diagnostico,
+    .mat-column-vigencia,
+    .mat-column-tipo
+        display: none

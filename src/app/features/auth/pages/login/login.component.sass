@@ -1,0 +1,131 @@
+@use 'styles/variables' as *
+
+:host
+    display: block
+    height: 100%
+
+    ::ng-deep .canvas-body
+        padding: 0 !important
+        gap: 0
+
+    ::ng-deep .canvas-content-inner
+        max-width: none !important
+        padding: 0
+
+// ==================== LAYOUT ====================
+
+.split-layout
+    display: grid
+    grid-template-columns: 1fr
+    min-height: 100vh
+
+    @media (min-width: $small-devices + 1px)
+        grid-template-columns: 1fr 1fr
+
+// ==================== FORM PANEL ====================
+
+.form-panel
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    padding: var(--space-10) var(--space-6)
+    background: var(--bg-body)
+
+    @media (min-width: $small-devices + 1px)
+        padding: var(--space-12) var(--space-8)
+
+.form-wrapper
+    width: 100%
+    max-width: 400px
+
+.logo-area
+    display: flex
+    flex-direction: column
+    align-items: center
+    gap: var(--space-1)
+    margin-bottom: var(--space-8)
+
+    @media (min-width: $small-devices + 1px)
+        gap: var(--space-2)
+        margin-bottom: var(--space-10)
+
+.logo-img
+    width: 80px
+    height: 80px
+    margin-bottom: var(--space-4)
+
+.brand-subtitle
+    color: var(--text-secondary)
+
+// ==================== FORM ====================
+
+.form-header
+    p
+        color: var(--text-secondary)
+
+// ==================== FOOTER ====================
+
+.form-footer
+    display: flex
+    flex-direction: column
+    align-items: center
+    gap: var(--space-3)
+    margin-top: var(--space-2)
+
+    a
+        color: var(--secondary)
+        cursor: pointer
+        text-decoration: none
+
+        &:hover
+            text-decoration: underline
+
+.register-links
+    display: flex
+    flex-direction: column
+    gap: var(--space-2)
+    width: 100%
+
+    button
+        width: 100%
+
+// ==================== INSTITUTIONAL PANEL ====================
+
+.inst-panel
+    display: none
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    padding: var(--space-16)
+    background: linear-gradient(160deg, var(--secondary-dark) 0%, var(--primary-dark) 100%)
+    color: var(--text-primary-light)
+    overflow: hidden
+
+    @media (min-width: $small-devices + 1px)
+        display: flex
+
+.inst-content
+    text-align: center
+    max-width: 440px
+
+    p
+        color: var(--primary-400)
+
+.inst-logo
+    width: 90px
+    height: 90px
+    margin-bottom: var(--space-8)
+    filter: brightness(0) invert(1)
+    opacity: 0.9
+
+.inst-stat
+    display: flex
+    flex-direction: column
+    align-items: center
+    gap: var(--space-1)
+
+.inst-footer
+    position: absolute
+    bottom: var(--space-8)
+    color: var(--text-secondary)

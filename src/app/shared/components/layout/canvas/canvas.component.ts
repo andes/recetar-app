@@ -1,5 +1,6 @@
 import { Component, Input, HostBinding } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatCardModule } from '@angular/material/card';
 import { HeaderComponent } from '@shared/layouts/header/header.component';
 import { SidebarComponent, SidebarItem } from '../sidebar/sidebar.component';
 import { FooterComponent } from '@shared/layouts/footer/footer.component';
@@ -12,6 +13,7 @@ import { BreakpointService } from '@shared/services/breakpoint.service';
     standalone: true,
     imports: [
         CommonModule,
+        MatCardModule,
         HeaderComponent,
         SidebarComponent,
         FooterComponent
@@ -22,6 +24,8 @@ export class CanvasComponent {
     @Input() showSidebar = false;
     @Input() showFooter = true;
     @Input() sidebarItems: SidebarItem[] = [];
+    @Input() adjustContent = false;
+    @Input() noCard = false;
 
     sidebarCollapsed = false;
     sidebarOpen = false;

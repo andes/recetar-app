@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { catchError, tap, map } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { Patient, PatientAdapter } from '../interfaces/patients';
+import { PatientPayload } from '@models/dto/patients.dto';
 
 @Injectable({
     providedIn: 'root'
@@ -33,6 +34,14 @@ export class PatientsService {
         );
     }
 
+    searchPatients(term: string): Observable<Patient[]> {
+        return this.http.get<Patient[]>(`${environment.API_END_POINT}/patients/search`, {
+            params: { q: term }
+        }).pipe(
+            map((patients: Patient[]) => patients.map((patient) => this.patientAdapter.adapt(patient)))
+        );
+    }
+
     getPatientById(id: string): Observable<Patient> {
         return this.http.get<Patient>(`${environment.API_END_POINT}/patients/${id}`).pipe(
             map((patient: Patient) => this.patientAdapter.adapt(patient)),
@@ -49,8 +58,29 @@ export class PatientsService {
         );
     }
 
+    createPatient(patient: PatientPayload): Observable<Patient> {
+        return this.http.post<Patient>(`${environment.API_END_POINT}/patients`, patient).pipe(
+            map((newPatient: Patient) => this.patientAdapter.adapt(newPatient))
+        );
+    }
+
+    updatePatient(id: string, patient: Partial<PatientPayload>): Observable<Patient> {
+        return this.http.patch<Patient>(`${environment.API_END_POINT}/patients/${id}`, patient).pipe(
+            map((updatedPatient: Patient) => this.patientAdapter.adapt(updatedPatient))
+        );
+    }
+
     getPatientInsurance(dni: string) {
         return this.http.get<unknown>(`https://app.andes.gob.ar/api/modules/obraSocial/puco/?dni=${dni}`);
+    }
+
+    validatePatient(dni: string, sexo: string): Observable<Patient> {
+        return this.http.post<Patient>(`${environment.API_END_POINT}/patients/validate`, {
+            dni,
+            sexo
+        }).pipe(
+            map((patient: Patient) => this.patientAdapter.adapt(patient))
+        );
     }
 
     private handleError<T>(operation = 'operation', result?: T) {

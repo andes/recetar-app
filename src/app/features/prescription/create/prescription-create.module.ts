@@ -1,0 +1,53 @@
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { PrescriptionCreateRoutingModule, routingComponents } from './prescription-create-routing.module';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { SharedModule } from '@shared/shared.module';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatTableModule } from '@angular/material/table';
+import { EditPatientComponent } from '@shared/components/edit-patient/edit-patient.component';
+import { FormFieldComponent } from '@shared/components/form-field/form-field.component';
+import { PatientItemComponent } from './components/patient-item/patient-item.component';
+import { MedicationItemComponent } from './components/medication-item/medication-item.component';
+import { DocumentTabsComponent } from './pages/new-prescription/document-tabs/document-tabs.component';
+import { CertificateFormComponent } from './pages/new-prescription/certificate-form/certificate-form.component';
+import { PracticeFormComponent } from './pages/new-prescription/practice-form/practice-form.component';
+
+@NgModule({
+    declarations: [
+        routingComponents,
+        DocumentTabsComponent,
+        CertificateFormComponent,
+        PracticeFormComponent,
+    ],
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        FormsModule,
+        PrescriptionCreateRoutingModule,
+        FlexLayoutModule,
+        SharedModule,
+        MatCardModule,
+        MatIconModule,
+        MatButtonModule,
+        MatProgressSpinnerModule,
+        MatChipsModule,
+        MatBadgeModule,
+        MatPaginatorModule,
+        MatTabsModule,
+        MatTableModule,
+        EditPatientComponent,
+        FormFieldComponent,
+        PatientItemComponent,
+        MedicationItemComponent,
+    ]
+})
+export class PrescriptionCreateModule { }

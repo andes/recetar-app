@@ -1,0 +1,66 @@
+@use 'styles/variables' as *
+
+:host
+    display: block
+
+h2[mat-dialog-title]
+    display: flex
+    align-items: center
+    gap: $space-2
+    font-size: 1.25rem
+    font-weight: 600
+    color: var(--text-primary)
+
+    mat-icon
+        color: var(--secondary)
+
+mat-dialog-content
+    p
+        color: var(--text-secondary)
+        margin-bottom: $space-4
+
+.biometric-loading
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    padding: $space-8
+    gap: $space-4
+
+    p
+        color: var(--text-secondary)
+        font-size: 0.875rem
+        margin: 0
+        text-align: center
+
+.pin-field
+    width: 100%
+    max-width: 200px
+    margin: 0 auto
+
+    input
+        text-align: center
+        font-size: 1.5rem
+        letter-spacing: 0.5rem
+        font-family: $font-mono
+
+.error-message
+    display: flex
+    align-items: center
+    gap: $space-2
+    padding: $space-3
+    background: var(--error-bg)
+    color: var(--error-text)
+    border-radius: $radius-sm
+    margin-top: $space-3
+    font-size: 0.875rem
+
+    mat-icon
+        font-size: 1.125rem
+        width: 1.125rem
+        height: 1.125rem
+
+mat-dialog-actions
+    margin-top: $space-4
+    padding-top: $space-4
+    border-top: 1px solid var(--border-color)

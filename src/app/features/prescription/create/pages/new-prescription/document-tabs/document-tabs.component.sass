@@ -1,0 +1,385 @@
+@use 'styles/variables' as *
+
+.disabled-msg
+    display: flex
+    flex-direction: column
+    align-items: center
+    gap: $space-2
+    padding: $space-8 $space-4
+    color: var(--text-disabled)
+    text-align: center
+    mat-icon
+        font-size: 40px
+        width: 40px
+        height: 40px
+
+.loading-bar
+    display: flex
+    align-items: center
+    justify-content: center
+    gap: $space-2
+    padding: $space-6 0
+    color: var(--text-secondary)
+    .spin
+        animation: spin 1s linear infinite
+        @keyframes spin
+            to
+                transform: rotate(360deg)
+
+// ==================== TYPE CARDS ====================
+
+.type-cards
+    display: flex
+    gap: $space-2 + 2px
+    margin-bottom: $space-6
+
+.type-card
+    display: flex
+    align-items: center
+    gap: $space-2
+    padding: $space-3 $space-5
+    border: 1px solid var(--border-color)
+    border-radius: $radius-sm
+    background: var(--bg-card)
+    cursor: pointer
+    transition: all .12s
+    font-size: 13px
+
+    &:hover
+        border-color: var(--secondary-100)
+
+    &.active
+        border-color: var(--secondary)
+        background: var(--secondary-50)
+
+    .card-icon
+        font-size: 18px
+        width: 18px
+        height: 18px
+
+    .card-label
+        font-weight: 500
+
+    .card-count
+        font-size: 12px
+        font-weight: 600
+        background: var(--bg-over-body)
+        color: var(--text-secondary)
+        padding: 3px 6px
+        border-radius: $radius-full
+
+    &.active
+        .card-icon, .card-label
+            color: var(--secondary)
+        .card-count
+            background: var(--secondary)
+            color: var(--text-primary-light)
+
+// ==================== HISTORY SECTION ====================
+
+.history-head
+    display: flex
+    align-items: center
+    justify-content: space-between
+    margin-bottom: $space-3
+
+.create-btn
+    white-space: nowrap
+
+// ==================== HISTORY LIST ====================
+
+.history-list
+    display: flex
+    flex-direction: column
+    gap: 6px
+
+.history-item
+    display: flex
+    align-items: center
+    gap: $space-3
+    padding: $space-5 $space-4
+    border: 1px solid var(--border-color)
+    border-radius: $radius-sm
+    cursor: pointer
+    transition: background .1s
+
+    &:hover
+        background: var(--primary-50)
+
+    .item-icon-box
+        width: 32px
+        height: 32px
+        border-radius: 6px
+        background: var(--bg-over-body)
+        display: flex
+        align-items: center
+        justify-content: center
+        flex-shrink: 0
+
+    .item-body
+        flex: 1
+        min-width: 0
+        display: flex
+        flex-direction: column
+        gap: var(--space-1)
+
+    .item-title
+        font-size: 13px
+        font-weight: 500
+
+    .item-meta
+        font-size: 12px
+        color: var(--text-secondary)
+        display: flex
+        gap: 4px
+
+.history-empty
+    text-align: center
+    padding: 28px 16px
+    color: var(--text-disabled)
+    font-size: 13px
+
+// ==================== DRAFT TOOLBAR ====================
+
+.draft-toolbar
+    display: flex
+    align-items: center
+    justify-content: space-between
+    margin-bottom: $space-5
+
+    .draft-toolbar-left
+        // h3
+        //     margin: 0
+        //     font-size: 15px
+        //     font-weight: 600
+        //     color: var(--text-primary)
+        p
+            // margin: 3px 0 0
+            font-size: 13px
+            color: var(--text-secondary)
+
+// ==================== DRAFT SECTION (highlighted) ====================
+
+.draft-section
+    border: 1px solid $secondary-200
+    background: linear-gradient(to bottom, $secondary-50, var(--bg-card) 60%)
+    border-radius: $radius-md
+    overflow: hidden
+    margin-bottom: $space-5
+
+    .draft-list
+        padding: $space-3 $space-3
+        display: flex
+        flex-direction: column
+        gap: $space-2 + 2px
+
+.draft-banner
+    display: flex
+    align-items: center
+    gap: $space-2
+    padding: $space-2 + 2px $space-4
+    background: $secondary-50
+    color: $secondary
+    font-size: 11px
+    font-weight: 700
+    text-transform: uppercase
+    letter-spacing: .04em
+    border-bottom: 1px solid $secondary-200
+
+    .pulse-dot
+        width: 8px
+        height: 8px
+        border-radius: 50%
+        background: $secondary
+        box-shadow: 0 0 0 4px rgba($secondary, .18)
+        animation: pulse 1.6s infinite
+
+    .banner-hint
+        margin-left: auto
+        text-transform: none
+        letter-spacing: 0
+        color: var(--text-secondary)
+        font-weight: 500
+        font-size: 11.5px
+
+.draft-footer
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: $space-3
+    padding: $space-3 $space-4
+    background: $secondary-50
+    border-top: 1px dashed $secondary-200
+    font-size: 12.5px
+
+    .draft-summary
+        color: var(--text-secondary)
+
+        b
+            color: var(--text-primary)
+
+    .draft-footer-actions
+        display: flex
+        gap: $space-2
+
+.draft-empty
+    padding: $space-5 $space-4
+    text-align: center
+    font-size: 12.5px
+    color: var(--text-disabled)
+
+    a
+        color: $secondary
+        font-weight: 600
+        text-decoration: none
+
+        &:hover
+            text-decoration: underline
+
+@keyframes pulse
+    0%
+        box-shadow: 0 0 0 0 rgba($secondary, .4)
+    70%
+        box-shadow: 0 0 0 8px rgba($secondary, 0)
+    100%
+        box-shadow: 0 0 0 0 rgba($secondary, 0)
+
+// ==================== DRAFT ITEMS (inside section) ====================
+
+.history-item.draft-item
+    cursor: default
+    border-color: $secondary-200
+    margin-bottom: 0
+    background: var(--bg-card)
+
+    // &:hover
+    //     background: $secondary-50
+
+    //     .draft-actions .btn-icon
+    //         background: var(--bg-card)
+
+    .item-icon-box.draft
+        background: $secondary-50
+        color: $secondary
+
+    .item-title
+        text-transform: uppercase
+
+    .draft-item-footer
+        display: flex
+        align-items: center
+        gap: $space-2
+        flex-shrink: 0
+        margin-left: auto
+
+    @media (max-width: $small-devices)
+        flex-wrap: wrap
+
+        .draft-item-footer
+            width: 100%
+            margin-left: 0
+            justify-content: space-between
+
+.draft-actions
+    display: flex
+    gap: 4px
+    flex-shrink: 0
+
+// ==================== QUANTITY CONTROLS ====================
+
+.qty
+    display: inline-flex
+    align-items: center
+    gap: $space-1
+
+    .qty-btn
+        width: 34px
+        height: 34px
+        border-radius: $radius-sm
+        border: 1px solid var(--border-color)
+        background: var(--bg-card)
+        color: var(--text-secondary)
+        cursor: pointer
+        display: inline-flex
+        align-items: center
+        justify-content: center
+        padding: 0
+        transition: background .12s, border-color .12s
+
+        &:hover
+            background: var(--hover-bg)
+            color: var(--text-primary)
+            border-color: var(--border-strong)
+
+        .mat-icon
+            font-size: 18px
+            width: 18px
+            height: 18px
+
+    .qty-value
+        min-width: 32px
+        text-align: center
+        font-size: 13px
+        font-weight: 600
+        color: var(--text-primary)
+        font-family: var(--font-mono)
+        line-height: 34px
+        border-radius: $radius-sm
+        background: var(--bg-over-body)
+        padding: 0 $space-1
+
+// ==================== PRICE ====================
+
+.item-price
+    font-weight: 500
+    color: var(--text-primary)
+    font-family: var(--font-mono)
+
+// ==================== DIAGNOSTIC ====================
+
+.diagnostic-text
+    display: -webkit-box
+    -webkit-line-clamp: 2
+    -webkit-box-orient: vertical
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: normal
+
+// ==================== HISTORY CELL CONTENT ====================
+
+.h-date
+    font-family: var(--font-mono)
+    font-size: 12.5px
+    color: var(--text-secondary)
+
+.h-med-name
+    font-weight: 500
+    white-space: nowrap
+    overflow: hidden
+    text-overflow: ellipsis
+
+.h-detail-grid
+    display: grid
+    grid-template-columns: repeat(4, 1fr)
+    gap: 12px 16px
+
+.h-detail-item
+    display: flex
+    flex-direction: column
+    gap: 2px
+    min-width: 0
+
+.h-detail-label
+    font-size: 10.5px
+    font-weight: 600
+    text-transform: uppercase
+    letter-spacing: .06em
+    color: var(--text-disabled)
+
+.h-detail-value
+    font-size: 13px
+    color: var(--text-primary)
+
+    &.mono
+        font-family: var(--font-mono)
+        font-size: 12.5px

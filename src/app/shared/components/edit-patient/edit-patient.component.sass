@@ -1,0 +1,77 @@
+@use 'styles/variables' as *
+
+.edit-patient-header
+    display: flex
+    align-items: center
+    gap: var(--space-2, 8px)
+    font-weight: 500
+    margin-bottom: var(--space-4, 16px)
+    color: var(--text-primary)
+
+    .mat-icon
+        color: var(--secondary)
+
+.validation-badge
+    display: inline-flex
+    align-items: center
+    gap: 4px
+    font-size: 0.75rem
+    font-weight: 600
+    padding: 2px 10px
+    border-radius: 12px
+    text-transform: uppercase
+    letter-spacing: 0.5px
+
+    .mat-icon
+        font-size: 16px
+        width: 16px
+        height: 16px
+
+.status-validated
+    background-color: var(--success-bg)
+    color: var(--success-text)
+
+    .mat-icon
+        color: var(--success-text)
+
+.status-temporal
+    background-color: var(--warning-bg)
+    color: var(--warning-text)
+
+    .mat-icon
+        color: var(--warning-text)
+
+.validation-btn
+    margin-left: auto
+
+.edit-patient-form
+    display: flex
+    flex-direction: column
+    gap: var(--space-3, 12px)
+
+.form-row
+    display: flex
+    flex-direction: column
+    gap: var(--space-3, 12px)
+
+    @media (min-width: $small-devices + 1px)
+        flex-direction: row
+
+.edit-patient-actions
+    display: flex
+    align-items: center
+    gap: var(--space-2, 8px)
+    margin-top: var(--space-2, 8px)
+    padding-top: var(--space-3, 12px)
+    border-top: 1px solid var(--border-color)
+
+    .btn-spinner
+        margin-right: 4px
+
+@keyframes fadeIn
+    from
+        opacity: 0
+        transform: translateY(-4px)
+    to
+        opacity: 1
+        transform: translateY(0)

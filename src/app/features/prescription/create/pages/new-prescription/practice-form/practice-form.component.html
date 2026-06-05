@@ -1,0 +1,20 @@
+<div class="practice-form">
+    <app-form-field type="text" label="Práctica / procedimiento" [control]="form.get('practice')"
+        [errors]="{ required: 'Debe ingresar la práctica' }">
+    </app-form-field>
+
+    <app-form-field type="textarea" label="Diagnóstico" [control]="form.get('diagnostic')" fullwidth
+        [errors]="{ required: 'El diagnóstico es requerido' }">
+    </app-form-field>
+
+    <app-form-field type="textarea" label="Indicaciones" [control]="form.get('indications')" fullwidth>
+    </app-form-field>
+
+    <div class="form-actions">
+        <button matButton="filled" (click)="save()">
+            <mat-icon>{{ data ? 'save' : 'add_circle' }}</mat-icon>
+            {{ data ? 'Guardar cambios' : 'Agregar práctica' }}
+        </button>
+        <button mat-stroked-button *ngIf="data" (click)="cancel()">Cancelar edición</button>
+    </div>
+</div>

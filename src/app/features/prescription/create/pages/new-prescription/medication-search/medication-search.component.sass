@@ -1,0 +1,195 @@
+@use 'styles/variables' as *
+
+.search-bar-wrapper
+    border-radius: var(--radius-sm)
+    transition: border-color .15s, box-shadow .15s
+    margin-bottom: var(--space-2)
+
+    @media (min-width: $small-devices + 1px)
+        border: 1px solid var(--border-color)
+        background: var(--bg-card)
+
+        &:focus-within
+            border-color: var(--secondary)
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, .1)
+
+    ::ng-deep .search-bar
+        margin-bottom: 0
+
+        @media (min-width: $small-devices + 1px)
+            border: none !important
+            background: transparent
+            box-shadow: none !important
+            border-radius: 0
+
+            &:focus-within
+                border-color: transparent !important
+                box-shadow: none !important
+
+    ::ng-deep ui-toggle
+        @media (min-width: $small-devices + 1px)
+            margin-right: var(--space-2)
+
+.patient-empty
+    display: flex
+    flex-direction: column
+    align-items: center
+    padding: 28px 16px
+    color: var(--text-disabled)
+
+    .mat-icon
+        font-size: 36px
+        margin-bottom: 8px
+        color: var(--border-color)
+
+    p
+        font-size: 13px
+
+.search-results
+    overflow: hidden
+    animation: fadeIn .2s ease
+
+.disabled-msg
+    text-align: center
+    padding: var(--space-6) var(--space-4)
+    color: var(--text-disabled)
+    font-size: 13px
+
+    .mat-icon
+        font-size: 32px
+        display: block
+        margin-bottom: 6px
+        color: var(--border-color)
+
+// ==================== SEARCH RESULTS ====================
+
+.search-result
+    display: flex
+    align-items: center
+    gap: var(--space-3)
+    padding: 14px 16px
+    cursor: pointer
+    border-bottom: 1px solid var(--border-color)
+    transition: background .12s
+
+    &:last-child
+        border-bottom: none
+
+    &:active
+        background: var(--hover-bg)
+
+.result-chevron
+    color: var(--border-color)
+    font-size: 20px
+    flex-shrink: 0
+
+// ==================== FREQUENT MEDICATIONS GRID ====================
+
+.freq-med-grid
+    display: grid
+    grid-template-columns: 1fr
+    gap: 8px
+
+    ui-card
+        cursor: pointer
+
+    @media (min-width: $small-devices + 1px)
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+        gap: var(--space-3)
+
+// ==================== PAGINATOR ====================
+
+.results-paginator
+    border-top: 1px solid var(--border-color)
+    font-size: 0.8125rem
+
+// ==================== DETAIL VIEW ====================
+
+.detail-header
+    display: flex
+    align-items: flex-start
+    gap: var(--space-3)
+    padding: 0 0 var(--space-4) 0
+    margin-bottom: var(--space-4)
+    border-bottom: 1px solid var(--border-color)
+
+    .detail-header-info
+        flex: 1
+
+        .detail-name
+            font-size: 14px
+            font-weight: 500
+            text-transform: uppercase
+
+        .detail-meta
+            font-size: 12px
+            color: var(--text-secondary)
+            margin-top: 2px
+            text-transform: capitalize
+
+.detail-form
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+
+.detail-form-row
+    display: grid
+    grid-template-columns: 1fr 1fr
+    gap: var(--space-3)
+
+.detail-checkboxes
+    display: flex
+    gap: var(--space-5)
+    align-items: center
+    flex-wrap: wrap
+    padding: 2px 0
+
+.check-label
+    display: flex
+    align-items: center
+    gap: 6px
+    font-size: 13px
+    cursor: pointer
+    user-select: none
+    color: var(--text-secondary)
+
+    input[type="checkbox"]
+        width: 16px
+        height: 16px
+        accent-color: var(--secondary)
+        cursor: pointer
+        margin: 0
+
+    &.active
+        color: var(--secondary)
+        font-weight: 500
+
+.triplicate-fields
+    display: grid
+    grid-template-columns: 1fr 2fr
+    gap: var(--space-3)
+    padding-left: 24px
+
+.detail-actions
+    display: flex
+    gap: var(--space-3)
+    padding-top: var(--space-4)
+    border-top: 1px solid var(--border-color)
+
+    @media (max-width: $small-devices)
+        flex-direction: column
+        gap: var(--space-3)
+
+        button
+            width: 100%
+            padding: var(--space-5) var(--space-4)
+            font-size: 16px
+            min-height: 52px
+
+@keyframes fadeIn
+    from
+        opacity: 0
+        transform: translateY(8px)
+    to
+        opacity: 1
+        transform: translateY(0)
