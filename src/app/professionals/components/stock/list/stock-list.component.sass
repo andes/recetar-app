@@ -1,4 +1,4 @@
-@import 'styles/_variables'
+@use 'styles/variables' as vars
 
 mat-card-content
   .loading-prescriptions
@@ -108,7 +108,7 @@ table
     color: #3e75ff
 
 
-      // @media (min-width: $x-small-devices) and (max-width: $small-devices)
+      // @media (min-width: vars.$x-small-devices) and (max-width: vars.$small-devices)
 
 .mat-form-field
   font-size: 14px
@@ -118,7 +118,7 @@ table
 .mat-paginator
   margin-top: 24px
 
-@media (min-width: $x-small-devices) and (max-width: $small-devices)
+@media (min-width: vars.$x-small-devices) and (max-width: vars.$small-devices)
   .mat-elevation-z8
     background: transparent
     box-shadow: none

@@ -1,8 +1,5 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { NotFoundComponent } from './shared/not-found/not-found.component';
-import { PublicCertificateComponent } from './shared/components/public-certificate/public-certificate.component';
-import { PublicPracticeComponent } from './shared/components/public-practice/public-practice.component';
 
 const routes: Routes = [
     {
@@ -12,13 +9,13 @@ const routes: Routes = [
     },
     {
         path: 'certificate/:id',
-        component: PublicCertificateComponent
+        loadComponent: () => import('./shared/components/public-certificate/public-certificate.component').then(m => m.PublicCertificateComponent)
     },
     {
         path: 'practice/:id',
-        component: PublicPracticeComponent
+        loadComponent: () => import('./shared/components/public-practice/public-practice.component').then(m => m.PublicPracticeComponent)
     },
-    { path: '404', component: NotFoundComponent },
+    { path: '404', loadComponent: () => import('./shared/not-found/not-found.component').then(m => m.NotFoundComponent) },
     { path: '**', redirectTo: '/404' }
 ];
 
@@ -27,9 +24,3 @@ const routes: Routes = [
     exports: [RouterModule]
 })
 export class AppRoutingModule { }
-
-export const routingComponents = [
-    NotFoundComponent,
-    PublicCertificateComponent,
-    PublicPracticeComponent
-];

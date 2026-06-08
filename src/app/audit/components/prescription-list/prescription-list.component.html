@@ -4,11 +4,10 @@
       <mat-icon>gesture</mat-icon>
       <span>
         Recetas dispensadas @if (dataSource.data.length) {
-        <span> por {{dataSource.data[0].dispensedBy.businessName}},
-        CUIT {{dataSource.data[0].dispensedBy.cuil}}</span>
+        <span> por {{dataSource.data[0].dispensedBy?.businessName}},
+        CUIT {{dataSource.data[0].dispensedBy?.cuil}}</span>
       }
     </span>
-    <button mat-stroked-button (click)="generateReport()">Generar reporte</button>
   </h2>
 </mat-card-title>
 <mat-card-content>
@@ -26,7 +25,7 @@
           <ng-container matColumnDef="professional">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> Profesional </th>
             <td mat-cell *matCellDef="let element" class='title-cell' test data-label='Profesional'> {{
-            element.professional.businessName.toUpperCase() }}</td>
+            element.professional?.businessName.toUpperCase() }}</td>
           </ng-container>
           <!-- Date -->
           <ng-container matColumnDef="date">

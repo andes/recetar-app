@@ -29,12 +29,11 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
-import { DialogReportComponent } from './components/dialog-report/dialog-report.component';
 import { PrescriptionListComponent } from './components/prescription-list/prescription-list.component';
 import { UserCreateComponent } from './components/user-create/user-create.component';
 import { UsersListComponent } from './components/user-list/users-list.component';
 import { FormatTimePipe } from './pipes/format-time.pipe';
+import { SharedModule } from '@shared/shared.module';
 
 @NgModule({
     declarations: [
@@ -43,7 +42,6 @@ import { FormatTimePipe } from './pipes/format-time.pipe';
         UserCreateComponent,
         PrescriptionListComponent,
         FormatTimePipe,
-        DialogReportComponent,
     ],
     imports: [
         BrowserModule,
@@ -73,8 +71,8 @@ import { FormatTimePipe } from './pipes/format-time.pipe';
         MatSortModule,
         MatPaginatorModule,
         MatCheckboxModule,
-        MatRadioModule
-    ],
-    providers: [PatientNamePipe]
+        MatRadioModule,
+        SharedModule
+    ]
 })
 export class AuditModule { }

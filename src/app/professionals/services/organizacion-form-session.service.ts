@@ -4,6 +4,8 @@ import { UserService } from '@services/users.service';
 import { Observable, of } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
+type ServerSubOrganizacionPayload = Pick<SubOrganizacion, 'nombre' | 'direccion'> & { _id?: string };
+
 @Injectable({
     providedIn: 'root'
 })
@@ -78,7 +80,7 @@ export class OrganizacionFormSessionService {
         this.markSelectedOrganizacion(newOrganizacion);
     }
 
-    commitChanges(): Observable<any> {
+    commitChanges(): Observable<SubOrganizacion[] | null> {
         if (!this.initialized || !this.userId || !this.pendingChanges) {
             return of(null);
         }
@@ -86,13 +88,14 @@ export class OrganizacionFormSessionService {
         const organizacionesParaServidor = this.workingOrganizaciones.map(organizacion => this.prepareOrganizacionForServer(organizacion));
 
         return this.userService.updateUserOrganizaciones(this.userId, organizacionesParaServidor).pipe(
+            map((updatedUser) => (updatedUser && updatedUser.organizaciones) ? updatedUser.organizaciones : this.workingOrganizaciones),
             tap(updatedUser => {
-                const updatedOrganizaciones = updatedUser && updatedUser.organizaciones ? updatedUser.organizaciones : this.workingOrganizaciones;
-                const cloned = this.cloneOrganizaciones(updatedOrganizaciones);
+                const cloned = this.cloneOrganizaciones(updatedUser);
                 this.snapshotOrganizaciones = cloned;
                 this.workingOrganizaciones = this.cloneOrganizaciones(cloned);
                 this.pendingChanges = false;
-            })
+            }),
+            map((updatedOrganizaciones) => this.cloneOrganizaciones(updatedOrganizaciones))
         );
     }
 
@@ -142,8 +145,8 @@ export class OrganizacionFormSessionService {
         return a.nombre === b.nombre && JSON.stringify(a.direccion) === JSON.stringify(b.direccion);
     }
 
-    private prepareOrganizacionForServer(organizacion: SubOrganizacion): any {
-        const result: any = {
+    private prepareOrganizacionForServer(organizacion: SubOrganizacion): ServerSubOrganizacionPayload {
+        const result: ServerSubOrganizacionPayload = {
             nombre: organizacion.nombre,
             direccion: organizacion.direccion
         };

@@ -6,6 +6,10 @@ import { ProfessionalDialogComponent } from '@professionals/components/professio
 import { PracticesService } from '@services/practices.service';
 import { PatientFormComponent } from '@shared/components/patient-form/patient-form.component';
 
+interface PracticeProfessionalRef {
+    userId: string;
+}
+
 @Component({
     selector: 'app-practices-form',
     templateUrl: './practices-form.component.html',
@@ -17,7 +21,7 @@ export class PracticesFormComponent implements OnInit {
     practicesForm: FormGroup;
     practiceDate = new FormControl(new Date(), [Validators.required]);
     isSubmitPractice = false;
-    professionalData: any;
+    professionalData: PracticeProfessionalRef;
 
     constructor(
         private fBuilder: FormBuilder,
@@ -27,7 +31,7 @@ export class PracticesFormComponent implements OnInit {
     ) { }
 
     ngOnInit(): void {
-        this.professionalData = this.authService.getLoggedUserId();
+        this.professionalData = { userId: this.authService.getLoggedUserId() };
         this.initPracticesForm();
     }
 

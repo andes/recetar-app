@@ -1,17 +1,39 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, AbstractControl, FormGroupDirective } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, AbstractControl, FormGroupDirective, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { AuthService } from '@auth/services/auth.service';
 import { AmbitoService } from '@auth/services/ambito.service';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { ThemePalette } from '@angular/material/core';
 import { DialogComponent } from '@auth/components/dialog/dialog.component';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { getHttpErrorMessage } from '@shared/utils/http-error.util';
+import { take } from 'rxjs/operators';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
     selector: 'app-login',
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.sass'],
-    standalone: false
+    standalone: true,
+    imports: [
+        ReactiveFormsModule,
+        FormsModule,
+        RouterModule,
+        FlexLayoutModule,
+        MatCardModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatIconModule,
+        MatButtonModule,
+        MatProgressSpinnerModule,
+        MatDialogModule
+    ]
 })
 export class LoginComponent implements OnInit {
 
@@ -79,7 +101,7 @@ export class LoginComponent implements OnInit {
                 err => {
                     loginNgForm.resetForm();
                     loginForm.reset();
-                    this.error = err;
+                    this.error = getHttpErrorMessage(err);
                     this.showSubmit = false;
                 });
         }
@@ -90,7 +112,7 @@ export class LoginComponent implements OnInit {
             width: '800px'
         });
 
-        dialogRef.afterClosed().subscribe();
+        dialogRef.afterClosed().pipe(take(1)).subscribe();
     }
 
     showInformation(): void {

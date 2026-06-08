@@ -1,16 +1,28 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Practice } from '@interfaces/practices';
 import { PracticesService } from '@services/practices.service';
 import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 import { Observable, of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
+import { CommonModule } from '@angular/common';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
     selector: 'app-public-practice',
     templateUrl: './public-practice.component.html',
     styleUrls: ['./public-practice.component.sass'],
-    standalone: false
+    standalone: true,
+    imports: [
+        CommonModule,
+        RouterModule,
+        MatProgressSpinnerModule,
+        MatIconModule,
+        MatButtonModule,
+        PatientNamePipe
+    ]
 })
 
 export class PublicPracticeComponent implements OnInit {

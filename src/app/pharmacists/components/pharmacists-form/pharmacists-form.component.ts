@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Observable, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, take } from 'rxjs/operators';
 
 // Services
 import { InsurancesService } from '@services/insurance.service';
@@ -116,7 +116,7 @@ export class PharmacistsFormComponent implements OnInit {
             data: { dialogType: aDialogType, prescription: aPrescription, text: aText }
         });
 
-        dialogRef.afterClosed().subscribe();
+        dialogRef.afterClosed().pipe(take(1)).subscribe();
     }
 
 
@@ -132,4 +132,3 @@ export class PharmacistsFormComponent implements OnInit {
         return this.prescriptionForm.get('dateFilter');
     }
 }
-

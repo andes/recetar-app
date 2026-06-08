@@ -16,6 +16,12 @@ import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 import { Subscription } from 'rxjs';
 import { PatientFormComponent } from '@shared/components/patient-form/patient-form.component';
 
+interface CertificateFieldErrorMap {
+    whitespace?: {
+        value: string;
+    };
+}
+
 @Component({
     selector: 'app-certificate-form',
     templateUrl: './certificate-form.component.html',
@@ -54,7 +60,10 @@ export class CertificateFormComponent implements OnInit {
     certificateForm: FormGroup;
     loadingCertificates: boolean;
     today = new Date();
-    professionalData: any;
+    professionalData: {
+        userId: string;
+        businessName: string;
+    };
     readonly spinnerColor: ThemePalette = 'primary';
     isSubmit = false;
     isFormShown = true;
@@ -122,7 +131,10 @@ export class CertificateFormComponent implements OnInit {
 
     initProfessionalForm() {
         this.today = new Date((new Date()));
-        this.professionalData = this.authService.getLoggedUserId();
+        this.professionalData = {
+            userId: this.authService.getLoggedUserId(),
+            businessName: this.authService.getLoggedBusinessName(),
+        };
         this.certificateForm = this.fBuilder.group({
             _id: [''],
             professional: [this.professionalData],
@@ -138,7 +150,7 @@ export class CertificateFormComponent implements OnInit {
     }
 
     noWhitespaceValidator(): ValidatorFn {
-        return (control: AbstractControl): { [key: string]: any } | null => {
+        return (control: AbstractControl): CertificateFieldErrorMap | null => {
             if (!control.value) {
                 return null;
             }

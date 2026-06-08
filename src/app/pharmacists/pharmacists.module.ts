@@ -32,9 +32,7 @@ import { PrescriptionListComponent } from './components/prescription-list/prescr
 import { PrescriptionUndoComponent } from './components/prescription-undo/prescription-undo.component';
 import { AndesPrescriptionPrinterComponent } from './components/andes-prescription-printer/andes-prescription-printer.component';
 import { FormatTimePipe } from './pipes/format-time.pipe';
-import { DialogReportComponent } from './components/dialog-report/dialog-report.component';
 import { SharedModule } from '@shared/shared.module';
-import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 import { EditUserInfoModule } from '@shared/components/edit-user-info/edit-user-info.module';
 
 @NgModule({
@@ -44,7 +42,6 @@ import { EditUserInfoModule } from '@shared/components/edit-user-info/edit-user-
     PrescriptionUndoComponent,
     AndesPrescriptionPrinterComponent,
     FormatTimePipe,
-    DialogReportComponent
   ],
   imports: [
     BrowserModule,
@@ -79,6 +76,5 @@ import { EditUserInfoModule } from '@shared/components/edit-user-info/edit-user-
   exports: [
     AndesPrescriptionPrinterComponent
   ],
-  providers: [PatientNamePipe],
 })
 export class PharmacistsModule { }

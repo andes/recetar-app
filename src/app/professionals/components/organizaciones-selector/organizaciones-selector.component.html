@@ -1,7 +1,7 @@
 <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center">
   <mat-form-field appearance="fill" fxFlex="80">
     <mat-label>Organización</mat-label>
-    <mat-select [formControl]="organizacionControl" [disabled]="disabled" [compareWith]="compareOrganizaciones">
+    <mat-select [formControl]="organizacionControl" [compareWith]="compareOrganizaciones">
       @for (organizacion of organizaciones; track organizacion) {
         <mat-option [value]="organizacion">
           {{ organizacion.nombre }}@if (organizacion?.direccion) {

@@ -1,7 +1,8 @@
 import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { MatPaginator, MatPaginatorIntl } from '@angular/material/paginator';
+import { MatPaginator, MatPaginatorIntl, PageEvent } from '@angular/material/paginator';
+import { MatSelectChange } from '@angular/material/select';
 import { MatSelect } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
@@ -57,6 +58,7 @@ export class UsersListComponent implements OnInit, AfterContentInit, OnDestroy {
 
     private searchSubject = new Subject<string>();
     private destroy$ = new Subject<void>();
+    private editScrollFrameId: number | null = null;
 
     apiRoles: Role[] = [];
 
@@ -91,6 +93,11 @@ export class UsersListComponent implements OnInit, AfterContentInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
+        if (this.editScrollFrameId !== null) {
+            cancelAnimationFrame(this.editScrollFrameId);
+            this.editScrollFrameId = null;
+        }
+
         this.destroy$.next();
         this.destroy$.complete();
     }
@@ -114,21 +121,26 @@ export class UsersListComponent implements OnInit, AfterContentInit, OnDestroy {
             ? this.usersService.searchUsers(searchTerm.trim(), { offset, limit })
             : this.usersService.getUsers({ offset, limit });
 
-        serviceCall.subscribe((response) => {
-            this.totalUsers = response.total || 0;
+        serviceCall.subscribe({
+            next: (response) => {
+                this.totalUsers = response.total || 0;
 
-            this.dataSource.data = response.users;
+                this.dataSource.data = response.items;
 
-            this.dataSource.sortingDataAccessor = (item, property) => {
-                switch (property) {
-                    case 'businessName': return item.businessName;
-                    case 'role': return item.roles[0].role;
-                    default: return item[property];
-                }
-            };
-            this.dataSource.sort = this.tbSort;
-            this.dataSource.paginator = this.paginator;
-            this.loadingUsers = false;
+                this.dataSource.sortingDataAccessor = (item, property) => {
+                    switch (property) {
+                        case 'businessName': return item.businessName;
+                        case 'role': return item.roles[0].role;
+                        default: return item[property];
+                    }
+                };
+                this.dataSource.sort = this.tbSort;
+                this.dataSource.paginator = this.paginator;
+                this.loadingUsers = false;
+            },
+            error: () => {
+                this.loadingUsers = false;
+            }
         });
     }
 
@@ -214,7 +226,7 @@ export class UsersListComponent implements OnInit, AfterContentInit, OnDestroy {
         return this.tempSelectedRoles.some(r => r._id === role._id);
     }
 
-    onRoleSelectionChange(event: any): void {
+    onRoleSelectionChange(event: MatSelectChange): void {
         this.tempSelectedRoles = event.value || [];
     }
 
@@ -327,9 +339,18 @@ export class UsersListComponent implements OnInit, AfterContentInit, OnDestroy {
             return this.apiRoles.find(apiRole => apiRole.role === userRole.role) || userRole;
         }) : [];
 
-        setTimeout(() => {
-            if (this.tableContainer && this.tableContainer.nativeElement) {
-                const el = this.tableContainer.nativeElement;
+        this.scheduleTableScrollToEnd();
+    }
+
+    private scheduleTableScrollToEnd(): void {
+        if (this.editScrollFrameId !== null) {
+            cancelAnimationFrame(this.editScrollFrameId);
+        }
+
+        this.editScrollFrameId = requestAnimationFrame(() => {
+            this.editScrollFrameId = null;
+            const el = this.tableContainer?.nativeElement;
+            if (el) {
                 el.scrollLeft = el.scrollWidth;
             }
         });
@@ -429,7 +450,7 @@ export class UsersListComponent implements OnInit, AfterContentInit, OnDestroy {
         this.loadUsers(this.usersPageIndex * this.usersPageSize, this.usersPageSize, this.currentSearchTerm);
     }
 
-    onUsersPageChange(event: any) {
+    onUsersPageChange(event: PageEvent) {
         this.usersPageIndex = event.pageIndex;
         this.usersPageSize = event.pageSize;
         this.loadUsers(event.pageIndex * event.pageSize, event.pageSize, this.currentSearchTerm);

@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface AndesProfessionalData {
+    _id?: string;
     id: string;
     documento: string;
     nombre: string;
@@ -66,7 +68,7 @@ export interface AndesPharmacyData {
     matriculaDTResponsable: string;
     disposicionAltaDT: string;
     domicilio: {
-        geoReferencia: any[];
+        geoReferencia: unknown[];
         activo: boolean;
         _id: string;
         valor: string;
@@ -114,6 +116,8 @@ export interface AndesPharmacyData {
         valor: string;
         activo: boolean;
     }>;
+    telefono?: string;
+    email?: string;
     disposiciones?: Array<{
         numero: string;
         descripcion: string;
@@ -140,7 +144,14 @@ export class AndesSearchService {
    */
     searchProfessional(documento: string): Observable<AndesApiResponse<AndesProfessionalData>> {
         const params = { documento };
-        return this.http.get<AndesApiResponse<AndesProfessionalData>>(`${environment.API_END_POINT}/andes/professionals`, { params });
+        return this.http.get<AndesProfessionalData[]>(`${environment.API_END_POINT}/auth/professionals-andes`, { params }).pipe(
+            map((data) => ({
+                ok: true,
+                message: data.length > 0 ? 'Profesionales encontrados' : 'No se encontraron profesionales',
+                data,
+                total: data.length,
+            }))
+        );
     }
 
     /**
@@ -150,7 +161,14 @@ export class AndesSearchService {
    */
     searchPharmacy(cuit: string): Observable<AndesApiResponse<AndesPharmacyData>> {
         const params = { cuit };
-        return this.http.get<AndesApiResponse<AndesPharmacyData>>(`${environment.API_END_POINT}/andes/pharmacies`, { params });
+        return this.http.get<AndesPharmacyData[]>(`${environment.API_END_POINT}/auth/pharmacies-andes`, { params }).pipe(
+            map((data) => ({
+                ok: true,
+                message: data.length > 0 ? 'Farmacias encontradas' : 'No se encontraron farmacias',
+                data,
+                total: data.length,
+            }))
+        );
     }
 
 
@@ -162,38 +180,28 @@ export class AndesSearchService {
    * @returns Observable<boolean> indicando si es válida
    */
     validatePharmacy(cuit: string, matricula?: string): Observable<boolean> {
-        return new Observable<boolean>(observer => {
-            this.searchPharmacy(cuit).subscribe({
-                next: (response) => {
-                    if (response && response.ok && response.data && response.data.length > 0) {
-                        const pharmacy = response.data[0];
-
-                        // Si se proporciona matrícula, validarla contra la matrícula del DT responsable
-                        if (matricula && pharmacy.matriculaDTResponsable && pharmacy.matriculaDTResponsable !== matricula) {
-                            observer.next(false);
-                            observer.complete();
-                            return;
-                        }
-
-                        // Verificar habilitación vigente
-                        if (pharmacy.vencimientoHabilitacion) {
-                            const currentDate = new Date();
-                            const expirationDate = new Date(pharmacy.vencimientoHabilitacion);
-                            observer.next(expirationDate > currentDate && pharmacy.activo);
-                        } else {
-                            observer.next(pharmacy.activo); // Si no hay fecha de vencimiento, verificar solo si está activa
-                        }
-                    } else {
-                        observer.next(false);
-                    }
-                    observer.complete();
-                },
-                error: (error) => {
-                    observer.next(false);
-                    observer.complete();
+        return this.searchPharmacy(cuit).pipe(
+            map((response) => {
+                if (!response?.ok || response.data.length === 0) {
+                    return false;
                 }
-            });
-        });
+
+                const pharmacy = response.data[0];
+
+                if (matricula && pharmacy.matriculaDTResponsable && pharmacy.matriculaDTResponsable !== matricula) {
+                    return false;
+                }
+
+                if (pharmacy.vencimientoHabilitacion) {
+                    const currentDate = new Date();
+                    const expirationDate = new Date(pharmacy.vencimientoHabilitacion);
+                    return expirationDate > currentDate && pharmacy.activo;
+                }
+
+                return pharmacy.activo;
+            }),
+            catchError(() => of(false))
+        );
     }
 
     /**
@@ -208,44 +216,36 @@ export class AndesSearchService {
         apellido?: string;
         cuil?: string;
     }> {
-        return new Observable(observer => {
-            this.searchProfessional(documento).subscribe({
-                next: (professionals) => {
-                    if (professionals && professionals.ok) {
-                        const professional = professionals[0];
-
-                        // Obtener la matrícula más reciente y vigente
-                        let latestMatricula = '';
-                        let latestEndDate = new Date(0);
-
-                        professional.profesiones.forEach(profesion => {
-                            profesion.matriculacion.forEach(mat => {
-                                const endDate = new Date(mat.fin);
-                                if (endDate > new Date() && endDate > latestEndDate) {
-                                    latestMatricula = mat.matriculaNumero;
-                                    latestEndDate = endDate;
-                                }
-                            });
-                        });
-
-                        observer.next({
-                            email: professional.email,
-                            matricula: latestMatricula,
-                            nombre: professional.nombre,
-                            apellido: professional.apellido,
-                            cuil: professional.cuit
-                        });
-                    } else {
-                        observer.next({});
-                    }
-                    observer.complete();
-                },
-                error: (error) => {
-                    observer.next({});
-                    observer.complete();
+        return this.searchProfessional(documento).pipe(
+            map((response) => {
+                if (!response?.ok || response.data.length === 0) {
+                    return {};
                 }
-            });
-        });
+
+                const professional = response.data[0];
+                let latestMatricula = '';
+                let latestEndDate = new Date(0);
+
+                professional.profesiones.forEach((profesion) => {
+                    profesion.matriculacion.forEach((mat) => {
+                        const endDate = new Date(mat.fin);
+                        if (endDate > new Date() && endDate > latestEndDate) {
+                            latestMatricula = mat.matriculaNumero?.toString() || '';
+                            latestEndDate = endDate;
+                        }
+                    });
+                });
+
+                return {
+                    email: professional.email,
+                    matricula: latestMatricula,
+                    nombre: professional.nombre,
+                    apellido: professional.apellido,
+                    cuil: professional.cuit
+                };
+            }),
+            catchError(() => of({}))
+        );
     }
 
     /**
@@ -258,32 +258,24 @@ export class AndesSearchService {
         matricula?: string;
         nombre?: string;
     }> {
-        return new Observable(observer => {
-            this.searchPharmacy(cuit).subscribe({
-                next: (response) => {
-                    if (response && response.ok && response.data && response.data.length > 0) {
-                        const pharmacy = response.data[0];
-
-                        // Buscar email activo en los contactos
-                        const emailContact = pharmacy.contactos?.find(contact =>
-                            contact.tipo === 'email' && contact.activo && contact.valor
-                        );
-
-                        observer.next({
-                            email: emailContact?.valor,
-                            matricula: pharmacy.matriculaDTResponsable,
-                            nombre: pharmacy.denominacion || pharmacy.razonSocial
-                        });
-                    } else {
-                        observer.next({});
-                    }
-                    observer.complete();
-                },
-                error: (error) => {
-                    observer.next({});
-                    observer.complete();
+        return this.searchPharmacy(cuit).pipe(
+            map((response) => {
+                if (!response?.ok || response.data.length === 0) {
+                    return {};
                 }
-            });
-        });
+
+                const pharmacy = response.data[0];
+                const emailContact = pharmacy.contactos?.find((contact) =>
+                    contact.tipo === 'email' && contact.activo && contact.valor
+                );
+
+                return {
+                    email: emailContact?.valor,
+                    matricula: pharmacy.matriculaDTResponsable,
+                    nombre: pharmacy.denominacion || pharmacy.razonSocial
+                };
+            }),
+            catchError(() => of({}))
+        );
     }
 }

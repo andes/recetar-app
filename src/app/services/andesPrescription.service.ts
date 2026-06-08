@@ -2,8 +2,12 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map, mapTo, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import AndesPrescriptions from '../interfaces/andesPrescriptions';
+import AndesPrescriptions, { AndesPrescriptionsAdapter } from '../interfaces/andesPrescriptions';
 import { HttpClient, HttpParams } from '@angular/common/http';
+
+interface AndesVerificationResult {
+    _id?: string;
+}
 
 @Injectable({
     providedIn: 'root'
@@ -13,31 +17,37 @@ export class AndesPrescriptionsService {
     private myAndesPrescriptions: BehaviorSubject<AndesPrescriptions[]>;
     private andesPrescriptionsArray: AndesPrescriptions[] = [];
 
-    constructor(private http: HttpClient) {
+    constructor(private http: HttpClient, private andesPrescriptionsAdapter: AndesPrescriptionsAdapter) {
         this.myAndesPrescriptions = new BehaviorSubject<AndesPrescriptions[]>(this.andesPrescriptionsArray);
     }
 
-    getPrescriptionsFromAndes(params: { patient_dni: string; patient_sex: string }): Observable<boolean> {
-        return this.http.get(`${environment.API_END_POINT}/andes-prescriptions/from-andes/?dni=${params.patient_dni}&sexo=${params.patient_sex.toLowerCase()}`).pipe(
-            tap((prescriptions: AndesPrescriptions[]) => this.setPrescriptions(prescriptions)),
-            map((prescriptions: AndesPrescriptions[]) => prescriptions.length > 0)
-        );
+    private adaptAndesPrescription(item: AndesPrescriptions): AndesPrescriptions {
+        return this.andesPrescriptionsAdapter.adapt(item);
     }
 
-    getPrescriptions(params): Observable<boolean> {
-        return this.http.get(`${environment.API_END_POINT}/andes-prescriptions/`, { params }).pipe(
+    private adaptAndesPrescriptionList(items: AndesPrescriptions[]): AndesPrescriptions[] {
+        return items.map((item) => this.adaptAndesPrescription(item));
+    }
+
+    getPrescriptions(params: { dispensedBy?: string }): Observable<boolean> {
+        const cuil = params?.dispensedBy || '';
+        return this.http.get<{ prescriptions: AndesPrescriptions[]; total: number }>(`${environment.API_END_POINT}/prescriptions/dispensed-by/${cuil}`).pipe(
+            map((response) => this.adaptAndesPrescriptionList(response.prescriptions)),
             tap((prescriptions: AndesPrescriptions[]) => this.setPrescriptions(prescriptions)),
             map((prescriptions: AndesPrescriptions[]) => prescriptions.length > 0)
         );
     }
 
     getById(id: string): Observable<AndesPrescriptions> {
-        return this.http.get<AndesPrescriptions>(`${environment.API_END_POINT}/prescriptions/${id}`);
+        return this.http.get<AndesPrescriptions>(`${environment.API_END_POINT}/prescriptions/${id}`).pipe(
+            map((prescription: AndesPrescriptions) => this.adaptAndesPrescription(prescription))
+        );
     }
 
     dispense(prescription: AndesPrescriptions, pharmacistId: string): Observable<boolean> {
         const params = { 'prescription': prescription, 'pharmacistId': pharmacistId };
-        return this.http.patch<AndesPrescriptions>(`${environment.API_END_POINT}/andes-prescriptions/dispense`, params).pipe(
+        return this.http.patch<AndesPrescriptions>(`${environment.API_END_POINT}/prescriptions/andes/dispense`, params).pipe(
+            map((updatedPrescription: AndesPrescriptions) => this.adaptAndesPrescription(updatedPrescription)),
             tap((updatedPrescription: AndesPrescriptions) => this.updatePrescription(updatedPrescription)),
             mapTo(true)
         );
@@ -45,7 +55,8 @@ export class AndesPrescriptionsService {
 
     cancelDispense(prescriptionId: string, pharmacistId: string): Observable<boolean> {
         const params = { 'prescriptionId': prescriptionId, 'pharmacistId': pharmacistId };
-        return this.http.patch<AndesPrescriptions>(`${environment.API_END_POINT}/andes-prescriptions/cancel-dispense`, params).pipe(
+        return this.http.patch<AndesPrescriptions>(`${environment.API_END_POINT}/prescriptions/andes/cancel-dispense`, params).pipe(
+            map((updatedPrescription: AndesPrescriptions) => this.adaptAndesPrescription(updatedPrescription)),
             tap((updatedPrescription: AndesPrescriptions) => this.updatePrescription(updatedPrescription)),
             mapTo(true)
         );
@@ -53,35 +64,32 @@ export class AndesPrescriptionsService {
 
     suspendPrescription(recetaId: string, profesionalId: string): Observable<boolean> {
         const params = { 'recetaId': recetaId, 'profesionalId': profesionalId };
-        return this.http.patch<AndesPrescriptions>(`${environment.API_END_POINT}/andes-prescriptions/suspend`, params).pipe(
+        return this.http.patch<AndesPrescriptions>(`${environment.API_END_POINT}/prescriptions/andes/suspend`, params).pipe(
+            map((updatedPrescription: AndesPrescriptions) => this.adaptAndesPrescription(updatedPrescription)),
             tap((updatedPrescription: AndesPrescriptions) => this.updatePrescription(updatedPrescription)),
             mapTo(true)
         );
     }
 
-    getFromDniAndDate(params: { patient_dni: string; dateFilter: string }): Observable<boolean> {
-        return this.http.get<AndesPrescriptions[]>(`${environment.API_END_POINT}/prescriptions/find/${params.patient_dni}&${params.dateFilter}`).pipe(
-            tap((prescriptions: AndesPrescriptions[]) => this.setPrescriptions(prescriptions)),
-            map((prescriptions: AndesPrescriptions[]) => prescriptions.length > 0)
-        );
-    }
-
     getByUserId(userId: string): Observable<Boolean> {
-        return this.http.get<AndesPrescriptions[]>(`${environment.API_END_POINT}/prescriptions/get-by-user-id/${userId}`).pipe(
+        return this.http.get<AndesPrescriptions[]>(`${environment.API_END_POINT}/prescriptions/user/${userId}`).pipe(
+            map((prescriptions: AndesPrescriptions[]) => this.adaptAndesPrescriptionList(prescriptions)),
             tap((prescriptions: AndesPrescriptions[]) => this.setPrescriptions(prescriptions)),
             mapTo(true)
         );
     }
 
     newPrescription(prescription: AndesPrescriptions): Observable<Boolean> {
-        return this.http.post<AndesPrescriptions[]>(`${environment.API_END_POINT}/prescriptions`, prescription).pipe(
-            tap((newPrescriptions: AndesPrescriptions[]) => this.addPrescription(newPrescriptions)),
+        return this.http.post<AndesPrescriptions>(`${environment.API_END_POINT}/prescriptions`, prescription).pipe(
+            map((newPrescriptionItem: AndesPrescriptions) => this.adaptAndesPrescription(newPrescriptionItem)),
+            tap((newPrescriptionItem: AndesPrescriptions) => this.addPrescription([newPrescriptionItem])),
             mapTo(true)
         );
     }
 
     editPrescription(prescription: AndesPrescriptions): Observable<Boolean> {
         return this.http.patch<AndesPrescriptions>(`${environment.API_END_POINT}/prescriptions/${prescription.idAndes}`, prescription).pipe(
+            map((updatedPrescription: AndesPrescriptions) => this.adaptAndesPrescription(updatedPrescription)),
             tap((updatedPrescription: AndesPrescriptions) => this.updatePrescription(updatedPrescription)),
             mapTo(true)
         );
@@ -135,8 +143,8 @@ export class AndesPrescriptionsService {
             .set('dni', dni)
             .set('conceptId', conceptId)
             .set('sexo', sexo);
-        return this.http.get<any[]>(`${environment.API_END_POINT}/andes-prescriptions/verificar`, { params }).pipe(
-            map((recetas: any[]) => Array.isArray(recetas) && recetas.length > 0)
+        return this.http.get<AndesVerificationResult[]>(`${environment.API_END_POINT}/prescriptions/andes/verify`, { params }).pipe(
+            map((recetas: AndesVerificationResult[]) => Array.isArray(recetas) && recetas.length > 0)
         );
     }
 

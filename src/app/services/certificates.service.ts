@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Certificate } from '@interfaces/certificate';
+import { Certificate, CertificateAdapter } from '@interfaces/certificate';
 import * as CryptoJS from 'crypto-js';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { map, mapTo, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject, of, timer } from 'rxjs';
+import { map, mapTo, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -20,10 +20,9 @@ export class CertificatesService {
     private certificateSubject = new BehaviorSubject<Certificate>(null);
     certificate$ = this.certificateSubject.asObservable();
     private secretKey = environment.CERTIFICATE_SECRET_KEY;
-    private searchTimeout: any = null;
-    private searchSubscription: any = null;
+    private cancelSearch$ = new Subject<void>();
 
-    constructor(private http: HttpClient) {
+    constructor(private http: HttpClient, private certificateAdapter: CertificateAdapter) {
         this.myCertificates = new BehaviorSubject<Certificate[]>(this.certificatesArray);
     }
 
@@ -44,9 +43,16 @@ export class CertificatesService {
     }
 
     getByUserId(userId: string, params?: { offset?: number; limit?: number }): Observable<{ certificates: Certificate[]; total: number; offset: number; limit: number }> {
-        const queryParams = params || {};
-        return this.http.get<{ certificates: Certificate[]; total: number; offset: number; limit: number }>(`${environment.API_END_POINT}/certificates/user/${userId}`, { params: queryParams }).pipe(
-            tap((response) => this.setCertificates(response.certificates)),
+        const queryParams = { userId, ...params };
+        const httpParams: any = { userId };
+        if (params?.offset !== undefined) { httpParams.skip = params.offset; }
+        if (params?.limit !== undefined) { httpParams.limit = params.limit; }
+        return this.http.get<{ certificates: Certificate[]; total: number; offset: number; limit: number }>(`${environment.API_END_POINT}/certificates`, { params: httpParams }).pipe(
+            map((response) => ({
+                ...response,
+                certificates: response.certificates.map((certificate) => this.certificateAdapter.adapt(certificate))
+            })),
+            tap((response) => this.setCertificates(response.certificates))
         );
     }
 
@@ -74,41 +80,24 @@ export class CertificatesService {
             });
         }
 
-        // Cancelar timeout anterior si existe
-        if (this.searchTimeout) {
-            clearTimeout(this.searchTimeout);
-        }
+        this.cancelSearch$.next();
 
-        // Cancelar suscripción HTTP anterior si existe
-        if (this.searchSubscription) {
-            this.searchSubscription.unsubscribe();
-            this.searchSubscription = null;
-        }
+        const httpParams: any = { userId, searchTerm };
+        if (params?.offset !== undefined) { httpParams.skip = params.offset; }
+        if (params?.limit !== undefined) { httpParams.limit = params.limit; }
 
-        // Crear un nuevo Observable que espere 500ms antes de hacer la llamada
-        return new Observable(observer => {
-            this.searchTimeout = setTimeout(() => {
-                this.searchSubscription = this.http.get<{ certificates: Certificate[]; total: number; offset: number; limit: number }>(
-                    `${environment.API_END_POINT}/certificates/user/${userId}/search`,
-                    { params: queryParams }
-                ).pipe(
-                    tap((response) => this.setCertificates(response.certificates))
-                ).subscribe({
-                    next: (response) => {
-                        observer.next(response);
-                        this.searchSubscription = null;
-                    },
-                    error: (error) => {
-                        observer.error(error);
-                        this.searchSubscription = null;
-                    },
-                    complete: () => {
-                        observer.complete();
-                        this.searchSubscription = null;
-                    }
-                });
-            }, 500);
-        });
+        return timer(500).pipe(
+            takeUntil(this.cancelSearch$),
+            switchMap(() => this.http.get<{ certificates: Certificate[]; total: number; offset: number; limit: number }>(
+                `${environment.API_END_POINT}/certificates`,
+                { params: httpParams }
+            )),
+            map((response) => ({
+                ...response,
+                certificates: response.certificates.map((certificate) => this.certificateAdapter.adapt(certificate))
+            })),
+            tap((response) => this.setCertificates(response.certificates))
+        );
     }
 
 
@@ -129,7 +118,9 @@ export class CertificatesService {
                 'public': publicURL ? 'true' : 'false'
             },
             responseType: 'json'
-        });
+        }).pipe(
+            map((certificate) => this.certificateAdapter.adapt(certificate))
+        );
     }
 
     /**

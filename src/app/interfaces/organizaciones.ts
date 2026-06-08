@@ -64,17 +64,17 @@ export interface Organizacion {
     turnosMobile: boolean;
     _id: string;
     nombre: string;
-    contacto: any[];
+    contacto: unknown[];
     direccion: Direccion;
     telecom: Telecom[];
     codigo: Codigo;
     tipoEstablecimiento: TipoEstablecimiento;
     nivelComplejidad: number;
-    edificio: any[];
-    mapaSectores: any[];
-    unidadesOrganizativas: any[];
-    ofertaPrestacional: any[];
-    trasladosEspeciales: any[];
+    edificio: unknown[];
+    mapaSectores: unknown[];
+    unidadesOrganizativas: unknown[];
+    ofertaPrestacional: unknown[];
+    trasladosEspeciales: unknown[];
     id: string;
 }
 

@@ -10,7 +10,7 @@ export interface Role {
     name?: string;
     color?: string;
     displayName?: string; // Nombre traducido al español
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 @Injectable({
@@ -30,7 +30,7 @@ export class RolesService {
     constructor(private http: HttpClient) { }
 
     getRoleTypes(): Observable<Role[]> {
-        return this.http.get<Role[]>(`${environment.API_END_POINT}/roles/types`);
+        return this.http.get<Role[]>(`${environment.API_END_POINT}/auth/role-types`);
     }
 
     getFilteredRoleTypes(): Observable<Role[]> {

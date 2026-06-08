@@ -1,11 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Practice } from '@interfaces/practices';
-import { saveAs } from 'file-saver';
-import moment from 'moment';
+import { Practice, PracticeAdapter } from '@interfaces/practices';
+
 import * as CryptoJS from 'crypto-js';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { map, mapTo, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject, of, timer } from 'rxjs';
+import { map, mapTo, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -16,15 +15,15 @@ export class PracticesService {
     private secretKey = environment.CERTIFICATE_SECRET_KEY;
     private myPractices: BehaviorSubject<Practice[]>;
     private practicesArray: Practice[] = [];
-    private searchTimeout: any = null;
-    private searchSubscription: any = null;
+    private cancelSearch$ = new Subject<void>();
 
-    constructor(private http: HttpClient) {
+    constructor(private http: HttpClient, private practiceAdapter: PracticeAdapter) {
         this.myPractices = new BehaviorSubject<Practice[]>(this.practicesArray);
     }
 
     getPractices(params): Observable<boolean> {
         return this.http.get(`${environment.API_END_POINT}/practices`, { params }).pipe(
+            map((practices: Practice[]) => practices.map((practice) => this.practiceAdapter.adapt(practice))),
             tap((practices: Practice[]) => this.setPractices(practices)),
             map((practices: Practice[]) => practices.length > 0)
         );
@@ -36,19 +35,28 @@ export class PracticesService {
                 'public': publicURL ? 'true' : 'false'
             },
             responseType: 'json'
-        });
+        }).pipe(
+            map((practice) => this.practiceAdapter.adapt(practice))
+        );
     }
 
     getFromDniAndDate(params: { patient_dni: string; dateFilter: string }): Observable<boolean> {
         return this.http.get<Practice[]>(`${environment.API_END_POINT}/practices/find/${params.patient_dni}&${params.dateFilter}`).pipe(
+            map((practices) => practices.map((practice) => this.practiceAdapter.adapt(practice))),
             tap((practices: Practice[]) => this.setPractices(practices)),
             map((practices: Practice[]) => practices.length > 0)
         );
     }
 
     getByUserId(userId: string, params?: { offset?: number; limit?: number }): Observable<{ practices: Practice[]; total: number; offset: number; limit: number }> {
-        const queryParams = params || {};
-        return this.http.get<{ practices: Practice[]; total: number; offset: number; limit: number }>(`${environment.API_END_POINT}/practices/user/${userId}`, { params: queryParams }).pipe(
+        const httpParams: any = { userId };
+        if (params?.offset !== undefined) { httpParams.skip = params.offset; }
+        if (params?.limit !== undefined) { httpParams.limit = params.limit; }
+        return this.http.get<{ practices: Practice[]; total: number; offset: number; limit: number }>(`${environment.API_END_POINT}/practices`, { params: httpParams }).pipe(
+            map((response) => ({
+                ...response,
+                practices: response.practices.map((practice) => this.practiceAdapter.adapt(practice))
+            })),
             tap((response) => this.setPractices(response.practices))
         );
     }
@@ -62,52 +70,37 @@ export class PracticesService {
             return of({ practices: [], total: 0, offset: queryParams.offset || 0, limit: queryParams.limit || 10 });
         }
 
-        // Cancelar timeout anterior si existe
-        if (this.searchTimeout) {
-            clearTimeout(this.searchTimeout);
-        }
+        this.cancelSearch$.next();
 
-        // Cancelar suscripción HTTP anterior si existe
-        if (this.searchSubscription) {
-            this.searchSubscription.unsubscribe();
-            this.searchSubscription = null;
-        }
+        const httpParams: any = { userId, searchTerm };
+        if (params?.offset !== undefined) { httpParams.skip = params.offset; }
+        if (params?.limit !== undefined) { httpParams.limit = params.limit; }
 
-        // Crear un nuevo Observable que espere 500ms antes de hacer la llamada
-        return new Observable(observer => {
-            this.searchTimeout = setTimeout(() => {
-                this.searchSubscription = this.http.get<{ practices: Practice[]; total: number; offset: number; limit: number }>(
-                    `${environment.API_END_POINT}/practices/user/${userId}/search`,
-                    { params: queryParams }
-                ).pipe(
-                    tap((response) => this.setPractices(response.practices))
-                ).subscribe({
-                    next: (response) => {
-                        observer.next(response);
-                        this.searchSubscription = null;
-                    },
-                    error: (error) => {
-                        observer.error(error);
-                        this.searchSubscription = null;
-                    },
-                    complete: () => {
-                        observer.complete();
-                        this.searchSubscription = null;
-                    }
-                });
-            }, 500);
-        });
+        return timer(500).pipe(
+            takeUntil(this.cancelSearch$),
+            switchMap(() => this.http.get<{ practices: Practice[]; total: number; offset: number; limit: number }>(
+                `${environment.API_END_POINT}/practices`,
+                { params: httpParams }
+            )),
+            map((response) => ({
+                ...response,
+                practices: response.practices.map((practice) => this.practiceAdapter.adapt(practice))
+            })),
+            tap((response) => this.setPractices(response.practices))
+        );
     }
 
     newPractice(practice: Practice): Observable<Boolean> {
-        return this.http.post<Practice[]>(`${environment.API_END_POINT}/practices`, practice).pipe(
-            tap((newPractices: Practice[]) => this.addPractice(newPractices)),
+        return this.http.post<Practice>(`${environment.API_END_POINT}/practices`, practice).pipe(
+            map((newPracticeItem: Practice) => this.practiceAdapter.adapt(newPracticeItem)),
+            tap((newPracticeItem: Practice) => this.addPractice([newPracticeItem])),
             mapTo(true)
         );
     }
 
     editPractice(practice: Practice): Observable<Boolean> {
         return this.http.patch<Practice>(`${environment.API_END_POINT}/practices/${practice._id}`, practice).pipe(
+            map((updatedPractice: Practice) => this.practiceAdapter.adapt(updatedPractice)),
             tap((updatedPractice: Practice) => this.updatePractice(updatedPractice)),
             mapTo(true)
         );
@@ -122,6 +115,7 @@ export class PracticesService {
 
     completePractice(practiceId: string): Observable<boolean> {
         return this.http.patch<Practice>(`${environment.API_END_POINT}/practices/${practiceId}/complete`, {}).pipe(
+            map((updatedPractice: Practice) => this.practiceAdapter.adapt(updatedPractice)),
             tap((updatedPractice: Practice) => this.updatePractice(updatedPractice)),
             mapTo(true)
         );
@@ -129,6 +123,7 @@ export class PracticesService {
 
     cancelPractice(practiceId: string): Observable<boolean> {
         return this.http.patch<Practice>(`${environment.API_END_POINT}/practices/${practiceId}/cancel`, {}).pipe(
+            map((updatedPractice: Practice) => this.practiceAdapter.adapt(updatedPractice)),
             tap((updatedPractice: Practice) => this.updatePractice(updatedPractice)),
             mapTo(true)
         );
@@ -159,17 +154,6 @@ export class PracticesService {
         const updateIndex = this.practicesArray.findIndex((practice: Practice) => practice._id === updatedPractice._id);
         this.practicesArray.splice(updateIndex, 1, updatedPractice);
         this.myPractices.next(this.practicesArray);
-    }
-
-    getCsv(dateFilter: Object): Observable<Blob> {
-        return this.http.post(`${environment.API_END_POINT}/practices/get-csv`, dateFilter, { responseType: 'blob' } as any).pipe(
-            tap((csv: any) => {
-                const header = { type: 'text/csv' };
-                const blob = new Blob([csv], header);
-                const fileName = `reporte-practicas-${moment().format('DD-MM-YYYY-HH:mm')}.csv`;
-                saveAs(blob, fileName);
-            })
-        );
     }
 
     get practices(): Observable<Practice[]> {

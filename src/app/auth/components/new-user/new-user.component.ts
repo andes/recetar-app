@@ -1,18 +1,48 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, AbstractControl, FormGroupDirective } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { FormBuilder, FormGroup, Validators, AbstractControl, FormGroupDirective, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { cuilValidator } from '../../../utils/custome-validators/cuil.validator';
 import { fechaValida } from '../../../utils/custome-validators/date.validator';
 import { AuthService } from '@auth/services/auth.service';
-import { ProfessionalsService } from '../../../services/professionals.service';
+import { AuthorizedProfession, ProfessionalsService } from '../../../services/professionals.service';
 import moment from 'moment';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { NgxTurnstileModule } from '../../../shared/ngx-turnstile/ngx-turnstile.module';
+import { NgxTurnstileFormsModule } from '../../../shared/ngx-turnstile/ngx-turnstile-forms.module';
 
 @Component({
     selector: 'app-new-user',
     templateUrl: './new-user.component.html',
     styleUrls: ['./new-user.component.sass'],
-    standalone: false
+    standalone: true,
+    imports: [
+        ReactiveFormsModule,
+        FormsModule,
+        RouterModule,
+        FlexLayoutModule,
+        MatCardModule,
+        MatIconModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatButtonModule,
+        MatTooltipModule,
+        MatSnackBarModule,
+        NgxTurnstileModule,
+        NgxTurnstileFormsModule
+    ]
 })
 export class NewUserComponent implements OnInit {
 
@@ -23,7 +53,7 @@ export class NewUserComponent implements OnInit {
     public regexEmail = '^[a-z0-9._%+-]+@[a-z0-9.-]+[\.]{1}[a-z]{2,4}$';
     public siteKey = '0x4AAAAAAAhL2mZAyxFj63Dw';
     public minDate = new Date();
-    public authorizedProfessions: any[] = [];
+    public authorizedProfessions: AuthorizedProfession[] = [];
 
     constructor(
         private fBuilder: FormBuilder,
