@@ -1,15 +1,34 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
-import { Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators, AbstractControl, ReactiveFormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '@auth/services/auth.service';
 import { UserService } from '@services/users.service';
+import { getHttpErrorMessage } from '@shared/utils/http-error.util';
+import { CommonModule } from '@angular/common';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
     selector: 'app-edit-user-info',
     templateUrl: './edit-user-info.component.html',
     styleUrls: ['./edit-user-info.component.sass'],
-    standalone: false
+    standalone: true,
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        RouterModule,
+        FlexLayoutModule,
+        MatCardModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatProgressSpinnerModule
+    ]
 })
 export class EditUserInfoComponent implements OnInit {
     editUserForm: FormGroup;
@@ -61,10 +80,6 @@ export class EditUserInfoComponent implements OnInit {
         return this.editUserForm.get('email');
     }
 
-    private getErrorMessage(error: any, fallback: string): string {
-        return error?.error?.mensaje || error?.mensaje || error || fallback;
-    }
-
     onSubmit(): void {
         if (this.editUserForm.valid && !this.isLoading) {
             this.isLoading = true;
@@ -84,7 +99,7 @@ export class EditUserInfoComponent implements OnInit {
                     },
                     error: (error) => {
                         this.isLoading = false;
-                        this.updateError = this.getErrorMessage(error, 'Error al solicitar la actualización');
+                        this.updateError = getHttpErrorMessage(error, 'Error al solicitar la actualización');
                         this.snackBar.open(this.updateError as string, 'Cerrar', { duration: 5000 });
                     }
                 });
@@ -100,7 +115,7 @@ export class EditUserInfoComponent implements OnInit {
                     },
                     error: (error) => {
                         this.isLoading = false;
-                        this.updateError = this.getErrorMessage(error, 'Error al cargar la información del usuario');
+                        this.updateError = getHttpErrorMessage(error, 'Error al cargar la información del usuario');
                         this.snackBar.open(
                             `${this.updateError}`,
                             'Cerrar',

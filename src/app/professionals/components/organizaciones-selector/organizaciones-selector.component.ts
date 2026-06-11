@@ -1,7 +1,8 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
+import { take, takeUntil } from 'rxjs/operators';
 import { SubOrganizacion } from '@interfaces/organizaciones';
 import { AuthService } from '@auth/services/auth.service';
 import { OrganizacionFormSessionService } from '@professionals/services/organizacion-form-session.service';
@@ -14,15 +15,36 @@ import { OrganizacionDialogComponent } from '../organizacion-dialog/organizacion
     standalone: false
 })
 export class OrganizacionesSelectorComponent implements OnInit, OnDestroy {
-    @Input() organizacionControl: FormControl = new FormControl('', Validators.required);
-    @Input() disabled = false;
+    @Input() set organizacionControl(value: FormControl) {
+        this._organizacionControl = value;
+        if (this._disabled) {
+            value.disable({ emitEvent: false });
+        }
+    }
+    get organizacionControl(): FormControl {
+        return this._organizacionControl;
+    }
+    @Input() set disabled(value: boolean) {
+        this._disabled = value;
+        if (value) {
+            this._organizacionControl.disable({ emitEvent: false });
+        } else {
+            this._organizacionControl.enable({ emitEvent: false });
+        }
+    }
+    get disabled(): boolean {
+        return this._disabled;
+    }
     @Output() organizacionSelected = new EventEmitter<SubOrganizacion>();
 
     organizaciones: SubOrganizacion[] = [];
-    private subscriptions = new Subscription();
+    private _disabled = false;
+    private _organizacionControl: FormControl = new FormControl('', Validators.required);
+    private destroy$ = new Subject<void>();
     private userId: string | null = null;
     isAddingOrganizacion = false;
     private isInitialLoad = true;
+    private clearInitialLoadFrameId: number | null = null;
 
     constructor(
         private authService: AuthService,
@@ -36,26 +58,34 @@ export class OrganizacionesSelectorComponent implements OnInit, OnDestroy {
             return;
         }
 
-        const sessionSub = this.organizacionSessionService.initialize(this.userId).subscribe(
-            () => this.loadOrganizaciones(),
-            () => {}
-        );
-        this.subscriptions.add(sessionSub);
+        this.organizacionSessionService.initialize(this.userId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(
+                () => this.loadOrganizaciones(),
+                () => {}
+            );
 
         // Escuchar cambios en el control
-        const controlSub = this.organizacionControl.valueChanges.subscribe(value => {
-            if (value) {
-                this.organizacionSelected.emit(value);
-                if (!this.isInitialLoad) {
-                    this.reorderOrganizaciones(value);
+        this.organizacionControl.valueChanges
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((value: SubOrganizacion) => {
+                if (value) {
+                    this.organizacionSelected.emit(value);
+                    if (!this.isInitialLoad) {
+                        this.reorderOrganizaciones(value);
+                    }
                 }
-            }
-        });
-        this.subscriptions.add(controlSub);
+            });
     }
 
     ngOnDestroy(): void {
-        this.subscriptions.unsubscribe();
+        if (this.clearInitialLoadFrameId !== null) {
+            cancelAnimationFrame(this.clearInitialLoadFrameId);
+            this.clearInitialLoadFrameId = null;
+        }
+
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     private loadOrganizaciones(): void {
@@ -67,9 +97,20 @@ export class OrganizacionesSelectorComponent implements OnInit, OnDestroy {
             this.organizacionSelected.emit(this.organizaciones[0]);
         }
 
-        setTimeout(() => {
+        this.scheduleInitialLoadEnd(() => {
             this.isInitialLoad = false;
-        }, 100);
+        });
+    }
+
+    private scheduleInitialLoadEnd(action: () => void): void {
+        if (this.clearInitialLoadFrameId !== null) {
+            cancelAnimationFrame(this.clearInitialLoadFrameId);
+        }
+
+        this.clearInitialLoadFrameId = requestAnimationFrame(() => {
+            this.clearInitialLoadFrameId = null;
+            action();
+        });
     }
 
     refreshOrganizaciones(): void {
@@ -77,11 +118,12 @@ export class OrganizacionesSelectorComponent implements OnInit, OnDestroy {
             return;
         }
 
-        const refreshSub = this.organizacionSessionService.initialize(this.userId).subscribe(
-            () => this.loadOrganizaciones(),
-            () => {}
-        );
-        this.subscriptions.add(refreshSub);
+        this.organizacionSessionService.initialize(this.userId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(
+                () => this.loadOrganizaciones(),
+                () => {}
+            );
     }
 
     private reorderOrganizaciones(selectedOrganizacion: SubOrganizacion): void {
@@ -98,12 +140,11 @@ export class OrganizacionesSelectorComponent implements OnInit, OnDestroy {
             data: {}
         });
 
-        const dialogSub = dialogRef.afterClosed().subscribe(result => {
+        dialogRef.afterClosed().pipe(take(1)).subscribe(result => {
             if (result) {
                 this.addNewOrganizacion(result);
             }
         });
-        this.subscriptions.add(dialogSub);
     }
 
     private addNewOrganizacion(newOrganizacion: SubOrganizacion): void {

@@ -1,3 +1,5 @@
+import { Injectable } from '@angular/core';
+import { Adapter, asRecord } from './adapter';
 import Supply from '@interfaces/supplies';
 import { Patient } from '@interfaces/patients';
 import AndesPrescriptions from './andesPrescriptions';
@@ -62,4 +64,32 @@ export class Prescriptions {
     updatedAt?: Date;
     triple?: boolean;
     triplicado?: boolean;
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class PrescriptionsAdapter implements Adapter<Prescriptions> {
+    adapt(item: unknown): Prescriptions {
+        const data = asRecord(item);
+
+        return {
+            _id: data['_id'] as string,
+            prescriptionId: data['prescriptionId'] as string,
+            patient: data['patient'] as Patient,
+            professional: data['professional'] as Prescriptions['professional'],
+            organizacion: data['organizacion'] as Prescriptions['organizacion'],
+            dispensedBy: data['dispensedBy'] as Prescriptions['dispensedBy'],
+            dispensedAt: data['dispensedAt'] ? new Date(data['dispensedAt'] as string | number | Date) : undefined,
+            supplies: (data['supplies'] as Prescriptions['supplies']) || [],
+            status: data['status'] as string,
+            date: new Date(data['date'] as string | number | Date),
+            diagnostic: data['diagnostic'] as string,
+            observation: data['observation'] as string,
+            createdAt: data['createdAt'] ? new Date(data['createdAt'] as string | number | Date) : undefined,
+            updatedAt: data['updatedAt'] ? new Date(data['updatedAt'] as string | number | Date) : undefined,
+            triple: data['triple'] as boolean,
+            triplicado: data['triplicado'] as boolean
+        } as Prescriptions;
+    }
 }

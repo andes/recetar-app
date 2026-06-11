@@ -39,7 +39,7 @@ type SupportedVersion = '0';
     selector: 'ngx-turnstile',
     template: '',
     exportAs: 'ngx-turnstile',
-    standalone: false
+    standalone: true
 })
 export class NgxTurnstileComponent implements AfterViewInit, OnDestroy {
     @Input() siteKey!: string;

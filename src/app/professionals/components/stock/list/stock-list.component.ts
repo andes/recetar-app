@@ -1,12 +1,48 @@
 import { AfterContentInit, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { StockService, formatTipoInsumo } from '@services/stock.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { rowsAnimation, detailExpand, arrowDirection } from '@animations/animations.template';
-import { StockPrinterComponent } from '../printer/stock-printer.component';
+import { StockPrintData, StockPrinterComponent } from '../printer/stock-printer.component';
+
+interface StockListSupply {
+    supply?: {
+        name?: string;
+        type?: string;
+        specification?: string;
+    };
+    quantity?: number;
+    quantityPresentation?: string;
+}
+
+interface StockListProfessional {
+    businessName: string;
+    enrollment?: string;
+    profesionGrado?: Array<{ profesion: string; numeroMatricula: string }>;
+}
+
+interface StockListItem {
+    _id?: string;
+    patient?: {
+        lastName?: string;
+        firstName?: string;
+        dni?: string;
+        fechaNac?: Date | string;
+        obraSocial?: {
+            nombre?: string;
+            numeroAfiliado?: string;
+        };
+        sex?: string;
+    };
+    date?: string | Date;
+    status?: string;
+    supplies?: StockListSupply[];
+    professional?: StockListProfessional;
+    prescriptionId?: string;
+}
 
 @Component({
     selector: 'app-stock-list',
@@ -24,12 +60,13 @@ export class StockListComponent implements OnInit, OnDestroy, OnChanges, AfterCo
 
 
     private destroy$ = new Subject<void>();
+    private paginatorSetupFrameId: number | null = null;
 
-    dataStock = new MatTableDataSource<any>([]);
+    dataStock = new MatTableDataSource<StockListItem>([]);
     stockColumns: string[] = ['patient', 'dni', 'date', 'status', 'action', 'arrow'];
     loadingStock = false;
     totalStock = 0;
-    expandedElement: any | null;
+    expandedElement: StockListItem | null;
     stockPageSize = 10;
     stockPageIndex = 0;
     pageSizeOptions = [10, 20, 30];
@@ -64,14 +101,17 @@ export class StockListComponent implements OnInit, OnDestroy, OnChanges, AfterCo
     }
 
     initDataSource() {
-        this.dataStock = new MatTableDataSource<any>([]);
+        this.dataStock = new MatTableDataSource<StockListItem>([]);
         this.dataStock.sortingDataAccessor = (item, property) => {
             switch (property) {
                 case 'patient': return item.patient?.lastName + ' ' + item.patient?.firstName;
                 case 'dni': return item.patient?.dni;
                 case 'date': return new Date(item.date).getTime();
                 case 'status': return item.status;
-                default: return item[property];
+                default: {
+                    const value = (item as unknown as Record<string, unknown>)[property];
+                    return value == null ? '' : String(value);
+                }
             }
         };
         this.dataStock.sort = this.sort;
@@ -88,43 +128,54 @@ export class StockListComponent implements OnInit, OnDestroy, OnChanges, AfterCo
 
         obs.pipe(
             takeUntil(this.destroy$)
-        ).subscribe((response: any) => {
+        ).subscribe((response: StockListItem[]) => {
             this.totalStock = response.length;
             this.dataStock.data = response;
             this.loadingStock = false;
-            setTimeout(() => {
+            this.scheduleStockPaginatorSetup(() => {
                 this.setupStockPaginator();
-            }, 100);
+            });
+        });
+    }
+
+    private scheduleStockPaginatorSetup(action: () => void): void {
+        if (this.paginatorSetupFrameId !== null) {
+            cancelAnimationFrame(this.paginatorSetupFrameId);
+        }
+
+        this.paginatorSetupFrameId = requestAnimationFrame(() => {
+            this.paginatorSetupFrameId = null;
+            action();
         });
     }
 
     // Helper methods for template
-    getPatientName(element: any): string {
+    getPatientName(element: StockListItem): string {
         return `${element.patient?.lastName || ''}, ${element.patient?.firstName || ''}`;
     }
 
-    getPatientDni(element: any): string {
+    getPatientDni(element: StockListItem): string {
         return element.patient?.dni || '';
     }
 
-    getDate(element: any): Date {
+    getDate(element: StockListItem): Date {
         return new Date(element.date);
     }
 
-    getStatus(element: any): string {
+    getStatus(element: StockListItem): string {
         return element.status;
     }
 
-    isExpanded(element: any): boolean {
+    isExpanded(element: StockListItem): boolean {
         return this.expandedElement === element;
     }
 
-    toggleExpand(element: any) {
+    toggleExpand(element: StockListItem) {
         this.expandedElement = this.expandedElement === element ? null : element;
     }
 
-    async printStock(element: any) {
-        await this.stockPrinter.print(element);
+    async printStock(element: StockListItem) {
+        await this.stockPrinter.print(element as unknown as StockPrintData);
     }
 
     private setupStockPaginator() {
@@ -154,12 +205,17 @@ export class StockListComponent implements OnInit, OnDestroy, OnChanges, AfterCo
         }
     }
 
-    onStockPageChange(event: any) {
+    onStockPageChange(event: PageEvent) {
         this.stockPageIndex = event.pageIndex;
         this.stockPageSize = event.pageSize;
     }
 
     ngOnDestroy() {
+        if (this.paginatorSetupFrameId !== null) {
+            cancelAnimationFrame(this.paginatorSetupFrameId);
+            this.paginatorSetupFrameId = null;
+        }
+
         this.destroy$.next();
         this.destroy$.complete();
     }

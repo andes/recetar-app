@@ -1,9 +1,18 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import SnomedConcept from '@interfaces/snomedConcept';
-import { tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
+
+interface RawSnomedConcept {
+    conceptId?: string;
+    id?: string;
+    term?: string;
+    nombre?: string;
+    fsn?: string;
+    semanticTag?: string;
+}
 
 @Injectable({
     providedIn: 'root'
@@ -12,14 +21,28 @@ export class SnomedSuppliesService {
 
     private mySupplies: BehaviorSubject<SnomedConcept[]>;
     private suppliesArray: SnomedConcept[] = [];
-    private dataLoaded = false;
 
     constructor(private http: HttpClient) {
-        this.mySupplies = new BehaviorSubject<any[]>(this.suppliesArray);
+        this.mySupplies = new BehaviorSubject<SnomedConcept[]>(this.suppliesArray);
     }
 
-    get(params): Observable<any[]> {
-        return this.http.get<any[]>(`${environment.API_END_POINT}/snomed/supplies?search=${params}`);
+    private normalizeConcept(item: RawSnomedConcept): SnomedConcept {
+        return {
+            conceptId: item?.conceptId || item?.id || '',
+            term: item?.term || item?.nombre || '',
+            fsn: item?.fsn || item?.term || item?.nombre || '',
+            semanticTag: item?.semanticTag || ''
+        };
+    }
+
+    get(searchTerm: string): Observable<SnomedConcept[]> {
+        return this.http.get<RawSnomedConcept[]>(`${environment.API_END_POINT}/supplies/snomed?search=${searchTerm}`).pipe(
+            map((concepts: RawSnomedConcept[]) => concepts.map((concept) => this.normalizeConcept(concept))),
+            tap((concepts: SnomedConcept[]) => {
+                this.suppliesArray = concepts;
+                this.mySupplies.next(concepts);
+            })
+        );
     }
 
 }

@@ -11,7 +11,7 @@ import { NgxTurnstileComponent } from './ngx-turnstile.component';
             multi: true,
         },
     ],
-    standalone: false
+    standalone: true
 })
 export class NgxTurnstileValueAccessorDirective implements ControlValueAccessor, OnInit {
     private onChange!: (value: string) => void;
@@ -34,18 +34,18 @@ export class NgxTurnstileValueAccessorDirective implements ControlValueAccessor,
         });
     }
 
-    writeValue(value: any): void {
+    writeValue(_value: string | null): void {
         if (this.resolved) {
             this.resolved = false;
             this.turnstileComp.reset();
         }
     }
 
-    registerOnChange(fn: any): void {
+    registerOnChange(fn: (value: string) => void): void {
         this.onChange = fn;
     }
 
-    registerOnTouched(fn: any): void {
+    registerOnTouched(fn: () => void): void {
         this.onTouched = fn;
     }
 }

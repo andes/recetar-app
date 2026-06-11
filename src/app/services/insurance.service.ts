@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError, tap, map } from 'rxjs/operators';
-import { Observable, of, throwError } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { catchError, tap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
 import { Insurances } from '../interfaces/insurances';
 
 @Injectable({
@@ -20,7 +20,7 @@ export class InsurancesService {
     }
 
     private handleError<T>(operation = 'operation', result?: T) {
-        return (error: any): Observable<T> => {
+        return (_error: unknown): Observable<T> => {
             // Let the app keep running by returning an empty result.
             return of(result as T);
         };

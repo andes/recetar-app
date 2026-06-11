@@ -9,6 +9,30 @@ import decode from 'jwt-decode';
 import { Tokens } from '@auth/models/tokens';
 import { PrescriptionsService } from '@services/prescriptions.service';
 
+interface JwtPayload {
+    usrn?: string;
+    sub?: string;
+    bsname?: string;
+    email?: string;
+    rl?: string[];
+}
+
+interface ForgotPasswordResponse {
+    status?: string;
+    msg?: string;
+}
+
+interface ResetPasswordResponse {
+    message?: string;
+    mensaje?: string;
+}
+
+interface RegisterResponse {
+    newUser?: {
+        businessName?: string;
+    };
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -40,7 +64,7 @@ export class AuthService {
 
     async load(): Promise<void> {
         if (this.tokensExists()) {
-            const resp = await this.http.get<any>(`${this.apiEndPoint}/auth/jwt-login`).pipe(
+            await this.http.get<Tokens>(`${this.apiEndPoint}/auth/jwt-login`).pipe(
                 tap(tokens => this.doLoginUser(tokens)),
                 mapTo(true),
                 catchError(async (error) => {
@@ -53,14 +77,14 @@ export class AuthService {
     }
 
     login(user: { username: string; password: string }): Observable<boolean | HttpErrorResponse> {
-        return this.http.post<any>(`${this.apiEndPoint}/auth/login`, user).pipe(
+        return this.http.post<Tokens>(`${this.apiEndPoint}/auth/login`, user).pipe(
             tap(tokens => this.doLoginUser(tokens)),
             mapTo(true)
         );
     }
 
-    logout() {
-        return this.http.post<any>(`${this.apiEndPoint}/auth/logout`, {
+    logout(): Observable<boolean> {
+        return this.http.post<unknown>(`${this.apiEndPoint}/auth/logout`, {
             'refreshToken': this.getRefreshToken()
         }).pipe(
             tap(() => this.doLogoutUser()),
@@ -71,16 +95,16 @@ export class AuthService {
         );
     }
 
-    resetPassword(passwords: { oldPassword: string; newPassword: string }) {
-        return this.http.post<any>(`${this.apiEndPoint}/auth/reset-password`, passwords);
+    resetPassword(passwords: { oldPassword: string; newPassword: string }): Observable<ResetPasswordResponse> {
+        return this.http.post<ResetPasswordResponse>(`${this.apiEndPoint}/auth/reset-password`, passwords);
     }
 
-    recoverPassword(data) {
-        return this.http.post<any>(`${this.apiEndPoint}/auth/recovery-password`, data);
+    recoverPassword(data: { newPassword: string; authenticationToken: string }): Observable<string> {
+        return this.http.post<string>(`${this.apiEndPoint}/auth/recovery-password`, data);
     }
 
-    register(data) {
-        return this.http.post<any>(`${this.apiEndPoint}/auth/register`, data);
+    register(data: Record<string, unknown>): Observable<RegisterResponse> {
+        return this.http.post<RegisterResponse>(`${this.apiEndPoint}/auth/register`, data);
     }
 
     get isLoggedIn() {
@@ -103,8 +127,8 @@ export class AuthService {
         return this.isProfessionalBothRolesO.asObservable();
     }
 
-    refreshToken() {
-        return this.http.post<any>(`${this.apiEndPoint}/auth/refresh`, {
+    refreshToken(): Observable<Tokens> {
+        return this.http.post<Tokens>(`${this.apiEndPoint}/auth/refresh`, {
             'refreshToken': this.getRefreshToken()
         }).pipe(
             tap((tokens: Tokens) => {
@@ -118,22 +142,22 @@ export class AuthService {
     }
 
     getLoggedUsername(): string {
-        const payLoadJwt: any = this.getDecodeJwt();
-        return payLoadJwt.usrn;
+        const payLoadJwt = this.getDecodeJwt();
+        return payLoadJwt?.usrn || '';
     }
 
     getLoggedUserId(): string {
-        const payLoadJwt: any = this.getDecodeJwt();
-        return payLoadJwt.sub;
+        const payLoadJwt = this.getDecodeJwt();
+        return payLoadJwt?.sub || '';
     }
 
     getLoggedBusinessName(): string {
-        const payLoadJwt: any = this.getDecodeJwt();
-        return payLoadJwt.bsname;
+        const payLoadJwt = this.getDecodeJwt();
+        return payLoadJwt?.bsname || '';
     }
 
     getLoggedUserEmail(): string | null {
-        const payLoadJwt: any = this.getDecodeJwt();
+        const payLoadJwt = this.getDecodeJwt();
         return payLoadJwt && payLoadJwt.email ? payLoadJwt.email : null;
     }
 
@@ -197,22 +221,22 @@ export class AuthService {
         return roles.some((role: string) => role === 'admin');
     }
     getLoggedRole(): string[] {
-        const payLoadJwt: any = this.getDecodeJwt();
-        return payLoadJwt.rl;
+        const payLoadJwt = this.getDecodeJwt();
+        return payLoadJwt?.rl || [];
     }
 
     // Metodo que invoca a la api para realizar el recovering de la password
-    setValidationTokenAndNotify(usuario: Number): Observable<any> {
-        return this.http.post<any>(`${this.apiEndPoint}/auth/setValidationTokenAndNotify`, usuario);
+    setValidationTokenAndNotify(payload: { usuario: string }): Observable<ForgotPasswordResponse> {
+        return this.http.post<ForgotPasswordResponse>(`${this.apiEndPoint}/auth/setValidationTokenAndNotify`, payload);
     }
 
-    private getDecodeJwt() {
+    private getDecodeJwt(): JwtPayload | null {
         if (!!this.getJwtToken()) {
             const token = this.getJwtToken();
-            const tokenPayload = decode(token);
+            const tokenPayload = decode<JwtPayload>(token as string);
             return tokenPayload;
         }
-        return false;
+        return null;
     }
 
     private doLoginUser(tokens: Tokens) {

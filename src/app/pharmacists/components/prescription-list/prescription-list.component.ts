@@ -11,10 +11,13 @@ import moment from 'moment';
 import { DialogComponent } from '@pharmacists/components/dialog/dialog.component';
 import { AuthService } from '@auth/services/auth.service';
 import { detailExpand, arrowDirection } from '@animations/animations.template';
-import { DialogReportComponent } from '../dialog-report/dialog-report.component';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { take, takeUntil } from 'rxjs/operators';
 import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unified-printer.component';
+import { getHttpErrorMessage } from '@shared/utils/http-error.util';
+
+type MixedPrescription = Prescriptions | AndesPrescriptions;
+type SelectedPatient = Prescriptions['patient'] | AndesPrescriptions['paciente'] | null;
 
 @Component({
     selector: 'app-prescription-list',
@@ -30,13 +33,13 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
     private destroy$ = new Subject<void>();
 
     displayedColumns: string[] = ['medicamento', 'date', 'status', 'action', 'arrow'];
-    dataSource = new MatTableDataSource<any>([]);
-    expandedElement: Prescriptions | null;
+    dataSource = new MatTableDataSource<MixedPrescription>([]);
+    expandedElement: MixedPrescription | null;
     loadingPrescriptions: boolean;
     lapseTime = 2;
     pharmacistId: string;
     isAdmin = false;
-    selectedPatient: any = null; // Paciente seleccionado para mostrar en la vista
+    selectedPatient: SelectedPatient = null; // Paciente seleccionado para mostrar en la vista
     fechaDesde: Date | undefined;
     fechaHasta: Date | undefined;
 
@@ -114,9 +117,15 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
     private initDataSource(): void {
         this.dataSource.sortingDataAccessor = (item, property) => {
             switch (property) {
-                case 'patient': return item.patient?.lastName + item.patient?.firstName;
-                case 'prescription_date': return new Date(item.date || item.fechaPrestacion).getTime();
-                default: return item[property];
+                case 'patient':
+                    return this.isAndesPrescription(item)
+                        ? `${item.paciente?.apellido || ''}${item.paciente?.nombre || ''}`
+                        : `${item.patient?.lastName || ''}${item.patient?.firstName || ''}`;
+                case 'prescription_date': return this.getPrescriptionDate(item).getTime();
+                default: {
+                    const value = (item as unknown as Record<string, unknown>)[property];
+                    return value == null ? '' : String(value);
+                }
             }
         };
 
@@ -145,8 +154,8 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         if (this.dataSource.data.length > 0) {
             // Intentar obtener el DNI y sexo del primer elemento
             const firstElement = this.dataSource.data[0];
-            patientDni = firstElement.patient?.dni || firstElement.paciente?.documento || '';
-            patientSex = firstElement.patient?.sex || firstElement.paciente?.sexo || '';
+            patientDni = this.getPatientDni(firstElement);
+            patientSex = this.getPatientSex(firstElement);
             // Actualizar el último DNI y sexo conocidos si se encuentran
             if (patientDni) {
                 this.lastPatientDni = patientDni;
@@ -181,18 +190,10 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
             // Buscar paciente con nombreAutopercibido o usar el primero disponible
             this.selectedPatient = this.findSelectedPatient(newData);
 
-            // Si hay cambios en la cantidad de datos o es la primera carga,
-            // actualizar la paginación
             if (previousDataLength !== newData.length || previousDataLength === 0) {
-                setTimeout(() => {
-                    if (this.paginator) {
-                        this.dataSource.paginator = this.paginator;
-                        this.paginator.page.pipe(
-                            takeUntil(this.destroy$)
-                        ).subscribe((pageEvent) => {
-                        });
-                    }
-                });
+                if (this.paginator) {
+                    this.dataSource.paginator = this.paginator;
+                }
             }
 
             this.loadingPrescriptions = false;
@@ -235,25 +236,24 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         // Los filtros principales (estado y fecha) se manejan en la API
         const textFilter = filterValue.trim().toLowerCase();
 
-        this.dataSource.filterPredicate = (data: any, filter: string) => {
+        this.dataSource.filterPredicate = (data: MixedPrescription, filter: string) => {
             // Si no hay filtro de texto, mostrar el elemento
             if (!textFilter) {
                 return true;
             }
 
             // Aplicar filtro de texto
-            const accumulator = (currentTerm, key) => {
+            const accumulator = (currentTerm: string, key: string): string => {
                 // enable filter by lastName / firstName / date / status
-                const patientName = data.patient ?
-                    `${data.patient.lastName} ${data.patient.firstName}` :
-                    (data.paciente ? `${data.paciente.apellido} ${data.paciente.nombre}` : '');
+                const patientName = this.isAndesPrescription(data)
+                    ? `${data.paciente?.apellido || ''} ${data.paciente?.nombre || ''}`
+                    : `${data.patient?.lastName || ''} ${data.patient?.firstName || ''}`;
 
-                const medicamento = data.medicamento?.concepto?.term ||
-                    (data.supplies?.length ? data.supplies[0]?.supply?.name : '');
+                const medicamento = this.getMedicationName(data);
 
-                const dateStr = moment(data.date || data.fechaRegistro || data.fechaPrestacion, 'YYYY-MM-DD').format('DD/MM/YYYY');
+                const dateStr = moment(this.getPrescriptionDate(data), 'YYYY-MM-DD').format('DD/MM/YYYY');
 
-                return currentTerm + patientName + medicamento + dateStr + (data.status || data.estadoActual?.tipo || '');
+                return currentTerm + patientName + medicamento + dateStr + this.getPrescriptionStatusForFilter(data);
             };
 
             const dataStr = Object.keys(data).reduce(accumulator, '').toLowerCase();
@@ -303,7 +303,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
                     }
                 },
                 error => {
-                    this.openDialog('error-dispensed', prescription, error.message || 'Error al dispensar la prescripción');
+                    this.openDialog('error-dispensed', prescription, getHttpErrorMessage(error, 'Error al dispensar la prescripción'));
                 }
             );
         } else if ('estadoActual' in prescription) {
@@ -316,7 +316,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
                     }
                 },
                 error => {
-                    this.openDialog('error-dispensed', prescription, error.message || 'Error al dispensar la prescripción');
+                    this.openDialog('error-dispensed', prescription, getHttpErrorMessage(error, 'Error al dispensar la prescripción'));
                 }
             );
         }
@@ -332,7 +332,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
                     }
                 },
                 error => {
-                    this.openDialog('error-cancel-dispensed', prescription, error.message || 'Error al cancelar la dispensación');
+                    this.openDialog('error-cancel-dispensed', prescription, getHttpErrorMessage(error, 'Error al cancelar la dispensación'));
                 }
             );
         } else if ('estadoActual' in prescription) {
@@ -344,7 +344,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
                     }
                 },
                 error => {
-                    this.openDialog('error-cancel-dispensed', prescription, error.message || 'Error al cancelar la dispensación');
+                    this.openDialog('error-cancel-dispensed', prescription, getHttpErrorMessage(error, 'Error al cancelar la dispensación'));
                 }
             );
         }
@@ -357,7 +357,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
             data: { dialogType: aDialogType, prescription: aPrescription, text: aText }
         });
 
-        dialogRef.afterClosed().subscribe(result => {
+        dialogRef.afterClosed().pipe(take(1)).subscribe(() => {
             // eslint-disable-next-line no-console
             console.log('The dialog was closed');
         });
@@ -401,20 +401,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         return this.calculateCanCounter(prescription);
     }
 
-    generateReport() {
-        const dialogReport = this.dialog.open(DialogReportComponent, {
-            width: '400px',
-            data: { fechaDesde: this.fechaDesde, fechaHasta: this.fechaHasta, pharmacistId: this.pharmacistId }
-        });
-
-        dialogReport.afterClosed().subscribe(result => {
-            if (result) {
-                this.prescriptionService.getCsv(result).subscribe();
-            }
-        });
-    }
-
-    private findSelectedPatient(prescriptions: any[]): any {
+    private findSelectedPatient(prescriptions: MixedPrescription[]): SelectedPatient {
         if (!prescriptions || prescriptions.length === 0) {
             return null;
         }
@@ -422,11 +409,11 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         // Buscar paciente con nombreAutopercibido
         const patientWithAutopercibido = prescriptions.find(prescription => {
             // Para prescripciones de Andes
-            if (prescription.paciente && prescription.paciente.nombreAutopercibido) {
+            if (this.isAndesPrescription(prescription) && prescription.paciente && 'nombreAutopercibido' in prescription.paciente) {
                 return true;
             }
             // Para prescripciones regulares
-            if (prescription.patient && prescription.patient.nombreAutopercibido) {
+            if (!this.isAndesPrescription(prescription) && prescription.patient && prescription.patient.nombreAutopercibido) {
                 return true;
             }
             return false;
@@ -434,12 +421,16 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
 
         if (patientWithAutopercibido) {
             // Retornar el paciente encontrado (puede ser .patient o .paciente)
-            return patientWithAutopercibido.patient || patientWithAutopercibido.paciente;
+            return this.isAndesPrescription(patientWithAutopercibido)
+                ? patientWithAutopercibido.paciente
+                : patientWithAutopercibido.patient;
         }
 
         // Si no se encuentra, usar el primer paciente disponible
         const firstPrescription = prescriptions[0];
-        return firstPrescription.patient || firstPrescription.paciente || null;
+        return this.isAndesPrescription(firstPrescription)
+            ? firstPrescription.paciente
+            : firstPrescription.patient;
     }
 
     updateMaps() {
@@ -533,5 +524,71 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
             'dispensada': 'FINALIZADA'
         };
         return statusMap[statusLower] || status.toUpperCase();
+    }
+
+    private isAndesPrescription(prescription: MixedPrescription): prescription is AndesPrescriptions {
+        return 'estadoActual' in prescription;
+    }
+
+    private getPatientDni(prescription: MixedPrescription): string {
+        return this.isAndesPrescription(prescription)
+            ? prescription.paciente?.documento || ''
+            : prescription.patient?.dni || '';
+    }
+
+    private getPatientSex(prescription: MixedPrescription): string {
+        return this.isAndesPrescription(prescription)
+            ? prescription.paciente?.sexo || ''
+            : prescription.patient?.sex || '';
+    }
+
+    private getMedicationName(prescription: MixedPrescription): string {
+        if (this.isAndesPrescription(prescription)) {
+            return prescription.medicamento?.concepto?.term || '';
+        }
+
+        return prescription.supplies?.length ? (prescription.supplies[0]?.supply?.name || '') : '';
+    }
+
+    private getPrescriptionDate(prescription: MixedPrescription): Date {
+        if (this.isAndesPrescription(prescription)) {
+            return new Date(prescription.fechaRegistro || prescription.fechaPrestacion);
+        }
+
+        return new Date(prescription.date);
+    }
+
+    private getPrescriptionStatusForFilter(prescription: MixedPrescription): string {
+        return this.isAndesPrescription(prescription)
+            ? (prescription.estadoActual?.tipo || '')
+            : (prescription.status || '');
+    }
+
+    get selectedPatientLastName(): string {
+        const patient = this.selectedPatient;
+
+        if (!patient) {
+            return '';
+        }
+
+        return this.isAndesSelectedPatient(patient)
+            ? patient.apellido
+            : patient.lastName;
+    }
+
+    get selectedPatientDocument(): string {
+        const patient = this.selectedPatient;
+
+        if (!patient) {
+            return '';
+        }
+
+        return this.isAndesSelectedPatient(patient)
+            ? patient.documento
+            : patient.dni;
+    }
+
+    private isAndesSelectedPatient(patient: Exclude<SelectedPatient, null>): patient is AndesPrescriptions['paciente'] {
+        return 'documento' in patient;
     }
 }

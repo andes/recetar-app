@@ -1,18 +1,40 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, AbstractControl, FormGroupDirective, Validators, ValidationErrors } from '@angular/forms';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, AbstractControl, FormGroupDirective, Validators, ValidationErrors, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { AuthService } from '@auth/services/auth.service';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { Location } from '@angular/common';
 import { ThemePalette } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { getHttpErrorMessage } from '@shared/utils/http-error.util';
+import { Subject, timer } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
     selector: 'app-recovery-password',
     templateUrl: './recovery-password.component.html',
     styleUrls: ['./recovery-password.component.sass'],
-    standalone: false
+    standalone: true,
+    imports: [
+        ReactiveFormsModule,
+        FormsModule,
+        RouterModule,
+        FlexLayoutModule,
+        MatCardModule,
+        MatIconModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatProgressSpinnerModule
+    ]
 })
-export class RecoveryComponent implements OnInit {
+export class RecoveryComponent implements OnInit, OnDestroy {
 
     recoveryForm: FormGroup;
     hideOldPassword = true;
@@ -22,6 +44,7 @@ export class RecoveryComponent implements OnInit {
     readonly spinnerColor: ThemePalette = 'primary';
     readonly spinnerDiameter: number = 30;
     private token;
+    private destroy$ = new Subject<void>();
 
     constructor(
         private fBuild: FormBuilder,
@@ -58,15 +81,17 @@ export class RecoveryComponent implements OnInit {
                 res => {
                     // menssage
                     this.showSubmit = false;
-                    setTimeout(() => {
-                        this.router.navigate(['/auth/login']);
-                    }, 3000);
+                    timer(3000)
+                        .pipe(takeUntil(this.destroy$))
+                        .subscribe(() => {
+                            this.router.navigate(['/auth/login']);
+                        });
                     this.openSnackBar(res, 'Cerrar');
                 },
                 err => {
                     recoveryNgForm.resetForm();
                     recoveryForm.reset();
-                    this.error = err;
+                    this.error = getHttpErrorMessage(err);
                     this.showSubmit = false;
                 });
         }
@@ -106,5 +131,10 @@ export class RecoveryComponent implements OnInit {
 
     get newPassword(): AbstractControl {
         return this.recoveryForm.get('newPassword');
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 }

@@ -1,6 +1,6 @@
 import { AfterContentInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { arrowDirection, detailExpand, rowsAnimation } from '@animations/animations.template';
@@ -22,10 +22,12 @@ import { formatTipoInsumo } from '@services/stock.service';
 import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unified-printer.component';
 import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 import { forkJoin, of, Subject } from 'rxjs';
-import { catchError, takeUntil } from 'rxjs/operators';
+import { catchError, take, takeUntil } from 'rxjs/operators';
 
 // Tipo union para manejar prescripciones mixtas
 type MixedPrescription = Prescriptions | AndesPrescriptions;
+type ListType = 'receta' | 'certificados' | 'practicas' | 'insumos' | null;
+type DialogItem = MixedPrescription | Certificate | Practice;
 
 
 @Component({
@@ -42,17 +44,17 @@ type MixedPrescription = Prescriptions | AndesPrescriptions;
 export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnDestroy {
     private destroy$ = new Subject<void>();
     @Output() anulateCertificateEvent = new EventEmitter<Certificate>();
-    @Input() tipo: any;
+    @Input() tipo: string | null = null;
 
     displayedColumns: string[] = ['source', 'patient', 'dni', 'prescription_date', 'status', 'action', 'arrow'];
     certificatesColumns: string[] = ['patient', 'dni', 'certificate_date', 'end_date', 'status', 'action', 'arrow'];
     practicesColumns: string[] = ['patient', 'dni', 'practice_date', 'action', 'arrow'];
     dataSource = new MatTableDataSource<MixedPrescription>([]);
-    expandedElement: MixedPrescription | null;
+    expandedElement: MixedPrescription | Certificate | Practice | null;
     loadingPrescriptions: boolean;
     loadingCertificates: boolean;
     loadingPractices: boolean;
-    selectedType: string = null;
+    selectedType: ListType = null;
     dataCertificates = new MatTableDataSource<Certificate>([]);
     dataPractices = new MatTableDataSource<Practice>([]);
 
@@ -73,6 +75,7 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     patientsData: { [key: string]: Patient } = {};
 
     private paginatorsInitialized = false;
+    private paginatorSetupFrameId: number | null = null;
 
     formatType(type: string | undefined): string {
         return formatTipoInsumo(type);
@@ -155,25 +158,27 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
             this.dataSource.data = list;
             this.loadingPrescriptions = false;
 
-            const patientDnis: any = {};
+            const patientDnis: Record<string, string> = {};
 
-            list.forEach((p: any) => {
-                const dni = p.patient ? p.patient.dni : (p.paciente ? p.paciente.documento : null);
+            list.forEach((p: MixedPrescription) => {
+                const dni = this.getPatientDni(p);
                 if (dni) {
                     patientDnis[dni] = dni;
                 }
             });
 
             if (Object.keys(patientDnis).length > 0) {
-                const requests = [];
+                const requests: Array<ReturnType<PatientsService['getPatientByDni']>> = [];
                 for (const key in patientDnis) {
                     requests.push(this.patientsService.getPatientByDni(key).pipe(
-                        catchError(() => of([]))
+                        catchError(() => of([] as Patient[]))
                     ));
                 }
 
-                forkJoin(requests).subscribe((results: any[]) => {
-                    results.forEach((patients: any[]) => {
+                forkJoin(requests)
+                    .pipe(takeUntil(this.destroy$))
+                    .subscribe((results: Patient[][]) => {
+                    results.forEach((patients: Patient[]) => {
                         if (patients && patients.length > 0) {
                             const patient = patients[0];
                             if (patient.dni) {
@@ -181,16 +186,12 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
                             }
                         }
                     });
-                });
+                    });
             }
 
-            // Configurar paginator después de que los datos estén cargados
-            this.dataSource.data = response.prescriptions;
-            this.loadingPrescriptions = false;
-
-            setTimeout(() => {
+            this.schedulePaginatorSetup(() => {
                 this.setupPrescriptionsPaginator();
-            }, 100);
+            });
         });
     }
 
@@ -210,9 +211,9 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
             this.dataCertificates.data = response.certificates;
             this.loadingCertificates = false;
 
-            setTimeout(() => {
+            this.schedulePaginatorSetup(() => {
                 this.setupCertificatesPaginator();
-            }, 100);
+            });
         });
     }
 
@@ -232,9 +233,9 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
             this.dataPractices.data = response.practices;
             this.loadingPractices = false;
 
-            setTimeout(() => {
+            this.schedulePaginatorSetup(() => {
                 this.setupPracticesPaginator();
-            }, 100);
+            });
         });
     }
 
@@ -287,9 +288,20 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         }
     }
 
+    private schedulePaginatorSetup(action: () => void): void {
+        if (this.paginatorSetupFrameId !== null) {
+            cancelAnimationFrame(this.paginatorSetupFrameId);
+        }
+
+        this.paginatorSetupFrameId = requestAnimationFrame(() => {
+            this.paginatorSetupFrameId = null;
+            action();
+        });
+    }
+
     initDataSource() {
         // Inicializar DataSources vacíos
-        this.dataSource = new MatTableDataSource<Prescriptions>([]);
+        this.dataSource = new MatTableDataSource<MixedPrescription>([]);
         this.dataSource.sortingDataAccessor = (item, property) => {
             switch (property) {
                 case 'patient': return this.getPatientName(item);
@@ -329,13 +341,17 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         return 'patient' in item && '_id' in item;
     }
 
+    private isPrescriptionItem(item: MixedPrescription | Certificate | Practice): item is MixedPrescription {
+        return 'patient' in item || 'paciente' in item;
+    }
+
     getPatientName(item: MixedPrescription): string {
         const dni = this.getPatientDni(item);
         if (dni && this.patientsData[dni]) {
             return `${this.patientsData[dni].lastName} ${this.patientNamePipe.transform(this.patientsData[dni])}`;
         }
-        if ((item as any).patient) {
-            return `${(item as any).patient.lastName} ${this.patientNamePipe.transform((item as any).patient)}`;
+        if (this.isLocalPrescription(item)) {
+            return `${item.patient.lastName} ${this.patientNamePipe.transform(item.patient)}`;
         }
         if (this.isAndesPrescription(item)) {
             return `${item.paciente.apellido} ${item.paciente.nombre}`;
@@ -362,7 +378,8 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     getPrescriptionStatus(item: MixedPrescription): string {
         if (this.isAndesPrescription(item)) {
             // Manejar tanto formato viejo de Andes como nuevo (status a nivel raiz)
-            const currentStatus = item.estadoActual?.tipo || (item as any).status;
+            const itemWithStatus = item as AndesPrescriptions & { status?: string };
+            const currentStatus = item.estadoActual?.tipo || itemWithStatus.status;
             return this.normalizeStatus(currentStatus);
         } else {
             return this.normalizeStatus(item.status);
@@ -406,6 +423,11 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         if (!this.expandedElement) {
             return false;
         }
+
+        if (!this.isPrescriptionItem(this.expandedElement)) {
+            return false;
+        }
+
         return this.getPrescriptionId(element) === this.getPrescriptionId(this.expandedElement);
     }
 
@@ -513,13 +535,13 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         await this.unifiedPrinter.printPractice(practice);
     }
 
-    private openDialog(aDialogType: string, aItem?: any, aText?: string): void {
+    private openDialog(aDialogType: string, aItem?: DialogItem, aText?: string): void {
         const dialogRef = this.dialog.open(ProfessionalDialogComponent, {
             width: '400px',
             data: { dialogType: aDialogType, item: aItem, text: aText }
         });
 
-        dialogRef.afterClosed().subscribe(result => {
+        dialogRef.afterClosed().pipe(take(1)).subscribe(result => {
             if (result === 'deleted') {
                 this.openSuccessDialog('deleted');
             } else if (result === 'error') {
@@ -538,19 +560,19 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         });
     }
 
-    onPrescriptionsPageChange(event: any) {
+    onPrescriptionsPageChange(event: PageEvent) {
         this.prescriptionsPageIndex = event.pageIndex;
         this.prescriptionsPageSize = event.pageSize;
         this.loadPrescriptions(event.pageIndex * event.pageSize, event.pageSize);
     }
 
-    onCertificatesPageChange(event: any) {
+    onCertificatesPageChange(event: PageEvent) {
         this.certificatesPageIndex = event.pageIndex;
         this.certificatesPageSize = event.pageSize;
         this.loadCertificates(event.pageIndex * event.pageSize, event.pageSize);
     }
 
-    onPracticesPageChange(event: any) {
+    onPracticesPageChange(event: PageEvent) {
         this.practicesPageIndex = event.pageIndex;
         this.practicesPageSize = event.pageSize;
         this.loadPractices(event.pageIndex * event.pageSize, event.pageSize);
@@ -565,12 +587,17 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
 
         this.loadDataForSelectedType();
 
-        setTimeout(() => {
+        this.schedulePaginatorSetup(() => {
             this.initializePaginators();
-        }, 100);
+        });
     }
 
     ngOnDestroy() {
+        if (this.paginatorSetupFrameId !== null) {
+            cancelAnimationFrame(this.paginatorSetupFrameId);
+            this.paginatorSetupFrameId = null;
+        }
+
         this.destroy$.next();
         this.destroy$.complete();
     }

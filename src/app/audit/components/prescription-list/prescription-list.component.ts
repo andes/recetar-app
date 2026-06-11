@@ -1,5 +1,4 @@
-import { AfterContentInit, Component, Input, OnInit, ViewChild } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -9,8 +8,9 @@ import { Prescriptions } from '@interfaces/prescriptions';
 import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unified-printer.component';
 import { PrescriptionsService } from '@services/prescriptions.service';
 import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
+import { Subject } from 'rxjs';
 import moment from 'moment';
-import { DialogReportComponent } from '../dialog-report/dialog-report.component';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
     selector: 'app-prescription-list',
@@ -22,7 +22,7 @@ import { DialogReportComponent } from '../dialog-report/dialog-report.component'
     ],
     standalone: false
 })
-export class PrescriptionListComponent implements OnInit, AfterContentInit {
+export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDestroy {
 
     @Input() prescriptions: Prescriptions[];
 
@@ -40,16 +40,19 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
     @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
     @ViewChild(MatSort, { static: true }) sort: MatSort;
 
+    private destroy$ = new Subject<void>();
+
     constructor(
         private authService: AuthService,
         private prescriptionService: PrescriptionsService,
         private unifiedPrinter: UnifiedPrinterComponent,
-        public dialog: MatDialog,
         private patientNamePipe: PatientNamePipe) { };
 
     ngOnInit(): void {
         this.loadingPrescriptions = true;
-        this.prescriptionService.prescriptions.subscribe((prescriptions: Prescriptions[]) => {
+        this.prescriptionService.prescriptions.pipe(
+            takeUntil(this.destroy$)
+        ).subscribe((prescriptions: Prescriptions[]) => {
             this.dataSource = new MatTableDataSource<Prescriptions>(prescriptions);
             // sort after populate dataSource
             this.dataSource.sortingDataAccessor = (item, property) => {
@@ -116,17 +119,9 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit {
     }
 
 
-    generateReport() {
-        const dialogReport = this.dialog.open(DialogReportComponent, {
-            width: '400px',
-            data: { fechaDesde: this.fechaDesde, fechaHasta: this.fechaHasta, pharmacistId: this.dataSource.data[0].dispensedBy.userId }
-        });
-
-        dialogReport.afterClosed().subscribe(result => {
-            if (result) {
-                this.prescriptionService.getCsv(result).subscribe();
-            }
-        });
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
 }

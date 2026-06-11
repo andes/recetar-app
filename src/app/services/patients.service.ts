@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { catchError, tap, map } from 'rxjs/operators';
-import { Observable, of, throwError } from 'rxjs';
-import { Patient } from '../interfaces/patients';
+import { Observable, of } from 'rxjs';
+import { Patient, PatientAdapter } from '../interfaces/patients';
 
 @Injectable({
     providedIn: 'root'
@@ -12,24 +12,30 @@ export class PatientsService {
 
     constructor(
         private http: HttpClient,
+        private patientAdapter: PatientAdapter
     ) { }
 
-    getPatients(): Observable<any> {
-        return this.http.get(`${environment.API_END_POINT}/patients`);
+    getPatients(): Observable<Patient[]> {
+        return this.http.get<Patient[]>(`${environment.API_END_POINT}/patients`).pipe(
+            map((patients: Patient[]) => patients.map((patient) => this.patientAdapter.adapt(patient)))
+        );
     }
     getPatientOSByDni(dni: string, sexo: string) {
-        const params = { 'documento': dni, 'sexo': sexo };
-        return this.http.get(`${environment.API_END_POINT}/patients/get-os-by-dni`, { params });
+        const params = { sexo };
+        return this.http.get(`${environment.API_END_POINT}/patients/coverages/${dni}`, { params });
     }
     getOS() {
-        return this.http.get(`${environment.API_END_POINT}/patients/get-os`);
+        return this.http.get(`${environment.API_END_POINT}/patients/coverages`);
     }
     getPatientByDni(dni: string): Observable<Patient[]> {
-        return this.http.get<Patient[]>(`${environment.API_END_POINT}/patients/get-by-dni/${dni}`);
+        return this.http.get<Patient[]>(`${environment.API_END_POINT}/patients/dni/${dni}`).pipe(
+            map((patients: Patient[]) => patients.map((patient) => this.patientAdapter.adapt(patient)))
+        );
     }
 
     getPatientById(id: string): Observable<Patient> {
         return this.http.get<Patient>(`${environment.API_END_POINT}/patients/${id}`).pipe(
+            map((patient: Patient) => this.patientAdapter.adapt(patient)),
             tap(() => undefined),
             catchError(this.handleError<Patient>(`getPatientById id=${id}`))
         );
@@ -37,17 +43,18 @@ export class PatientsService {
 
     newPatient(patient: Patient): Observable<Patient> {
         return this.http.post<Patient>(`${environment.API_END_POINT}/patients`, patient).pipe(
+            map((newPatient: Patient) => this.patientAdapter.adapt(newPatient)),
             tap(() => undefined),
             catchError(this.handleError<Patient>('newPatient'))
         );
     }
 
     getPatientInsurance(dni: string) {
-        return this.http.get(`https://app.andes.gob.ar/api/modules/obraSocial/puco/?dni=${dni}`);
+        return this.http.get<unknown>(`https://app.andes.gob.ar/api/modules/obraSocial/puco/?dni=${dni}`);
     }
 
     private handleError<T>(operation = 'operation', result?: T) {
-        return (error: any): Observable<T> => {
+        return (_error: unknown): Observable<T> => {
             // Let the app keep running by returning an empty result.
             return of(result as T);
         };

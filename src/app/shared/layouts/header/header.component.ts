@@ -1,15 +1,28 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '@auth/services/auth.service';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AmbitoService } from '../../../auth/services/ambito.service';
+import { CommonModule } from '@angular/common';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
 
 @Component({
     selector: 'app-header',
     templateUrl: './header.component.html',
     styleUrls: ['./header.component.sass'],
-    standalone: false
+    standalone: true,
+    imports: [
+        CommonModule,
+        RouterModule,
+        FlexLayoutModule,
+        MatToolbarModule,
+        MatButtonModule,
+        MatMenuModule
+    ]
 })
 export class HeaderComponent implements OnInit {
   isLoggedIn$: Observable<boolean>;

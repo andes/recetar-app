@@ -5,12 +5,11 @@
                 <mat-icon>gesture</mat-icon>
                 <h2>
                     Recetas <span *ngIf="selectedPatient"> de
-                        {{selectedPatient.lastName || selectedPatient.apellido}}, {{selectedPatient | patientName}} DNI
-                        {{selectedPatient.dni || selectedPatient.documento}}</span>
+                        {{selectedPatientLastName}}, {{selectedPatient | patientName}} DNI
+                        {{selectedPatientDocument}}</span>
                 </h2>
             </div>
             <div fxFlex="25" fxLayout="row" fxLayoutAlign="end center">
-                <button mat-stroked-button (click)="generateReport()">Generar reporte</button>
             </div>
         </div>
     </mat-card-title>

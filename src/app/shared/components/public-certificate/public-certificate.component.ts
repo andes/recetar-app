@@ -1,15 +1,35 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Certificate } from '@interfaces/certificate';
 import { CertificatesService } from '@services/certificates.service';
 import { Observable, of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
+import { CommonModule } from '@angular/common';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatButtonModule } from '@angular/material/button';
+import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
+
+type PublicCertificateData = Certificate & {
+    endDate?: Date | string;
+    anulateDate?: Date | string;
+};
 
 @Component({
     selector: 'app-public-certificate',
     templateUrl: './public-certificate.component.html',
     styleUrls: ['./public-certificate.component.sass'],
-    standalone: false
+    standalone: true,
+    imports: [
+        CommonModule,
+        RouterModule,
+        MatProgressSpinnerModule,
+        MatIconModule,
+        MatChipsModule,
+        MatButtonModule,
+        PatientNamePipe
+    ]
 })
 
 export class PublicCertificateComponent implements OnInit {
@@ -77,7 +97,7 @@ export class PublicCertificateComponent implements OnInit {
         });
     }
 
-    getCertificateStatus(certificate: any): string {
+    getCertificateStatus(certificate: PublicCertificateData): string {
 
         if (!certificate.endDate) {
             return 'activo';

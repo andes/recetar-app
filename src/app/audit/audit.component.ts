@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-    selector: 'app-pharmacists',
+    selector: 'app-audit',
     templateUrl: './audit.component.html',
     styleUrls: ['./audit.component.sass'],
     standalone: false

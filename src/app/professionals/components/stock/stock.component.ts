@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
 import { StockService, Insumo } from '@services/stock.service';
-import Supplies from '@interfaces/supplies';
+import { Prescriptions } from '@interfaces/prescriptions';
 import { debounceTime, distinctUntilChanged, switchMap, catchError, startWith, map } from 'rxjs/operators';
 import { of, Subscription, Observable } from 'rxjs';
 import { PrescriptionsService } from '@services/prescriptions.service';
@@ -12,9 +12,46 @@ import { Patient } from '@interfaces/patients';
 import { MatDialog } from '@angular/material/dialog';
 import { StockDialogComponent } from './stock-dialog/stock-dialog.component';
 
+interface CoverageOption {
+  nombre: string;
+  codigoPuco?: string;
+  numeroAfiliado?: string;
+}
+
+interface SupplyCode {
+  fuente?: string;
+  valor?: string;
+  source?: string;
+  value?: string;
+  id?: string;
+}
+
+interface ValidationErrorPayload {
+  value: unknown;
+}
+
+interface StockValidatorErrors {
+  invalidDate?: ValidationErrorPayload;
+  futureDate?: ValidationErrorPayload;
+  tooOldDate?: ValidationErrorPayload;
+}
+
+interface NewInsumoItem {
+  _id: string;
+  quantity: string;
+  type: 'nutrition' | 'device';
+  name: string;
+  requiresSpecification: boolean;
+  specification: string;
+  codigo?: SupplyCode[];
+  estado?: string;
+  snomedConcept?: { conceptId?: string; term?: string; fsn?: string; semanticTag?: string };
+  concepto?: { conceptId?: string; term?: string; fsn?: string; semanticTag?: string };
+}
+
 // Validador personalizado para fechas
 function validDateValidator(): ValidatorFn {
-  return (control: AbstractControl): { [key: string]: any } | null => {
+  return (control: AbstractControl): StockValidatorErrors | null => {
     if (!control.value) {
       return null; // Si no hay valor, no validamos (required se encarga)
     }
@@ -56,7 +93,7 @@ export class StockComponent implements OnInit, OnDestroy {
   specificationControl = new FormControl('');
   requiresSpecificationControl = new FormControl(false);
   filteredSupplies: Insumo[] = [];
-  supplies: Supplies[] = [];
+  supplies: NewInsumoItem[] = [];
   loading = false;
   selectedSupply: Insumo | null = null;
   saving = false;
@@ -72,11 +109,11 @@ export class StockComponent implements OnInit, OnDestroy {
   maxDate = new Date();
   today = new Date();
 
-  obraSocialControl = new FormControl<any>('');
-  filteredObrasSociales: Observable<any[]>;
+  obraSocialControl = new FormControl<CoverageOption | string>('');
+  filteredObrasSociales: Observable<CoverageOption[]>;
   organizacionControl = new FormControl('');
-  obraSocial: any[];
-  obrasSociales: any[];
+  obraSocial: CoverageOption[];
+  obrasSociales: CoverageOption[];
 
   constructor(
     private stockService: StockService,
@@ -126,7 +163,7 @@ export class StockComponent implements OnInit, OnDestroy {
     // Configurar filtro de obras sociales
     this.filteredObrasSociales = this.obraSocialControl.valueChanges.pipe(
       startWith(''),
-      map((value: any) => {
+      map((value: CoverageOption | string) => {
         const name = typeof value === 'string' ? value : value?.nombre;
         return name ? this._filter(name) : (this.obrasSociales ? this.obrasSociales.slice() : []);
       })
@@ -162,18 +199,49 @@ export class StockComponent implements OnInit, OnDestroy {
         this.selectedSupply = null;
       }
     });
+
+    this.loadObrasSociales();
+  }
+
+  private loadObrasSociales(): void {
+    this.patientsService.getOS().subscribe(
+      res => {
+        this.obrasSociales = (res as CoverageOption[]);
+      }
+    );
   }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
 
-  displaySupply(supply: any | null): string {
-    return supply ? (supply.nombre || supply.insumo || supply.supply || supply.name || supply.term || '') : '';
+  private getSupplyDisplayName(supply: Insumo | null): string {
+    if (!supply) {
+      return '';
+    }
+
+    return supply.name || supply.term || supply.insumo || supply.supply || '';
   }
 
-  onSupplySelected(supply: any) {
-    const displayName = supply.nombre || supply.insumo || supply.supply || supply.name || supply.term || '';
+  private getSupplyTypeLabel(supply: Insumo): 'Nutrición' | 'Dispositivo' {
+    const rawType = (supply.type || supply.tipo || '').toString().toLowerCase();
+    return rawType === 'nutrition' || rawType === 'nutricion' ? 'Nutrición' : 'Dispositivo';
+  }
+
+  private supplyRequiresSpecification(supply: Insumo): boolean {
+    return !!(supply.requiresSpecification ?? supply.requiereEspecificacion);
+  }
+
+  displaySupply(supply: Insumo | string | null): string {
+    if (typeof supply === 'string') {
+      return supply;
+    }
+
+    return this.getSupplyDisplayName(supply);
+  }
+
+  onSupplySelected(supply: Insumo) {
+    const displayName = this.getSupplyDisplayName(supply);
 
     // if (supply.tipo) {
     //   displayName += ` (${supply.tipo})`;
@@ -182,15 +250,9 @@ export class StockComponent implements OnInit, OnDestroy {
     this.selectedSupply = supply;
     this.termControl.setValue(displayName, { emitEvent: false });
 
-    if (supply.tipo) {
-      if (supply.tipo.toLowerCase() === 'nutricion') {
-        this.typeControl.setValue('Nutrición');
-      } else if (supply.tipo.toLowerCase() === 'dispositivo') {
-        this.typeControl.setValue('Dispositivo');
-      }
-    }
+    this.typeControl.setValue(this.getSupplyTypeLabel(supply));
 
-    if (supply.requiereEspecificacion) {
+    if (this.supplyRequiresSpecification(supply)) {
       this.requiresSpecificationControl.setValue(true);
       this.requiresSpecificationControl.disable();
     } else {
@@ -204,7 +266,7 @@ export class StockComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const requiresSpec = this.requiresSpecificationControl.value || this.selectedSupply.requiereEspecificacion;
+    const requiresSpec = !!(this.requiresSpecificationControl.value || this.supplyRequiresSpecification(this.selectedSupply));
 
     if (requiresSpec && !this.specificationControl.value) {
       return;
@@ -212,16 +274,16 @@ export class StockComponent implements OnInit, OnDestroy {
 
 
 
-    const newInsumo: any = {
-      _id: this.selectedSupply._id || (this.selectedSupply as any).id || '',
+    const newInsumo: NewInsumoItem = {
+      _id: this.selectedSupply._id || this.selectedSupply.id || '',
       quantity: this.quantityControl.value.toString(),
       type: this.typeControl.value === 'Nutrición' ? 'nutrition' : 'device',
-      name: (this.selectedSupply as any).nombre || this.selectedSupply.insumo || this.selectedSupply.name || '',
+      name: this.getSupplyDisplayName(this.selectedSupply),
       requiresSpecification: requiresSpec || false,
       specification: this.specificationControl.value,
-      codigo: (this.selectedSupply as any).codigo || undefined,
-      estado: (this.selectedSupply as any).estado || undefined,
-      concepto: (this.selectedSupply as any).concepto || (this.selectedSupply as any).snomedConcept || undefined,
+      codigo: this.selectedSupply.codigo || this.selectedSupply.code || undefined,
+      estado: this.selectedSupply.estado || this.selectedSupply.status || undefined,
+      concepto: this.selectedSupply.concepto || this.selectedSupply.snomedConcept || undefined,
     };
 
     this.supplies.push(newInsumo);
@@ -246,16 +308,19 @@ export class StockComponent implements OnInit, OnDestroy {
     this.saving = true;
 
     const newPrescription = {
-      professional: this.authService.getLoggedUserId(),
+      professional: {
+        userId: this.authService.getLoggedUserId(),
+        businessName: this.authService.getLoggedBusinessName(),
+      },
       patient: this.patientForm.value,
       date: new Date(),
       ambito: this.ambito,
       organizacion: this.isAmbitoPublico() ? this.organizacionControl.value : undefined,
-      supplies: this.supplies.map((item: any) => ({
+      supplies: this.supplies.map((item: NewInsumoItem) => ({
         supply: {
           _id: item._id,
           snomedConcept: item.snomedConcept || item.concepto,
-          code: item.codigo ? item.codigo.map((c: any) => ({
+          code: item.codigo ? item.codigo.map((c: SupplyCode) => ({
             source: c.fuente || c.source,
             value: c.valor || c.value,
             id: c.id
@@ -272,7 +337,7 @@ export class StockComponent implements OnInit, OnDestroy {
       status: 'Pendiente'
     };
 
-    this.prescriptionsService.newPrescription(newPrescription as any).subscribe(
+    this.prescriptionsService.newPrescription(newPrescription as unknown as Prescriptions).subscribe(
       () => {
         this.saving = false;
         this.supplies = [];
@@ -378,19 +443,16 @@ export class StockComponent implements OnInit, OnDestroy {
           this.dniShowSpinner = false;
         });
 
-      this.patientsService.getPatientOSByDni(dniValue, this.patientSex.value).subscribe(
-        res => {
-          if (Array.isArray(res)) {
-            this.obraSocial = res;
-          } else {
-            this.obraSocial = [];
-          }
-        });
-      this.patientsService.getOS().subscribe(
-        res => {
-          this.obrasSociales = (res as Array<any>);
-        }
-      );
+      if (this.patientSex.value) {
+        this.patientsService.getPatientOSByDni(dniValue, this.patientSex.value).subscribe(
+          res => {
+            if (Array.isArray(res)) {
+              this.obraSocial = res;
+            } else {
+              this.obraSocial = [];
+            }
+          });
+      }
     } else {
       this.dniShowSpinner = false;
     }
@@ -446,7 +508,7 @@ export class StockComponent implements OnInit, OnDestroy {
     return this.patientForm.get('otraOS');
   }
 
-  onOsSelected(selectedOs: any): void {
+  onOsSelected(selectedOs: CoverageOption): void {
     const osGroup = this.patientForm.get('os') as FormGroup;
     if (osGroup && selectedOs) {
       osGroup.patchValue({
@@ -461,21 +523,21 @@ export class StockComponent implements OnInit, OnDestroy {
     }
   }
 
-  existenObrasSociales(array: any[]): boolean {
+  existenObrasSociales(array: CoverageOption[]): boolean {
     if (!array || array.length === 0) {
       return false;
     }
     return !array.every(item => item === null || item === undefined);
   }
 
-  private _filter(value: string): any[] {
+  private _filter(value: string): CoverageOption[] {
     const filterValue = value.toLowerCase();
     return this.obrasSociales.filter(os =>
       os.nombre.toLowerCase().includes(filterValue)
     );
   }
 
-  displayOs(os: any): string {
+  displayOs(os: CoverageOption): string {
     return os && os.nombre ? os.nombre : '';
   }
 }
