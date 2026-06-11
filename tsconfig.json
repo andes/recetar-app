@@ -3,9 +3,6 @@
   "compilerOptions": {
     "baseUrl": "src",
     "paths": {
-      "@dashboard/*": [
-        "app/dashboard/*"
-      ],
       "@auth/*": [
         "app/auth/*"
       ],
@@ -35,6 +32,9 @@
       ],
       "@audit/*": [
         "app/audit/*"
+      ],
+      "@dashboard/*": [
+        "app/features/dashboard/*"
       ]
     },
     "outDir": "./dist/out-tsc",

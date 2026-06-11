@@ -1,0 +1,19 @@
+<app-header *ngIf="showHeader"
+    (menuClick)="toggleSidebar()">
+</app-header>
+
+<div class="sidebar-backdrop" *ngIf="showSidebar && sidebarOpen" (click)="sidebarOpen = false"></div>
+
+<div class="canvas-body" [class.has-sidebar]="showSidebar">
+    <app-sidebar *ngIf="showSidebar"
+        [items]="sidebarItems"
+        [collapsed]="sidebarCollapsed"
+        [overlayOpen]="sidebarOpen"
+        (toggled)="sidebarCollapsed = !sidebarCollapsed">
+    </app-sidebar>
+    <main class="canvas-content">
+        <ng-content></ng-content>
+    </main>
+</div>
+
+<app-footer *ngIf="showFooter"></app-footer>

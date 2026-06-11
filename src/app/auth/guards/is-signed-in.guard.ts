@@ -17,7 +17,7 @@ export class IsSignedInGuard implements CanActivate {
             take(1),
             map((isLoggedIn: boolean) => {
                 if (isLoggedIn) {
-                    this.router.navigate(['/farmacias/recetas/dispensar']);
+                    this.router.navigate(['/dashboard']);
                     return false;
                 }
                 return true;

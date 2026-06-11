@@ -1,0 +1,35 @@
+@use 'styles/variables' as *
+
+:host
+    display: flex
+    flex-direction: column
+    min-height: 100vh
+    overflow: visible
+
+.canvas-body
+    display: flex
+    flex: 1
+    gap: 0
+    padding: 0
+
+    @media (min-width: $small-devices + 1px)
+        gap: 16px
+        padding: 16px
+
+    .canvas-content
+        flex: 1
+        background: var(--bg-body)
+        padding: 12px
+
+        @media (min-width: $small-devices + 1px)
+            padding: 24px
+
+.sidebar-backdrop
+    display: block
+    position: fixed
+    inset: 0
+    background: rgba(0, 0, 0, 0.4)
+    z-index: 999
+
+    @media (min-width: $small-devices + 1px)
+        display: none
