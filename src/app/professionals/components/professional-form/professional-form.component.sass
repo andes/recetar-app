@@ -14,9 +14,12 @@
     margin: 0px!important
     border-radius: 0px!important
 
-  &.three-elements
+  // &.three-elements
+  //   button
+  //     width: calc(100% / 3)
+  &.two-elements
     button
-      width: calc(100% / 3)
+      width: calc(100% / 2)
 
   &.four-elements
     button
@@ -37,8 +40,11 @@
     top: 0
     background-color: #4056b5
 
-.three-elements ~ .link-bar-indicator-container .indicator
-  width: 33.33%
+// .three-elements ~ .link-bar-indicator-container .indicator
+//   width: 33.33%
+
+.two-elements ~ .link-bar-indicator-container .indicator
+  width: 50%
 
 .four-elements ~ .link-bar-indicator-container .indicator
   width: 25%
