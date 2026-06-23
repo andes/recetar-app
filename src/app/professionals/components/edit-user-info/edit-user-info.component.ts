@@ -65,7 +65,7 @@ export class EditUserInfoComponent implements OnInit {
             this.isLoading = true;
             const newEmail = this.editUserForm.get('email')?.value;
 
-            this.userService.updateUser(this.currentUserId, { email: newEmail }).subscribe({
+            this.userService.updateUserOwn(this.currentUserId, { email: newEmail }).subscribe({
                 next: () => {
                     this.isLoading = false;
                     this.snackBar.open('Email actualizado exitosamente', 'Cerrar', {
@@ -75,16 +75,8 @@ export class EditUserInfoComponent implements OnInit {
                     this.router.navigate(['/']);
                 },
                 error: (error) => {
-                    console.log(error);
                     this.isLoading = false;
-                    this.updateError = error.error.mensaje || 'Error al cargar la información del usuario';
-                    this.snackBar.open(
-                        `${this.updateError}`,
-                        'Cerrar',
-                        {
-                            duration: 5000
-                        }
-                    );
+                    this.updateError = error || error.error?.message || error.message || 'Error al actualizar el usuario';
                 }
             });
         }

@@ -1,51 +1,54 @@
+<div fxLayout="column" fxLayoutAlign="space-evenly center" class="logo">
+  <img src="assets/img/LogoRecetar.png" class="icon-login">
+  <h1 class="title-login">RecetAR</h1>
+</div>
 
-  <!-- Logo -->
-  <div fxLayout="column" fxLayoutAlign="space-evenly center" class="logo">
-    <img src="assets/img/LogoRecetar.png" class="icon-login">
-    <h1 class="title-login">RecetAR</h1>
-  </div>
-
-  <div fxLayout="row" fxLayoutAlign="space-evenly start" fxLayoutGap="20px" class="cards-container" fxFill>
-    
-    <!-- panel "Forgot form" -->
-    <div  class="form-panel">
-      <mat-card fxLayout="column" fxLayoutAlign="space-between">
-        <mat-card-title><h2 class="text-center">Restablecer contraseña</h2></mat-card-title>
-        <span *ngIf="!mailEnviado">
-          Por favor, ingrese su usuario. Recibirá un correo electrónico con instrucciones para restablecer su contraseña.
-        </span>
-        <span *ngIf="mailEnviado">
-          Hemos enviado un e-mail para regenerar su contraseña.
-        </span>
-        <mat-card-content *ngIf="!mailEnviado">
-          <form [formGroup]="forgotForm"  #forgotNgForm="ngForm" (ngSubmit)="onSubmitEvent(forgotForm, forgotNgForm)" class="form-container" >
-            <div fxLayout fxLayout="column" fxLayoutAlign="center" class="container" fxLayoutGap="20px">
-              <mat-form-field>
-                <input matInput placeholder="Ingrese su Usuario" formControlName="usuario" autocomplete="off">
-                <mat-error *ngIf="usuario.errors?.required ">
-                  Usuario es requerido
-                </mat-error>
+<div class="edit-user-info">
+  <mat-card>
+      <mat-card-header>
+          <mat-card-title>Restablecer contraseña</mat-card-title>
+          <mat-card-subtitle *ngIf="!mailEnviado">
+            Por favor, ingrese su usuario. Recibirá un correo electrónico con instrucciones para restablecer su contraseña.
+          </mat-card-subtitle>
+          <mat-card-subtitle *ngIf="mailEnviado">
+            Hemos enviado un e-mail para regenerar su contraseña.
+          </mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content *ngIf="!mailEnviado">
+          <form [formGroup]="forgotForm" #forgotNgForm="ngForm" (ngSubmit)="onSubmitEvent(forgotForm, forgotNgForm)" class="edit-form">
+              
+              <mat-form-field appearance="fill" class="email-field">
+                  <mat-label>Usuario</mat-label>
+                  <input matInput placeholder="Ingrese su Usuario" formControlName="usuario" autocomplete="off" required>
+                  <mat-error *ngIf="usuario.errors?.required">
+                      Usuario es requerido
+                  </mat-error>
               </mat-form-field>
-
-            </div>
-            <mat-error *ngIf="error" class="text-center login-error">
-              {{ error }}
-            </mat-error>
-
-            <div fxLayout="row" fxLayoutAlign="center">
-              <div fxLayout="row" fxLayoutGap="10px" fxFlex="100%" *ngIf="!showSubmit">
-                <button mat-raised-button color="primary" (click)="cancelar()" *ngIf="!showSubmit" fxFlex="100%">
-                  Cancelar
-                </button>
-                <button mat-raised-button color="primary" type="submit" fxFlex="50%" *ngIf="!showSubmit">
-                  Recuperar Contraseña
-                </button>
+              
+              <div class="alert alert-danger" *ngIf="error" style="color: #f44336; margin-bottom: 16px; font-size: 0.9em; font-weight: 500;">
+                  {{ error }}
               </div>
-            
-              <mat-spinner [color]="spinnerColor" [diameter]="spinnerDiameter" *ngIf="showSubmit"></mat-spinner>
-            </div>
+
+              <div class="form-actions">
+                  <button mat-raised-button color="primary" type="submit" [disabled]="forgotForm.invalid || showSubmit">
+                      <mat-spinner *ngIf="showSubmit" diameter="20"></mat-spinner>
+                      <span *ngIf="!showSubmit">Recuperar Contraseña</span>
+                      <span *ngIf="showSubmit">Enviando...</span>
+                  </button>
+                  <button mat-button type="button" (click)="cancelar()">
+                      Cancelar
+                  </button>
+              </div>
           </form>
-        </mat-card-content>
-      </mat-card>
-    </div>
-  </div>
+      </mat-card-content>
+
+      <mat-card-content *ngIf="mailEnviado">
+          <div class="form-actions" style="margin-top: 2rem;">
+              <button mat-raised-button color="primary" type="button" (click)="cancelar()">
+                  Volver a la pantalla principal
+              </button>
+          </div>
+      </mat-card-content>
+  </mat-card>
+</div>
