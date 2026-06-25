@@ -74,7 +74,7 @@
         </mat-form-field>
       </div>
 
-      <mat-checkbox formControlName="otraOS" [disabled]="!patientSearch">Elegir otra cobertura social</mat-checkbox>
+      <mat-checkbox formControlName="otraOS">Elegir otra cobertura social</mat-checkbox>
       <div formGroupName="os" fxLayout="row" fxLayout.sm="column" fxLayoutGap="10px" fxLayoutAlign="start center"
         fxLayoutAlign.sm="start" fxLayoutGap.sm="0" fxLayout.xs="column" fxLayoutAlign.xs="start">
 
@@ -95,7 +95,7 @@
         <mat-form-field *ngIf="patientForm.get('otraOS')?.value" appearance="fill" fxFlex="80" fxFlex.md="100">
           <mat-label>Obra Social</mat-label>
           <input type="text" matInput [formControl]="obraSocialControl" [matAutocomplete]="auto"
-            [disabled]="!this.patientForm.get('dni').valid" placeholder="Buscar obra social">
+            placeholder="Buscar obra social">
           <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayOs"
             (optionSelected)="onOsSelected($event.option.value)">
             <mat-option *ngIf="!existenObrasSociales((filteredObrasSociales | async) || [])" [disabled]="true">

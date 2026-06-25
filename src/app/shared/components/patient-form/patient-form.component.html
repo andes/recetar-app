@@ -139,8 +139,7 @@
       <!-- Número de Afiliado -->
       <mat-form-field appearance="fill" fxFlex="18">
         <mat-label>Numero de Afiliado</mat-label>
-        <input type="text" matInput formControlName="numeroAfiliado" [disabled]="!patientForm.get('os.nombre')?.value"
-          inputmode="numeric" pattern="[0-9]*">
+        <input type="text" matInput formControlName="numeroAfiliado" inputmode="numeric" pattern="[0-9]*">
         <mat-error *ngIf="patientForm.get('os')?.get('numeroAfiliado')?.errors?.['required']">
           Debe ingresar el número de afiliado.
         </mat-error>
