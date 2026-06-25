@@ -5,7 +5,7 @@ import { UserService } from '@services/users.service';
 import { Role, RolesService } from '@services/roles.service';
 import { AndesSearchService } from '@services/andes-search.service';
 import { Subject, forkJoin, of } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, switchMap, takeUntil, catchError } from 'rxjs/operators';
 
 @Component({
     selector: 'app-user-create',
@@ -62,8 +62,10 @@ export class UserCreateComponent implements OnInit, OnDestroy {
             username: ['', [Validators.required, Validators.minLength(3)]],
             email: ['', [Validators.required, Validators.email]],
             password: ['', [Validators.required, Validators.minLength(6)]],
-            cuil: ['', [Validators.required, Validators.pattern(/^\d{11}$/)]],
+            cuil: ['', [Validators.required, Validators.pattern(/^\d{2}-?\d{8}-?\d{1}$|^\d{11}$/)]],
             enrollment: [''],
+            disposicionHabilitacion: [''],
+            vencimientoHabilitacion: [''],
             roles: [[], [Validators.required]]
         });
 
@@ -110,8 +112,11 @@ export class UserCreateComponent implements OnInit, OnDestroy {
                 username: formData.username,
                 email: formData.email,
                 password: formData.password,
-                cuil: formData.cuil || '',
+                cuil: (formData.cuil || '').replace(/-/g, ''),
                 enrollment: formData.enrollment || '',
+                responsibleDTEnrollment: formData.enrollment || '',
+                authorizationDisposition: formData.disposicionHabilitacion || '',
+                authorizationExpiration: formData.vencimientoHabilitacion || null,
                 roles: formData.roles.map(roleKey => {
                     const roleObject = this.availableRoleOptions.find(r => r.role === roleKey);
                     return {
@@ -219,6 +224,9 @@ export class UserCreateComponent implements OnInit, OnDestroy {
                 if (fieldName === 'cuil') {
                     return 'CUIL debe tener 11 dígitos';
                 }
+                if (fieldName === 'disposicionHabilitacion') {
+                    return 'Solo se permiten números y "/"';
+                }
                 return `${this.getFieldDisplayName(fieldName)} tiene un formato inválido`;
             }
         }
@@ -233,6 +241,8 @@ export class UserCreateComponent implements OnInit, OnDestroy {
             'password': 'Contraseña',
             'cuil': 'CUIL',
             'enrollment': 'Matrícula',
+            'disposicionHabilitacion': 'N° Disposición de habilitación',
+            'vencimientoHabilitacion': 'Fecha vencimiento de habilitación',
             'roles': 'Roles'
         };
         return displayNames[fieldName] || fieldName;
@@ -349,7 +359,7 @@ export class UserCreateComponent implements OnInit, OnDestroy {
         }
 
         // Limpiar campos del formulario al cambiar de rol sin marcar errores visuales
-        this.resetControls(['cuil', 'username', 'email', 'password']);
+        this.resetControls(['cuil', 'username', 'email', 'password', 'disposicionHabilitacion', 'vencimientoHabilitacion', 'enrollment']);
 
         // Re-habilitar todos los campos cuando se cambian los roles
         this.enableAllFormFields();
@@ -361,8 +371,15 @@ export class UserCreateComponent implements OnInit, OnDestroy {
     }
 
     private updateUsernameBasedOnRoles(): void {
-        const isDisabled = this.isUsernameDisabled();
         const usernameControl = this.userForm.get('username');
+
+        // Si ya hay un profesional cargado desde Andes, el documento no debe tocarse ni habilitarse.
+        if (this.hasProfessionalData()) {
+            usernameControl?.disable();
+            return;
+        }
+
+        const isDisabled = this.isUsernameDisabled();
 
         if (isDisabled) {
             // Si está deshabilitado, sincronizar con email cuando hay valor, y luego deshabilitar
@@ -409,7 +426,8 @@ export class UserCreateComponent implements OnInit, OnDestroy {
             debounceTime(500),
             distinctUntilChanged(),
             takeUntil(this.destroy$),
-            switchMap(cuil => {
+            switchMap(cuilRaw => {
+                const cuil = cuilRaw ? cuilRaw.replace(/-/g, '') : '';
                 if (!cuil || cuil.length < 11) {
                     this.isValidatingCuil = false;
                     this.cuilValidationMessage = '';
@@ -444,13 +462,21 @@ export class UserCreateComponent implements OnInit, OnDestroy {
                     return of(null);
                 }
 
-                return forkJoin(searchQueries);
+                return forkJoin(searchQueries).pipe(
+                    catchError(err => of({ error: true }))
+                );
             })
         ).subscribe({
             next: (result: any) => {
                 this.isValidatingCuil = false;
                 if (result === null) {
                     // No se realizó búsqueda
+                    return;
+                }
+
+                if (result.error) {
+                    this.isCuilValid = false;
+                    this.cuilValidationMessage = 'Error al buscar en Andes';
                     return;
                 }
 
@@ -468,6 +494,8 @@ export class UserCreateComponent implements OnInit, OnDestroy {
                 }
             },
             error: (error) => {
+                // Failsafe, no debería llegar acá por el catchError, 
+                // pero por si acaso re-activamos variables
                 this.isValidatingCuil = false;
                 this.isCuilValid = false;
                 this.cuilValidationMessage = 'Error al buscar en Andes';
@@ -479,7 +507,8 @@ export class UserCreateComponent implements OnInit, OnDestroy {
             takeUntil(this.destroy$)
         ).subscribe(value => {
             if (typeof value === 'string') {
-                this.cuilSearchSubject.next(value);
+                const cleanValue = value.replace(/-/g, '');
+                this.cuilSearchSubject.next(cleanValue);
             }
         });
 
@@ -503,7 +532,7 @@ export class UserCreateComponent implements OnInit, OnDestroy {
 
                 // Autocompletar CUIT si está disponible
                 if (data.cuit && !this.userForm.get('cuil')?.value) {
-                    this.userForm.get('cuil')?.setValue(data.cuit);
+                    this.userForm.get('cuil')?.setValue(this.formatCuilString(data.cuit));
                 }
 
                 // Deshabilitar campos excepto email
@@ -525,7 +554,7 @@ export class UserCreateComponent implements OnInit, OnDestroy {
 
                 // Confirmar/actualizar CUIL con el cuit que devuelve Andes para garantizar consistencia
                 if (data.cuit) {
-                    this.userForm.get('cuil')?.setValue(data.cuit);
+                    this.userForm.get('cuil')?.setValue(this.formatCuilString(data.cuit));
                 }
 
                 // Autocompletar matrícula del DT responsable
@@ -533,10 +562,20 @@ export class UserCreateComponent implements OnInit, OnDestroy {
                     this.userForm.get('enrollment')?.setValue(data.matriculaDTResponsable);
                 }
 
+                // Autocompletar disposición y vencimiento
+                if (data.disposicionHabilitacion) {
+                    this.userForm.get('disposicionHabilitacion')?.setValue(data.disposicionHabilitacion);
+                }
+                if (data.vencimientoHabilitacion) {
+                    this.userForm.get('vencimientoHabilitacion')?.setValue(data.vencimientoHabilitacion);
+                }
+
                 // Deshabilitar campos excepto email y password
                 this.userForm.get('businessName')?.disable();
                 this.userForm.get('cuil')?.disable();
                 this.userForm.get('enrollment')?.disable();
+                this.userForm.get('disposicionHabilitacion')?.disable();
+                this.userForm.get('vencimientoHabilitacion')?.disable();
             }
         }
     }
@@ -566,11 +605,21 @@ export class UserCreateComponent implements OnInit, OnDestroy {
                 this.isValidatingUsername = true;
                 this.usernameValidationMessage = 'Buscando profesional en Andes...';
 
-                return this.andesSearchService.searchProfessional(documento);
+                return this.andesSearchService.searchProfessional(documento).pipe(
+                    catchError(err => of({ error: true }))
+                );
             })
         ).subscribe({
-            next: (result) => {
+            next: (result: any) => {
                 this.isValidatingUsername = false;
+                
+                if (result === null) return;
+
+                if (result.error) {
+                    this.isUsernameValid = false;
+                    this.usernameValidationMessage = 'Error al buscar en Andes';
+                    return;
+                }
 
                 if (result && result.ok && result.data && Array.isArray(result.data) && result.data.length > 0) {
                     this.isUsernameValid = true;
@@ -600,8 +649,28 @@ export class UserCreateComponent implements OnInit, OnDestroy {
     }
 
     onCuilChange(event: any): void {
-        const value = event.target.value;
-        this.cuilSearchSubject.next(value);
+        const rawValue = event.target.value;
+        const formattedValue = this.formatCuilString(rawValue);
+        
+        // Evita mover el cursor mientras tipea actualizando solo si difiere en longitud significativamente o limitándose a onBlur.
+        // Pero para forzar formato, podemos setear el valor de nuevo
+        if (rawValue !== formattedValue) {
+            this.userForm.get('cuil')?.setValue(formattedValue, { emitEvent: false });
+        }
+        
+        const cleanValue = rawValue.replace(/-/g, '');
+        this.cuilSearchSubject.next(cleanValue);
+    }
+    
+    formatCuilString(cuil: string): string {
+        if (!cuil) return '';
+        const cleanCuil = cuil.replace(/[^\d]/g, '');
+        if (cleanCuil.length > 10) {
+            return `${cleanCuil.substring(0, 2)}-${cleanCuil.substring(2, 10)}-${cleanCuil.substring(10, 11)}`;
+        } else if (cleanCuil.length > 2) {
+            return `${cleanCuil.substring(0, 2)}-${cleanCuil.substring(2)}`;
+        }
+        return cleanCuil;
     }
 
     // Métodos para manejar datos encontrados
@@ -698,17 +767,49 @@ export class UserCreateComponent implements OnInit, OnDestroy {
         }
         username?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
 
-        // CUIL: requerido solo para farmacia
+        // CUIL y otros campos de farmacia: requeridos solo para farmacia
         const cuil = this.userForm.get('cuil');
+        const disposicionHabilitacion = this.userForm.get('disposicionHabilitacion');
+        const vencimientoHabilitacion = this.userForm.get('vencimientoHabilitacion');
+        const enrollment = this.userForm.get('enrollment');
+        
         cuil?.clearValidators();
+        disposicionHabilitacion?.clearValidators();
+        vencimientoHabilitacion?.clearValidators();
+        enrollment?.clearValidators();
+        
         if (hasPharma) {
-            cuil?.setValidators([Validators.required, Validators.pattern(/^\d{11}$/)]);
+            cuil?.setValidators([Validators.required, Validators.pattern(/^\d{2}-?\d{8}-?\d{1}$|^\d{11}$/)]);
             cuil?.enable();
+            
+            disposicionHabilitacion?.clearValidators();
+            disposicionHabilitacion?.disable();
+            
+            vencimientoHabilitacion?.clearValidators();
+            vencimientoHabilitacion?.disable();
+            
+            enrollment?.clearValidators();
+            enrollment?.disable();
         } else {
             cuil?.disable();
             cuil?.reset('', { emitEvent: false });
+            
+            disposicionHabilitacion?.disable();
+            disposicionHabilitacion?.reset('', { emitEvent: false });
+            
+            vencimientoHabilitacion?.disable();
+            vencimientoHabilitacion?.reset('', { emitEvent: false });
+            
+            if (!hasPro) {
+                // Si no es profesional ni farmacia, limpiar enrollment también si estuviera vinculado
+                enrollment?.disable();
+                enrollment?.reset('', { emitEvent: false });
+            }
         }
         cuil?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+        disposicionHabilitacion?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+        vencimientoHabilitacion?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+        enrollment?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
 
         // Roles siempre habilitado
         this.userForm.get('roles')?.enable();

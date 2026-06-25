@@ -1,11 +1,9 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map, mapTo, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import AndesPrescriptions from '../interfaces/andesPrescriptions';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
-import AndesPrescriptions from "../interfaces/andesPrescriptions";
-import { tap, mapTo, map } from 'rxjs/operators';
-import { saveAs } from 'file-saver';
-import * as moment from 'moment';
 
 @Injectable({
     providedIn: 'root'
@@ -19,8 +17,8 @@ export class AndesPrescriptionsService {
         this.myAndesPrescriptions = new BehaviorSubject<AndesPrescriptions[]>(this.andesPrescriptionsArray);
     }
 
-    getPrescriptionsFromAndes(params: { patient_dni: string, patient_sex: string }): Observable<boolean> {
-        return this.http.get(`${environment.API_END_POINT}/andes-prescriptions/from-andes/?dni=${params.patient_dni}&sexo=${params.patient_sex}`).pipe(
+    getPrescriptionsFromAndes(params: { patient_dni: string; patient_sex: string }): Observable<boolean> {
+        return this.http.get(`${environment.API_END_POINT}/andes-prescriptions/from-andes/?dni=${params.patient_dni}&sexo=${params.patient_sex.toLowerCase()}`).pipe(
             tap((prescriptions: AndesPrescriptions[]) => this.setPrescriptions(prescriptions)),
             map((prescriptions: AndesPrescriptions[]) => prescriptions.length > 0)
         );
@@ -37,19 +35,17 @@ export class AndesPrescriptionsService {
         return this.http.get<AndesPrescriptions>(`${environment.API_END_POINT}/prescriptions/${id}`);
     }
 
-    dispense(prescription: AndesPrescriptions, pharmacistId: string): Observable<boolean> {
+    dispense(prescription: AndesPrescriptions, pharmacistId: string): Observable<AndesPrescriptions> {
         const params = { 'prescription': prescription, 'pharmacistId': pharmacistId };
         return this.http.patch<AndesPrescriptions>(`${environment.API_END_POINT}/andes-prescriptions/dispense`, params).pipe(
-            tap((updatedPrescription: AndesPrescriptions) => this.updatePrescription(updatedPrescription)),
-            mapTo(true)
+            tap((updatedPrescription: AndesPrescriptions) => this.updatePrescription(updatedPrescription))
         );
     }
 
-    cancelDispense(prescriptionId: string, pharmacistId: string): Observable<boolean> {
+    cancelDispense(prescriptionId: string, pharmacistId: string): Observable<AndesPrescriptions> {
         const params = { 'prescriptionId': prescriptionId, 'pharmacistId': pharmacistId };
         return this.http.patch<AndesPrescriptions>(`${environment.API_END_POINT}/andes-prescriptions/cancel-dispense`, params).pipe(
-            tap((updatedPrescription: AndesPrescriptions) => this.updatePrescription(updatedPrescription)),
-            mapTo(true)
+            tap((updatedPrescription: AndesPrescriptions) => this.updatePrescription(updatedPrescription))
         );
     }
 
@@ -61,7 +57,7 @@ export class AndesPrescriptionsService {
         );
     }
 
-    getFromDniAndDate(params: { patient_dni: string, dateFilter: string }): Observable<boolean> {
+    getFromDniAndDate(params: { patient_dni: string; dateFilter: string }): Observable<boolean> {
         return this.http.get<AndesPrescriptions[]>(`${environment.API_END_POINT}/prescriptions/find/${params.patient_dni}&${params.dateFilter}`).pipe(
             tap((prescriptions: AndesPrescriptions[]) => this.setPrescriptions(prescriptions)),
             map((prescriptions: AndesPrescriptions[]) => prescriptions.length > 0)
@@ -123,6 +119,23 @@ export class AndesPrescriptionsService {
         const updateIndex = this.andesPrescriptionsArray.findIndex((prescription: AndesPrescriptions) => prescription._id === updatedPrescription._id);
         this.andesPrescriptionsArray.splice(updateIndex, 1, updatedPrescription);
         this.myAndesPrescriptions.next(this.andesPrescriptionsArray);
+    }
+
+    /**
+     * Verifica si existe una receta activa (vigente/pendiente, sin dispensa completa)
+     * para el paciente y el concepto SNOMED dados, usando el nuevo endpoint dedicado.
+     * @param dni DNI del paciente
+     * @param conceptId conceptId SNOMED del medicamento
+     * @returns Observable<boolean> true si existe una receta activa
+     */
+    verificarRecetaExistente(dni: string, conceptId: string, sexo: string): Observable<boolean> {
+        const params = new HttpParams()
+            .set('dni', dni)
+            .set('conceptId', conceptId)
+            .set('sexo', sexo);
+        return this.http.get<any[]>(`${environment.API_END_POINT}/andes-prescriptions/verificar`, { params }).pipe(
+            map((recetas: any[]) => Array.isArray(recetas) && recetas.length > 0)
+        );
     }
 
     get prescriptions(): Observable<AndesPrescriptions[]> {

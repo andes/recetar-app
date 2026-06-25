@@ -1,14 +1,24 @@
-<div class="custom-tab-link-bar" [class.two-elements]="isAmbitoPublico()">
+<!-- <div class="custom-tab-link-bar" [class.three-elements]="isAmbitoPublico()" [class.four-elements]="!isAmbitoPublico()"> -->
+<div class="custom-tab-link-bar" [class.two-elements]="isAmbitoPublico()" [class.four-elements]="!isAmbitoPublico()">
     <button mat-flat-button (click)="showForm()">Medicamentos</button>
-    <button mat-flat-button (click)="showCertificados()" *ngIf="!isAmbitoPublico()">Certificados</button>
+    <!-- <button mat-flat-button (click)="showInsumos()" *ngIf="isAmbitoPublico()">Insumos</button> -->
     <button mat-flat-button (click)="showPractices()" *ngIf="!isAmbitoPublico()">Prácticas</button>
+    <button mat-flat-button (click)="showCertificados()" *ngIf="!isAmbitoPublico()">Certificados</button>
     <button mat-flat-button (click)="showList()">Mis documentos</button>
 </div>
 <div class="link-bar-indicator-container">
-    <div class="indicator"
-        [@stepLink]="isAmbitoPublico() ?
+    <!-- <div class="indicator" [@stepLink]="isAmbitoPublico() ?
+            (currentTab === 'form' ? 'left-3' : 
+             currentTab === 'insumos' ? 'center-3' : 'right-3') :
+            (currentTab === 'form' ? 'left' : 
+             currentTab === 'practices' ? 'center-left' : 
+             currentTab === 'certificates' ? 'center-right' : 'right')">
+    </div> -->
+    <div class="indicator" [@stepLink]="isAmbitoPublico() ?
             (currentTab === 'form' ? 'left-2' : 'right-2') :
-            (currentTab === 'form' ? 'left' : currentTab === 'certificates' ? 'center-left' : currentTab === 'practices' ? 'center-right' : 'right')">
+            (currentTab === 'form' ? 'left' : 
+             currentTab === 'practices' ? 'center-left' : 
+             currentTab === 'certificates' ? 'center-right' : 'right')">
     </div>
 </div>
 <div class="pf-container">
@@ -54,7 +64,8 @@
                                     </div>
 
                                     <app-patient-form #patientForm [showObraSocial]="true" [appearance]="'fill'"
-                                        [layout]="'row'" formControlName="patient">
+                                        [layout]="'row'" formControlName="patient"
+                                        (patientFound)="onPatientFound($event)">
                                     </app-patient-form>
                                     <app-organizaciones-selector *ngIf="isAmbitoPublico()"
                                         [organizacionControl]="organizacionControl">
@@ -68,7 +79,6 @@
                                             Debe seleccionar al menos un medicamento
                                         </mat-error>
                                     </div>
-                                    <!-- Medicamento -->
                                     <div *ngFor="let control of suppliesForm.controls; let i=index" [formGroupName]="i"
                                         fxLayout="row" fxLayoutGap="10px">
                                         <mat-card class="supply-card" fxFlex="100">
@@ -124,7 +134,6 @@
                                                 fxLayoutGap="10px">
                                                 <mat-form-field appearance="fill">
                                                     <mat-label>Medicamento</mat-label>
-
                                                     <input type="text" [tabIndex]="4 + i" placeholder="Medicamento"
                                                         matInput [formControl]="control.get('supply.name')" required
                                                         [matAutocomplete]="supplyref">
@@ -136,13 +145,16 @@
                                                             {{sup.term}}
                                                         </mat-option>
                                                     </mat-autocomplete>
-
                                                     <mat-error *ngIf="control.get('supply.name').hasError('required')">
                                                         Debe seleccionar un medicamento
                                                     </mat-error>
                                                     <mat-error
                                                         *ngIf="control.get('supply.name').hasError('medicationNotSelected')">
                                                         Debe seleccionar un medicamento del listado
+                                                    </mat-error>
+                                                    <mat-error
+                                                        *ngIf="control.get('supply.name').hasError('medicationNotSelected')">
+                                                        Debe seleccionar un medicamento de la lista desplegable
                                                     </mat-error>
                                                     <mat-error *ngIf="control.get('supply.name').hasError('invalid')">
                                                         {{ control.get('supply').getError('invalid') }}
@@ -168,7 +180,6 @@
                                                     </mat-error>
                                                 </mat-form-field>
                                             </div>
-
                                             <div fxLayout="row" fxLayoutGap="10px">
                                                 <mat-form-field appearance="fill">
                                                     <mat-label>Cantidad de envases</mat-label>
@@ -232,7 +243,6 @@
                                                     </mat-form-field>
                                                 </div>
                                             </div>
-
                                             <div fxLayout="row" fxLayoutGap="10px">
                                                 <mat-checkbox fxFlex="50%" matInput formControlName="duplicate">Receta
                                                     por
@@ -309,6 +319,11 @@
                     </mat-card-content>
                 </div>
             </mat-card>
+        </div>
+
+        <!-- panel "Insumos" -->
+        <div class="insumos-panel" *ngIf="currentTab === 'insumos'">
+            <app-stock></app-stock>
         </div>
 
         <!-- panel "Prácticas" -->

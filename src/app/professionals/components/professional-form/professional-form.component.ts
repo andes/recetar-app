@@ -10,12 +10,45 @@ import { PrescriptionsListComponent } from '@professionals/components/prescripti
 import { ProfessionalDialogComponent } from '@professionals/components/professional-dialog/professional-dialog.component';
 import { InteractionService } from '@professionals/interaction.service';
 import { OrganizacionFormSessionService } from '@professionals/services/organizacion-form-session.service';
+import { AndesPrescriptionsService } from '@services/andesPrescription.service';
 import { CertificatesService } from '@services/certificates.service';
 import { PrescriptionsService } from '@services/prescriptions.service';
 import { SnomedSuppliesService } from '@services/snomedSupplies.service';
+import { SuppliesService } from '@services/supplies.service';
 import { PatientFormComponent } from '@shared/components/patient-form/patient-form.component';
-import { Observable, of, Subject, Subscription } from 'rxjs';
-import { catchError, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { of, Subject, Subscription, Observable, forkJoin } from 'rxjs';
+import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap, take, takeUntil } from 'rxjs/operators';
+import { Patient } from '@interfaces/patients';
+
+// Validador personalizado para fechas
+function validDateValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+        if (!control.value) {
+            return null; // Si no hay valor, no validamos (required se encarga)
+        }
+
+        const date = new Date(control.value);
+        const isValidDate = date instanceof Date && !isNaN(date.getTime());
+
+        if (!isValidDate) {
+            return { 'invalidDate': { value: control.value } };
+        }
+
+        // Validar que la fecha no sea futura para fecha de nacimiento
+        const today = new Date();
+        if (date > today) {
+            return { 'futureDate': { value: control.value } };
+        }
+
+        // Validar que la fecha sea razonable (no muy antigua)
+        const minDate = new Date('1900-01-01');
+        if (date < minDate) {
+            return { 'tooOldDate': { value: control.value } };
+        }
+
+        return null;
+    };
+}
 
 function medicationSelectedValidator(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
@@ -46,8 +79,7 @@ function medicationSelectedValidator(): ValidatorFn {
         stepLink
     ]
 })
-
-export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewInit {
+export class ProfessionalFormComponent implements OnInit, OnDestroy {
     obraSocialControl = new FormControl('');
     filteredObrasSociales: Observable<any[]>;
     organizacionControl = new FormControl('');
@@ -83,6 +115,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     professionalForm: FormGroup;
 
     filteredSupplies = [];
+    filteredInsumos = [];
     request;
     storedSupplies = [];
     today = new Date();
@@ -94,6 +127,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     maxDate = new Date(new Date().setMonth(new Date().getMonth() + 1));
     isSubmit = false;
     supplySpinner: { show: boolean }[] = [{ show: false }, { show: false }];
+    insumoSpinner: { show: boolean }[] = [];
     myPrescriptions: Prescriptions[] = [];
     isEditCertificate = false;
     isEdit = false;
@@ -101,6 +135,8 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     currentTab = 'form';
     isListShown = false;
     isCertificateShown = false;
+    /** _id del paciente seleccionado (para consulta al endpoint /recetas/verificar) */
+    selectedPatientId: string | null = null;
     devices: any = {
         mobile: false,
         tablet: false,
@@ -112,15 +148,17 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     ambito: 'publico' | 'privado';
 
     constructor(
+        public dialog: MatDialog,
+        private suppliesService: SuppliesService,
         private snomedSuppliesService: SnomedSuppliesService,
         private fBuilder: FormBuilder,
         private apiPrescriptions: PrescriptionsService, // privado
         private authService: AuthService,
-        public dialog: MatDialog,
         private _interactionService: InteractionService,
         private certificateService: CertificatesService,
         private ambitoService: AmbitoService,
-        private organizacionSessionService: OrganizacionFormSessionService
+        private organizacionSessionService: OrganizacionFormSessionService,
+        private andesService: AndesPrescriptionsService
     ) { }
 
     ngOnInit(): void {
@@ -141,7 +179,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         const deletePrescriptionSub = this._interactionService.deletePrescription$
             .pipe(takeUntil(this.destroy$))
             .subscribe(
-                prescription => {
+                () => {
                     // Solo actualizar la lista si está visible
                     if (this.prescriptionsList && this.currentTab === 'list') {
                         this.prescriptionsList.loadDataForSelectedType();
@@ -150,7 +188,6 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
             );
         this.subscriptions.add(deletePrescriptionSub);
 
-        // get prescriptions
         const prescriptionsSub = this.apiPrescriptions.getByUserId(this.authService.getLoggedUserId()).subscribe();
         this.subscriptions.add(prescriptionsSub);
 
@@ -182,12 +219,6 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         }
     }
 
-    ngAfterViewInit() {
-        // Implementation not needed for this case
-    }
-
-    // Método removido - funcionalidad manejada por patient-form component
-
     initProfessionalForm() {
         this.today = new Date((new Date()));
         this.minDate = new Date();
@@ -210,6 +241,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
             ]],
             trimestral: [false],
             supplies: this.fBuilder.array([]),
+            insumos: this.fBuilder.array([]),
             ambito: [this.ambito]
         });
         this.configureOrganizacionByAmbito();
@@ -229,71 +261,126 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         quantity.updateValueAndValidity();
     }
 
-    // Método removido - funcionalidad manejada por patient-form component
-
-    // Método removido - funcionalidad manejada por patient-form component
-
-    // Método removido - funcionalidad manejada por patient-form component
-
     onSubmitProfessionalForm(professionalNgForm: FormGroupDirective): void {
-        if (this.professionalForm.valid) {
-            const newPrescription = { ...this.professionalForm.value };
-            const shouldPersistOrganizacion = this.isAmbitoPublico();
+        if (!this.professionalForm.valid) { return; }
 
-            if (!shouldPersistOrganizacion) {
-                delete newPrescription.organizacion;
+        const formValue = this.professionalForm.value;
+        const combinedSupplies = [
+            ...formValue.supplies,
+            ...formValue.insumos.map((ins: any) => ({
+                supply: ins.supply,
+                type: ins.type,
+                requiresSpecification: ins.requiresSpecification,
+                description: ins.description
+            }))
+        ];
+
+        const newPrescription = { ...formValue, supplies: combinedSupplies } as any;
+        delete (newPrescription as any).insumos;
+
+        const shouldPersistOrganizacion = this.isAmbitoPublico();
+
+        if (!shouldPersistOrganizacion) {
+            delete newPrescription.organizacion;
+        }
+
+        newPrescription.supplies.forEach(element => {
+            if (element.isMagistral) {
+                element.supply.type = 'magistral';
+            }
+        });
+
+        this.isSubmit = true;
+
+        const handleSuccess = () => {
+            if (shouldPersistOrganizacion) {
+                this.organizacionSessionService.commitChanges().subscribe(
+                    () => this.formReset(professionalNgForm),
+                    () => this.formReset(professionalNgForm)
+                );
+            } else {
+                this.formReset(professionalNgForm);
+            }
+        };
+
+        // Sólo validar contra Andes cuando es ámbito público y es creación
+        if (!this.isEdit && this.isAmbitoPublico()) {
+            const pacienteDni = professionalNgForm.value?.patient?.dni;
+            const sexo = professionalNgForm.value?.patient?.sex.toLowerCase();
+            const supplyConceptIds: string[] = (this.suppliesForm.controls || [])
+                .map((ctrl: FormGroup) => ctrl.value?.supply?.snomedConcept?.conceptId)
+                .filter(Boolean);
+
+            // Si no tenemos el DNI del paciente, no podemos verificar: crear directo
+            if (!pacienteDni) {
+                this.apiPrescriptions.newPrescription(newPrescription).subscribe({
+                    next: (success) => { if (success) { handleSuccess(); } },
+                    error: (err) => this.handleSupplyError(err)
+                });
+                return;
             }
 
-            newPrescription.supplies.forEach(element => {
-                if (element.isMagistral) {
-                    element.supply.type = 'magistral';
+            // Verificar en paralelo si ya existe receta activa para cada conceptId
+            const verificaciones$ = supplyConceptIds.map(conceptId =>
+                this.andesService.verificarRecetaExistente(pacienteDni, conceptId, sexo).pipe(
+                    catchError(() => of(false))
+                )
+            );
+
+            forkJoin(verificaciones$).subscribe({
+                next: (resultados: boolean[]) => {
+                    const hasDuplicate = resultados.some(existe => existe);
+                    const payload = { ...newPrescription };
+
+                    if (hasDuplicate) { payload.ambito = 'privado'; }
+
+                    if (hasDuplicate) {
+                        const dialogRef = this.dialog.open(ProfessionalDialogComponent, {
+                            width: '400px',
+                            data: { dialogType: 'andes_warning' }
+                        });
+
+                        dialogRef.afterClosed().pipe(take(1)).subscribe(() => {
+                            this.apiPrescriptions.newPrescription(payload).subscribe({
+                                next: (success) => {
+                                    if (success) { handleSuccess(); }
+                                },
+                                error: (err) => this.handleSupplyError(err)
+                            });
+                        });
+                    } else {
+                        this.apiPrescriptions.newPrescription(payload).subscribe({
+                            next: (success) => {
+                                if (success) { handleSuccess(); }
+                            },
+                            error: (err) => this.handleSupplyError(err)
+                        });
+                    }
+                },
+                error: () => {
+                    // Error inesperado en forkJoin: crear igualmente
+                    this.apiPrescriptions.newPrescription(newPrescription).subscribe({
+                        next: (success) => {
+                            if (success) { handleSuccess(); }
+                        },
+                        error: (e) => this.handleSupplyError(e)
+                    });
                 }
             });
-            this.isSubmit = true;
-            if (!this.isEdit) {
-                this.apiPrescriptions.newPrescription(newPrescription).subscribe(
-                    success => {
-                        if (success) {
-                            if (shouldPersistOrganizacion) {
-                                this.organizacionSessionService.commitChanges().subscribe(
-                                    () => this.formReset(professionalNgForm),
-                                    () => this.formReset(professionalNgForm)
-                                );
-                            } else {
-                                this.formReset(professionalNgForm);
-                            }
-                        }
-                    },
-                    err => {
-                        this.handleSupplyError(err);
-                    });
+            return;
+        }
 
-            } else {
-                // edit
-                this.apiPrescriptions.editPrescription(newPrescription).subscribe(
-                    success => {
-                        if (success) {
-                            if (shouldPersistOrganizacion) {
-                                this.organizacionSessionService.commitChanges().subscribe(
-                                    () => this.formReset(professionalNgForm),
-                                    () => this.formReset(professionalNgForm)
-                                );
-                            } else {
-                                this.formReset(professionalNgForm);
-                            }
-                        }
-                    },
-                    err => {
-                        this.handleSupplyError(err);
-                    });
-            }
+        // Editar o ámbito privado: flujo original
+        if (!this.isEdit) {
+            this.apiPrescriptions.newPrescription(newPrescription).subscribe({
+                next: (success) => { if (success) { handleSuccess(); } },
+                error: (err) => this.handleSupplyError(err)
+            });
         } else {
-            // Marcar todos los campos como touched para mostrar errores
-            this.markFormGroupTouched(this.professionalForm);
-            // También marcar los campos del patient-form como touched
-            if (this.patientFormComponent) {
-                this.patientFormComponent.markAllFieldsTouched();
-            }
+            this.apiPrescriptions.editPrescription(newPrescription).subscribe({
+                next: (success) => { if (success) { handleSuccess(); } },
+                error: (err) => this.handleSupplyError(err)
+            });
         }
     }
 
@@ -311,8 +398,12 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         this.isSubmit = false;
     }
 
-    private formReset(professionalNgForm: FormGroupDirective) {
-        this.isEdit ? this.openDialog('updated') : this.openDialog('created');
+    private formReset(professionalNgForm: FormGroupDirective, dialogTypeOverride?: string) {
+        if (dialogTypeOverride) {
+            this.openDialog(dialogTypeOverride);
+        } else {
+            this.isEdit ? this.openDialog('updated') : this.openDialog('created');
+        }
         this.clearForm(professionalNgForm, false);
         this.isSubmit = false;
     }
@@ -323,6 +414,10 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
             width: '400px',
             data: { dialogType: aDialogType, prescription: aPrescription, text: aText }
         });
+    }
+
+    onPatientFound(patient: Patient): void {
+        this.selectedPatientId = patient?._id || null;
     }
 
     get professional(): AbstractControl {
@@ -336,6 +431,18 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     get suppliesForm(): FormArray {
         return this.professionalForm.get('supplies') as FormArray;
     }
+
+    // Getters removidos - funcionalidad manejada por patient-form component
+    get insumosForm(): FormArray {
+        return this.professionalForm.get('insumos') as FormArray;
+    }
+
+    get patientDni(): AbstractControl {
+        const patient = this.professionalForm.get('patient');
+        return patient.get('dni');
+    }
+
+    // Método removido - funcionalidad manejada por patient-form component
 
     displayFn(supply): string {
         return supply ? supply : '';
@@ -359,6 +466,25 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     }
 
 
+    onInsumoSelected(item, index: number) {
+        const control = this.insumosForm.at(index);
+        const supplyControl = control.get('supply') as FormGroup;
+        supplyControl.patchValue({
+            _id: item._id || item.id,
+            name: item.nombre || item.name || item.term || '',
+            codigo: item.codigo,
+            tipo: item.tipo || item.type || ''
+        });
+        const typeControl = control.get('type');
+        if ((item.tipo || item.type) && typeControl) {
+            typeControl.setValue(item.tipo || item.type);
+        }
+        const requiresSpecControl = control.get('requiresSpecification');
+        if (item.requiereEspecificacion !== undefined && requiresSpecControl) {
+            requiresSpecControl.setValue(item.requiereEspecificacion);
+        }
+        supplyControl.updateValueAndValidity();
+    }
 
     addSupply() {
         const supplies = this.fBuilder.group({
@@ -451,6 +577,35 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         }
     }
 
+    addInsumo() {
+        const insumo = this.fBuilder.group({
+            supply: this.fBuilder.group({
+                _id: [''],
+                name: ['', [Validators.required]],
+                codigo: [null],
+                tipo: ['']
+            }),
+            type: ['', [Validators.required]],
+            requiresSpecification: [false],
+            description: ['']
+        });
+
+        const requiresCtrl = insumo.get('requiresSpecification');
+        const descriptionCtrl = insumo.get('description');
+        requiresCtrl?.valueChanges.subscribe((val: boolean) => {
+            if (val) {
+                descriptionCtrl?.setValidators([Validators.required]);
+            } else {
+                descriptionCtrl?.clearValidators();
+            }
+            descriptionCtrl?.updateValueAndValidity();
+        });
+
+        this.insumosForm.push(insumo);
+        this.insumoSpinner.push({ show: false });
+        this.subscribeToInsumoChanges(insumo, this.insumosForm.length - 1);
+    }
+
     subscribeToSupplyChanges(control: FormGroup, index: number) {
         control.get('supply.name').valueChanges.pipe(
             debounceTime(300),
@@ -514,6 +669,26 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         };
     }
 
+    subscribeToInsumoChanges(control: FormGroup, index: number) {
+        control.get('supply.name').valueChanges.pipe(
+            debounceTime(300),
+            distinctUntilChanged()
+        ).subscribe((term: string) => {
+            if (typeof term === 'string' && term.length > 2) {
+                this.insumoSpinner[index] = { show: true };
+                this.suppliesService.get(term).pipe(
+                    catchError(() => {
+                        this.insumoSpinner[index] = { show: false };
+                        return of([]);
+                    })
+                ).subscribe((res) => {
+                    this.insumoSpinner[index] = { show: false };
+                    this.filteredInsumos = [...res];
+                });
+            }
+        });
+    }
+
     subscribeToTriplicateChanges(control: FormGroup, index: number) {
         const triplicateControl = control.get('triplicate');
         const triplicateDataGroup = control.get('triplicateData') as FormGroup;
@@ -563,6 +738,11 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     deleteSupply(index: number) {
         this.suppliesForm.removeAt(index);
         this.supplySpinner.splice(index, 1);
+    }
+
+    deleteInsumo(index: number) {
+        this.insumosForm.removeAt(index);
+        this.insumoSpinner.splice(index, 1);
     }
 
     // set form with prescriptions values and disabled npt editable fields
@@ -616,7 +796,9 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         if (this.patientFormComponent) {
             this.patientFormComponent.resetForm();
         }
-        // Validaciones ahora manejadas por patient-form component
+
+        // Limpiar el ID del paciente seleccionado
+        this.selectedPatientId = null;
     }
 
     rollbackPendingOrganizacionesOnLeave(): void {
@@ -636,7 +818,6 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
     }
 
     onCertificateCreated() {
-        // Set the selected type to 'certificados' in the prescriptions list component
         if (this.prescriptionsList) {
             this.prescriptionsList.selectedType = 'certificados';
             this.prescriptionsList.onSelectedTypeChange();
@@ -666,6 +847,10 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy, AfterViewIn
         this.currentTab = 'practices';
     }
 
+    showInsumos(): void {
+        this.isFormShown = false;
+        this.currentTab = 'insumos';
+    }
     isAmbitoPublico(): boolean {
         return this.ambito === 'publico';
     }

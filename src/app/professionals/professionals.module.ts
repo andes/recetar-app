@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
 import { ProfessionalsRoutingModule, routingComponents } from './professionals-routing.module';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
@@ -28,6 +27,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatListModule } from '@angular/material/list';
 import { PharmacistsModule } from '@pharmacists/pharmacists.module';
 import { PrescriptionsListComponent } from './components/prescriptions-list/prescriptions-list.component';
 import { CertificateFormComponent } from './components/certificate-form/certificate-form.component';
@@ -35,11 +36,14 @@ import { SupplyListComponent } from './components/supply-list/supply-list.compon
 import { PracticesFormComponent } from './components/practices-form/practices-form.component';
 import { CertificatePracticePrinterComponent } from './components/certificate-practice-printer/certificate-practice-printer.component';
 import { SelectorAmbitoComponent } from './components/selector-ambito/selector-ambito.component';
-import { EditUserInfoComponent } from './components/edit-user-info/edit-user-info.component';
 import { SharedModule } from '@shared/shared.module';
 import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 import { OrganizacionesSelectorComponent } from './components/organizaciones-selector/organizaciones-selector.component';
 import { OrganizacionDialogComponent } from './components/organizacion-dialog/organizacion-dialog.component';
+import { StockComponent } from './components/stock/stock.component';
+import { StockDialogComponent } from './components/stock/stock-dialog/stock-dialog.component';
+import { StockListComponent } from './components/stock/list/stock-list.component';
+import { StockPrinterComponent } from './components/stock/printer/stock-printer.component';
 
 @NgModule({
   declarations: [
@@ -50,9 +54,13 @@ import { OrganizacionDialogComponent } from './components/organizacion-dialog/or
     CertificateFormComponent,
     CertificatePracticePrinterComponent,
     SelectorAmbitoComponent,
-    EditUserInfoComponent,
     OrganizacionesSelectorComponent,
     OrganizacionDialogComponent,
+    OrganizacionesSelectorComponent,
+    OrganizacionDialogComponent,
+    StockComponent,
+    StockDialogComponent,
+    StockListComponent,
   ],
   imports: [
     CommonModule,
@@ -84,7 +92,10 @@ import { OrganizacionDialogComponent } from './components/organizacion-dialog/or
     PharmacistsModule,
     SharedModule,
     MatDialogModule,
+    MatListModule,
+    MatTabsModule
   ],
-  providers: [PatientNamePipe],
+  providers: [PatientNamePipe, StockPrinterComponent],
 })
+
 export class ProfessionalsModule { }

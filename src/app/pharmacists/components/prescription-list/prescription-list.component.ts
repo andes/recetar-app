@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterContentInit, ViewChild, OnDestroy } from '@angular/core';
+import { Component, OnInit, AfterContentInit, ViewChild, OnDestroy, Input } from '@angular/core';
 import { Prescriptions } from '@interfaces/prescriptions';
 import AndesPrescriptions from '@interfaces/andesPrescriptions';
 import { PrescriptionsService } from '@services/prescriptions.service';
@@ -12,7 +12,7 @@ import { DialogComponent } from '@pharmacists/components/dialog/dialog.component
 import { AuthService } from '@auth/services/auth.service';
 import { detailExpand, arrowDirection } from '@animations/animations.template';
 import { DialogReportComponent } from '../dialog-report/dialog-report.component';
-import { combineLatest, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unified-printer.component';
 
@@ -36,13 +36,35 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
     lapseTime = 2;
     pharmacistId: string;
     isAdmin = false;
-    fechaDesde: Date;
-    fechaHasta: Date;
     selectedPatient: any = null; // Paciente seleccionado para mostrar en la vista
+    fechaDesde: Date | undefined;
+    fechaHasta: Date | undefined;
+
+    // Variable para mantener el último DNI del paciente utilizado
+    private lastPatientDni = '';
+    private lastPatientSex = '';
+
+    statusFilter = 'vigente';
+    dateFromFilter: Date | undefined;
+    dateToFilter: Date | undefined;
+    dateRangeInvalid = false;
+    statusOptions = [
+        { value: 'vigente', label: 'Vigente' },
+        { value: 'vencida', label: 'Vencida' },
+        { value: 'finalizada', label: 'Finalizada' },
+        { value: 'dispensada', label: 'Dispensada' },
+        { value: 'rechazada', label: 'Rechazada' },
+        { value: 'suspendida', label: 'Suspendida' },
+        { value: 'pendiente', label: 'Pendiente' },
+        { value: 'todas', label: 'Todas' }
+    ];
 
     canDispenseMap = new Map<string, boolean>();
     isStatusMap = new Map<string, boolean>();
     canCounterMap = new Map<string, boolean>();
+
+    // Control para habilitar/deshabilitar los filtros desde el padre
+    @Input() filtersEnabled = false;
 
     @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
     @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -57,8 +79,36 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
     ngOnInit(): void {
         this.pharmacistId = this.authService.getLoggedUserId();
         this.isAdmin = this.authService.isAdminRole();
+
+        // Inicializar filtros de fecha con el último mes
+        this.initializeDateFilters();
+
         this.initDataSource();
         this.loadPrescriptions();
+    }
+
+    // Permite al componente padre establecer el contexto del paciente explícitamente
+    public setPatientContext(dni: string, sex: string): void {
+        this.lastPatientDni = dni || '';
+        this.lastPatientSex = sex || '';
+    }
+
+    // Resetea los filtros al valor por defecto
+    public resetFiltersToDefault(): void {
+        this.statusFilter = 'vigente';
+        this.initializeDateFilters();
+        this.dateRangeInvalid = false;
+    }
+
+    private initializeDateFilters(): void {
+        const today = new Date();
+        this.dateToFilter = new Date(today);
+        this.dateFromFilter = new Date(today);
+        this.dateFromFilter.setMonth(today.getMonth() - 1); // Último mes
+
+        // También inicializar las fechas existentes para compatibilidad
+        this.fechaHasta = new Date(this.dateToFilter);
+        this.fechaDesde = new Date(this.dateFromFilter);
     }
 
     private initDataSource(): void {
@@ -69,20 +119,61 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
                 default: return item[property];
             }
         };
+
         this.dataSource.sort = this.sort;
     }
 
     private loadPrescriptions(offset: number = 0, limit: number = 10): void {
+        // Evitar cargar si el rango de fechas es inválido
+        if (this.dateRangeInvalid || (this.dateFromFilter && this.dateToFilter && this.dateFromFilter > this.dateToFilter)) {
+            this.loadingPrescriptions = false;
+            return;
+        }
+
         this.loadingPrescriptions = true;
 
-        combineLatest([
-            this.andesPrescriptionService.prescriptions,
-            this.prescriptionService.prescriptions
-        ]).pipe(
+        // Preparar filtros para la API
+        const filters = {
+            status: this.statusFilter,
+            dateFrom: this.dateFromFilter ? moment(this.dateFromFilter).format('DD-MM-YYYY') : undefined,
+            dateTo: this.dateToFilter ? moment(this.dateToFilter).format('DD-MM-YYYY') : undefined
+        };
+
+        // Obtener el DNI y sexo del paciente de los datos existentes o usar los últimos conocidos
+        let patientDni = '';
+        let patientSex = '';
+        if (this.dataSource.data.length > 0) {
+            // Intentar obtener el DNI y sexo del primer elemento
+            const firstElement = this.dataSource.data[0];
+            patientDni = firstElement.patient?.dni || firstElement.paciente?.documento || '';
+            patientSex = firstElement.patient?.sex || firstElement.paciente?.sexo || '';
+            // Actualizar el último DNI y sexo conocidos si se encuentran
+            if (patientDni) {
+                this.lastPatientDni = patientDni;
+            }
+            if (patientSex) {
+                this.lastPatientSex = patientSex;
+            }
+        }
+
+        // Si no hay DNI en los datos actuales, usar el último DNI y sexo conocidos
+        if (!patientDni && this.lastPatientDni) {
+            patientDni = this.lastPatientDni;
+            patientSex = this.lastPatientSex;
+        }
+
+        // Si no hay DNI disponible, no hacer ninguna búsqueda
+        if (!patientDni) {
+            this.loadingPrescriptions = false;
+            return;
+        }
+
+        // Si tenemos DNI, usar el método del servicio de prescriptions (que ahora retorna recetas combinadas de Andes y locales)
+        this.prescriptionService.getPrescriptionsWithFiltersDirect(patientDni, { ...filters, sexo: patientSex }).pipe(
             takeUntil(this.destroy$)
-        ).subscribe(([andesPrescriptions, prescriptions]) => {
+        ).subscribe((prescriptions) => {
             const previousDataLength = this.dataSource.data.length;
-            const newData = [...andesPrescriptions, ...prescriptions];
+            const newData = prescriptions;
 
             this.dataSource.data = newData;
             this.updateMaps();
@@ -140,29 +231,77 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
     }
 
     applyFilter(filterValue: string) {
-        this.dataSource.filterPredicate = (data: Prescriptions, filter: string) => {
+        // El filtro de texto ahora se aplica localmente solo para búsqueda rápida
+        // Los filtros principales (estado y fecha) se manejan en la API
+        const textFilter = filterValue.trim().toLowerCase();
+
+        this.dataSource.filterPredicate = (data: any, filter: string) => {
+            // Si no hay filtro de texto, mostrar el elemento
+            if (!textFilter) {
+                return true;
+            }
+
+            // Aplicar filtro de texto
             const accumulator = (currentTerm, key) => {
-                // enable filter by lastName / firstName / date
-                return currentTerm + data.status + moment(data.date, 'YYYY-MM-DD').format('DD/MM/YYY').toString();
+                // enable filter by lastName / firstName / date / status
+                const patientName = data.patient ?
+                    `${data.patient.lastName} ${data.patient.firstName}` :
+                    (data.paciente ? `${data.paciente.apellido} ${data.paciente.nombre}` : '');
+
+                const medicamento = data.medicamento?.concepto?.term ||
+                    (data.supplies?.length ? data.supplies[0]?.supply?.name : '');
+
+                const dateStr = moment(data.date || data.fechaRegistro || data.fechaPrestacion, 'YYYY-MM-DD').format('DD/MM/YYYY');
+
+                return currentTerm + patientName + medicamento + dateStr + (data.status || data.estadoActual?.tipo || '');
             };
 
             const dataStr = Object.keys(data).reduce(accumulator, '').toLowerCase();
-            // Transform the filter by converting it to lowercase and removing whitespace.
-            const transformedFilter = filter.trim().toLowerCase();
-            return dataStr.indexOf(transformedFilter) !== -1;
+            return dataStr.indexOf(textFilter) !== -1;
         };
-        this.dataSource.filter = filterValue.trim().toLowerCase();
+
+        this.dataSource.filter = textFilter || Math.random().toString();
+
         if (this.dataSource.paginator) {
             this.dataSource.paginator.firstPage();
+        }
+    }
+
+    // Métodos de filtro simplificados - ahora solo llaman a la API
+    onStatusFilterChange(): void {
+        // No cargar automáticamente; se aplicará al presionar el botón
+    }
+
+    onDateFilterChange(): void {
+        // También actualizar las fechas existentes para compatibilidad
+        this.fechaDesde = this.dateFromFilter ? new Date(this.dateFromFilter) : undefined;
+        this.fechaHasta = this.dateToFilter ? new Date(this.dateToFilter) : undefined;
+        // Validar rango de fechas: fecha desde no puede ser mayor a fecha hasta
+        this.dateRangeInvalid = !!(this.dateFromFilter && this.dateToFilter && this.dateFromFilter > this.dateToFilter);
+    }
+
+    // Aplicar filtros manualmente al presionar el botón
+    applyFilters(): void {
+        // Refrescar compatibilidad
+        this.fechaDesde = this.dateFromFilter ? new Date(this.dateFromFilter) : undefined;
+        this.fechaHasta = this.dateToFilter ? new Date(this.dateToFilter) : undefined;
+        this.dateRangeInvalid = !!(this.dateFromFilter && this.dateToFilter && this.dateFromFilter > this.dateToFilter);
+
+        if (!this.dateRangeInvalid) {
+            this.loadPrescriptions();
         }
     }
 
     dispense(prescription: Prescriptions | AndesPrescriptions) {
         if ('status' in prescription) {
             this.prescriptionService.dispense(prescription._id, this.pharmacistId).subscribe(
-                success => {
-                    if (success) {
-                        // Actualizar los mapas después de la operación exitosa
+                (updatedPrescription) => {
+                    if (updatedPrescription) {
+                        const index = this.dataSource.data.findIndex(p => p._id === prescription._id);
+                        if (index >= 0) {
+                            this.dataSource.data[index] = updatedPrescription;
+                            this.dataSource._updateChangeSubscription();
+                        }
                         this.updateMaps();
                         this.openDialog('dispensed', prescription, prescription.professional.businessName);
                     }
@@ -173,11 +312,15 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
             );
         } else if ('estadoActual' in prescription) {
             this.andesPrescriptionService.dispense(prescription, this.pharmacistId).subscribe(
-                success => {
-                    if (success) {
-                        // Actualizar los mapas después de la operación exitosa
+                (updatedPrescription) => {
+                    if (updatedPrescription) {
+                        const index = this.dataSource.data.findIndex(p => p._id === prescription._id);
+                        if (index >= 0) {
+                            this.dataSource.data[index] = updatedPrescription;
+                            this.dataSource._updateChangeSubscription();
+                        }
                         this.updateMaps();
-                        this.openDialog('dispensed', prescription, prescription.profesional.nombre);
+                        this.openDialog('dispensed', prescription, prescription.profesional.apellido + ', ' + prescription.profesional.nombre);
                     }
                 },
                 error => {
@@ -190,8 +333,13 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
     cancelDispense(prescription: Prescriptions | AndesPrescriptions) {
         if ('status' in prescription) {
             this.prescriptionService.cancelDispense(prescription._id, this.pharmacistId).subscribe(
-                success => {
-                    if (success) {
+                (updatedPrescription) => {
+                    if (updatedPrescription) {
+                        const index = this.dataSource.data.findIndex(p => p._id === prescription._id);
+                        if (index >= 0) {
+                            this.dataSource.data[index] = updatedPrescription;
+                            this.dataSource._updateChangeSubscription();
+                        }
                         this.updateMaps();
                         this.openDialog('cancel-dispensed', prescription);
                     }
@@ -202,8 +350,13 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
             );
         } else if ('estadoActual' in prescription) {
             this.andesPrescriptionService.cancelDispense(prescription._id, this.pharmacistId).subscribe(
-                success => {
-                    if (success) {
+                (updatedPrescription) => {
+                    if (updatedPrescription) {
+                        const index = this.dataSource.data.findIndex(p => p._id === prescription._id);
+                        if (index >= 0) {
+                            this.dataSource.data[index] = updatedPrescription;
+                            this.dataSource._updateChangeSubscription();
+                        }
                         this.updateMaps();
                         this.openDialog('cancel-dispensed', prescription);
                     }

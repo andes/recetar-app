@@ -4,6 +4,11 @@ export class Certificate {
     _id?: string;
     patient: Patient;
     certificate: string;
+    organizacion?: {
+        _id: string;
+        nombre: string;
+        direccion: string;
+    };
     startDate: Date;
     cantDias: number;
     createdAt: Date;
