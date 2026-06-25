@@ -352,6 +352,9 @@
                                             <span>Cantidad de días:</span> {{
                                             element.cantDias }}
                                         </div>
+                                        <div class="element-description" *ngIf="element.organizacion">
+                                            <span>Organización:</span> {{ element.organizacion.nombre }}
+                                        </div>
                                         <div class="element-description" *ngIf="element.anulateReason">
                                             <span>Motivo:</span> {{ element.anulateReason }}
                                         </div>

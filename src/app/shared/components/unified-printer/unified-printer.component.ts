@@ -398,7 +398,7 @@ export class UnifiedPrinterComponent {
                 new Txt('\n').end,
                 await new Img(qrCodeImage).fit([100, 100]).alignment('center').link(qrUrl).build()
             ] : [];
-            this.addProfessionalSignature(pdf, certificate.professional, qrStack);
+            this.addProfessionalSignature(pdf, certificate.professional, qrStack, certificate.organizacion);
             pdf.footer(new Txt([
                 { text: 'Este certificado fue emitido digitalmente a través de RecetAR - ', italics: true },
                 { text: `Fecha de emisión: ${this.datePipe.transform(certificate.createdAt, 'dd/MM/yyyy HH:mm')}`, bold: true }
@@ -505,7 +505,7 @@ export class UnifiedPrinterComponent {
         });
     }
 
-    private addProfessionalSignature(pdf: PdfMakeWrapper, professional: any, leftStack?: any[]) {
+    private addProfessionalSignature(pdf: PdfMakeWrapper, professional: any, leftStack?: any[], organizacion?: any) {
         pdf.add(new Columns([
             {
                 stack: leftStack || [],
@@ -517,6 +517,11 @@ export class UnifiedPrinterComponent {
                     new Txt([
                         { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
                         { text: `\n ${professional.businessName}`, fontSize: 14, bold: true },
+                        {
+                            text: `${organizacion ?
+                                `\n Organizacion: ${organizacion.nombre} - ${this.getOrganizacionDireccion(organizacion.direccion)}` :
+                                ''}`, fontSize: 9, bold: true
+                        },
                         {
                             text: `\n ${professional?.profesionGrado?.length ?
                                 professional.profesionGrado

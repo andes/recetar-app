@@ -41,6 +41,9 @@
                         </mat-form-field>
                     </div>
 
+                    <!-- Selector de organización -->
+                    <app-organizaciones-selector [organizacionControl]="organizacionControl"></app-organizaciones-selector>
+
                     <!-- Componente reutilizable de paciente -->
                     <app-patient-form #patientForm formControlName="patient"></app-patient-form>
 

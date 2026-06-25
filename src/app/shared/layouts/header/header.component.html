@@ -9,6 +9,7 @@
       <a mat-button [routerLink]="['/audit/users']">Usuarios</a>
     </mat-toolbar>
 
+    <p *ngIf="(ambito$ | async) && !(isOnlyAuditRole$ | async)">Ámbito {{(ambito$ | async) === 'publico' ? 'público' : (ambito$ | async)}}</p>
 
     <div>
       <button mat-button [matMenuTriggerFor]="menu">{{businessName$ | async}}</button>

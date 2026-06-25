@@ -87,6 +87,10 @@
                         <span>{{ certificate.cantDias ? ( certificate.cantDias ) : '- sin especificar -'
                             }}</span>
                     </div>
+                    <div class="info-item" *ngIf="certificate.organizacion">
+                        <label>Organización:</label>
+                        <span>{{ certificate.organizacion.nombre }}</span>
+                    </div>
                 </div>
             </div>
 

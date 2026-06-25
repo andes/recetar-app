@@ -15,6 +15,7 @@ import { CertificatesService } from '@services/certificates.service';
 import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 import { Subscription } from 'rxjs';
 import { PatientFormComponent } from '@shared/components/patient-form/patient-form.component';
+import { OrganizacionFormSessionService } from '@professionals/services/organizacion-form-session.service';
 
 @Component({
     selector: 'app-certificate-form',
@@ -64,6 +65,7 @@ export class CertificateFormComponent implements OnInit {
     private anulateCertificateSubscription: Subscription;
     public certificate: Certificate;
     cantDias = new FormControl('', [Validators.required, Validators.min(1)]);
+    organizacionControl = new FormControl('');
 
     @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
     @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -75,7 +77,8 @@ export class CertificateFormComponent implements OnInit {
         private certificateService: CertificatesService,
         private authService: AuthService,
         public dialog: MatDialog,
-        private patientNamePipe: PatientNamePipe
+        private patientNamePipe: PatientNamePipe,
+        private organizacionSessionService: OrganizacionFormSessionService
     ) { }
 
     ngOnInit(): void {
@@ -133,6 +136,7 @@ export class CertificateFormComponent implements OnInit {
                 this.startDateValidator.bind(this)
             ]],
             cantDias: [''],
+            organizacion: this.organizacionControl,
         });
     }
 
