@@ -222,7 +222,7 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
             ]],
             lastName: ['', Validators.required],
             firstName: ['', Validators.required],
-            nombreAutopercibido: ['', Validators.required],
+            nombreAutopercibido: [''],
             sex: ['', Validators.required],
             fechaNac: ['', this.showFechaNac ? [
                 Validators.required,
