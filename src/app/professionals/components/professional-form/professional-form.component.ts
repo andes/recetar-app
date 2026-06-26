@@ -759,7 +759,8 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
                 firstName: { value: e.patient.firstName, disabled: true },
                 fechaNac: { value: e.patient.fechaNac, disabled: true }
             },
-            supplies: e.supplies
+            supplies: e.supplies,
+            trimestral: e.trimestral || false
         });
         this.isEdit = true;
         this.isFormShown = true;
@@ -778,7 +779,8 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
                 organizacion: this.isAmbitoPublico() ? organizacionValue : null,
                 date: this.today,
                 patient: null,
-                ambito: currentAmbito
+                ambito: currentAmbito,
+                trimestral: false
             });
             this.configureOrganizacionByAmbito();
         };
