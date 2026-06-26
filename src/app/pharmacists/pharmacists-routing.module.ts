@@ -7,7 +7,7 @@ import { PharmacistsFormComponent } from '@pharmacists/components/pharmacists-fo
 import { DialogComponent } from '@pharmacists/components/dialog/dialog.component';
 import { RolePharmacistGuard } from '@auth/guards/role-pharmacist.guard';
 import { AndesPrescriptionPrinterComponent } from './components/andes-prescription-printer/andes-prescription-printer.component';
-import { EditUserInfoComponent } from '@professionals/components/edit-user-info/edit-user-info.component';
+import { EditUserInfoComponent } from '@shared/components/edit-user-info/edit-user-info.component';
 
 const routes: Routes = [
     {

@@ -1,4 +1,3 @@
-import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -16,7 +15,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { DialogComponent } from './components/dialog/dialog.component';
 import { NewUserComponent } from './components/new-user/new-user.component';
 import { NewUserPharmacistComponent } from './components/new-user-pharmacist/new-user-pharmacist.component';
 import { ConfirmUpdateComponent } from './components/confirm-update/confirm-update.component';
@@ -38,7 +36,6 @@ import { NgxTurnstileFormsModule } from '../shared/ngx-turnstile/ngx-turnstile-f
     CommonModule,
     ReactiveFormsModule,
     AuthRoutingModule,
-    BrowserModule,
     NgxTurnstileModule,
     NgxTurnstileFormsModule,
     HttpClientModule,
