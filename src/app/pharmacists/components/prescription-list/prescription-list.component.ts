@@ -51,11 +51,9 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
     statusOptions = [
         { value: 'vigente', label: 'Vigente' },
         { value: 'vencida', label: 'Vencida' },
-        { value: 'finalizada', label: 'Finalizada' },
         { value: 'dispensada', label: 'Dispensada' },
         { value: 'rechazada', label: 'Rechazada' },
         { value: 'suspendida', label: 'Suspendida' },
-        { value: 'pendiente', label: 'Pendiente' },
         { value: 'todas', label: 'Todas' }
     ];
 
@@ -543,12 +541,12 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         const statusLower = status.toLowerCase();
         const statusMap: { [key: string]: string } = {
             'vigente': 'VIGENTE',
-            'finalizada': 'FINALIZADA',
+            'finalizada': 'DISPENSADA',
             'vencida': 'VENCIDA',
             'suspendida': 'SUSPENDIDA',
             'rechazada': 'RECHAZADA',
             'pendiente': 'VIGENTE',
-            'dispensada': 'FINALIZADA'
+            'dispensada': 'DISPENSADA'
         };
         return statusMap[statusLower] || status.toUpperCase();
     }
