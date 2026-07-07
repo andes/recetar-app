@@ -51,9 +51,11 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
     statusOptions = [
         { value: 'vigente', label: 'Vigente' },
         { value: 'vencida', label: 'Vencida' },
+        { value: 'finalizada', label: 'Finalizada' },
         { value: 'dispensada', label: 'Dispensada' },
         { value: 'rechazada', label: 'Rechazada' },
         { value: 'suspendida', label: 'Suspendida' },
+        { value: 'pendiente', label: 'Pendiente' },
         { value: 'todas', label: 'Todas' }
     ];
 
@@ -293,13 +295,9 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
     dispense(prescription: Prescriptions | AndesPrescriptions) {
         if ('status' in prescription) {
             this.prescriptionService.dispense(prescription._id, this.pharmacistId).subscribe(
-                (updatedPrescription) => {
-                    if (updatedPrescription) {
-                        const index = this.dataSource.data.findIndex(p => p._id === prescription._id);
-                        if (index >= 0) {
-                            this.dataSource.data[index] = updatedPrescription;
-                            this.dataSource._updateChangeSubscription();
-                        }
+                success => {
+                    if (success) {
+                        // Actualizar los mapas después de la operación exitosa
                         this.updateMaps();
                         this.openDialog('dispensed', prescription, prescription.professional.businessName);
                     }
@@ -310,15 +308,11 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
             );
         } else if ('estadoActual' in prescription) {
             this.andesPrescriptionService.dispense(prescription, this.pharmacistId).subscribe(
-                (updatedPrescription) => {
-                    if (updatedPrescription) {
-                        const index = this.dataSource.data.findIndex(p => p._id === prescription._id);
-                        if (index >= 0) {
-                            this.dataSource.data[index] = updatedPrescription;
-                            this.dataSource._updateChangeSubscription();
-                        }
+                success => {
+                    if (success) {
+                        // Actualizar los mapas después de la operación exitosa
                         this.updateMaps();
-                        this.openDialog('dispensed', prescription, prescription.profesional.apellido + ', ' + prescription.profesional.nombre);
+                        this.openDialog('dispensed', prescription, prescription.profesional.nombre);
                     }
                 },
                 error => {
@@ -331,13 +325,8 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
     cancelDispense(prescription: Prescriptions | AndesPrescriptions) {
         if ('status' in prescription) {
             this.prescriptionService.cancelDispense(prescription._id, this.pharmacistId).subscribe(
-                (updatedPrescription) => {
-                    if (updatedPrescription) {
-                        const index = this.dataSource.data.findIndex(p => p._id === prescription._id);
-                        if (index >= 0) {
-                            this.dataSource.data[index] = updatedPrescription;
-                            this.dataSource._updateChangeSubscription();
-                        }
+                success => {
+                    if (success) {
                         this.updateMaps();
                         this.openDialog('cancel-dispensed', prescription);
                     }
@@ -348,13 +337,8 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
             );
         } else if ('estadoActual' in prescription) {
             this.andesPrescriptionService.cancelDispense(prescription._id, this.pharmacistId).subscribe(
-                (updatedPrescription) => {
-                    if (updatedPrescription) {
-                        const index = this.dataSource.data.findIndex(p => p._id === prescription._id);
-                        if (index >= 0) {
-                            this.dataSource.data[index] = updatedPrescription;
-                            this.dataSource._updateChangeSubscription();
-                        }
+                success => {
+                    if (success) {
                         this.updateMaps();
                         this.openDialog('cancel-dispensed', prescription);
                     }
@@ -541,12 +525,12 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         const statusLower = status.toLowerCase();
         const statusMap: { [key: string]: string } = {
             'vigente': 'VIGENTE',
-            'finalizada': 'DISPENSADA',
+            'finalizada': 'FINALIZADA',
             'vencida': 'VENCIDA',
             'suspendida': 'SUSPENDIDA',
             'rechazada': 'RECHAZADA',
             'pendiente': 'VIGENTE',
-            'dispensada': 'DISPENSADA'
+            'dispensada': 'FINALIZADA'
         };
         return statusMap[statusLower] || status.toUpperCase();
     }

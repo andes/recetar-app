@@ -33,17 +33,19 @@ export class PrescriptionsService {
         return this.http.get<Prescriptions>(`${environment.API_END_POINT}/prescriptions/${id}`);
     }
 
-    dispense(prescriptionId: string, pharmacistId: string): Observable<Prescriptions> {
+    dispense(prescriptionId: string, pharmacistId: string): Observable<boolean> {
         const params = { 'prescriptionId': prescriptionId, 'pharmacistId': pharmacistId };
         return this.http.patch<Prescriptions>(`${environment.API_END_POINT}/prescriptions/${params.prescriptionId}/dispense`, params).pipe(
-            tap((updatedPrescription: Prescriptions) => this.updatePrescription(updatedPrescription))
+            tap((updatedPrescription: Prescriptions) => this.updatePrescription(updatedPrescription)),
+            mapTo(true)
         );
     }
 
-    cancelDispense(prescriptionId: string, pharmacistId: string): Observable<Prescriptions> {
+    cancelDispense(prescriptionId: string, pharmacistId: string): Observable<boolean> {
         const params = { 'prescriptionId': prescriptionId, 'pharmacistId': pharmacistId };
         return this.http.patch<Prescriptions>(`${environment.API_END_POINT}/prescriptions/${params.prescriptionId}/cancel-dispense`, params).pipe(
-            tap((updatedPrescription: Prescriptions) => this.updatePrescription(updatedPrescription))
+            tap((updatedPrescription: Prescriptions) => this.updatePrescription(updatedPrescription)),
+            mapTo(true)
         );
     }
 

@@ -90,4 +90,12 @@ export class StockService {
         const url = `${this.API_URL}/andes/search?insumo=${encodeURIComponent(query)}&tipos=dispositivo,nutricion`;
         return this.http.get<Insumo[]>(url);
     }
+
+    /**
+     * Buscar insumos magistrales usando GET con query parameter
+     */
+    searchMagistral(query: string): Observable<Insumo[]> {
+        const url = `${this.API_URL}/andes/search?insumo=${encodeURIComponent(query)}&tipos=magistral`;
+        return this.http.get<Insumo[]>(url);
+    }
 }

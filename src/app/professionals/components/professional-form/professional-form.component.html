@@ -90,7 +90,7 @@
 
                                             <!-- Toggle individual para medicamento magistral -->
                                             <!-- Esta opcion se debe activar cuando la implementacion de medicamentos magistrales en Andes este completa. -->
-                                            <!-- <div class="individual-magistral-toggle" fxLayout="row"
+                                            <div *ngIf="ambito === 'publico'" class="individual-magistral-toggle" fxLayout="row"
                                                 fxLayoutAlign="start center" fxLayoutGap="10px">
                                                 <mat-slide-toggle formControlName="isMagistral" color="primary">
                                                     Medicamento Magistral
@@ -99,17 +99,25 @@
                                                     class="magistral-hint">
                                                     Preparado en farmacia según prescripción específica
                                                 </mat-hint>
-                                            </div> -->
+                                            </div>
 
                                             <!-- Campos para medicamento magistral -->
-                                            <!-- <div *ngIf="control.get('isMagistral')?.value" fxLayout="column"
+                                            <div *ngIf="control.get('isMagistral')?.value" fxLayout="column"
                                                 fxLayoutGap="10px">
                                                 <div fxLayout="row" fxLayoutGap="10px">
                                                     <mat-form-field appearance="fill" fxFlex="50">
                                                         <mat-label>Nombre del medicamento</mat-label>
                                                         <input type="text" [tabIndex]="4 + i" placeholder="Nombre"
                                                             matInput [formControl]="control.get('supply.name')"
-                                                            required>
+                                                            required [matAutocomplete]="magistralref">
+                                                        <mat-spinner matSuffix [color]="spinnerColor" [diameter]="20"
+                                                            *ngIf="supplySpinner[i].show"></mat-spinner>
+                                                        <mat-autocomplete #magistralref="matAutocomplete"
+                                                            (optionSelected)="onMagistralSelected($event.option.value, i)">
+                                                            <mat-option *ngFor="let sup of filteredMagistrales" [value]="sup">
+                                                                {{sup.nombre || sup.insumo || sup.name || sup.supply || sup.term}}
+                                                            </mat-option>
+                                                        </mat-autocomplete>
                                                         <mat-error
                                                             *ngIf="control.get('supply.name').hasError('required')">
                                                             Debe ingresar el nombre del medicamento
@@ -127,7 +135,7 @@
                                                         </mat-error>
                                                     </mat-form-field>
                                                 </div>
-                                            </div> -->
+                                            </div>
 
                                             <!-- Campo para medicamento SNOMED (no magistral) -->
                                             <div *ngIf="!control.get('isMagistral')?.value" fxLayout="row"
@@ -163,50 +171,42 @@
                                             </div>
 
                                             <!-- Campos de cantidad para medicamentos magistrales -->
-                                            <!-- <div *ngIf="control.get('isMagistral')?.value" fxLayout="row"
+                                            <div *ngIf="control.get('isMagistral')?.value && control.get('unidadMedida')?.value !== null && control.get('unidadMedida')?.value !== undefined" fxLayout="column"
                                                 fxLayoutGap="10px">
-                                                <mat-form-field appearance="fill" fxFlex="50">
-                                                    <mat-label>Cantidad</mat-label>
-                                                    <input [tabIndex]="5 + i" type="number" matInput
-                                                        formControlName="quantityPresentation" required>
-                                                    <mat-error
-                                                        *ngIf="control.get('quantityPresentation').hasError('required')">
-                                                        Debe ingresar una cantidad
-                                                    </mat-error>
-                                                    <mat-error
-                                                        *ngIf="control.get('quantityPresentation').hasError('min')">
-                                                        Debe ingresar un mínimo de
-                                                        {{control.get('quantityPresentation').errors?.min.min}}
-                                                    </mat-error>
-                                                </mat-form-field>
+                                                <div fxLayout="row" fxLayoutGap="10px">
+                                                    <mat-form-field appearance="fill" fxFlex="40">
+                                                        <mat-label>Cant. de envases</mat-label>
+                                                        <input [tabIndex]="5 + i" type="number" matInput
+                                                            formControlName="quantity" required>
+                                                        <mat-error *ngIf="control.get('quantity').hasError('required')">
+                                                            Debe ingresar una cantidad
+                                                        </mat-error>
+                                                        <mat-error *ngIf="control.get('quantity').hasError('min')">
+                                                            Debe ingresar un mínimo de
+                                                            {{control.get('quantity').errors?.min.min}}
+                                                        </mat-error>
+                                                    </mat-form-field>
+                                                    <span style="font-weight: 500; color: #555; margin-bottom: 20px; align-self: center;">x</span>
+                                                    <mat-form-field appearance="fill" fxFlex="40">
+                                                        <mat-label>Cantidad</mat-label>
+                                                        <input [tabIndex]="6 + i" type="number" matInput
+                                                            formControlName="quantityPresentation" required>
+                                                        <mat-error
+                                                            *ngIf="control.get('quantityPresentation').hasError('required')">
+                                                            Debe ingresar una cantidad
+                                                        </mat-error>
+                                                        <mat-error
+                                                            *ngIf="control.get('quantityPresentation').hasError('min')">
+                                                            Debe ingresar un mínimo de
+                                                            {{control.get('quantityPresentation').errors?.min.min}}
+                                                        </mat-error>
+                                                    </mat-form-field>
+                                                    <span class="unidad-medida" style="font-weight: 500; color: #555; margin-bottom: 20px; align-self: center;">
+                                                        {{ control.get('unidadMedida')?.value }}
+                                                    </span>
+                                                </div>
                                             </div>
-                                            <div fxLayout="row" fxLayoutGap="10px">
-                                                <mat-form-field appearance="fill">
-                                                    <mat-label>Cantidad de envases</mat-label>
-                                                    <input [tabIndex]="5 + i" type="number" matInput
-                                                        formControlName="quantity" required>
-                                                    <mat-error *ngIf="control.get('quantity').hasError('required')">
-                                                        Debe ingresar una cantidad
-                                                    </mat-error>
-                                                    <mat-error *ngIf="control.get('quantity').hasError('min')">
-                                                        Debe ingresar un mínimo de
-                                                        {{control.get('quantity').errors?.min.min}}
-                                                    </mat-error>
-                                                </mat-form-field>
-                                                <mat-form-field appearance="fill" fxFlex="50">
-                                                    <mat-label>Cantidad por envase</mat-label>
-                                                    <input [tabIndex]="7 + i" type="number" matInput
-                                                        formControlName="packageQuantity" required>
-                                                    <mat-error
-                                                        *ngIf="control.get('packageQuantity').hasError('required')">
-                                                        Debe ingresar la cantidad por envase
-                                                    </mat-error>
-                                                    <mat-error *ngIf="control.get('packageQuantity').hasError('min')">
-                                                        Debe ingresar un mínimo de
-                                                        {{control.get('packageQuantity').errors?.min.min}}
-                                                    </mat-error>
-                                                </mat-form-field>
-                                            </div> -->
+
 
 
                                             <!-- Campos de cantidad para medicamentos SNOMED (no magistrales) -->
