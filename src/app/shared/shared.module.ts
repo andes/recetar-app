@@ -12,6 +12,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PatientNamePipe } from './pipes/patient-name.pipe';
 import { PatientFormComponent } from './components/patient-form/patient-form.component';
+import { PatientSexPipe } from './pipes/patient-sex.pipe';
 
 const MATERIAL_MODULES = [
     MatFormFieldModule,
@@ -27,7 +28,8 @@ const MATERIAL_MODULES = [
 @NgModule({
     declarations: [
         PatientNamePipe,
-        PatientFormComponent
+        PatientFormComponent,
+        PatientSexPipe,
     ],
     imports: [
         CommonModule,
@@ -35,11 +37,16 @@ const MATERIAL_MODULES = [
         FlexLayoutModule,
         ...MATERIAL_MODULES,
     ],
+    providers: [
+        PatientNamePipe,
+        PatientSexPipe
+    ],
     exports: [
         PatientNamePipe,
         PatientFormComponent,
         FlexLayoutModule,
         ...MATERIAL_MODULES,
+        PatientSexPipe,
     ]
 })
 export class SharedModule { }

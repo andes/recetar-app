@@ -69,13 +69,14 @@ export class PharmacistsFormComponent implements OnInit {
             this.dniShowSpinner = true;
             this.dateShowSpinner = true;
 
-            this.patientsService.getPatientByDni(values.patient_dni).pipe(catchError(() => of(null))).subscribe((patientSuccess) => {
+            this.patientsService.getPatientByDni(values.patient_dni, values.patient_sexo).pipe(catchError(() => of([]))).subscribe((patientSuccess) => {
                 this.lastDni = values.patient_dni;
+                this.lastSexo = values.patient_sexo;
                 this.lastDate = digestDate;
                 this.dniShowSpinner = false;
                 this.dateShowSpinner = false;
 
-                this.patient = patientSuccess ? patientSuccess[0] : null;
+                this.patient = Array.isArray(patientSuccess) && patientSuccess.length > 0 ? patientSuccess[0] : null;
 
                 // Establecer el contexto del paciente en la lista, habilitar filtros y resetearlos
                 if (this.prescriptionList) {
@@ -98,7 +99,7 @@ export class PharmacistsFormComponent implements OnInit {
                 Validators.required,
                 Validators.minLength(this.dniMinLength)
             ]],
-            patient_sexo: [''],
+            patient_sexo: ['', [Validators.required]],
             dateFilter: ['', [
             ]],
         });
@@ -134,5 +135,4 @@ export class PharmacistsFormComponent implements OnInit {
         return this.prescriptionForm.get('dateFilter');
     }
 }
-
 

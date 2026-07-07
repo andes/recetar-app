@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { catchError, tap, map } from 'rxjs/operators';
 import { Observable, of, throwError } from 'rxjs';
 import { Patient } from "../interfaces/patients";
@@ -24,8 +24,12 @@ export class PatientsService {
   getOS() {
     return this.http.get(`${environment.API_END_POINT}/patients/get-os`);
   }
-  getPatientByDni(dni: string): Observable<Patient[]> {
-    return this.http.get<Patient[]>(`${environment.API_END_POINT}/patients/get-by-dni/${dni}`);
+  getPatientByDni(dni: string, sex?: string): Observable<Patient[]> {
+    let params = new HttpParams();
+    if (sex) {
+      params = params.set('sex', sex);
+    }
+    return this.http.get<Patient[]>(`${environment.API_END_POINT}/patients/get-by-dni/${dni}`, { params });
   }
 
   getPatientById(id: string): Observable<Patient> {
