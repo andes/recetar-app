@@ -33,17 +33,20 @@ export class StockPrinterComponent {
         const barcodeBase64 = await this.barcodeService.generateBarcodeBase64(stockData._id);
         const barcodeImg = await new Img(barcodeBase64).fit([230, 60]).alignment('center').margin([0, 20]).build();
 
-        // Similar prescriptionId barcode logic if needed, assuming just _id for now based on data sample
         let prescriptionIdBarcodeImg = null;
         let prescriptionIdLabel = null;
-        if (stockData.prescriptionId) {
-            const prescriptionIdBarcodeBase64 = await this.barcodeService.generateBarcodeBase64(stockData.prescriptionId);
+        const prescriptionId = stockData.prescriptionId || stockData.idReceta;
+        if (prescriptionId) {
+            const prescriptionIdBarcodeBase64 = await this.barcodeService.generateBarcodeBase64(prescriptionId);
             prescriptionIdLabel = new Txt('Número de receta:').fontSize(9).bold().alignment('center').margin([0, 5, 0, 0]).end;
             prescriptionIdBarcodeImg = await new Img(prescriptionIdBarcodeBase64).fit([230, 60]).alignment('center').margin([0, 5]).build();
         }
 
+        const professional = stockData.professional || stockData.profesional;
+        const profBusinessName = this.getProfessionalName(professional) || 'Profesional';
+
         pdf.info({
-            title: 'Receta de Insumos ' + stockData.professional.businessName,
+            title: 'Receta de Insumos ' + profBusinessName,
             author: 'RecetAR'
         });
 
@@ -53,42 +56,49 @@ export class StockPrinterComponent {
             new Txt('RECETA DE INSUMOS').bold().fontSize(20).alignment('center').end,
             new Txt(label ? `${label}` : '').bold().italics().fontSize(20).alignment('right').opacity(0.6).end]).end);
         pdf.add(new Txt('\n').end);
-        pdf.add(new Columns([new Txt('RECETAR').bold().alignment('left').end, new Txt(`Fecha prescripción: ${this.datePipe.transform(stockData.date, 'dd/MM/yyyy')}`).alignment('right').end]).end);
+        pdf.add(new Columns([new Txt('RECETAR').bold().alignment('left').end, new Txt(`Fecha prescripción: ${this.datePipe.transform(stockData.date || stockData.fechaPrestacion || stockData.fechaRegistro, 'dd/MM/yyyy')}`).alignment('right').end]).end);
         pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
         pdf.add(new Txt('\n').end);
 
         // Patient
+        const patientLastName = (stockData.patient?.lastName || stockData.paciente?.apellido || '').toUpperCase();
+        const patientFirstName = (stockData.patient?.firstName || stockData.paciente?.nombre || '').toUpperCase();
+        const patientDni = stockData.patient?.dni || stockData.paciente?.documento || '';
+        const fechaNac = stockData.patient?.fechaNac || stockData.patient?.fechaNacimiento || stockData.paciente?.fechaNacimiento;
+        const sex = stockData.patient?.sex || stockData.paciente?.sexo || stockData.paciente?.genero || 'No informado';
+
         pdf.add(new Txt([
             { text: 'Paciente:   ' },
-            { text: `${stockData.patient.lastName.toUpperCase()} ${stockData.patient.firstName.toUpperCase()}`, bold: true }
+            { text: `${patientLastName} ${patientFirstName}`, bold: true }
         ]).end);
         pdf.add(new Txt('\n').end);
 
         pdf.add(new Txt([
             { text: 'DNI:    ' },
-            { text: `${stockData.patient.dni}`, bold: true }
+            { text: `${patientDni}`, bold: true }
         ]).end);
         pdf.add(new Txt('\n').end);
 
-        if (stockData.patient.fechaNac) {
+        if (fechaNac) {
             pdf.add(new Txt([
                 { text: 'Fecha Nacimiento:    ' },
-                { text: `${this.datePipe.transform(stockData.patient.fechaNac, 'dd/MM/yyyy')}`, bold: true }
+                { text: `${this.datePipe.transform(fechaNac, 'dd/MM/yyyy')}`, bold: true }
             ]).end);
             pdf.add(new Txt('\n').end);
         }
 
         pdf.add(new Txt([
             { text: 'Sexo:    ' },
-            { text: `${stockData.patient.sex}`, bold: true }
+            { text: `${sex}`, bold: true }
         ]).end);
         pdf.add(new Txt('\n').end);
 
         let obraSocial = '';
         let numeroAfiliado = '';
-        if (stockData.patient.obraSocial?.nombre) {
-            obraSocial = stockData.patient.obraSocial.nombre;
-            numeroAfiliado = stockData.patient.obraSocial.numeroAfiliado || '';
+        const osObj = stockData.patient?.obraSocial || stockData.paciente?.obraSocial;
+        if (osObj?.nombre || osObj?.financiador) {
+            obraSocial = osObj.nombre || osObj.financiador || '';
+            numeroAfiliado = osObj.numeroAfiliado || '';
         }
         pdf.add(new Txt([
             { text: 'Obra Social / Plan de salud :   ' }, { text: `${(obraSocial || 'No informado')}`, bold: true }
@@ -107,20 +117,30 @@ export class StockPrinterComponent {
         pdf.add(new Txt('\n').end);
 
         // Supplies
-        stockData.supplies.forEach((item: any) => {
-            const cant = item.quantityPresentation ? `${item.quantity} envase(s) de ${item.quantityPresentation} unidades` : `x ${item.quantity}`;
+        const suppliesList = stockData.supplies || (stockData.insumo ? [{
+            supply: {
+                name: stockData.insumo.nombre || stockData.insumo.concepto?.term,
+                type: stockData.insumo.tipo,
+                specification: stockData.insumo.especificacion
+            },
+            quantity: stockData.insumo.cantidad
+        }] : []);
+
+        suppliesList.forEach((item: any) => {
+            const supplyName = item.supply?.name || item.name || 'Insumo';
+            const cant = item.quantityPresentation ? `${item.quantity} envase(s) de ${item.quantityPresentation} unidades` : `x ${item.quantity || 1}`;
 
             pdf.add(new Columns([
-                new Txt('' + item.supply.name).bold().end,
+                new Txt('' + supplyName).bold().end,
                 new Txt(' ').end,
                 new Txt(cant).bold().end
             ]).end);
 
-            if (item.supply.type) {
-                pdf.add(new Txt(`Tipo: ${formatTipoInsumo(item.supply.type)}`).fontSize(10).margin([10, 0, 0, 0]).end);
+            if (item.supply?.type || item.type) {
+                pdf.add(new Txt(`Tipo: ${formatTipoInsumo(item.supply?.type || item.type)}`).fontSize(10).margin([10, 0, 0, 0]).end);
             }
-            if (item.supply.specification) {
-                pdf.add(new Txt(`Especificación: ${item.supply.specification}`).fontSize(10).margin([10, 0, 0, 0]).end);
+            if (item.supply?.specification || item.specification) {
+                pdf.add(new Txt(`Especificación: ${item.supply?.specification || item.specification}`).fontSize(10).margin([10, 0, 0, 0]).end);
             }
             pdf.add(new Txt('\n').end);
         });
@@ -146,19 +166,10 @@ export class StockPrinterComponent {
             ]).alignment('center').width('100%').end);
 
             // Professional Signature
-            pdf.add(new Txt([
-                { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
-                { text: '\n', fontSize: 3 },
-                { text: `\n ${stockData.professional.businessName}`, fontSize: 14, bold: true },
-                {
-                    text: `\n ${stockData.professional?.profesionGrado?.length ?
-                        stockData.professional.profesionGrado
-                            .map((g: any) => `${g.profesion} MP ${g.numeroMatricula}`)
-                            .join('\n')
-                        : (stockData.professional?.enrollment ? `MP ${stockData.professional.enrollment}\n` : '')
-                        }`, bold: true, fontSize: 9
-                }
-            ]).alignment('center').margin([0, 25, 0, 0]).end);
+            pdf.add(new Txt(this.getSignatureContent(professional, stockData.organizacion))
+                .alignment('center')
+                .margin([0, 25, 0, 0])
+                .end);
 
         } else {
             // Just barcode and signature
@@ -170,19 +181,10 @@ export class StockPrinterComponent {
                 },
                 {
                     stack: [
-                        new Txt([
-                            { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
-                            { text: '\n', fontSize: 3 },
-                            { text: `\n ${stockData.professional.businessName}`, fontSize: 14, bold: true },
-                            {
-                                text: `\n ${stockData.professional?.profesionGrado?.length ?
-                                    stockData.professional.profesionGrado
-                                        .map((g: any) => `${g.profesion} MP ${g.numeroMatricula}`)
-                                        .join('\n')
-                                    : (stockData.professional?.enrollment ? `MP ${stockData.professional.enrollment}\n` : '')
-                                    }`, bold: true, fontSize: 9
-                            }
-                        ]).alignment('center').margin([0, 25, 0, 0]).end
+                        new Txt(this.getSignatureContent(professional, stockData.organizacion))
+                            .alignment('center')
+                            .margin([0, 25, 0, 0])
+                            .end
                     ],
                     alignment: 'center',
                     width: '50%'
@@ -195,5 +197,83 @@ export class StockPrinterComponent {
             { text: '  Esta receta fue creada por emisor inscripto y válido en el Registro de Recetarios Electrónicos \n del Ministerio de Salud de la Nación - ', italics: true },
             { text: 'RL-2025-63212094-APN-SSVEIYES#MS   ', bold: true }
         ]).fontSize(11).alignment('center').end);
+    }
+
+    private getProfessionalName(prof: any): string {
+        if (!prof) {
+            return '';
+        }
+        if (prof.businessName) {
+            return prof.businessName;
+        }
+        if (prof.apellido && prof.nombre) {
+            return `${prof.apellido.toUpperCase()}, ${prof.nombre.toUpperCase()}`;
+        }
+        if (prof.apellido) {
+            return prof.apellido.toUpperCase();
+        }
+        if (prof.nombre) {
+            return prof.nombre.toUpperCase();
+        }
+        return '';
+    }
+
+    private getProfessionalMatriculas(prof: any): string {
+        if (!prof) {
+            return '';
+        }
+        if (prof.profesionGrado && Array.isArray(prof.profesionGrado) && prof.profesionGrado.length > 0) {
+            return prof.profesionGrado
+                .map((g: any) => {
+                    const mat = g.numeroMatricula || g.matricula;
+                    if (g.profesion && mat) {
+                        return `${g.profesion} MP ${mat}`;
+                    } else if (mat) {
+                        return `MP ${mat}`;
+                    }
+                    return '';
+                })
+                .filter((s: string) => !!s)
+                .join('\n');
+        }
+        const enrollment = prof.enrollment || prof.matricula;
+        if (enrollment) {
+            return prof.profesion ? `${prof.profesion} MP ${enrollment}` : `MP ${enrollment}`;
+        }
+        return '';
+    }
+
+    private getOrganizacionDireccion(direccion: any): string {
+        if (!direccion) {
+            return '';
+        }
+        if (typeof direccion === 'string') {
+            return direccion;
+        }
+        return direccion.valor || '';
+    }
+
+    private getSignatureContent(professional: any, organizacion?: any): any[] {
+        const name = this.getProfessionalName(professional);
+        const matriculas = this.getProfessionalMatriculas(professional);
+        const orgStr = organizacion ? `\n Organización: ${organizacion.nombre}${this.getOrganizacionDireccion(organizacion.direccion) ? ' - ' + this.getOrganizacionDireccion(organizacion.direccion) : ''}` : '';
+
+        const content: any[] = [
+            { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true }
+        ];
+
+        if (name) {
+            content.push({ text: `\n ${name}`, fontSize: 14, bold: true });
+        }
+
+        if (matriculas) {
+            content.push({ text: `\n ${matriculas}`, fontSize: 9, bold: true });
+        }
+
+        if (orgStr) {
+            content.push({ text: orgStr, fontSize: 9, bold: true });
+        }
+
+        return content;
     }
 }

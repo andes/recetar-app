@@ -53,14 +53,24 @@ export default class AndesPrescriptions {
     fechaPrestacion: Date;
     idPrestacion: string;
     idRegistro: string;
-    medicamento: {
-        concepto: {
+    medicamento?: {
+        concepto?: {
             conceptId: string;
             term: string;
             fsn: string;
             semanticTag: string;
         };
-        dosisDiaria: {
+        esMagistral?: boolean;
+        magistral?: {
+            codigo?: Array<{
+                fuente: string;
+                valor: string;
+            }>;
+            nombre: string;
+            unidadMedida?: string;
+            id?: string;
+        };
+        dosisDiaria?: {
             dosis: string;
             intervalo: {
                 id: string;
@@ -72,13 +82,32 @@ export default class AndesPrescriptions {
             dias: number;
             notaMedica: string;
         };
-        presentacion: string;
-        unidades: string;
-        cantidad: number;
-        cantEnvases: number;
-        tratamientoProlongado: Boolean;
-        tiempoTratamiento: any;
-        tipoReceta: 'simple' | 'duplicado' | 'triplicado';
+        presentacion?: string;
+        unidades?: string;
+        cantidad?: number;
+        cantEnvases?: number;
+        tratamientoProlongado?: Boolean;
+        tiempoTratamiento?: any;
+        tipoReceta?: 'simple' | 'duplicado' | 'triplicado';
+    };
+    insumo?: {
+        id?: string;
+        nombre?: string;
+        codigo?: Array<{
+            fuente: string;
+            valor: string;
+        }>;
+        concepto?: {
+            conceptId?: string;
+            term?: string;
+            fsn?: string;
+            semanticTag?: string;
+        };
+        tipo?: string;
+        cantidad?: number;
+        cantEnvases?: number;
+        unidades?: string;
+        especificacion?: string;
     };
     dispensa: Dispensa[];
     estados: [

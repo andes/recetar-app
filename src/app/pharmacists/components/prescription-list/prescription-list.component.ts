@@ -29,8 +29,18 @@ import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unif
 export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDestroy {
     private destroy$ = new Subject<void>();
 
-    displayedColumns: string[] = ['medicamento', 'date', 'status', 'tipo', 'action', 'arrow'];
+    displayedColumns: string[] = ['source', 'medicamento', 'date', 'status', 'tipo', 'action', 'arrow'];
     dataSource = new MatTableDataSource<any>([]);
+
+    isAndesPrescription(item: any): boolean {
+        if (!item) return false;
+        return (item as any).isFromAndes === true || 'idAndes' in item || 'estadoActual' in item || 'insumo' in item || (!!(item as any).paciente && !(item as any).patient);
+    }
+
+    isLocalPrescription(item: any): boolean {
+        if (!item) return false;
+        return !this.isAndesPrescription(item);
+    }
     expandedElement: Prescriptions | null;
     loadingPrescriptions: boolean;
     lapseTime = 2;
@@ -51,9 +61,11 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
     statusOptions = [
         { value: 'vigente', label: 'Vigente' },
         { value: 'vencida', label: 'Vencida' },
+        { value: 'finalizada', label: 'Finalizada' },
         { value: 'dispensada', label: 'Dispensada' },
         { value: 'rechazada', label: 'Rechazada' },
         { value: 'suspendida', label: 'Suspendida' },
+        { value: 'pendiente', label: 'Pendiente' },
         { value: 'todas', label: 'Todas' }
     ];
 
@@ -282,13 +294,9 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
     dispense(prescription: any) {
         if ('status' in prescription) {
             this.prescriptionService.dispense(prescription._id, this.pharmacistId).subscribe(
-                (updatedPrescription) => {
-                    if (updatedPrescription) {
-                        const index = this.dataSource.data.findIndex(p => p._id === prescription._id);
-                        if (index >= 0) {
-                            this.dataSource.data[index] = updatedPrescription;
-                            this.dataSource._updateChangeSubscription();
-                        }
+                success => {
+                    if (success) {
+                        // Actualizar los mapas después de la operación exitosa
                         this.updateMaps();
                         this.openDialog('dispensed', prescription, prescription.professional.businessName);
                     }
@@ -316,15 +324,11 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
             );
         } else if ('estadoActual' in prescription) {
             this.andesPrescriptionService.dispense(prescription, this.pharmacistId).subscribe(
-                (updatedPrescription) => {
-                    if (updatedPrescription) {
-                        const index = this.dataSource.data.findIndex(p => p._id === prescription._id);
-                        if (index >= 0) {
-                            this.dataSource.data[index] = updatedPrescription;
-                            this.dataSource._updateChangeSubscription();
-                        }
+                success => {
+                    if (success) {
+                        // Actualizar los mapas después de la operación exitosa
                         this.updateMaps();
-                        this.openDialog('dispensed', prescription, prescription.profesional.apellido + ', ' + prescription.profesional.nombre);
+                        this.openDialog('dispensed', prescription, prescription.profesional.nombre);
                     }
                 },
                 error => {
@@ -337,13 +341,8 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
     cancelDispense(prescription: any) {
         if ('status' in prescription) {
             this.prescriptionService.cancelDispense(prescription._id, this.pharmacistId).subscribe(
-                (updatedPrescription) => {
-                    if (updatedPrescription) {
-                        const index = this.dataSource.data.findIndex(p => p._id === prescription._id);
-                        if (index >= 0) {
-                            this.dataSource.data[index] = updatedPrescription;
-                            this.dataSource._updateChangeSubscription();
-                        }
+                success => {
+                    if (success) {
                         this.updateMaps();
                         this.openDialog('cancel-dispensed', prescription);
                     }
@@ -371,13 +370,8 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
             );
         } else if ('estadoActual' in prescription) {
             this.andesPrescriptionService.cancelDispense(prescription._id, this.pharmacistId).subscribe(
-                (updatedPrescription) => {
-                    if (updatedPrescription) {
-                        const index = this.dataSource.data.findIndex(p => p._id === prescription._id);
-                        if (index >= 0) {
-                            this.dataSource.data[index] = updatedPrescription;
-                            this.dataSource._updateChangeSubscription();
-                        }
+                success => {
+                    if (success) {
                         this.updateMaps();
                         this.openDialog('cancel-dispensed', prescription);
                     }
@@ -566,12 +560,12 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         const statusLower = status.toLowerCase();
         const statusMap: { [key: string]: string } = {
             'vigente': 'VIGENTE',
-            'finalizada': 'DISPENSADA',
+            'finalizada': 'FINALIZADA',
             'vencida': 'VENCIDA',
             'suspendida': 'SUSPENDIDA',
             'rechazada': 'RECHAZADA',
             'pendiente': 'VIGENTE',
-            'dispensada': 'DISPENSADA'
+            'dispensada': 'FINALIZADA'
         };
         return statusMap[statusLower] || status.toUpperCase();
     }

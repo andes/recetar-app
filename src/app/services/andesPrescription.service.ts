@@ -35,17 +35,19 @@ export class AndesPrescriptionsService {
         return this.http.get<AndesPrescriptions>(`${environment.API_END_POINT}/prescriptions/${id}`);
     }
 
-    dispense(prescription: AndesPrescriptions, pharmacistId: string): Observable<AndesPrescriptions> {
+    dispense(prescription: AndesPrescriptions, pharmacistId: string): Observable<boolean> {
         const params = { 'prescription': prescription, 'pharmacistId': pharmacistId };
         return this.http.patch<AndesPrescriptions>(`${environment.API_END_POINT}/andes-prescriptions/dispense`, params).pipe(
-            tap((updatedPrescription: AndesPrescriptions) => this.updatePrescription(updatedPrescription))
+            tap((updatedPrescription: AndesPrescriptions) => this.updatePrescription(updatedPrescription)),
+            mapTo(true)
         );
     }
 
-    cancelDispense(prescriptionId: string, pharmacistId: string): Observable<AndesPrescriptions> {
+    cancelDispense(prescriptionId: string, pharmacistId: string): Observable<boolean> {
         const params = { 'prescriptionId': prescriptionId, 'pharmacistId': pharmacistId };
         return this.http.patch<AndesPrescriptions>(`${environment.API_END_POINT}/andes-prescriptions/cancel-dispense`, params).pipe(
-            tap((updatedPrescription: AndesPrescriptions) => this.updatePrescription(updatedPrescription))
+            tap((updatedPrescription: AndesPrescriptions) => this.updatePrescription(updatedPrescription)),
+            mapTo(true)
         );
     }
 
@@ -123,16 +125,22 @@ export class AndesPrescriptionsService {
 
     /**
      * Verifica si existe una receta activa (vigente/pendiente, sin dispensa completa)
-     * para el paciente y el concepto SNOMED dados, usando el nuevo endpoint dedicado.
+     * para el paciente y el concepto SNOMED/magistral dados, usando el nuevo endpoint dedicado.
      * @param dni DNI del paciente
      * @param conceptId conceptId SNOMED del medicamento
+     * @param sexo Sexo del paciente
+     * @param extraParams Opciones para medicamentos magistrales (esMagistral, codigoFuente, codigoValor, nombre)
      * @returns Observable<boolean> true si existe una receta activa
      */
-    verificarRecetaExistente(dni: string, conceptId: string, sexo: string): Observable<boolean> {
-        const params = new HttpParams()
-            .set('dni', dni)
-            .set('conceptId', conceptId)
-            .set('sexo', sexo);
+    verificarRecetaExistente(dni: string, conceptId?: string, sexo?: string, extraParams?: { esMagistral?: boolean; codigoFuente?: string; codigoValor?: string; nombre?: string }): Observable<boolean> {
+        let params = new HttpParams().set('dni', dni);
+        if (sexo) { params = params.set('sexo', sexo); }
+        if (conceptId) { params = params.set('conceptId', conceptId); }
+        if (extraParams?.esMagistral) { params = params.set('esMagistral', 'true'); }
+        if (extraParams?.codigoFuente) { params = params.set('codigoFuente', extraParams.codigoFuente); }
+        if (extraParams?.codigoValor) { params = params.set('codigoValor', extraParams.codigoValor); }
+        if (extraParams?.nombre) { params = params.set('nombre', extraParams.nombre); }
+
         return this.http.get<any[]>(`${environment.API_END_POINT}/andes-prescriptions/verificar`, { params }).pipe(
             map((recetas: any[]) => Array.isArray(recetas) && recetas.length > 0)
         );

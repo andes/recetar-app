@@ -31,6 +31,8 @@ table
         background: #00a3e0
       &.medicamento
         background: #7b9e3c
+      &.magistral
+        background: #e67e22
 
   th.mat-column-tipo
     text-align: center
@@ -218,3 +220,33 @@ table
       right: 0
       &:before
         display: none
+
+.centered-header
+  display: block
+  text-align: center
+
+.source-column-header,
+.source-column
+  width: 80px !important
+  max-width: 80px !important
+  min-width: 80px !important
+
+  .source-icon
+    display: flex
+    justify-content: center
+    align-items: center
+    width: 100%
+    height: 32px
+
+    img
+      object-fit: contain
+
+    &.andes-icon
+      img
+        width: 40px
+        height: 20px
+
+    &.recetar-icon
+      img
+        width: 32px
+        height: 32px

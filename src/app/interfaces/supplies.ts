@@ -3,8 +3,9 @@ export default interface Supplies {
   code: string;
   status: 'activo' | 'inactivo';
   quantity: string;
-  type: 'device' | 'nutrition',
+  type: 'device' | 'nutrition' | 'magistral',
   name: string;
+  description?: string;
   requiresSpecification: boolean,
   specification?: string
 }
