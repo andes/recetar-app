@@ -17,7 +17,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { PatientNamePipe } from './pipes/patient-name.pipe';
 import { PatientFormComponent } from './components/patient-form/patient-form.component';
 import { SessionExpirationBannerComponent } from './components/session-expiration-banner/session-expiration-banner.component';
-import { EditUserInfoComponent } from '../professionals/components/edit-user-info/edit-user-info.component';
+import { EditUserInfoModule } from './components/edit-user-info/edit-user-info.module';
 
 const MATERIAL_MODULES = [
     MatFormFieldModule,
@@ -38,13 +38,13 @@ const MATERIAL_MODULES = [
     declarations: [
         PatientNamePipe,
         PatientFormComponent,
-        SessionExpirationBannerComponent,
-        EditUserInfoComponent
+        SessionExpirationBannerComponent
     ],
     imports: [
         CommonModule,
         ReactiveFormsModule,
         FlexLayoutModule,
+        EditUserInfoModule,
         ...MATERIAL_MODULES,
     ],
     exports: [
@@ -52,7 +52,7 @@ const MATERIAL_MODULES = [
         PatientFormComponent,
         FlexLayoutModule,
         SessionExpirationBannerComponent,
-        EditUserInfoComponent,
+        EditUserInfoModule,
         ...MATERIAL_MODULES,
     ]
 })

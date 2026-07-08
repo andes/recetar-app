@@ -2,8 +2,6 @@ import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BrowserModule } from '@angular/platform-browser';
-
 import { AuditRoutingModule, routingComponent } from './audit-routing.module';
 // flex-layout
 import { FlexLayoutModule } from '@angular/flex-layout';
@@ -33,20 +31,17 @@ import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
 import { DialogReportComponent } from './components/dialog-report/dialog-report.component';
 import { PrescriptionListComponent } from './components/prescription-list/prescription-list.component';
 import { UserCreateComponent } from './components/user-create/user-create.component';
-import { UsersListComponent } from './components/user-list/users-list.component';
 import { FormatTimePipe } from './pipes/format-time.pipe';
 
 @NgModule({
   declarations: [
     routingComponent,
-    UsersListComponent,
     UserCreateComponent,
     PrescriptionListComponent,
     FormatTimePipe,
     DialogReportComponent,
   ],
   imports: [
-    BrowserModule,
     CommonModule,
     AuditRoutingModule,
     ReactiveFormsModule,

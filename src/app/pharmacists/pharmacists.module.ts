@@ -1,4 +1,3 @@
-import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -35,19 +34,16 @@ import { FormatTimePipe } from './pipes/format-time.pipe';
 import { DialogReportComponent } from './components/dialog-report/dialog-report.component';
 import { SharedModule } from '@shared/shared.module';
 import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
-import { EditUserInfoModule } from '@shared/components/edit-user-info/edit-user-info.module';
 
 @NgModule({
   declarations: [
     routingComponent,
     PrescriptionListComponent,
     PrescriptionUndoComponent,
-    AndesPrescriptionPrinterComponent,
     FormatTimePipe,
     DialogReportComponent
   ],
   imports: [
-    BrowserModule,
     CommonModule,
     PharmacistsRoutingModule,
     ReactiveFormsModule,
@@ -73,7 +69,6 @@ import { EditUserInfoModule } from '@shared/components/edit-user-info/edit-user-
     MatProgressSpinnerModule,
     MatSortModule,
     MatPaginatorModule,
-    EditUserInfoModule,
     SharedModule
   ],
   exports: [

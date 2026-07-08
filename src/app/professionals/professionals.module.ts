@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProfessionalsRoutingModule, routingComponents } from './professionals-routing.module';
-import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 // flex-layout
@@ -56,15 +55,12 @@ import { StockPrinterComponent } from './components/stock/printer/stock-printer.
         SelectorAmbitoComponent,
         OrganizacionesSelectorComponent,
         OrganizacionDialogComponent,
-        OrganizacionesSelectorComponent,
-        OrganizacionDialogComponent,
         StockComponent,
         StockDialogComponent,
         StockListComponent,
     ],
     imports: [
         CommonModule,
-        BrowserModule,
         HttpClientModule,
         ReactiveFormsModule,
         FormsModule,
