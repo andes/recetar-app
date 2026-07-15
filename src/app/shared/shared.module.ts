@@ -18,10 +18,18 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatListModule } from '@angular/material/list';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { PatientNamePipe } from './pipes/patient-name.pipe';
 import { PatientFormComponent } from './components/patient-form/patient-form.component';
 import { CanvasComponent } from './components/layout/canvas/canvas.component';
 import { SidebarComponent } from './components/layout/sidebar/sidebar.component';
+import { UiIconComponent } from './ui/icon.component';
+import { UiBadgeChipComponent } from './ui/badge-chip.component';
+import { UiAvatarComponent } from './ui/avatar.component';
+import { UiItemCardComponent } from './ui/item-card.component';
+import { UiCardComponent } from './ui/card.component';
+import { UiSearchBarComponent } from './ui/search-bar.component';
+import { UiSectionDividerComponent } from './ui/section-divider.component';
 
 const MATERIAL_MODULES = [
     MatFormFieldModule,
@@ -39,6 +47,7 @@ const MATERIAL_MODULES = [
     MatChipsModule,
     MatListModule,
     MatTooltipModule,
+    MatSnackBarModule,
 ];
 
 @NgModule({
@@ -51,6 +60,13 @@ const MATERIAL_MODULES = [
         PatientFormComponent,
         CanvasComponent,
         SidebarComponent,
+        UiIconComponent,
+        UiBadgeChipComponent,
+        UiAvatarComponent,
+        UiItemCardComponent,
+        UiCardComponent,
+        UiSearchBarComponent,
+        UiSectionDividerComponent,
         ...MATERIAL_MODULES,
     ],
     exports: [
@@ -58,6 +74,13 @@ const MATERIAL_MODULES = [
         PatientFormComponent,
         CanvasComponent,
         SidebarComponent,
+        UiIconComponent,
+        UiBadgeChipComponent,
+        UiAvatarComponent,
+        UiItemCardComponent,
+        UiCardComponent,
+        UiSearchBarComponent,
+        UiSectionDividerComponent,
         FlexLayoutModule,
         ...MATERIAL_MODULES,
     ]

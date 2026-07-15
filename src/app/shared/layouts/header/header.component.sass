@@ -5,6 +5,17 @@ $danger: #EF4444
 :host
     display: block
 
+    @media (max-width: $small-devices)
+        position: fixed
+        top: 0
+        left: 0
+        right: 0
+        z-index: 100
+        transition: transform .3s ease
+
+        &.header-hidden
+            transform: translateY(-100%)
+
 .header-toolbar
     background: var(--bg-card)
     color: var(--text-primary)
@@ -64,19 +75,15 @@ $danger: #EF4444
 .brand
     display: flex
     align-items: center
-    gap: 8px
     padding: 0 24px 0 16px
 
-    .brand-icon
-        color: var(--primary)
-        font-size: 24px
-        width: 24px
-        height: 24px
+    .brand-logo
+        height: 28px
+        width: auto
+        display: block
 
-    .brand-title
-        color: var(--text-primary)
-        font-size: 1.25rem
-        letter-spacing: 0.02em
+        @media (min-width: $small-devices + 1px)
+            height: 32px
 
 .header-right-section
     display: flex
@@ -117,7 +124,7 @@ $danger: #EF4444
         width: 32px
         height: 32px
         border-radius: 50%
-        background: var(--primary)
+        background: var(--secondary)
         color: #ffffff
         font-size: 0.75rem
         flex-shrink: 0

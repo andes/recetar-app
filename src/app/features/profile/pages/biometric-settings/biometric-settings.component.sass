@@ -1,0 +1,223 @@
+@use 'styles/variables' as *
+
+.biometric-container
+    display: flex
+    justify-content: center
+    padding: $space-6
+
+    @media (max-width: $small-devices)
+        padding: $space-4
+
+.biometric-card
+    width: 100%
+    max-width: 560px
+
+    mat-card-header
+        margin-bottom: $space-6
+
+        mat-card-title
+            font-size: 1.5rem
+            font-weight: 600
+            color: var(--text-primary)
+
+        mat-card-subtitle
+            color: var(--text-secondary)
+
+.not-supported,
+.not-available
+    display: flex
+    align-items: flex-start
+    gap: $space-3
+    padding: $space-4
+    background: var(--error-bg)
+    color: var(--error-text)
+    border-radius: $radius-sm
+    margin-bottom: $space-4
+
+    mat-icon
+        font-size: 1.5rem
+        width: 1.5rem
+        height: 1.5rem
+        flex-shrink: 0
+
+    .not-supported-text,
+    .not-available-text
+        display: flex
+        flex-direction: column
+        gap: $space-2
+
+        strong
+            font-size: 1rem
+            font-weight: 600
+
+        p
+            font-size: 0.875rem
+            margin: 0
+            opacity: 0.9
+
+.status-section
+    margin-bottom: $space-6
+
+.status-indicator
+    display: flex
+    align-items: center
+    gap: $space-3
+    padding: $space-4
+    border-radius: $radius-sm
+    background: var(--success-bg)
+    color: var(--success-text)
+    margin-bottom: $space-3
+
+    &.active
+        background: var(--success-bg)
+        color: var(--success-text)
+
+    mat-icon
+        font-size: 1.5rem
+        width: 1.5rem
+        height: 1.5rem
+
+    .status-text
+        display: flex
+        flex-direction: column
+        gap: $space-1
+
+        strong
+            font-size: 0.875rem
+            font-weight: 600
+
+        span
+            font-size: 0.75rem
+            opacity: 0.9
+
+.status-description
+    color: var(--text-secondary)
+    font-size: 0.875rem
+    margin: 0
+
+.actions-section
+    display: flex
+    gap: $space-3
+    margin-bottom: $space-6
+    padding-top: $space-4
+    border-top: 1px solid var(--border-color)
+
+    button
+        display: flex
+        align-items: center
+        gap: $space-2
+
+.loading-container
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    padding: $space-12
+    gap: $space-4
+
+    p
+        color: var(--text-secondary)
+        margin: 0
+
+.credentials-section
+    margin-top: $space-6
+
+    h3
+        font-size: 1.125rem
+        font-weight: 600
+        color: var(--text-primary)
+        margin: 0 0 $space-4 0
+
+.credentials-list
+    display: flex
+    flex-direction: column
+    gap: $space-3
+
+.credential-item
+    display: flex
+    align-items: center
+    justify-content: space-between
+    padding: $space-4
+    background: var(--bg-body)
+    border-radius: $radius-sm
+    border: 1px solid var(--border-color)
+
+    &:hover
+        border-color: var(--primary)
+
+.credential-info
+    display: flex
+    align-items: flex-start
+    gap: $space-3
+
+    > mat-icon
+        font-size: 2rem
+        width: 2rem
+        height: 2rem
+        color: var(--primary)
+        flex-shrink: 0
+
+.credential-details
+    display: flex
+    flex-direction: column
+    gap: $space-2
+
+.credential-device
+    display: flex
+    align-items: center
+    gap: $space-2
+
+    strong
+        font-size: 0.875rem
+        font-weight: 600
+        color: var(--text-primary)
+
+    .backup-icon
+        font-size: 1rem
+        width: 1rem
+        height: 1rem
+        color: var(--success-text)
+
+.credential-meta
+    display: flex
+    flex-wrap: wrap
+    gap: $space-2
+    font-size: 0.75rem
+    color: var(--text-secondary)
+
+.credential-transport
+    display: flex
+    flex-wrap: wrap
+    gap: $space-2
+    margin-top: $space-1
+
+    mat-chip
+        font-size: 0.625rem
+        padding: $space-1 $space-2
+        height: auto
+        min-height: 0
+
+.no-credentials
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    padding: $space-12
+    text-align: center
+    color: var(--text-secondary)
+
+    mat-icon
+        font-size: 3rem
+        width: 3rem
+        height: 3rem
+        margin-bottom: $space-4
+        opacity: 0.5
+
+    p
+        margin: 0
+        font-size: 0.875rem
+
+        &:first-of-type
+            font-weight: 500
+            color: var(--text-primary)
+            margin-bottom: $space-2

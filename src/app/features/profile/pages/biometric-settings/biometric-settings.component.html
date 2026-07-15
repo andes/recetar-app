@@ -1,0 +1,123 @@
+<app-canvas [showSidebar]="true" [sidebarItems]="sidebarItems">
+    <div class="biometric-container">
+        <mat-card class="biometric-card">
+            <mat-card-header>
+                <mat-card-title>Autenticación Biométrica</mat-card-title>
+                <mat-card-subtitle>Gestioná tus credenciales biométricas para recetas</mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+                @if (!isWebAuthnSupported) {
+                    <div class="not-supported">
+                        <mat-icon>error_outline</mat-icon>
+                        <div class="not-supported-text">
+                            <strong>Biometría no disponible</strong>
+                            <p>Tu navegador o dispositivo no soporta autenticación biométrica.</p>
+                            <p>Podés usar el PIN de seguridad como alternativa.</p>
+                        </div>
+                    </div>
+                }
+
+                @if (isWebAuthnSupported && !isPlatformAuthenticatorAvailable) {
+                    <div class="not-available">
+                        <mat-icon>fingerprint</mat-icon>
+                        <div class="not-available-text">
+                            <strong>Autenticador no disponible</strong>
+                            <p>Este dispositivo no tiene un autenticador biométrico configurado.</p>
+                            <p>Configurá huella digital o reconocimiento facial en tu dispositivo y volvé a intentar.</p>
+                        </div>
+                    </div>
+                }
+
+                @if (isWebAuthnSupported && isPlatformAuthenticatorAvailable) {
+                    <div class="status-section">
+                        <div class="status-indicator active">
+                            <mat-icon>fingerprint</mat-icon>
+                            <div class="status-text">
+                                <strong>Biometría disponible</strong>
+                                <span>Usá tu huella digital o reconocimiento facial para autorizar recetas</span>
+                            </div>
+                        </div>
+
+                        <p class="status-description">
+                            La autenticación biométrica es más segura y rápida que el PIN.
+                            Se te solicitará antes de emitir una receta si tenés credenciales registradas.
+                        </p>
+                    </div>
+
+                    <div class="actions-section">
+                        <button mat-raised-button color="primary" (click)="registerCredential()" [disabled]="isRegistering">
+                            @if (isRegistering) {
+                                <mat-spinner diameter="20"></mat-spinner>
+                                <span>Registrando...</span>
+                            } @else {
+                                <ng-container>
+                                    <mat-icon>add</mat-icon>
+                                    <span>Registrar nueva credencial</span>
+                                </ng-container>
+                            }
+                        </button>
+                    </div>
+
+                    @if (isLoading) {
+                        <div class="loading-container">
+                            <mat-spinner diameter="40"></mat-spinner>
+                            <p>Cargando credenciales...</p>
+                        </div>
+                    }
+
+                    @if (!isLoading && credentials.length > 0) {
+                        <div class="credentials-section">
+                            <h3>Credenciales registradas</h3>
+                            <div class="credentials-list">
+                                @for (credential of credentials; track credential.id) {
+                                    <div class="credential-item">
+                                        <div class="credential-info">
+                                            <mat-icon>fingerprint</mat-icon>
+                                            <div class="credential-details">
+                                                <div class="credential-device">
+                                                    <strong>{{ getDeviceLabel(credential.deviceType) }}</strong>
+                                                    @if (credential.backedUp) {
+                                                        <mat-icon class="backup-icon" matTooltip="Respaldada en la nube">cloud_done</mat-icon>
+                                                    }
+                                                </div>
+                                                <div class="credential-meta">
+                                                    <span>Registrada: {{ formatDate(credential.createdAt) }}</span>
+                                                    @if (credential.lastUsedAt) {
+                                                        <span>· Último uso: {{ formatDate(credential.lastUsedAt) }}</span>
+                                                    }
+                                                </div>
+                                                @if (credential.transport && credential.transport.length > 0) {
+                                                    <div class="credential-transport">
+                                                        @for (t of credential.transport; track t) {
+                                                            <mat-chip>{{ t }}</mat-chip>
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                        <button mat-icon-button color="warn" (click)="deleteCredential(credential.id)" [disabled]="isDeleting === credential.id" matTooltip="Eliminar credencial">
+                                            @if (isDeleting === credential.id) {
+                                                <mat-spinner diameter="20"></mat-spinner>
+                                            } @else {
+                                                <mat-icon>delete</mat-icon>
+                                            }
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @if (!isLoading && credentials.length === 0) {
+                        <div class="no-credentials">
+                            <mat-icon>fingerprint</mat-icon>
+                            <p>No tenés credenciales biométricas registradas.</p>
+                            <p>Registra una credencial para usar biometría al emitir recetas.</p>
+                        </div>
+                    }
+                }
+            </mat-card-content>
+        </mat-card>
+    </div>
+</app-canvas>

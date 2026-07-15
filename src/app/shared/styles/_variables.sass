@@ -1,3 +1,5 @@
+$font-mono: 'JetBrains Mono', 'SFMono-Regular', Menlo, monospace
+
 // Breakpoints
 $x-small-devices: 320px
 $small-devices: 768px
@@ -26,11 +28,11 @@ $space-24: 96px
 // ========================================
 // Radius scale
 // ========================================
-$radius-xs: 2px
-$radius-sm: 4px
-$radius-md: 8px
-$radius-lg: 12px
-$radius-xl: 16px
+$radius-xs: 4px
+$radius-sm: 8px
+$radius-md: 12px
+$radius-lg: 16px
+$radius-xl: 20px
 $radius-2xl: 24px
 $radius-full: 9999px
 
@@ -47,46 +49,67 @@ $size-touch: 44px
 $app-component: 20px
 
 // ========================================
-// Primary palette
+// Primary palette — Carbon (#1F2937)
 // ========================================
-$primary: #6d3fd9
-$primary-dark: #4A2999
-$primary-light: #8B66E1
-$primary-50: #F0EBFD
-$primary-100: #D9CCF9
-$primary-200: #C0A8F4
-$primary-300: #A685EE
-$primary-400: #8D61E8
-$primary-500: #6d3fd9
-$primary-600: #5832B8
-$primary-700: #44268F
+$primary: #0b1220
+$primary-dark: #111827
+$primary-light: #5d697d
 
 // ========================================
-// Secondary palette — Azul Claro (#60A5FA)
-$secondary: #60A5FA
-$secondary-dark: #3B82F6
-$secondary-light: #93C5FD
-$secondary-50: #EFF6FF
-$secondary-100: #DBEAFE
-$secondary-200: #BFDBFE
-$secondary-300: #93C5FD
-$secondary-400: #60A5FA
-$secondary-500: #3B82F6
-$secondary-600: #2563EB
+// Button colors
+// ========================================
+$btn-base-bg: #0b1220
+$btn-base-hover: #273042
+$btn-base-text: #fff
+
+$icon-btn-bg: #f1f5f9
+$icon-btn-hover: #e2e8f0
+
+$primary-50: #F9FAFB
+$primary-100: #F3F4F6
+$primary-200: #E5E7EB
+$primary-300: #D1D5DB
+$primary-400: #9CA3AF
+$primary-500: #6B7280
+$primary-600: #4B5563
+$primary-700: #374151
+
+// ========================================
+// Secondary palette — Azul Indigo (#4F46E5)
+$secondary: #4F46E5
+$secondary-dark: #2c249d
+$secondary-light: #6366F1
+$secondary-50: #EEF2FF
+$secondary-100: #E0E7FF
+$secondary-200: #C7D2FE
+$secondary-300: #A5B4FC
+$secondary-400: #818CF8
+$secondary-500: #6366F1
+$secondary-600: #4F46E5
+
+// ========================================
+// Highlight color — Rosa Suave (#F472B6)
+$highlight: #F472B6
+$highlight-light: #FCE7F6
+$highlight-dark: #EC4899
 
 // ========================================
 // Neutral surfaces & text
 // ========================================
 $bg-body: #f5f7fb
 $bg-card: #FFFFFF
+$bg-over-body: #eceef4
 $bg-raised: #FFFFFF
-$text-primary: #1e293b
-$text-secondary: #64748b
+$text-primary: #212026
+$text-primary-light: #ffffff
+$text-secondary: #6f7c95
 $text-disabled: #94A3B8
+$icon-muted: #9ca3af
 $border-color: #e0e0e0
 $border-strong: #cbd5e1
-$hover-bg: rgba($primary, 0.10)
+$hover-bg: #e8e9eb
 $footer-bg: #e2e8f0
+$icon-muted: #94A3B8
 
 // ========================================
 // Status colors
@@ -95,8 +118,8 @@ $error-bg: #FEF2F2
 $error-text: #991B1B
 $warning-bg: #FFFBEB
 $warning-text: #92400E
-$success-bg: #F0FDF4
-$success-text: #166534
+$success-bg: #d3f6dd
+$success-text: #6ab084
 $info-bg: #EFF6FF
 $info-text: #1E40AF
 
@@ -129,17 +152,19 @@ $bg-raised-dark: #334155
 $text-primary-dark: #f8fafc
 $text-secondary-dark: #cbd5e1
 $text-disabled-dark: #64748b
+$icon-muted-dark: #94a3b8
 $border-color-dark: #334155
 $border-strong-dark: #475569
-$hover-bg-dark: rgba(255, 255, 255, 0.9)
+$hover-bg-dark: #e8e9eb
 $footer-bg-dark: #020617
 
 $error-bg-dark: #450A0A
 $error-text-dark: #FCA5A5
+$warning-bg: #eebd39
 $warning-bg-dark: #451A03
 $warning-text-dark: #FCD34D
-$success-bg-dark: #052E16
-$success-text-dark: #86EFAC
+$success-bg-dark: #54b37c
+$success-text-dark: #d9ffe7
 $info-bg-dark: #172554
 $info-text-dark: #93C5FD
 
@@ -151,3 +176,10 @@ $elevation-4-dark: 0 8px 16px rgba(0, 0, 0, 0.45), 0 4px 20px rgba(0, 0, 0, 0.35
 
 $shadow-sm-dark: $elevation-1-dark
 $shadow-lg-dark: $elevation-3-dark
+
+$btn-base-bg-dark: #e2e2ea
+$btn-base-hover-dark: darken($btn-base-bg-dark, 8%)
+$btn-base-text-dark: #21222d
+
+$icon-btn-bg-dark: #253348
+$icon-btn-hover-dark: #334155

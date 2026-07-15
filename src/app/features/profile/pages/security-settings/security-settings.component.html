@@ -1,0 +1,195 @@
+<app-canvas [showSidebar]="true" [sidebarItems]="sidebarItems">
+    <div class="security-container">
+        <mat-card class="security-card">
+            <mat-card-header>
+                <mat-card-title>Seguridad</mat-card-title>
+                <mat-card-subtitle>Gestioná tu PIN de seguridad para recetas</mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+                @if (isLoading) {
+                    <div class="loading-container">
+                        <mat-spinner diameter="40"></mat-spinner>
+                        <p>Cargando configuración...</p>
+                    </div>
+                }
+
+                @if (!isLoading) {
+                    <div class="status-section">
+                        <div class="status-indicator" [class.active]="hasPinActive">
+                            <mat-icon>{{ hasPinActive ? 'lock' : 'lock_open' }}</mat-icon>
+                            <div class="status-text">
+                                <strong>PIN de seguridad:</strong>
+                                <span>{{ hasPinActive ? 'Activado' : 'Desactivado' }}</span>
+                            </div>
+                        </div>
+
+                        <p class="status-description">
+                            @if (hasPinActive) {
+                                Tu PIN de seguridad está activo. Se te solicitará cada vez que emitas una receta.
+                            } @else {
+                                Activá un PIN de 4 dígitos para proteger la emisión de recetas.
+                            }
+                        </p>
+                    </div>
+
+                    <div class="actions-section">
+                        @if (!hasPinActive) {
+                            <button mat-raised-button color="primary" (click)="toggleSetupForm()">
+                                <mat-icon>add</mat-icon>
+                                Activar PIN
+                            </button>
+                        } @else {
+                            <button mat-button (click)="toggleChangeForm()">
+                                <mat-icon>edit</mat-icon>
+                                Cambiar PIN
+                            </button>
+                            <button mat-button color="warn" (click)="toggleDisableForm()">
+                                <mat-icon>lock_open</mat-icon>
+                                Desactivar PIN
+                            </button>
+                        }
+                    </div>
+
+                    <!-- Setup Form -->
+                    @if (showSetupForm) {
+                        <div class="form-section">
+                            <h3>Activar PIN de seguridad</h3>
+                            <form [formGroup]="setupForm" (ngSubmit)="onSubmitSetup()" autocomplete="off">
+                                <app-form-field
+                                    type="text"
+                                    label="Contraseña actual"
+                                    [control]="setupCurrentPassword"
+                                    placeholder="Tu contraseña"
+                                    [errors]="{ 'required': 'La contraseña es obligatoria' }"
+                                    [fullwidth]="true">
+                                </app-form-field>
+
+                                <app-form-field
+                                    type="text"
+                                    label="Nuevo PIN (4 dígitos)"
+                                    [control]="setupNewPin"
+                                    placeholder="••••"
+                                    [maxlength]="4"
+                                    [errors]="{ 'required': 'El PIN es obligatorio', 'pattern': 'El PIN debe tener 4 dígitos' }"
+                                    [fullwidth]="true">
+                                </app-form-field>
+
+                                <app-form-field
+                                    type="text"
+                                    label="Confirmar PIN"
+                                    [control]="setupConfirmPin"
+                                    placeholder="••••"
+                                    [maxlength]="4"
+                                    [errors]="{ 'required': 'La confirmación es obligatoria', 'pinMismatch': 'Los PIN no coinciden' }"
+                                    [fullwidth]="true">
+                                </app-form-field>
+
+                                <div class="form-actions">
+                                    <button type="button" mat-button (click)="cancelForm()" [disabled]="isSaving">
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" mat-raised-button color="primary" [disabled]="isSaving">
+                                        @if (isSaving) {
+                                            <mat-spinner diameter="20"></mat-spinner>
+                                            <span>Activando...</span>
+                                        } @else {
+                                            Activar PIN
+                                        }
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    }
+
+                    <!-- Change Form -->
+                    @if (showChangeForm) {
+                        <div class="form-section">
+                            <h3>Cambiar PIN de seguridad</h3>
+                            <form [formGroup]="changeForm" (ngSubmit)="onSubmitChange()" autocomplete="off">
+                                <app-form-field
+                                    type="text"
+                                    label="PIN actual"
+                                    [control]="changeCurrentPin"
+                                    placeholder="••••"
+                                    [maxlength]="4"
+                                    [errors]="{ 'required': 'El PIN actual es obligatorio', 'pattern': 'El PIN debe tener 4 dígitos' }"
+                                    [fullwidth]="true">
+                                </app-form-field>
+
+                                <app-form-field
+                                    type="text"
+                                    label="Nuevo PIN (4 dígitos)"
+                                    [control]="changeNewPin"
+                                    placeholder="••••"
+                                    [maxlength]="4"
+                                    [errors]="{ 'required': 'El nuevo PIN es obligatorio', 'pattern': 'El PIN debe tener 4 dígitos' }"
+                                    [fullwidth]="true">
+                                </app-form-field>
+
+                                <app-form-field
+                                    type="text"
+                                    label="Confirmar nuevo PIN"
+                                    [control]="changeConfirmPin"
+                                    placeholder="••••"
+                                    [maxlength]="4"
+                                    [errors]="{ 'required': 'La confirmación es obligatoria', 'pinMismatch': 'Los PIN no coinciden' }"
+                                    [fullwidth]="true">
+                                </app-form-field>
+
+                                <div class="form-actions">
+                                    <button type="button" mat-button (click)="cancelForm()" [disabled]="isSaving">
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" mat-raised-button color="primary" [disabled]="isSaving">
+                                        @if (isSaving) {
+                                            <mat-spinner diameter="20"></mat-spinner>
+                                            <span>Cambiando...</span>
+                                        } @else {
+                                            Cambiar PIN
+                                        }
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    }
+
+                    <!-- Disable Form -->
+                    @if (showDisableForm) {
+                        <div class="form-section">
+                            <h3>Desactivar PIN de seguridad</h3>
+                            <p class="warning-text">
+                                <mat-icon>warning</mat-icon>
+                                Al desactivar el PIN, no se te solicitará para emitir recetas.
+                            </p>
+                            <form [formGroup]="disableForm" (ngSubmit)="onSubmitDisable()" autocomplete="off">
+                                <app-form-field
+                                    type="text"
+                                    label="Contraseña"
+                                    [control]="disablePassword"
+                                    placeholder="Tu contraseña"
+                                    [errors]="{ 'required': 'La contraseña es obligatoria' }"
+                                    [fullwidth]="true">
+                                </app-form-field>
+
+                                <div class="form-actions">
+                                    <button type="button" mat-button (click)="cancelForm()" [disabled]="isSaving">
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" mat-raised-button color="warn" [disabled]="isSaving">
+                                        @if (isSaving) {
+                                            <mat-spinner diameter="20"></mat-spinner>
+                                            <span>Desactivando...</span>
+                                        } @else {
+                                            Desactivar PIN
+                                        }
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    }
+                }
+            </mat-card-content>
+        </mat-card>
+    </div>
+</app-canvas>

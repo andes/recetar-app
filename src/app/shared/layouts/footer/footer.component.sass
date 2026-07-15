@@ -6,28 +6,44 @@
 
 footer
   display: flex
+  flex-direction: column
   align-items: center
-  justify-content: space-between
-  height: $footer-height
-  padding: 0 $space-6
+  justify-content: center
+  gap: $space-2
+  height: auto
+  min-height: $footer-height
+  padding: $space-3 $space-6
   margin: 0
   box-sizing: border-box
 
+  @media (min-width: $small-devices + 1px)
+    flex-direction: row
+    justify-content: space-between
+    height: $footer-height
+    padding: 0 $space-6
+
 .footer-copyright
   font-size: 13px
-  color: var(--text-secondary)
+  color: var(--text-primary)
   white-space: nowrap
 
 .footer-logos
   display: flex
   align-items: center
-  gap: $space-6
-  width: 350px
-  justify-content: space-between
+  justify-content: center
+  gap: $space-8
+  flex: 1
+  min-width: 0
 
 .footer-logo
-  max-height: 50px
-  max-width: 150px
+  display: block
+  height: 30px
+  max-width: 33%
+
   width: auto
-  height: auto
-  object-fit: contain
+  flex-shrink: 1
+  filter: brightness(0)
+
+:host-context(.dark-mode)
+  .footer-logo
+    filter: none
