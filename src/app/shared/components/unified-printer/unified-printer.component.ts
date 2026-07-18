@@ -382,6 +382,14 @@ export class UnifiedPrinterComponent {
                 pdf.add(new Txt('\n').end);
             }
 
+            if (certificate.organizacion) {
+                pdf.add(new Txt([
+                    { text: 'Establecimiento: ' },
+                    { text: `${certificate.organizacion.nombre}`, bold: true }
+                ]).end);
+                pdf.add(new Txt('\n').end);
+            }
+
             pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
             pdf.add(new Txt('\n').end);
 
