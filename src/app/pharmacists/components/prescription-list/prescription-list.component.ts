@@ -1,8 +1,8 @@
 import { Component, OnInit, AfterContentInit, ViewChild, OnDestroy, Input } from '@angular/core';
 import { Prescriptions } from '@interfaces/prescriptions';
-import AndesPrescriptions from '@interfaces/andesPrescriptions';
 import { PrescriptionsService } from '@services/prescriptions.service';
 import { AndesPrescriptionsService } from '@services/andesPrescription.service';
+import { AndesInsumoPrescriptionService } from '@services/andesInsumoPrescription.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
@@ -29,7 +29,7 @@ import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unif
 export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDestroy {
     private destroy$ = new Subject<void>();
 
-    displayedColumns: string[] = ['medicamento', 'date', 'status', 'action', 'arrow'];
+    displayedColumns: string[] = ['medicamento', 'date', 'status', 'tipo', 'action', 'arrow'];
     dataSource = new MatTableDataSource<any>([]);
     expandedElement: Prescriptions | null;
     loadingPrescriptions: boolean;
@@ -71,6 +71,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         private authService: AuthService,
         private prescriptionService: PrescriptionsService,
         private andesPrescriptionService: AndesPrescriptionsService,
+        private andesInsumoPrescriptionService: AndesInsumoPrescriptionService,
         private unifiedPrinter: UnifiedPrinterComponent,
         public dialog: MatDialog) { };
 
@@ -278,7 +279,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         }
     }
 
-    dispense(prescription: Prescriptions | AndesPrescriptions) {
+    dispense(prescription: any) {
         if ('status' in prescription) {
             this.prescriptionService.dispense(prescription._id, this.pharmacistId).subscribe(
                 (updatedPrescription) => {
@@ -294,6 +295,23 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
                 },
                 error => {
                     this.openDialog('error-dispensed', prescription, error.message || 'Error al dispensar la prescripción');
+                }
+            );
+        } else if ('insumo' in prescription) {
+            this.andesInsumoPrescriptionService.dispense(prescription, this.pharmacistId).subscribe(
+                (updatedPrescription) => {
+                    if (updatedPrescription) {
+                        const index = this.dataSource.data.findIndex(p => p._id === prescription._id);
+                        if (index >= 0) {
+                            this.dataSource.data[index] = updatedPrescription;
+                            this.dataSource._updateChangeSubscription();
+                        }
+                        this.updateMaps();
+                        this.openDialog('dispensed', prescription, prescription.profesional.apellido + ', ' + prescription.profesional.nombre);
+                    }
+                },
+                error => {
+                    this.openDialog('error-dispensed', prescription, error.message || 'Error al dispensar el insumo');
                 }
             );
         } else if ('estadoActual' in prescription) {
@@ -316,9 +334,26 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         }
     }
 
-    cancelDispense(prescription: Prescriptions | AndesPrescriptions) {
+    cancelDispense(prescription: any) {
         if ('status' in prescription) {
             this.prescriptionService.cancelDispense(prescription._id, this.pharmacistId).subscribe(
+                (updatedPrescription) => {
+                    if (updatedPrescription) {
+                        const index = this.dataSource.data.findIndex(p => p._id === prescription._id);
+                        if (index >= 0) {
+                            this.dataSource.data[index] = updatedPrescription;
+                            this.dataSource._updateChangeSubscription();
+                        }
+                        this.updateMaps();
+                        this.openDialog('cancel-dispensed', prescription);
+                    }
+                },
+                error => {
+                    this.openDialog('error-cancel-dispensed', prescription, error.message || 'Error al cancelar la dispensación');
+                }
+            );
+        } else if ('insumo' in prescription) {
+            this.andesInsumoPrescriptionService.cancelDispense(prescription._id, this.pharmacistId).subscribe(
                 (updatedPrescription) => {
                     if (updatedPrescription) {
                         const index = this.dataSource.data.findIndex(p => p._id === prescription._id);
@@ -355,7 +390,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
     }
 
     // Show a dialog
-    openDialog(aDialogType: string, aPrescription?: Prescriptions | AndesPrescriptions, aText?: string): void {
+    openDialog(aDialogType: string, aPrescription?: any, aText?: string): void {
         const dialogRef = this.dialog.open(DialogComponent, {
             width: '400px',
             data: { dialogType: aDialogType, prescription: aPrescription, text: aText }
@@ -371,7 +406,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         return (prescription.status === 'Dispensada') && (prescription.dispensedBy?.userId === this.authService.getLoggedUserId());
     }
 
-    canDispense(prescription: Prescriptions | AndesPrescriptions): boolean {
+    canDispense(prescription: any): boolean {
         const canDispenseFromMap = this.canDispenseMap.get(prescription._id);
         if (canDispenseFromMap !== undefined) {
             return canDispenseFromMap;
@@ -379,15 +414,17 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         return this.calculateCanDispense(prescription);
     }
 
-    async printPrescription(prescription: Prescriptions | AndesPrescriptions) {
+    async printPrescription(prescription: any) {
         if ('status' in prescription) {
             await this.unifiedPrinter.printPrescription(prescription);
+        } else if ('insumo' in prescription) {
+            await this.unifiedPrinter.printAndesInsumoPrescription(prescription);
         } else if ('estadoActual' in prescription) {
             await this.unifiedPrinter.printAndesPrescription(prescription);
         }
     }
 
-    isStatus(prescription: Prescriptions | AndesPrescriptions, status: string): boolean {
+    isStatus(prescription: any, status: string): boolean {
         if (status === 'Vencida') {
             const isExpiredFromMap = this.isStatusMap.get(prescription._id);
             if (isExpiredFromMap !== undefined) {
@@ -397,7 +434,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         return this.calculateIsStatus(prescription, status);
     }
 
-    canCounter(prescription: Prescriptions | AndesPrescriptions): boolean {
+    canCounter(prescription: any): boolean {
         const canCounterFromMap = this.canCounterMap.get(prescription._id);
         if (canCounterFromMap !== undefined) {
             return canCounterFromMap;
@@ -462,7 +499,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         });
     }
 
-    calculateCanDispense(prescription: Prescriptions | AndesPrescriptions): boolean {
+    calculateCanDispense(prescription: any): boolean {
         if ('status' in prescription) {
             return prescription.status === 'Pendiente' && moment() >= moment(prescription.date);
         } else if ('estadoActual' in prescription) {
@@ -471,7 +508,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         return false;
     }
 
-    calculateIsStatus(prescription: Prescriptions | AndesPrescriptions, status: string): boolean {
+    calculateIsStatus(prescription: any, status: string): boolean {
         if ('estadoActual' in prescription) {
             return prescription.estadoActual.tipo.toLowerCase() === status.toLowerCase();
         } else if ('status' in prescription) {
@@ -480,7 +517,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         return false;
     }
 
-    calculateCanCounter(prescription: Prescriptions | AndesPrescriptions): boolean {
+    calculateCanCounter(prescription: any): boolean {
         if ('status' in prescription) {
             if (prescription.status === 'Dispensada' &&
                 typeof prescription.dispensedAt !== 'undefined' &&
@@ -505,7 +542,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         return false;
     }
 
-    getStatus(prescription: Prescriptions | AndesPrescriptions): string {
+    getStatus(prescription: any): string {
         if ('estadoActual' in prescription) {
             return this.normalizeStatus(prescription.estadoActual?.tipo);
         } else if ('status' in prescription) {
@@ -514,7 +551,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
         return '';
     }
 
-    getStatusColor(prescription: Prescriptions | AndesPrescriptions): string {
+    getStatusColor(prescription: any): string {
         const status = this.getStatus(prescription);
         if (status === 'VENCIDA') {
             return 'red';

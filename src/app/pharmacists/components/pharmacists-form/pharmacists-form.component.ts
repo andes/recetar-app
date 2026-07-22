@@ -98,7 +98,7 @@ export class PharmacistsFormComponent implements OnInit {
                 Validators.required,
                 Validators.minLength(this.dniMinLength)
             ]],
-            patient_sexo: [''],
+            patient_sexo: ['', Validators.required],
             dateFilter: ['', [
             ]],
         });

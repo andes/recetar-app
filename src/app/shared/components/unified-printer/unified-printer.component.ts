@@ -211,7 +211,7 @@ export class UnifiedPrinterComponent {
                 fontSize: 60
             });
         }
-        if (prescription.estadoActual.tipo === 'dispensada') {
+        if (prescription.estadoActual.tipo === 'finalizada' || prescription.estadoActual.tipo === 'dispensada') {
             pdf.watermark({
                 text: 'DISPENSADA',
                 color: 'grey',
@@ -321,13 +321,126 @@ export class UnifiedPrinterComponent {
             { text: `\n ${prescription.organizacion ? `Organización: ${prescription.organizacion.nombre} - ${this.getOrganizacionDireccion(prescription.organizacion.direccion)}` : ''}`, fontSize: 9, bold: true },
         ]).alignment('center').end);
 
-        if (prescription.estadoActual.tipo === 'dispensada' && prescription.estadoDispensaActual.fecha) {
+        if ((prescription.estadoActual.tipo === 'finalizada' || prescription.estadoActual.tipo === 'dispensada') && prescription.estadoDispensaActual.fecha) {
             pdf.add(new Txt(`Fecha dispensación: ${this.datePipe.transform(prescription.estadoDispensaActual.fecha, 'dd/MM/yyyy')}`).end);
         }
 
         pdf.footer(new Txt([
             { text: 'Esta receta fue creada por emisor inscripto y válido en el Registro de Recetarios Electrónicos \n del Ministerio de Salud de la Nación - ', italics: true },
             { text: 'RL-2025-63212094-APN-SSVEIYES#MS', bold: true }
+        ]).fontSize(11).alignment('center').end);
+    }
+
+    async printAndesInsumoPrescription(prescription: any) {
+        await this._generatePdf(async (pdf) => {
+            await this.addAndesInsumoPage(pdf, prescription);
+        });
+    }
+
+    private async addAndesInsumoPage(pdf: PdfMakeWrapper, prescription: any) {
+        if (prescription.estadoActual?.tipo === 'vencida') {
+            pdf.watermark({
+                text: 'Receta no valida para dispensa',
+                color: 'grey',
+                opacity: 0.3,
+                bold: true,
+                fontSize: 60
+            });
+        }
+        if (prescription.estadoActual?.tipo === 'finalizada' || prescription.estadoDispensaActual?.tipo === 'dispensada') {
+            pdf.watermark({
+                text: 'DISPENSADA',
+                color: 'grey',
+                opacity: 0.3,
+                bold: true,
+                fontSize: 100
+            });
+        }
+
+        const barcodeBase64 = await this.barcodeService.generateBarcodeBase64(prescription._id || prescription.idAndes);
+        const barcodeImg = await new Img(barcodeBase64).fit([230, 60]).alignment('center').margin([0, 20]).build();
+
+        pdf.info({
+            title: 'Receta de Insumos ' + prescription.profesional.nombre + ' ' + prescription.profesional.apellido,
+            author: 'Andes'
+        });
+
+        const fecha = prescription.fechaRegistro ? this.datePipe.transform(prescription.fechaRegistro, 'dd/MM/yyyy') : this.datePipe.transform(prescription.fechaPrestacion, 'dd/MM/yyyy');
+
+        pdf.add(new Columns([
+            await new Img('assets/img/LogoPdf.jpg').fit([60, 60]).build(),
+            new Txt('RECETA DE INSUMOS').bold().fontSize(20).alignment('center').end,
+            new Txt('').end
+        ]).end);
+        pdf.add(new Txt('\n').end);
+        pdf.add(new Columns([new Txt('RECETAR').bold().alignment('left').end, new Txt(`Fecha prescripcion: ${fecha}`).alignment('right').end]).end);
+        pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
+        pdf.add(new Txt('\n').end);
+
+        const patients = await this.patientsService.getPatientByDni(prescription.paciente.documento).toPromise();
+        const patient = patients[0];
+
+        this.addPatientData(pdf, {
+            firstname: `${prescription.paciente.nombre}`,
+            lastname: `${prescription.paciente.apellido}`,
+            autopercibido: `${patient.nombreAutopercibido || ''}`,
+            dni: `${prescription.paciente.documento}`,
+            dob: prescription.paciente.fechaNacimiento,
+            sex: `${prescription.paciente.sexo}`,
+            obraSocial: prescription.paciente.obraSocial?.nombre,
+            affiliateNumber: prescription.paciente.obraSocial?.numeroAfiliado
+        });
+
+        pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
+        pdf.add(new Txt('\n').end);
+        pdf.add(new Columns([new Txt('Insumo').end, new Columns([new Txt('').end]).end]).end);
+        pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
+        pdf.add(new Txt('\n').end);
+
+        const insumoNombre = prescription.insumo?.nombre || prescription.insumo?.concepto?.term || '';
+        const insumoCant = prescription.insumo?.cantidad || 1;
+        pdf.add(new Columns([
+            new Txt('' + insumoNombre).bold().end,
+            new Txt(' ').end,
+            new Txt(`x ${insumoCant}`).bold().end
+        ]).end);
+        pdf.add(new Txt('\n').end);
+
+        pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
+        pdf.add(new Txt('\n').end);
+
+        if (prescription.insumo?.tipo) {
+            pdf.add(new Txt(`Tipo: ${prescription.insumo.tipo}`).end);
+            pdf.add(new Txt('\n').end);
+        }
+        if (prescription.insumo?.especificacion) {
+            pdf.add(new Txt(`Especificacion: ${prescription.insumo.especificacion}`).end);
+            pdf.add(new Txt('\n').end);
+        }
+        if (prescription.diagnostico) {
+            pdf.add(new Txt('Diagnostico').bold().end);
+            pdf.add(new Txt('' + (prescription.diagnostico.term || prescription.diagnostico.descripcion || prescription.diagnostico)).end);
+            pdf.add(new Txt('\n').end);
+        }
+        if (prescription.estadoDispensaActual?.tipo === 'dispensada' && prescription.estadoDispensaActual?.fecha) {
+            pdf.add(new Txt(`Fecha dispensacion: ${this.datePipe.transform(prescription.estadoDispensaActual.fecha, 'dd/MM/yyyy')}`).end);
+            pdf.add(new Txt('\n').end);
+        }
+        pdf.add(new Txt('\n').end);
+        pdf.add(new Txt('\n').end);
+
+        pdf.add(new Columns([barcodeImg]).end);
+
+        pdf.add(new Txt([
+            { text: 'Este documento ha sido firmado \n electronicamente por Dr.:', fontSize: 9, bold: true, italics: true },
+            { text: `\n ${prescription.profesional.apellido}, ${prescription.profesional.nombre}`, fontSize: 14, bold: true },
+            { text: `\n MP ${prescription.profesional.matricula}`, bold: true, fontSize: 10 },
+            { text: `\n ${prescription.organizacion ? `Organizacion: ${prescription.organizacion.nombre}` : ''}`, fontSize: 9, bold: true },
+        ]).alignment('center').end);
+
+        pdf.footer(new Txt([
+            { text: '  Esta receta fue creada por emisor inscripto y valido en el Registro de Recetarios Electronicos \n del Ministerio de Salud de la Nacion - ', italics: true },
+            { text: 'RL-2025-63212094-APN-SSVEIYES#MS   ', bold: true }
         ]).fontSize(11).alignment('center').end);
     }
 
