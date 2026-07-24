@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
@@ -12,7 +12,7 @@ import { OrganizacionDialogComponent } from '../organizacion-dialog/organizacion
     templateUrl: './organizaciones-selector.component.html',
     styleUrls: ['./organizaciones-selector.component.sass']
 })
-export class OrganizacionesSelectorComponent implements OnInit, OnDestroy, OnChanges {
+export class OrganizacionesSelectorComponent implements OnInit, OnDestroy {
     @Input() organizacionControl: FormControl = new FormControl('', Validators.required);
     @Input() disabled = false;
     @Output() organizacionSelected = new EventEmitter<SubOrganizacion>();
@@ -30,10 +30,6 @@ export class OrganizacionesSelectorComponent implements OnInit, OnDestroy, OnCha
     ) {}
 
     ngOnInit(): void {
-        if (this.disabled) {
-            this.organizacionControl.disable({ emitEvent: false });
-        }
-
         this.userId = this.authService.getLoggedUserId();
         if (!this.userId) {
             return;
@@ -55,16 +51,6 @@ export class OrganizacionesSelectorComponent implements OnInit, OnDestroy, OnCha
             }
         });
         this.subscriptions.add(controlSub);
-    }
-
-    ngOnChanges(changes: SimpleChanges): void {
-        if (changes.disabled) {
-            if (this.disabled) {
-                this.organizacionControl.disable({ emitEvent: false });
-            } else {
-                this.organizacionControl.enable({ emitEvent: false });
-            }
-        }
     }
 
     ngOnDestroy(): void {

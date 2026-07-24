@@ -113,12 +113,21 @@ export class UnifiedPrinterComponent {
         pdf.add(new Txt('\n').end);
 
         prescription.supplies.forEach(supply => {
-            const cant = supply.quantityPresentation ? `${supply.quantity} envase(s) de ${supply.quantityPresentation} unidades` : `x ${supply.quantity}`;
+            const isMagistral = supply.supply.type === 'magistral';
+            const cant = isMagistral
+                ? (supply.unidadMedida ? `${supply.quantity} x ${supply.quantityPresentation} ${supply.unidadMedida}` : '')
+                : (supply.quantityPresentation ? `${supply.quantity} envase(s) de ${supply.quantityPresentation} unidades` : `x ${supply.quantity}`);
             pdf.add(new Columns([
                 new Txt('' + supply.supply.name).bold().end,
                 new Txt(' ').end,
-                new Columns([new Txt(`${cant} `).bold().end]).end]).end);
+                ...(cant ? [new Columns([new Txt(`${cant} `).bold().end]).end] : []),
+            ]).end);
             pdf.add(new Txt('\n').end);
+
+            if (isMagistral && supply.supply.description) {
+                pdf.add(new Txt('' + supply.supply.description).end);
+                pdf.add(new Txt('\n').end);
+            }
 
             if (supply.diagnostic) {
                 pdf.add(new Txt('\n').end);

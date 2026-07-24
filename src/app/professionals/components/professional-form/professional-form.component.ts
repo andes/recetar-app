@@ -15,6 +15,7 @@ import { CertificatesService } from '@services/certificates.service';
 import { PrescriptionsService } from '@services/prescriptions.service';
 import { SnomedSuppliesService } from '@services/snomedSupplies.service';
 import { SuppliesService } from '@services/supplies.service';
+import { StockService } from '@services/stock.service';
 import { PatientFormComponent } from '@shared/components/patient-form/patient-form.component';
 import { of, Subject, Subscription, Observable, forkJoin } from 'rxjs';
 import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap, take, takeUntil } from 'rxjs/operators';
@@ -116,6 +117,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
 
     filteredSupplies = [];
     filteredInsumos = [];
+    filteredMagistrales = [];
     request;
     storedSupplies = [];
     today = new Date();
@@ -151,6 +153,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
         public dialog: MatDialog,
         private suppliesService: SuppliesService,
         private snomedSuppliesService: SnomedSuppliesService,
+        private stockService: StockService,
         private fBuilder: FormBuilder,
         private apiPrescriptions: PrescriptionsService, // privado
         private authService: AuthService,
@@ -169,6 +172,15 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
             if (this.professionalForm) {
                 this.professionalForm.patchValue({ ambito: this.ambito });
                 this.configureOrganizacionByAmbito();
+                
+                // Si cambiamos a ámbito privado, desactivar medicamentos magistrales que estén activos
+                if (this.ambito === 'privado') {
+                    this.suppliesForm.controls.forEach((supplyControl: FormGroup) => {
+                        if (supplyControl.get('isMagistral')?.value) {
+                            supplyControl.get('isMagistral')?.setValue(false);
+                        }
+                    });
+                }
             }
         });
         this.subscriptions.add(ambitoSubscription);
@@ -287,6 +299,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
         newPrescription.supplies.forEach(element => {
             if (element.isMagistral) {
                 element.supply.type = 'magistral';
+                element.supply.snomedConcept = undefined;
             }
         });
 
@@ -306,13 +319,22 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
         // Sólo validar contra Andes cuando es ámbito público y es creación
         if (!this.isEdit && this.isAmbitoPublico()) {
             const pacienteDni = professionalNgForm.value?.patient?.dni;
-            const sexo = professionalNgForm.value?.patient?.sex.toLowerCase();
+            const sexo = professionalNgForm.value?.patient?.sex?.toLowerCase() || '';
             const supplyConceptIds: string[] = (this.suppliesForm.controls || [])
                 .map((ctrl: FormGroup) => ctrl.value?.supply?.snomedConcept?.conceptId)
                 .filter(Boolean);
 
             // Si no tenemos el DNI del paciente, no podemos verificar: crear directo
             if (!pacienteDni) {
+                this.apiPrescriptions.newPrescription(newPrescription).subscribe({
+                    next: (success) => { if (success) { handleSuccess(); } },
+                    error: (err) => this.handleSupplyError(err)
+                });
+                return;
+            }
+
+            // Si no hay conceptIds SNOMED (ej: todos son magistrales), no hay nada que verificar
+            if (supplyConceptIds.length === 0) {
                 this.apiPrescriptions.newPrescription(newPrescription).subscribe({
                     next: (success) => { if (success) { handleSuccess(); } },
                     error: (err) => this.handleSupplyError(err)
@@ -465,6 +487,24 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
         supplyControl.get('name').updateValueAndValidity();
     }
 
+    onMagistralSelected(item: any, index: number) {
+        const control = this.suppliesForm.at(index) as FormGroup;
+        const supplyControl = control.get('supply');
+        const itemName = item.nombre || item.insumo || item.name || item.supply || item.term || '';
+        
+        control.patchValue({
+            unidadMedida: item.unidadMedida || null
+        });
+
+        supplyControl.patchValue({
+            name: itemName,
+            description: item.description || ''
+        });
+        supplyControl.get('name').updateValueAndValidity();
+        supplyControl.get('description').updateValueAndValidity();
+
+        this.updateSupplyValidators(control, true);
+    }
 
     onInsumoSelected(item, index: number) {
         const control = this.insumosForm.at(index);
@@ -489,6 +529,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
     addSupply() {
         const supplies = this.fBuilder.group({
             isMagistral: [false],
+            unidadMedida: [null],
             supply: this.fBuilder.group({
                 name: ['', [
                     Validators.required,
@@ -513,7 +554,6 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
             ]],
             diagnostic: ['', [Validators.required, this.noWhitespaceValidator()]],
             indication: [''],
-            packageQuantity: [''],
             duplicate: [false],
             trimestral: [false],
             triplicate: [false],
@@ -549,31 +589,51 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
         const nameControl = control.get('supply.name');
         const descriptionControl = control.get('supply.description');
         const quantityPresentationControl = control.get('quantityPresentation');
-        const packageQuantityControl = control.get('packageQuantity');
+        const quantityControl = control.get('quantity');
 
         if (isMagistral) {
             nameControl?.setValidators([Validators.required]);
             descriptionControl?.setValidators([Validators.required]);
-            quantityPresentationControl?.clearValidators();
-            packageQuantityControl?.setValidators([Validators.required, Validators.min(1)]);
+
+            const unidadMedida = control.get('unidadMedida')?.value;
+            if (unidadMedida !== null && unidadMedida !== undefined) {
+                quantityControl?.setValidators([Validators.required, Validators.min(1)]);
+                quantityControl?.enable();
+                quantityPresentationControl?.setValidators([Validators.required, Validators.min(1)]);
+                quantityPresentationControl?.enable();
+            } else {
+                quantityControl?.clearValidators();
+                quantityControl?.disable();
+                quantityPresentationControl?.clearValidators();
+                quantityPresentationControl?.disable();
+            }
         } else {
             nameControl?.setValidators([Validators.required, medicationSelectedValidator()]);
             descriptionControl?.clearValidators();
+
+            // Rehabilitar y validar quantity para medicamentos SNOMED
+            quantityControl?.setValidators([Validators.required, Validators.min(1)]);
+            quantityControl?.enable();
+
             quantityPresentationControl?.setValidators([Validators.required, Validators.min(1)]);
-            packageQuantityControl?.clearValidators();
+            quantityPresentationControl?.enable();
         }
 
         nameControl?.updateValueAndValidity();
         descriptionControl?.updateValueAndValidity();
         quantityPresentationControl?.updateValueAndValidity();
-        packageQuantityControl?.updateValueAndValidity();
+        quantityControl?.updateValueAndValidity();
 
         if (isMagistral) {
             control.get('supply.snomedConcept')?.reset();
-            quantityPresentationControl?.reset();
+            const unidadMedida = control.get('unidadMedida')?.value;
+            if (unidadMedida === null || unidadMedida === undefined) {
+                quantityControl?.reset();
+                quantityPresentationControl?.reset();
+            }
         } else {
             descriptionControl?.reset();
-            packageQuantityControl?.reset();
+            control.get('unidadMedida')?.reset();
         }
     }
 
@@ -632,6 +692,25 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
                     ).subscribe((res) => {
                         this.supplySpinner[index] = { show: false };
                         this.filteredSupplies = [...res];
+                    });
+                }
+            }
+
+            if (isMagistral && typeof supply === 'string') {
+                if (supply.length === 0) {
+                    control.patchValue({ unidadMedida: null });
+                    this.updateSupplyValidators(control, true);
+                }
+                if (supply.length > 2) {
+                    this.supplySpinner[index] = { show: true };
+                    this.stockService.searchMagistral(supply).pipe(
+                        catchError(() => {
+                            this.supplySpinner[index] = { show: false };
+                            return of([]);
+                        })
+                    ).subscribe((res) => {
+                        this.supplySpinner[index] = { show: false };
+                        this.filteredMagistrales = [...res];
                     });
                 }
             }

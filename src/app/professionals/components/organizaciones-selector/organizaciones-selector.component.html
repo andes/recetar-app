@@ -1,7 +1,7 @@
 <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center">
     <mat-form-field appearance="fill" fxFlex="80">
         <mat-label>Organización</mat-label>
-        <mat-select [formControl]="organizacionControl" [compareWith]="compareOrganizaciones">
+        <mat-select [formControl]="organizacionControl" [disabled]="disabled" [compareWith]="compareOrganizaciones">
             <mat-option *ngFor="let organizacion of organizaciones" [value]="organizacion">
                 {{ organizacion.nombre }}<span *ngIf="organizacion?.direccion"> - {{ organizacion.direccion }}</span>
             </mat-option>

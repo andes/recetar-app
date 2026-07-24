@@ -35,17 +35,19 @@ export class AndesPrescriptionsService {
         return this.http.get<AndesPrescriptions>(`${environment.API_END_POINT}/prescriptions/${id}`);
     }
 
-    dispense(prescription: AndesPrescriptions, pharmacistId: string): Observable<AndesPrescriptions> {
+    dispense(prescription: AndesPrescriptions, pharmacistId: string): Observable<boolean> {
         const params = { 'prescription': prescription, 'pharmacistId': pharmacistId };
         return this.http.patch<AndesPrescriptions>(`${environment.API_END_POINT}/andes-prescriptions/dispense`, params).pipe(
-            tap((updatedPrescription: AndesPrescriptions) => this.updatePrescription(updatedPrescription))
+            tap((updatedPrescription: AndesPrescriptions) => this.updatePrescription(updatedPrescription)),
+            mapTo(true)
         );
     }
 
-    cancelDispense(prescriptionId: string, pharmacistId: string): Observable<AndesPrescriptions> {
+    cancelDispense(prescriptionId: string, pharmacistId: string): Observable<boolean> {
         const params = { 'prescriptionId': prescriptionId, 'pharmacistId': pharmacistId };
         return this.http.patch<AndesPrescriptions>(`${environment.API_END_POINT}/andes-prescriptions/cancel-dispense`, params).pipe(
-            tap((updatedPrescription: AndesPrescriptions) => this.updatePrescription(updatedPrescription))
+            tap((updatedPrescription: AndesPrescriptions) => this.updatePrescription(updatedPrescription)),
+            mapTo(true)
         );
     }
 

@@ -174,18 +174,6 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
                 }
             });
 
-            // Sincronizar estado disabled de numeroAfiliado con el valor de os.nombre
-            this.patientForm.get('os.nombre')?.valueChanges.subscribe((nombreValue) => {
-                const numeroAfiliado = this.patientForm.get('os.numeroAfiliado');
-                if (numeroAfiliado) {
-                    if (nombreValue) {
-                        numeroAfiliado.enable({ emitEvent: false });
-                    } else {
-                        numeroAfiliado.disable({ emitEvent: false });
-                    }
-                }
-            });
-
             // Configurar autocompletado de obras sociales
             this.filteredObrasSociales = this.patientForm.get('os.nombre')?.valueChanges.pipe(
                 startWith(''),
@@ -222,7 +210,7 @@ export class PatientFormComponent implements OnInit, OnDestroy, ControlValueAcce
             ]],
             lastName: ['', Validators.required],
             firstName: ['', Validators.required],
-            nombreAutopercibido: [''],
+            nombreAutopercibido: ['', Validators.required],
             sex: ['', Validators.required],
             fechaNac: ['', this.showFechaNac ? [
                 Validators.required,
