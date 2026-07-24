@@ -1,21 +1,14 @@
-<!-- <div class="custom-tab-link-bar" [class.three-elements]="isAmbitoPublico()" [class.four-elements]="!isAmbitoPublico()"> -->
-<div class="custom-tab-link-bar" [class.two-elements]="isAmbitoPublico()" [class.four-elements]="!isAmbitoPublico()">
+<div class="custom-tab-link-bar" [class.three-elements]="isAmbitoPublico()" [class.four-elements]="!isAmbitoPublico()">
     <button mat-flat-button (click)="showForm()">Medicamentos</button>
-    <!-- <button mat-flat-button (click)="showInsumos()" *ngIf="isAmbitoPublico()">Insumos</button> -->
+    <button mat-flat-button (click)="showInsumos()" *ngIf="isAmbitoPublico()">Insumos</button>
     <button mat-flat-button (click)="showPractices()" *ngIf="!isAmbitoPublico()">Prácticas</button>
     <button mat-flat-button (click)="showCertificados()" *ngIf="!isAmbitoPublico()">Certificados</button>
     <button mat-flat-button (click)="showList()">Mis documentos</button>
 </div>
 <div class="link-bar-indicator-container">
-    <!-- <div class="indicator" [@stepLink]="isAmbitoPublico() ?
+    <div class="indicator" [@stepLink]="isAmbitoPublico() ?
             (currentTab === 'form' ? 'left-3' : 
              currentTab === 'insumos' ? 'center-3' : 'right-3') :
-            (currentTab === 'form' ? 'left' : 
-             currentTab === 'practices' ? 'center-left' : 
-             currentTab === 'certificates' ? 'center-right' : 'right')">
-    </div> -->
-    <div class="indicator" [@stepLink]="isAmbitoPublico() ?
-            (currentTab === 'form' ? 'left-2' : 'right-2') :
             (currentTab === 'form' ? 'left' : 
              currentTab === 'practices' ? 'center-left' : 
              currentTab === 'certificates' ? 'center-right' : 'right')">

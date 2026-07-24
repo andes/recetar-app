@@ -70,7 +70,8 @@
                     <ng-container matColumnDef="medicamento">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header> Medicamento </th>
                         <td mat-cell *matCellDef="let element" class='title-cell' data-label='Medicamento'>
-                            {{ element.medicamento?.concepto?.term || (element.supplies?.length ?
+                            {{ element.medicamento?.concepto?.term || element.insumo?.nombre ||
+                            element.insumo?.concepto?.term || (element.supplies?.length ?
                             element.supplies[0]?.supply?.name : '') }}
                         </td>
                     </ng-container>
@@ -95,11 +96,14 @@
                     </ng-container>
 
                     <!-- Insumos Column -->
-                    <!-- <ng-container matColumnDef="supplies">
-                        <th mat-header-cell *matHeaderCellDef> Insumos </th>
-                        <td mat-cell *matCellDef="let element" class='has_label_on_mobile' data-label='Insumos:'>
-                            {{element.supplies?.length || element.medicamento?.cantidad}} envases</td>
-                    </ng-container> -->
+                    <!-- Tipo Column -->
+                    <ng-container matColumnDef="tipo">
+                        <th mat-header-cell *matHeaderCellDef> Tipo </th>
+                        <td mat-cell *matCellDef="let element" class="tipo-cell" data-label="Tipo">
+                            <span class="tipo-badge insumo" *ngIf="element.insumo">Insumo</span>
+                            <span class="tipo-badge medicamento" *ngIf="element.medicamento">Medicamento</span>
+                        </td>
+                    </ng-container>
 
                     <!-- Accion Column -->
                     <ng-container matColumnDef="action">
@@ -187,7 +191,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div *ngIf="element?.estadoActual" class="element-detail"
+                            <div *ngIf="element?.estadoActual && !element?.insumo" class="element-detail"
                                 [@detailExpand]="element._id == expandedElement?._id ? 'expanded' : 'collapsed'">
                                 <div class="element-diagram">
                                     <div class="supplies-list">
@@ -209,6 +213,30 @@
                                         *ngIf="element.medicamento?.dosisDiaria?.notaMedica"> <span
                                             class="description-title">Observaciones:</span>
                                         {{element.medicamento?.dosisDiaria?.notaMedica}}
+                                    </div>
+                                    <div class="element-description" *ngIf="element.profesional">
+                                        <span class="description-title">Profesional:</span>
+                                        {{ element.profesional?.apellido }}, {{ element.profesional?.nombre }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div *ngIf="element?.insumo && element?.estadoActual" class="element-detail"
+                                [@detailExpand]="element._id == expandedElement?._id ? 'expanded' : 'collapsed'">
+                                <div class="element-diagram">
+                                    <div class="supplies-list">
+                                        <div class="supply-description">
+                                            <span>{{ element.insumo?.nombre || element.insumo?.concepto?.term }} x {{
+                                                element.insumo?.cantidad }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="element-description" *ngIf="element.insumo?.especificacion">
+                                        <span class="description-title">Especificacion:</span>
+                                        {{ element.insumo?.especificacion }}
+                                    </div>
+                                    <div class="element-description" *ngIf="element.diagnostico">
+                                        <span class="description-title">Diagnostico:</span>
+                                        {{ element.diagnostico?.term || element.diagnostico?.descripcion ||
+                                        element.diagnostico }}
                                     </div>
                                     <div class="element-description" *ngIf="element.profesional">
                                         <span class="description-title">Profesional:</span>

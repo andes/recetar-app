@@ -1,8 +1,8 @@
 @import 'styles/_variables'
 
 mat-card-content
-  .loading-prescriptions
-    padding: 30px
+.loading-prescriptions
+  padding: 30px
 
 table
   width: 100%
@@ -10,10 +10,8 @@ table
   tr.detail-row
     height: 0
 
-
   tr.element-row:not(.expanded-row):hover
     background: whitesmoke
-
 
   tr.element-row:not(.expanded-row):active
     background: #efefef
@@ -21,9 +19,24 @@ table
   .title-cell
     width: 250px
 
+  .tipo-cell
+    text-align: center
+    .tipo-badge
+      display: inline-block
+      font-size: 12px
+      padding: 2px 8px
+      border-radius: 8px
+      color: #fff
+      &.insumo
+        background: #00a3e0
+      &.medicamento
+        background: #7b9e3c
+
+  th.mat-column-tipo
+    text-align: center
+
   .element-row td
     border-bottom-width: 0
-
 
   .element-detail
     overflow: hidden
@@ -56,7 +69,6 @@ table
         margin: 5px 0px
         .description-title
           font-weight: bold
-
 
   .mat-row
     &:hover
@@ -93,20 +105,17 @@ table
         margin-right: 0px
         color: #3e3e3e!important
 
-
     .menu-collapse
       display: none
 
   .mat-icon
     color: #3e75ff
 
-
       // @media (min-width: $x-small-devices) and (max-width: $small-devices)
 
 .mat-form-field
   font-size: 14px
   width: 100%
-
 
 .mat-paginator
   margin-top: 24px
@@ -143,17 +152,14 @@ table
       height: 44px!important
       display: flex
 
-
   tbody
     display: block
     width: 100%
-
 
   .mat-table
     background: transparent
     *
       box-sizing: border-box
-
 
     .mat-row
       display: block
@@ -192,21 +198,16 @@ table
         &:before
           display: none
 
-
       &.m-card-sub-title
         margin-top: -8px
         padding: 0 48px 0 16px
         color: rgba(0,0,0,.54)
-
-
 
     .has_label_on_mobile
       &:before
         content: attr(data-label)
         display: inline
         font-weight: normal
-
-
 
     .mat-column-star
       width: auto
@@ -217,5 +218,3 @@ table
       right: 0
       &:before
         display: none
-
-
