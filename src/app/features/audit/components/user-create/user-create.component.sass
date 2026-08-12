@@ -1,0 +1,161 @@
+@use 'styles/variables' as *
+
+:host
+    display: block
+
+.user-form
+    display: flex
+    flex-direction: column
+    gap: $space-6
+
+.form-section
+    display: flex
+    flex-direction: column
+    gap: $space-4
+
+    h3
+        display: flex
+        align-items: center
+        gap: $space-2
+        margin: 0
+        padding-bottom: $space-2
+        border-bottom: 1px solid var(--border-color)
+
+        mat-icon
+            color: var(--secondary)
+            font-size: 20px
+            width: 20px
+            height: 20px
+
+.form-field
+    display: flex
+    flex-direction: column
+    gap: $space-1
+
+    label
+        font-weight: 500
+
+    input, .role-select
+        height: $size-input
+        padding: 0 $space-4
+        border: 1px solid var(--border-color)
+        border-radius: $radius-sm
+        background: var(--bg-card)
+        font-family: inherit
+        font-size: .875rem
+        color: var(--text-primary)
+        outline: none
+        transition: border-color .15s
+
+        &:focus
+            border-color: var(--secondary)
+            box-shadow: 0 0 0 3px rgba(var(--secondary-rgb), 0.1)
+
+        &::placeholder
+            color: var(--text-disabled)
+
+        &:disabled
+            background: var(--hover-bg)
+            cursor: not-allowed
+
+.input-with-status
+    position: relative
+    display: flex
+    align-items: center
+
+    input
+        width: 100%
+        padding-right: $space-10
+
+    .input-spinner
+        position: absolute
+        right: $space-3
+
+    .input-status
+        position: absolute
+        right: $space-3
+        font-size: 20px
+        width: 20px
+        height: 20px
+
+        &.success
+            color: var(--success-text)
+
+        &.error
+            color: var(--error-fill)
+
+.field-hint
+    color: var(--text-secondary)
+
+    &.success-hint
+        color: var(--success-text)
+
+    &.error-hint
+        color: var(--error-fill)
+
+.field-error
+    color: var(--error-fill)
+
+.found-data
+    display: flex
+    justify-content: space-between
+    align-items: flex-start
+
+.data-rows
+    display: flex
+    flex-direction: column
+    gap: $space-2
+
+.data-row
+    display: flex
+    gap: $space-2
+
+    strong
+        min-width: 120px
+        flex-shrink: 0
+
+    .mono
+        font-family: var(--font-mono, 'JetBrains Mono', monospace)
+
+.status-active
+    color: var(--success-text)
+    font-weight: 600
+
+.status-inactive
+    color: var(--error-fill)
+    font-weight: 600
+
+.form-actions
+    display: flex
+    justify-content: flex-end
+    gap: $space-4
+    padding-top: $space-6
+    border-top: 1px solid var(--border-color)
+
+    .save-btn
+        background: var(--secondary)
+
+        &:hover:not([disabled])
+            background: var(--secondary-dark)
+
+        mat-icon, mat-spinner
+            margin-right: $space-2
+
+@media (max-width: $small-devices)
+    .form-actions
+        flex-direction: column-reverse
+        align-items: stretch
+
+        button
+            width: 100%
+
+.role-option
+    display: flex
+    align-items: center
+    gap: $space-2
+
+.role-dot
+    width: 10px
+    height: 10px
+    border-radius: $radius-full
+    flex-shrink: 0

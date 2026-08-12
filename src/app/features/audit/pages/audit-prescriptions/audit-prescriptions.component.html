@@ -1,0 +1,51 @@
+<div class="audit-prescriptions-page">
+    <div class="page-layout">
+        <div class="search-panel">
+            <ui-card icon="search" title="Buscar farmacia" subtitle="Ingrese el CUIT de la farmacia">
+                <form [formGroup]="prescriptionForm" class="search-form">
+                    <div class="cuit-field">
+                        <label>CUIT farmacia</label>
+                        <div class="input-row">
+                            <input
+                                type="text"
+                                formControlName="pharmacy_cuit"
+                                placeholder="Ingrese CUIT"
+                                maxlength="11"
+                                cdkFocusInitial>
+                            <mat-spinner *ngIf="cuitShowSpinner" diameter="20"></mat-spinner>
+                        </div>
+                        <div class="field-footer">
+                            <small class="char-count">{{ cuitLength }} / 11</small>
+                            <small class="field-error" *ngIf="pharmacy_cuit.errors?.required && pharmacy_cuit.touched">
+                                Debe ingresar el CUIT de una farmacia
+                            </small>
+                            <small class="field-error" *ngIf="pharmacy_cuit.errors?.minlength && pharmacy_cuit.touched">
+                                Debe ingresar al menos 10 dígitos
+                            </small>
+                        </div>
+                    </div>
+                </form>
+            </ui-card>
+        </div>
+
+        <div class="results-panel">
+            <app-prescription-table
+                *ngIf="hasSearched"
+                [prescriptions]="prescriptions"
+                [loading]="cuitShowSpinner"
+                [totalCount]="totalPrescriptions"
+                [pageSize]="pageSize"
+                [pageIndex]="pageIndex"
+                (pageChange)="onPageChange($event)"
+                (filterChange)="onFilterChange($event)">
+            </app-prescription-table>
+
+            <ui-empty-state
+                *ngIf="!hasSearched"
+                icon="search"
+                title="Buscar recetas dispensadas"
+                description="Ingrese el CUIT de una farmacia para ver sus recetas dispensadas.">
+            </ui-empty-state>
+        </div>
+    </div>
+</div>
