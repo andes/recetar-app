@@ -1,0 +1,50 @@
+@use 'styles/variables' as *
+
+:host
+    display: block
+
+.loading-container
+    display: flex
+    justify-content: center
+    padding: $space-8
+
+.results-count
+    display: flex
+    align-items: baseline
+    gap: $space-2
+    margin-bottom: $space-4
+
+.results-count-type
+    font-weight: 600
+
+.results-count-detail
+    color: var(--text-secondary)
+
+.detail-supplies
+    display: flex
+    flex-direction: column
+    gap: $space-2
+    margin-bottom: $space-3
+
+.detail-supply-row
+    display: flex
+    justify-content: space-between
+    align-items: center
+    padding-bottom: $space-1
+    border-bottom: 1px solid var(--border-color)
+
+.supply-name
+    margin-right: $space-4
+
+.supply-qty
+    width: 28px
+    text-align: center
+
+.detail-info
+    margin-top: $space-2
+
+    strong
+        margin-right: $space-2
+
+.status-badge
+    margin: 0

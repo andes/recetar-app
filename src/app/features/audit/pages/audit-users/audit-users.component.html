@@ -1,0 +1,187 @@
+<div class="audit-users-page">
+    <div *ngIf="!showCreateForm">
+        <ui-card icon="people" title="Gestión de usuarios" subtitle="Administre los usuarios del sistema">
+            <div ui-card-action class="header-actions">
+                <button *ngIf="showVolverButton()" mat-stroked-button (click)="goBackToOtherRole()">
+                    <mat-icon>arrow_back</mat-icon>
+                    Volver
+                </button>
+                <button mat-flat-button (click)="showCreateUserForm()" class="create-btn">
+                    <mat-icon>person_add</mat-icon>
+                    Crear usuario
+                </button>
+            </div>
+
+            <div class="search-section">
+                <ui-search-bar
+                    [control]="searchControl"
+                    placeholder="Buscar por nombre, usuario, email o CUIL"
+                    [isLoading]="loadingUsers"
+                    stretch>
+                </ui-search-bar>
+            </div>
+
+            <div *ngIf="loadingUsers && !users.length" class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+            </div>
+
+            <div class="table-wrapper" #tableContainer *ngIf="!loadingUsers || users.length">
+                <table mat-table [dataSource]="users" matSort #tbSort="matSort" class="users-table">
+
+                    <ng-container matColumnDef="businessName">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre</th>
+                        <td mat-cell *matCellDef="let element">
+                            <div *ngIf="!isUserInEditMode(element)">
+                                {{ element.businessName | uppercase }}
+                            </div>
+                            <div *ngIf="isUserInEditMode(element)" class="edit-cell">
+                                <input type="text" [value]="element.businessName"
+                                    (input)="tempEditValue = $event.target.value"
+                                    (keyup.enter)="startEdit(element, 'businessName'); saveAllChanges()"
+                                    (keyup.escape)="cancelEdit()"
+                                    placeholder="Nombre del negocio">
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="username">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Usuario</th>
+                        <td mat-cell *matCellDef="let element">
+                            <div *ngIf="!isUserInEditMode(element)"
+                                [matTooltip]="element.username || 'No asignado'" matTooltipShowDelay="300">
+                                <span class="truncate-text">{{ element.username || 'No asignado' }}</span>
+                            </div>
+                            <div *ngIf="isUserInEditMode(element)" class="edit-cell">
+                                <input type="text" [value]="element.username"
+                                    (input)="tempEditValue = $event.target.value"
+                                    (keyup.enter)="startEdit(element, 'username'); saveAllChanges()"
+                                    (keyup.escape)="cancelEdit()"
+                                    placeholder="Nombre de usuario">
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="email">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+                        <td mat-cell *matCellDef="let element">
+                            <div *ngIf="!isUserInEditMode(element)"
+                                [matTooltip]="element.email" matTooltipShowDelay="300">
+                                <span class="truncate-text">{{ element.email }}</span>
+                            </div>
+                            <div *ngIf="isUserInEditMode(element)" class="edit-cell">
+                                <input type="email" [value]="element.email"
+                                    (input)="tempEditValue = $event.target.value"
+                                    (keyup.enter)="startEdit(element, 'email'); saveAllChanges()"
+                                    (keyup.escape)="cancelEdit()"
+                                    placeholder="Correo electrónico">
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="cuil">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>CUIL</th>
+                        <td mat-cell *matCellDef="let element" class="mono">{{ element.cuil }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="enrollment">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Matrícula</th>
+                        <td mat-cell *matCellDef="let element">{{ element.enrollment }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="roles">
+                        <th mat-header-cell *matHeaderCellDef>Roles</th>
+                        <td mat-cell *matCellDef="let element">
+                            <div *ngIf="!isUserInEditMode(element)" [matTooltip]="getUserRolesTooltip(element)">
+                                <span *ngIf="element.roles && element.roles.length > 0"
+                                    [style.color]="getRoleColor(element.roles[0].role)" class="role-label">
+                                    {{ translateRole(element.roles[0].role) }}
+                                </span>
+                                <span *ngIf="element.roles && element.roles.length > 1" class="role-extra">
+                                    (+{{ element.roles.length - 1 }} más)
+                                </span>
+                                <span *ngIf="!element.roles || element.roles.length === 0" class="role-empty">
+                                    Sin roles
+                                </span>
+                            </div>
+                            <div *ngIf="isUserInEditMode(element)" class="edit-cell">
+                                <mat-select [(value)]="tempSelectedRoles"
+                                    (selectionChange)="onRoleSelectionChange($event)"
+                                    [compareWith]="compareRoles" multiple>
+                                    <mat-option *ngFor="let role of availableRoleOptions" [value]="role"
+                                        (click)="onRoleOptionClick($event, role)" [disabled]="isRoleDisabled(role)">
+                                        <div class="role-option">
+                                            <span class="role-dot" [style.background-color]="role.color"></span>
+                                            <span>{{ role.displayName || role.name || role.role }}</span>
+                                        </div>
+                                    </mat-option>
+                                </mat-select>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="lastLogin">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Último acceso</th>
+                        <td mat-cell *matCellDef="let element">
+                            <small>{{ element.lastLogin | date:'dd/MM/yyyy' }}</small>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="isActive">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header class="col-center">Estado</th>
+                        <td mat-cell *matCellDef="let element" class="col-center">
+                            <button mat-icon-button
+                                *ngIf="element.isActive === false"
+                                matTooltip="Activar usuario"
+                                (click)="activateUser(element)">
+                                <mat-icon class="activate-icon">person_add</mat-icon>
+                            </button>
+                            <button mat-icon-button
+                                *ngIf="element.isActive === true"
+                                matTooltip="Desactivar usuario"
+                                (click)="deactivateUser(element)">
+                                <mat-icon class="deactivate-icon">person_remove</mat-icon>
+                            </button>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef class="col-center">Acciones</th>
+                        <td mat-cell *matCellDef="let element" class="col-center">
+                            <div *ngIf="!isUserInEditMode(element)" class="action-buttons">
+                                <button mat-icon-button matTooltip="Editar" (click)="startEditMode(element)">
+                                    <mat-icon>edit</mat-icon>
+                                </button>
+                            </div>
+                            <div *ngIf="isUserInEditMode(element)" class="action-buttons">
+                                <button mat-icon-button matTooltip="Guardar" (click)="saveAllChanges()">
+                                    <mat-icon class="save-icon">check</mat-icon>
+                                </button>
+                                <button mat-icon-button matTooltip="Cancelar" (click)="cancelEdit()">
+                                    <mat-icon class="cancel-icon">close</mat-icon>
+                                </button>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns"
+                        [class.editing-row]="isUserInEditMode(row)">
+                    </tr>
+                </table>
+            </div>
+
+            <ui-paginator
+                [length]="totalUsers"
+                [pageSize]="usersPageSize"
+                [pageIndex]="usersPageIndex"
+                [pageSizeOptions]="[10, 20, 30]"
+                (page)="onUsersPageChange($event)">
+            </ui-paginator>
+        </ui-card>
+    </div>
+
+    <div *ngIf="showCreateForm">
+        <app-user-create (cancelCreate)="onCancelCreateUser()" (userCreated)="onUserCreated()">
+        </app-user-create>
+    </div>
+</div>

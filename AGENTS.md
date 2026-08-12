@@ -14,16 +14,19 @@
 - El nombre del proyecto Angular y la ruta de salida de la build son `preinscriptions-control`; los assets de producción quedan en `dist/preinscriptions-control`.
 - El arranque de la app depende de `APP_INITIALIZER` en `src/app/app.module.ts`, que llama a `servicesOnRun()` en `src/app/auth/token-initializer.ts` para ejecutar `AuthService.load()` antes de que la app esté lista.
 - El comportamiento HTTP autenticado está centralizado en `src/app/auth/token-interceptor.service.ts` mediante `httpInterceptorProvider`; preferí cambiar ahí el comportamiento de auth/request en lugar de parchear servicio por servicio.
-- Los límites principales de features son módulos por rol bajo `src/app/`: `auth`, `professionals`, `pharmacists`, `audit`, además de código reutilizable en `shared`, servicios de dominio en `services` y DTO/interfaces en `interfaces`.
+- La app tiene módulos legacy bajo `src/app/` (`auth`, `professionals`, `pharmacists`) y features nuevas bajo `src/app/features/` (`audit`, `dashboard`, `prescription`, `profile`, `documents`, `pharmacists`). Todos se importan eagerly en `AppModule`.
+- Cuando un feature module coexiste con su contraparte legacy, el nuevo usa sufijo `Feature` (ej: `AuditFeatureModule`, `PharmacistsFeatureModule`) para evitar colisión de nombres.
 - Las rutas públicas viven en `src/app/app-routing.module.ts`; los flujos específicos por rol están montados bajo `/auth`, `/profesionales`, `/farmacias` y `/audit` en el routing module de cada feature.
 
 ## Convenciones
 
 - Preferí los aliases de path de TS definidos en `tsconfig.json`, como `@auth/*`, `@services/*`, `@shared/*`, `@interfaces/*`, `@professionals/*`, `@pharmacists/*` y `@audit/*`.
+- **Cuidado:** `@audit/*` apunta al legacy `src/app/audit/*`, no a `src/app/features/audit/`. El nuevo feature usa imports relativos.
 - La carpeta de validadores custom está escrita con un typo a propósito: `src/app/utils/custome-validators/`. Respetá el path existente en lugar de renombrar imports oportunistamente.
 - Los estilos de componentes usan `.sass`, no `.scss`. Los schematics de Angular están configurados para generar componentes con `style: sass`.
 - Los include paths de SASS compartidos están configurados en `angular.json` (`src/app/shared/` y `src` para tests), así que preferí esos imports antes que paths relativos largos.
 - La app depende mucho de reactive forms y de piezas de formulario compartidas como `PatientFormComponent`; reutilizá validadores y controles compartidos existentes antes de agregar lógica puntual de formularios.
+- **UI nueva:** los features bajo `src/app/features/` usan componentes de `shared/ui/` (`ui-card`, `ui-table`, `ui-paginator`, `ui-search-bar`, `ui-icon`, etc.) e inputs nativos HTML con tokens CSS en lugar de `mat-form-field`/`mat-input`. Ver skill `recetar-app-ui-ux` en `.opencode/skills/`.
 
 ## Entorno Y Secretos
 

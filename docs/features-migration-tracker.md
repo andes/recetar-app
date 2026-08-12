@@ -22,8 +22,8 @@
 | `documents/` | `DocumentsHomeComponent` | Built | `DocumentsModule` + routing | `SidebarService`, `SharedModule`, `UnifiedPrinterComponent`, `PrescriptionsService`, `CertificatesService`, `PracticesService`, `StockService`, `AndesPrescriptionsService` |
 | `pharmacists/` | `DispenseHomeComponent`, `DispenseTableComponent`, `DispenseItemComponent`, `DispenseMedicationsPanelComponent`, `DispenseDrawerComponent`, `DispenseFiltersBarComponent` | Built | `FeaturesPharmacistsModule` + routing (`/farmacias/dispensar-nuevo`) | `SidebarService`, `UnifiedPrinterComponent`, `DispenseService`, `DispenseMedicationsService` |
 | `professionals/` | Todo el módulo legacy | Planned | — | — |
-| `pharmacists/` | Todo el módulo legacy | Planned | — | — |
-| `audit/` | Todo el módulo legacy | Planned | — | — |
+| `pharmacists/` | `DispenseHomeComponent`, `DispenseDrawerComponent`, `DispenseFiltersBarComponent`, `DispenseTableComponent`, `DispenseMedicationsPanelComponent` | Built | `PharmacistsFeatureModule` + routing | `SharedModule`, `SidebarService` |
+| `audit/` | `AuditPrescriptionsComponent`, `AuditUsersComponent`, `PrescriptionTableComponent`, `UserCreateComponent`, `AuditDialogComponent` | Built | `AuditFeatureModule` + routing | `SharedModule`, `NotificationService`, `UnifiedPrinterComponent` |
 
 ---
 
@@ -133,10 +133,10 @@ Leyenda: **Usado por features** / _Solo usado por legacy_ / ~~No usado~~
 
 | Pieza | Cantidad | Reemplazado por | Estado |
 |---|---|---|---|
-| `audit.module.ts` | 1 | `features/audit/` | Planeado |
-| `audit-routing.module.ts` | 1 | `features/audit/` | Planeado |
-| `components/` | 7 | `features/audit/pages/` y `components/` | Planeado |
-| `pipes/` | 1 | Evaluar si se mueve a shared | Planeado |
+| `audit.module.ts` | 1 | `features/audit/audit.module.ts` | Migrado (legacy sin eliminar) |
+| `audit-routing.module.ts` | 1 | `features/audit/audit-routing.module.ts` | Migrado (legacy sin eliminar) |
+| `components/` | 7 | `features/audit/pages/` y `components/` | Migrado (legacy sin eliminar) |
+| `pipes/` | 1 | `features/audit/pipes/` | Migrado (legacy sin eliminar) |
 
 ### `src/app/services/` (servicios de dominio legacy)
 
@@ -183,6 +183,7 @@ Todos los modelos, DTOs y adapters del directorio `interfaces/` se migrarán a `
 | 2026-08-10 | La pantalla de dispensar reemplaza la tabla por cards: nuevo `DispenseItemComponent` enfocado en medicamento + paciente, usando `ui-paginator` directamente en el home. `DispenseTableComponent` queda sin uso (sin declarar) hasta decidir su eliminación. | `pharmacists/` |
 | 2026-08-10 | Rediseño visual de `DispenseItemComponent` al layout "ticket split": contenido (tags fuente/tipo, medicamento, paciente, fecha de emisión, cantidad) a la izquierda y banda lateral con estado, countdown y acciones apiladas a la derecha. Layout responsivo a pila en pantallas chicas. | `pharmacists/` |
 | 2026-08-10 | `DispenseItemComponent` ahora renderiza cada receta como `<ui-card>` (shared/ui) con `[bordered]`, sobreescribiendo solo el body (flex row, sin padding) vía `::ng-deep` scoped. Se quita el estado `selected` del item. | `pharmacists/` |
+| 2026-08-10 | Creado `features/audit/` con `AuditFeatureModule`. Migradas las 3 pantallas del módulo audit legacy: auditar recetas (`AuditPrescriptionsComponent` + `PrescriptionTableComponent`), gestión de usuarios (`AuditUsersComponent`), crear usuario (`UserCreateComponent`), dialog (`AuditDialogComponent` standalone). Usa `shared/ui/` components (`ui-card`, `ui-table`, `ui-paginator`, `ui-search-bar`, `ui-empty-state`). `MatSnackBar` reemplazado por `NotificationService`. Legacy `src/app/audit/` conservado sin eliminar. | `audit/` |
 
 ---
 

@@ -1,0 +1,140 @@
+@use 'styles/variables' as *
+
+:host
+    display: block
+    width: 100%
+
+.audit-users-page
+    padding: $space-6
+    max-width: 1400px
+    margin: 0 auto
+
+.header-actions
+    display: flex
+    gap: $space-3
+    align-items: center
+
+    .create-btn
+        background: var(--secondary)
+
+        &:hover
+            background: var(--secondary-dark)
+
+.search-section
+    margin-bottom: $space-6
+
+.loading-container
+    display: flex
+    justify-content: center
+    padding: $space-8
+
+.table-wrapper
+    width: 100%
+    overflow-x: auto
+
+.users-table
+    width: 100%
+    min-width: 900px
+
+    .col-center
+        text-align: center
+
+    .mat-column-businessName
+        min-width: 150px
+
+    .mat-column-username
+        min-width: 120px
+
+    .mat-column-email
+        min-width: 180px
+
+    .mat-column-cuil
+        min-width: 120px
+
+    .mat-column-enrollment
+        min-width: 100px
+
+    .mat-column-roles
+        min-width: 180px
+
+    .mat-column-lastLogin
+        min-width: 120px
+
+    .mat-column-isActive
+        min-width: 64px
+
+    .mat-column-actions
+        min-width: 96px
+
+.truncate-text
+    display: inline-block
+    max-width: 160px
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+.role-label
+    font-weight: 500
+
+.role-extra
+    color: var(--text-secondary)
+    margin-left: $space-1
+
+.role-empty
+    color: var(--text-disabled)
+    font-style: italic
+
+.role-option
+    display: flex
+    align-items: center
+    gap: $space-2
+
+.role-dot
+    width: 10px
+    height: 10px
+    border-radius: $radius-full
+    flex-shrink: 0
+
+.edit-cell
+    input
+        height: 36px
+        padding: 0 $space-3
+        border: 1px solid var(--border-color)
+        border-radius: $radius-xs
+        background: var(--bg-card)
+        font-family: inherit
+        font-size: .8125rem
+        color: var(--text-primary)
+        outline: none
+        width: 100%
+
+        &:focus
+            border-color: var(--secondary)
+            box-shadow: 0 0 0 2px rgba(var(--secondary-rgb), 0.1)
+
+    mat-select
+        font-size: .8125rem
+
+.editing-row
+    background: var(--hover-bg) !important
+
+.action-buttons
+    display: flex
+    align-items: center
+    gap: $space-1
+    justify-content: center
+
+.activate-icon
+    color: var(--secondary)
+
+.deactivate-icon
+    color: var(--error-fill)
+
+.save-icon
+    color: var(--success-text)
+
+.cancel-icon
+    color: var(--error-fill)
+
+.mono
+    font-family: var(--font-mono, 'JetBrains Mono', monospace)
