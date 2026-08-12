@@ -23,8 +23,8 @@
 | `documents/` | `DocumentsHomeComponent` | Built | `DocumentsModule` + routing | `SidebarService`, `SharedModule`, `UnifiedPrinterComponent`, `PrescriptionsService`, `CertificatesService`, `PracticesService`, `StockService`, `AndesPrescriptionsService` |
 | `pharmacists/` | `DispenseHomeComponent`, `DispenseItemComponent`, `DispensePreviewPanelComponent` | Built | `FeaturesPharmacistsModule` + routing (`/farmacias/dispensar-nuevo`) | `SidebarService`, `UnifiedPrinterComponent`, `DispenseService` |
 | `professionals/` | Todo el módulo legacy | Planned | — | — |
-| `pharmacists/` | Todo el módulo legacy | Planned | — | — |
-| `audit/` | Todo el módulo legacy | Planned | — | — |
+| `pharmacists/` | `DispenseHomeComponent`, `DispenseDrawerComponent`, `DispenseFiltersBarComponent`, `DispenseTableComponent`, `DispenseMedicationsPanelComponent` | Built | `PharmacistsFeatureModule` + routing | `SharedModule`, `SidebarService` |
+| `audit/` | `AuditPrescriptionsComponent`, `AuditUsersComponent`, `PrescriptionTableComponent`, `UserCreateComponent`, `AuditDialogComponent` | Built | `AuditFeatureModule` + routing | `SharedModule`, `NotificationService`, `UnifiedPrinterComponent` |
 
 ---
 
@@ -137,10 +137,10 @@ Leyenda: **Usado por features** / _Solo usado por legacy_ / ~~No usado~~
 
 | Pieza | Cantidad | Reemplazado por | Estado |
 |---|---|---|---|
-| `audit.module.ts` | 1 | `features/audit/` | Planeado |
-| `audit-routing.module.ts` | 1 | `features/audit/` | Planeado |
-| `components/` | 7 | `features/audit/pages/` y `components/` | Planeado |
-| `pipes/` | 1 | Evaluar si se mueve a shared | Planeado |
+| `audit.module.ts` | 1 | `features/audit/audit.module.ts` | Migrado (legacy sin eliminar) |
+| `audit-routing.module.ts` | 1 | `features/audit/audit-routing.module.ts` | Migrado (legacy sin eliminar) |
+| `components/` | 7 | `features/audit/pages/` y `components/` | Migrado (legacy sin eliminar) |
+| `pipes/` | 1 | `features/audit/pipes/` | Migrado (legacy sin eliminar) |
 
 ### `src/app/services/` (servicios de dominio legacy)
 
@@ -188,6 +188,7 @@ Todos los modelos, DTOs y adapters del directorio `interfaces/` se migrarán a `
 | 2026-08-10 | Rediseño visual de `DispenseItemComponent` al layout "ticket split": contenido (tags fuente/tipo, medicamento, paciente, fecha de emisión, cantidad) a la izquierda y banda lateral con estado, countdown y acciones apiladas a la derecha. Layout responsivo a pila en pantallas chicas. | `pharmacists/` |
 | 2026-08-10 | `DispenseItemComponent` ahora renderiza cada receta como `<ui-card>` (shared/ui) con `[bordered]`, sobreescribiendo solo el body (flex row, sin padding) vía `::ng-deep` scoped. Se quita el estado `selected` del item. | `pharmacists/` |
 | 2026-08-18 | Pantalla dispensar-nuevo: se elimina el panel "Medicamentos del día" (`DispenseMedicationsPanelComponent` + `DispenseMedicationsService`) y el drawer (`DispenseDrawerComponent`). En su lugar, un sidebar de vista previa (`DispensePreviewPanelComponent`) con la receta seleccionada (por defecto la primera) y borde de color en el item activo. El confirm dialog ahora muestra paciente/DNI/profesional/fecha/cantidad y reemplazo. El reemplazo se guarda como medicamento actual y el original en `replacedMedication`. Se elimina `DispenseTableComponent` (dead code). | `pharmacists/` |
+| 2026-08-10 | Creado `features/audit/` con `AuditFeatureModule`. Migradas las 3 pantallas del módulo audit legacy: auditar recetas (`AuditPrescriptionsComponent` + `PrescriptionTableComponent`), gestión de usuarios (`AuditUsersComponent`), crear usuario (`UserCreateComponent`), dialog (`AuditDialogComponent` standalone). Usa `shared/ui/` components (`ui-card`, `ui-table`, `ui-paginator`, `ui-search-bar`, `ui-empty-state`). `MatSnackBar` reemplazado por `NotificationService`. Legacy `src/app/audit/` conservado sin eliminar. | `audit/` |
 | 2026-08-19 | `DispensePreviewPanelComponent`: la fecha de prescripción se mueve al header (reemplaza el código RX) y junto a la cantidad de envases se muestra el total de unidades (`getUnits()`). Se agregan datos faltantes del paciente: sexo en la línea DNI, y obra social + nº de afiliado como campos (`getPatientSex`, `getPatientObraSocial`, `getPatientAfiliado`). | `pharmacists/` |
 | 2026-08-19 | La vista previa de receta deja de ser un sidebar sticky y pasa a un drawer que se abre al clickear un ítem de resultados. Nuevo componente standalone `UiDrawerComponent` en `shared/ui/` (wrapper sobre `mat-drawer-container`/`mat-drawer`, mode `over`, position `end`). `DispenseHomeComponent` maneja `drawerOpen` (abrir al seleccionar, cerrar con X o backdrop). `DispensePreviewPanelComponent` ahora llena la altura del drawer (scroll interno en `.preview-scroll`). | `pharmacists/`, `shared/ui/` |
 | 2026-08-19 | `DispensePreviewPanelComponent`: debajo de Profesional se agrega la sección Organización (`getOrganization()`), mostrando `organizacion.nombre` de Andes o local. | `pharmacists/` |

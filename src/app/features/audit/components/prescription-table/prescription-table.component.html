@@ -1,0 +1,66 @@
+<div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+</div>
+
+<ui-card *ngIf="!loading">
+    <div class="results-count" *ngIf="prescriptions.length > 0">
+        <span class="results-count-type">Recetas dispensadas</span>
+        <small class="results-count-detail">
+            por {{ getDispenserLabel(prescriptions) }}, CUIT {{ getDispenserCuil(prescriptions) }}
+        </small>
+    </div>
+
+    <ui-table [dataSource]="prescriptions" [columns]="columns">
+        <ng-template uiTableDetail let-item>
+            <div class="detail-supplies">
+                <div class="detail-supply-row" *ngFor="let supp of item.supplies">
+                    <span class="supply-name">{{ supp.supply.name }}</span>
+                    <mat-chip disableRipple class="supply-qty">{{ supp.quantity }}</mat-chip>
+                </div>
+            </div>
+            <div class="detail-info" *ngIf="item.diagnostic">
+                <strong>Diagnóstico:</strong> {{ item.diagnostic }}
+            </div>
+            <div class="detail-info" *ngIf="item.observation">
+                <strong>Observaciones:</strong> {{ item.observation }}
+            </div>
+        </ng-template>
+    </ui-table>
+
+    <ui-paginator
+        [length]="totalCount"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [pageSizeOptions]="[10, 20, 30]"
+        (page)="onPageChange($event)">
+    </ui-paginator>
+</ui-card>
+
+<ng-template #professionalCell let-item>
+    {{ item.professional?.businessName | uppercase }}
+</ng-template>
+
+<ng-template #dateCell let-item>
+    <small>{{ item.date | date:'dd/MM/yyyy' }}</small>
+</ng-template>
+
+<ng-template #statusCell let-item>
+    <mat-chip disableRipple
+        [class]="getStatusVariant(item.status) + ' sm'"
+        class="status-badge">
+        {{ item.status }}
+    </mat-chip>
+</ng-template>
+
+<ng-template #suppliesCell let-item>
+    {{ item.supplies.length }}
+</ng-template>
+
+<ng-template #actionsCell let-item>
+    <button *ngIf="canPrint(item)"
+        mat-icon-button
+        matTooltip="Imprimir receta"
+        (click)="printPrescription(item)">
+        <mat-icon>print</mat-icon>
+    </button>
+</ng-template>

@@ -1,0 +1,79 @@
+@use 'styles/variables' as *
+
+:host
+    display: block
+    width: 100%
+
+.audit-prescriptions-page
+    padding: $space-6
+
+.page-layout
+    display: flex
+    flex-direction: column
+    gap: $space-6
+
+    @media (min-width: $small-devices + 1px)
+        flex-direction: row
+        align-items: flex-start
+
+.search-panel
+    width: 100%
+
+    @media (min-width: $small-devices + 1px)
+        width: 35%
+        flex-shrink: 0
+
+.results-panel
+    width: 100%
+
+    @media (min-width: $small-devices + 1px)
+        width: 65%
+
+.search-form
+    display: flex
+    flex-direction: column
+    gap: $space-4
+
+.cuit-field
+    display: flex
+    flex-direction: column
+    gap: $space-1
+
+    label
+        font-weight: 500
+
+.input-row
+    display: flex
+    align-items: center
+    gap: $space-2
+
+    input
+        flex: 1
+        height: $size-input
+        padding: 0 $space-4
+        border: 1px solid var(--border-color)
+        border-radius: $radius-sm
+        background: var(--bg-card)
+        font-family: inherit
+        font-size: .875rem
+        color: var(--text-primary)
+        outline: none
+        transition: border-color .15s
+
+        &:focus
+            border-color: var(--secondary)
+            box-shadow: 0 0 0 3px rgba(var(--secondary-rgb), 0.1)
+
+        &::placeholder
+            color: var(--text-disabled)
+
+.field-footer
+    display: flex
+    justify-content: space-between
+    align-items: center
+
+.char-count
+    color: var(--text-secondary)
+
+.field-error
+    color: var(--error-fill)
