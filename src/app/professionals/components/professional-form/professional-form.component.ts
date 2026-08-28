@@ -15,10 +15,17 @@ import { CertificatesService } from '@services/certificates.service';
 import { PrescriptionsService } from '@services/prescriptions.service';
 import { SnomedSuppliesService } from '@services/snomedSupplies.service';
 import { SuppliesService } from '@services/supplies.service';
+import { VademecumService } from '@services/vademecum.service';
 import { PatientFormComponent } from '@shared/components/patient-form/patient-form.component';
 import { of, Subject, Subscription, Observable, forkJoin } from 'rxjs';
 import { map, startWith, catchError, debounceTime, distinctUntilChanged, filter, switchMap, take, takeUntil } from 'rxjs/operators';
 import { Patient } from '@interfaces/patients';
+import { VademecumEntry } from '@interfaces/vademecum';
+import SnomedConcept from '@interfaces/snomedConcept';
+
+type SupplySearchResult =
+    | { kind: 'generic'; concept: SnomedConcept }
+    | { kind: 'commercial'; entry: VademecumEntry };
 
 // Validador personalizado para fechas
 function validDateValidator(): ValidatorFn {
@@ -114,7 +121,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
     private destroy$ = new Subject<void>();
     professionalForm: FormGroup;
 
-    filteredSupplies = [];
+    filteredSupplies: SupplySearchResult[] = [];
     filteredInsumos = [];
     request;
     storedSupplies = [];
@@ -151,6 +158,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
         public dialog: MatDialog,
         private suppliesService: SuppliesService,
         private snomedSuppliesService: SnomedSuppliesService,
+        private vademecumService: VademecumService,
         private fBuilder: FormBuilder,
         private apiPrescriptions: PrescriptionsService, // privado
         private authService: AuthService,
@@ -448,20 +456,42 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
         return supply ? supply : '';
     }
 
-    onSupplySelected(supply, index: number) {
+    onSupplySelected(result: SupplySearchResult, index: number) {
         const control = this.suppliesForm.at(index); // Obtiene el FormGroup en la posición del array
         const supplyControl = control.get('supply');
 
-        // Actualiza el valor del 'supply' con el 'term' en el 'name'
-        supplyControl.patchValue({
-            name: supply.term, // Solo el 'term' va en 'name'
-            snomedConcept: {
-                term: supply.term,
-                fsn: supply.fsn,
-                conceptId: supply.conceptId,
-                semanticTag: supply.semanticTag
-            }
-        });
+        if (result.kind === 'generic') {
+            const supply = result.concept;
+            // Actualiza el valor del 'supply' con el 'term' en el 'name'
+            supplyControl.patchValue({
+                name: supply.term, // Solo el 'term' va en 'name'
+                snomedConcept: {
+                    term: supply.term,
+                    fsn: supply.fsn,
+                    conceptId: supply.conceptId,
+                    semanticTag: supply.semanticTag
+                }
+            });
+        } else {
+            const entry = result.entry;
+            const conceptId = entry.snomed && entry.snomed.trim() ? entry.snomed : `alfabeta-${entry.id}`;
+            supplyControl.patchValue({
+                name: entry.nombre,
+                activePrinciple: entry.droga_descrip || '',
+                power: entry.potencia || '',
+                firstPresentation: entry.presentacion || '',
+                barCode: entry.codigoDeBarras?.[0] || '',
+                price: entry.precio,
+                actionDesc: entry.accion_descrip || '',
+                code: { source: 'ALFABETA', value: String(entry.id) },
+                snomedConcept: {
+                    term: entry.droga_descrip || entry.nombre,
+                    fsn: entry.droga_descrip || entry.nombre,
+                    conceptId,
+                    semanticTag: 'producto'
+                }
+            });
+        }
         supplyControl.get('name').updateValueAndValidity();
     }
 
@@ -495,6 +525,16 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
                     this.medicationSelectedValidator()
                 ]],
                 description: [''],
+                activePrinciple: [''],
+                power: [''],
+                firstPresentation: [''],
+                barCode: [''],
+                price: [null],
+                actionDesc: [''],
+                code: this.fBuilder.group({
+                    source: [''],
+                    value: ['']
+                }),
                 snomedConcept:
                     this.fBuilder.group({
                         term: [''],
@@ -624,15 +664,28 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
 
                 if (supply.length > 3) {
                     this.supplySpinner[index] = { show: true };
-                    this.snomedSuppliesService.get(supply).pipe(
-                        catchError(() => {
+
+                    if (this.isAmbitoPublico()) {
+                        this.snomedSuppliesService.get(supply).pipe(
+                            catchError(() => {
+                                this.supplySpinner[index] = { show: false };
+                                return of([]);
+                            })
+                        ).subscribe((res) => {
                             this.supplySpinner[index] = { show: false };
-                            return of([]);
-                        })
-                    ).subscribe((res) => {
-                        this.supplySpinner[index] = { show: false };
-                        this.filteredSupplies = [...res];
-                    });
+                            this.filteredSupplies = res.map(concept => ({ kind: 'generic' as const, concept }));
+                        });
+                    } else {
+                        this.vademecumService.searchMedications(supply).pipe(
+                            catchError(() => {
+                                this.supplySpinner[index] = { show: false };
+                                return of([]);
+                            })
+                        ).subscribe((res) => {
+                            this.supplySpinner[index] = { show: false };
+                            this.filteredSupplies = res.map(entry => ({ kind: 'commercial' as const, entry }));
+                        });
+                    }
                 }
             }
         });

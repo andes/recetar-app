@@ -135,7 +135,8 @@
                                                     <mat-autocomplete #supplyref="matAutocomplete"
                                                         (optionSelected)="onSupplySelected($event.option.value, i)">
                                                         <mat-option *ngFor="let sup of filteredSupplies" [value]="sup">
-                                                            {{sup.term}}
+                                                            <span *ngIf="sup.kind === 'generic'">{{ sup.concept.term }}</span>
+                                                            <span *ngIf="sup.kind === 'commercial'">{{ sup.entry.nombre }} - {{ sup.entry.presentacion }}</span>
                                                         </mat-option>
                                                     </mat-autocomplete>
                                                     <mat-error *ngIf="control.get('supply.name').hasError('required')">
