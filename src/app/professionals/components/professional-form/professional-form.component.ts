@@ -600,20 +600,12 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
 
         if (isMagistral) {
             nameControl?.setValidators([Validators.required]);
-            descriptionControl?.setValidators([Validators.required]);
+            descriptionControl?.clearValidators();
 
-            const unidadMedida = control.get('unidadMedida')?.value;
-            if (unidadMedida !== null && unidadMedida !== undefined) {
-                quantityControl?.setValidators([Validators.required, Validators.min(1)]);
-                quantityControl?.enable();
-                quantityPresentationControl?.setValidators([Validators.required, Validators.min(1)]);
-                quantityPresentationControl?.enable();
-            } else {
-                quantityControl?.clearValidators();
-                quantityControl?.disable();
-                quantityPresentationControl?.clearValidators();
-                quantityPresentationControl?.disable();
-            }
+            quantityControl?.setValidators([Validators.required, Validators.min(1)]);
+            quantityControl?.enable();
+            quantityPresentationControl?.setValidators([Validators.required, Validators.min(1)]);
+            quantityPresentationControl?.enable();
         } else {
             nameControl?.setValidators([Validators.required, medicationSelectedValidator()]);
             descriptionControl?.clearValidators();
@@ -633,11 +625,6 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
 
         if (isMagistral) {
             control.get('supply.snomedConcept')?.reset();
-            const unidadMedida = control.get('unidadMedida')?.value;
-            if (unidadMedida === null || unidadMedida === undefined) {
-                quantityControl?.reset();
-                quantityPresentationControl?.reset();
-            }
         } else {
             descriptionControl?.reset();
             control.get('unidadMedida')?.reset();

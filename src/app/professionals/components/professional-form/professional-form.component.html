@@ -98,7 +98,7 @@
                                             <div *ngIf="control.get('isMagistral')?.value" fxLayout="column"
                                                 fxLayoutGap="10px">
                                                 <div fxLayout="row" fxLayoutGap="10px">
-                                                    <mat-form-field appearance="fill" fxFlex="50">
+                                                    <mat-form-field appearance="fill" fxFlex="100">
                                                         <mat-label>Nombre del medicamento</mat-label>
                                                         <input type="text" [tabIndex]="4 + i" placeholder="Nombre"
                                                             matInput [formControl]="control.get('supply.name')"
@@ -114,17 +114,6 @@
                                                         <mat-error
                                                             *ngIf="control.get('supply.name').hasError('required')">
                                                             Debe ingresar el nombre del medicamento
-                                                        </mat-error>
-                                                    </mat-form-field>
-                                                    <mat-form-field appearance="fill" fxFlex="50">
-                                                        <mat-label>Descripción</mat-label>
-                                                        <textarea matInput [tabIndex]="5 + i"
-                                                            placeholder="Descripción del medicamento"
-                                                            [formControl]="control.get('supply.description')"
-                                                            required></textarea>
-                                                        <mat-error
-                                                            *ngIf="control.get('supply.description').hasError('required')">
-                                                            Debe ingresar una descripción
                                                         </mat-error>
                                                     </mat-form-field>
                                                 </div>
@@ -164,25 +153,12 @@
                                             </div>
 
                                             <!-- Campos de cantidad para medicamentos magistrales -->
-                                            <div *ngIf="control.get('isMagistral')?.value && control.get('unidadMedida')?.value !== null && control.get('unidadMedida')?.value !== undefined" fxLayout="column"
+                                            <div *ngIf="control.get('isMagistral')?.value" fxLayout="column"
                                                 fxLayoutGap="10px">
                                                 <div fxLayout="row" fxLayoutGap="10px">
                                                     <mat-form-field appearance="fill" fxFlex="40">
-                                                        <mat-label>Cant. de envases</mat-label>
-                                                        <input [tabIndex]="5 + i" type="number" matInput
-                                                            formControlName="quantity" required>
-                                                        <mat-error *ngIf="control.get('quantity').hasError('required')">
-                                                            Debe ingresar una cantidad
-                                                        </mat-error>
-                                                        <mat-error *ngIf="control.get('quantity').hasError('min')">
-                                                            Debe ingresar un mínimo de
-                                                            {{control.get('quantity').errors?.min.min}}
-                                                        </mat-error>
-                                                    </mat-form-field>
-                                                    <span style="font-weight: 500; color: #555; margin-bottom: 20px; align-self: center;">x</span>
-                                                    <mat-form-field appearance="fill" fxFlex="40">
                                                         <mat-label>Cantidad</mat-label>
-                                                        <input [tabIndex]="6 + i" type="number" matInput
+                                                        <input [tabIndex]="5 + i" type="number" matInput
                                                             formControlName="quantityPresentation" required>
                                                         <mat-error
                                                             *ngIf="control.get('quantityPresentation').hasError('required')">
@@ -194,9 +170,22 @@
                                                             {{control.get('quantityPresentation').errors?.min.min}}
                                                         </mat-error>
                                                     </mat-form-field>
-                                                    <span class="unidad-medida" style="font-weight: 500; color: #555; margin-bottom: 20px; align-self: center;">
+                                                    <span *ngIf="control.get('unidadMedida')?.value" class="unidad-medida" style="font-weight: 500; color: #555; margin-bottom: 20px; align-self: center;">
                                                         {{ control.get('unidadMedida')?.value }}
                                                     </span>
+                                                    <span style="font-weight: 500; color: #555; margin-bottom: 20px; align-self: center;">x</span>
+                                                    <mat-form-field appearance="fill" fxFlex="40">
+                                                        <mat-label>Cant. de envases</mat-label>
+                                                        <input [tabIndex]="6 + i" type="number" matInput
+                                                            formControlName="quantity" required>
+                                                        <mat-error *ngIf="control.get('quantity').hasError('required')">
+                                                            Debe ingresar una cantidad
+                                                        </mat-error>
+                                                        <mat-error *ngIf="control.get('quantity').hasError('min')">
+                                                            Debe ingresar un mínimo de
+                                                            {{control.get('quantity').errors?.min.min}}
+                                                        </mat-error>
+                                                    </mat-form-field>
                                                 </div>
                                             </div>
 
