@@ -4,6 +4,8 @@ import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from '@root/environments/environment';
 
+import { AmbitoService } from '../auth/services/ambito.service';
+
 export interface Insumo {
     _id?: string;
     id?: string;
@@ -45,13 +47,20 @@ export class StockService {
     private insumosSubject = new BehaviorSubject<Insumo[]>([]);
     public insumos$ = this.insumosSubject.asObservable();
 
-    constructor(private http: HttpClient) { }
+    constructor(
+        private http: HttpClient,
+        private ambitoService: AmbitoService
+    ) { }
 
     /**
      * Obtener todos los insumos
      */
-    getAll(): Observable<Insumo[]> {
-        return this.http.get<Insumo[]>(this.API_URL).pipe(
+    getAll(params?: any): Observable<Insumo[]> {
+        const queryParams = {
+            ...(params || {}),
+            ambito: this.ambitoService.getAmbito() || 'privado'
+        };
+        return this.http.get<Insumo[]>(this.API_URL, { params: queryParams }).pipe(
             tap(insumos => this.insumosSubject.next(insumos))
         );
     }
@@ -88,6 +97,14 @@ export class StockService {
      */
     search(query: string): Observable<Insumo[]> {
         const url = `${this.API_URL}/andes/search?insumo=${encodeURIComponent(query)}&tipos=dispositivo,nutricion`;
+        return this.http.get<Insumo[]>(url);
+    }
+
+    /**
+     * Buscar insumos magistrales usando GET con query parameter
+     */
+    searchMagistral(query: string): Observable<Insumo[]> {
+        const url = `${this.API_URL}/andes/search?insumo=${encodeURIComponent(query)}&tipos=magistral`;
         return this.http.get<Insumo[]>(url);
     }
 }

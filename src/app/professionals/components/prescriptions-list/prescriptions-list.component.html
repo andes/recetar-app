@@ -152,10 +152,13 @@
                                                     <div class="supply-description">
                                                         <span *ngIf="supp.quantityPresentation">
                                                             {{ supp.supply.name }} x {{supp.quantityPresentation}}
+                                                            <span *ngIf="isMagistralSupply(supp)"> (Fórmula magistral)</span>
                                                         </span>
                                                         <span *ngIf="!supp.quantityPresentation">{{ supp.supply.name }}
                                                             x
-                                                            {{supp.quantity}}</span>
+                                                            {{supp.quantity}}
+                                                            <span *ngIf="isMagistralSupply(supp)"> (Fórmula magistral)</span>
+                                                        </span>
                                                     </div>
                                                     <div class="element-description" *ngIf="supp.supply.type">
                                                         <span class="description-title">
@@ -188,36 +191,46 @@
                                         <!-- Para prescripciones de ANDES -->
                                         <div *ngIf="isAndesPrescription(element)">
                                             <div class="supplies-list">
-                                                <div class="supply-description">
-                                                    {{ element.medicamento.concepto.term }} x
-                                                    {{element.medicamento.cantidad}} {{element.medicamento.unidades}}
+                                                <div class="supply-description" *ngIf="element.medicamento">
+                                                    {{ element.medicamento?.esMagistral ? element.medicamento?.magistral?.nombre : element.medicamento?.concepto?.term }} x
+                                                    {{element.medicamento?.cantidad}} {{element.medicamento?.unidades}}
+                                                    <span *ngIf="isMagistralAndes(element)"> (Fórmula magistral)</span>
+                                                </div>
+                                                <div class="supply-description" *ngIf="element.insumo">
+                                                    {{ element.insumo?.nombre || element.insumo?.concepto?.term }} x
+                                                    {{element.insumo?.cantidad}} {{element.insumo?.unidades}}
+                                                    <span *ngIf="isMagistralAndes(element)"> (Fórmula magistral)</span>
                                                 </div>
                                             </div>
-                                            <div class="element-description">
+                                            <div class="element-description" *ngIf="element.medicamento?.presentacion">
                                                 <span class="description-title">Presentación:</span>
-                                                {{element.medicamento.presentacion}}
+                                                {{element.medicamento?.presentacion}}
                                             </div>
-                                            <div class="element-description">
+                                            <div class="element-description" *ngIf="element.insumo?.especificacion">
+                                                <span class="description-title">Especificación:</span>
+                                                {{element.insumo?.especificacion}}
+                                            </div>
+                                            <div class="element-description" *ngIf="element.medicamento?.cantEnvases || element.insumo?.cantEnvases">
                                                 <span class="description-title">Envases:</span>
-                                                {{element.medicamento.cantEnvases}}
+                                                {{element.medicamento?.cantEnvases || element.insumo?.cantEnvases}}
                                             </div>
                                             <div class="element-description" *ngIf="element.diagnostico">
                                                 <span class="description-title">Diagnóstico:</span>
-                                                {{element.diagnostico?.term|| element.diagnostico.descripcion}}
+                                                {{element.diagnostico?.term || element.diagnostico?.descripcion || element.diagnostico}}
                                             </div>
-                                            <div class="element-description" *ngIf="element.medicamento.dosisDiaria">
+                                            <div class="element-description" *ngIf="element.medicamento?.dosisDiaria">
                                                 <span class="description-title">Posología:</span>
-                                                {{element.medicamento.dosisDiaria.dosis}} -
-                                                {{element.medicamento.dosisDiaria.dias}} días
+                                                {{element.medicamento?.dosisDiaria?.dosis}} -
+                                                {{element.medicamento?.dosisDiaria?.dias}} días
                                             </div>
-                                            <div class="element-description">
+                                            <div class="element-description" *ngIf="element.organizacion?.nombre">
                                                 <span class="description-title">Organización:</span>
-                                                {{element.organizacion.nombre}}
+                                                {{element.organizacion?.nombre}}
                                             </div>
-                                            <div class="element-description">
+                                            <div class="element-description" *ngIf="element.profesional">
                                                 <span class="description-title">Profesional:</span>
-                                                {{element.profesional.apellido}}, {{element.profesional.nombre}} (Mat:
-                                                {{element.profesional.matricula}})
+                                                {{element.profesional?.apellido}}, {{element.profesional?.nombre}} (Mat:
+                                                {{element.profesional?.matricula}})
                                             </div>
                                         </div>
                                     </div>

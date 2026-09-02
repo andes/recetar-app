@@ -8,6 +8,9 @@ import { takeUntil } from 'rxjs/operators';
 import { rowsAnimation, detailExpand, arrowDirection } from '@animations/animations.template';
 import { StockPrinterComponent } from '../printer/stock-printer.component';
 
+import { AuthService } from '@auth/services/auth.service';
+import { AmbitoService } from '@auth/services/ambito.service';
+
 @Component({
     selector: 'app-stock-list',
     templateUrl: './stock-list.component.html',
@@ -25,9 +28,19 @@ export class StockListComponent implements OnInit, OnDestroy, OnChanges {
     private destroy$ = new Subject<void>();
 
     dataStock = new MatTableDataSource<any>([]);
-    stockColumns: string[] = ['patient', 'dni', 'date', 'status', 'action', 'arrow'];
+    stockColumns: string[] = ['source', 'patient', 'dni', 'date', 'status', 'action', 'arrow'];
     loadingStock: boolean = false;
     totalStock = 0;
+
+    isAndesPrescription(item: any): boolean {
+        if (!item) return false;
+        return (item as any).isFromAndes === true || 'idAndes' in item || 'idPrestacion' in item || 'idRegistro' in item || 'insumo' in item || (!!(item as any).paciente && !(item as any).patient);
+    }
+
+    isLocalPrescription(item: any): boolean {
+        if (!item) return false;
+        return !this.isAndesPrescription(item);
+    }
     expandedElement: any | null;
     stockPageSize = 10;
     stockPageIndex = 0;
@@ -42,7 +55,9 @@ export class StockListComponent implements OnInit, OnDestroy, OnChanges {
 
     constructor(
         private stockService: StockService,
-        private stockPrinter: StockPrinterComponent
+        private stockPrinter: StockPrinterComponent,
+        private authService: AuthService,
+        private ambitoService: AmbitoService
     ) { }
 
     ngOnInit() {
@@ -66,10 +81,10 @@ export class StockListComponent implements OnInit, OnDestroy, OnChanges {
         this.dataStock = new MatTableDataSource<any>([]);
         this.dataStock.sortingDataAccessor = (item, property) => {
             switch (property) {
-                case 'patient': return item.patient?.lastName + ' ' + item.patient?.firstName;
-                case 'dni': return item.patient?.dni;
-                case 'date': return new Date(item.date).getTime();
-                case 'status': return item.status;
+                case 'patient': return this.getPatientName(item);
+                case 'dni': return this.getPatientDni(item);
+                case 'date': return this.getDate(item).getTime();
+                case 'status': return this.getStatus(item);
                 default: return item[property];
             }
         };
@@ -78,18 +93,18 @@ export class StockListComponent implements OnInit, OnDestroy, OnChanges {
 
     private loadStock(offset: number = 0, limit: number = 10) {
         this.loadingStock = true;
+        const userId = this.authService.getLoggedUserId();
+        const ambito = this.ambitoService.getAmbito() || 'privado';
 
-        let obs = this.stockService.getAll();
-
-        // if (this.searchTerm) {
-        //      obs = this.stockService.search(this.searchTerm);
-        // }
+        let obs = this.stockService.getAll({ userId, ambito });
 
         obs.pipe(
             takeUntil(this.destroy$)
         ).subscribe((response: any) => {
-            this.totalStock = response.length;
-            this.dataStock.data = response;
+            const list = Array.isArray(response) ? response : (response?.prescriptions || []);
+            list.sort((a: any, b: any) => this.getDate(b).getTime() - this.getDate(a).getTime());
+            this.totalStock = list.length;
+            this.dataStock.data = list;
             this.loadingStock = false;
             setTimeout(() => {
                 this.setupStockPaginator();
@@ -99,19 +114,31 @@ export class StockListComponent implements OnInit, OnDestroy, OnChanges {
 
     // Helper methods for template
     getPatientName(element: any): string {
-        return `${element.patient?.lastName || ''}, ${element.patient?.firstName || ''}`;
+        if (!element) return '';
+        if (element.patient) {
+            return `${element.patient?.lastName || ''}, ${element.patient?.firstName || ''}`.trim();
+        }
+        if (element.paciente) {
+            return `${element.paciente?.apellido || ''}, ${element.paciente?.nombre || ''}`.trim();
+        }
+        return 'Sin datos';
     }
 
     getPatientDni(element: any): string {
-        return element.patient?.dni || '';
+        if (!element) return '';
+        return element.patient?.dni || element.paciente?.documento || '';
     }
 
     getDate(element: any): Date {
-        return new Date(element.date);
+        if (!element) return new Date();
+        const rawDate = element.date || element.fechaPrestacion || element.fechaRegistro || element.origenExterno?.fecha || element.createdAt;
+        return rawDate ? new Date(rawDate) : new Date();
     }
 
     getStatus(element: any): string {
-        return element.status;
+        if (!element) return '';
+        const s = element.status || element.estadoActual?.tipo || '';
+        return s ? s.toUpperCase() : '';
     }
 
     isExpanded(element: any): boolean {

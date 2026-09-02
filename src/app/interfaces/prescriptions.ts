@@ -44,6 +44,7 @@ export class Prescriptions {
         supply: Supply;
         quantity: number;
         quantityPresentation?: string;
+        unidadMedida?: string;
         diagnostic?: string;
         indication?: string;
         description?: string;

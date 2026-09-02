@@ -122,17 +122,6 @@ export class StockComponent implements OnInit, OnDestroy {
       this.subscriptions.add(otraOSSub);
     }
 
-    const dniStatusSub = this.patientDni.statusChanges.subscribe(status => {
-      if (status === 'VALID') {
-        this.obraSocialControl.enable({ emitEvent: false });
-      } else {
-        this.obraSocialControl.disable({ emitEvent: false });
-      }
-    });
-    this.subscriptions.add(dniStatusSub);
-
-    this.obraSocialControl.disable({ emitEvent: false });
-
     // Configurar filtro de obras sociales
     this.filteredObrasSociales = this.obraSocialControl.valueChanges.pipe(
       startWith(''),

@@ -113,12 +113,21 @@ export class UnifiedPrinterComponent {
         pdf.add(new Txt('\n').end);
 
         prescription.supplies.forEach(supply => {
-            const cant = supply.quantityPresentation ? `${supply.quantity} envase(s) de ${supply.quantityPresentation} unidades` : `x ${supply.quantity}`;
+            const isMagistral = supply.supply.type === 'magistral';
+            const cant = isMagistral
+                ? (supply.unidadMedida ? `${supply.quantity} x ${supply.quantityPresentation} ${supply.unidadMedida}` : '')
+                : (supply.quantityPresentation ? `${supply.quantity} envase(s) de ${supply.quantityPresentation} unidades` : `x ${supply.quantity}`);
             pdf.add(new Columns([
                 new Txt('' + supply.supply.name).bold().end,
                 new Txt(' ').end,
-                new Columns([new Txt(`${cant} `).bold().end]).end]).end);
+                ...(cant ? [new Columns([new Txt(`${cant} `).bold().end]).end] : []),
+            ]).end);
             pdf.add(new Txt('\n').end);
+
+            if (isMagistral && supply.supply.description) {
+                pdf.add(new Txt('' + supply.supply.description).end);
+                pdf.add(new Txt('\n').end);
+            }
 
             if (supply.diagnostic) {
                 pdf.add(new Txt('\n').end);
@@ -155,23 +164,10 @@ export class UnifiedPrinterComponent {
             ]).alignment('center').width('100%').end);
 
             // Firma del profesional debajo cuando hay prescriptionId
-            pdf.add(new Txt([
-                { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
-                { text: `\n ${prescription.professional.businessName}`, fontSize: 14, bold: true },
-                {
-                    text: `${prescription.organizacion ?
-                        `\n Organizacion: ${prescription.organizacion.nombre} - ${this.getOrganizacionDireccion(prescription.organizacion.direccion)}` :
-                        ''}`, fontSize: 9, bold: true
-                },
-                {
-                    text: `\n ${prescription.professional?.profesionGrado?.length ?
-                        prescription.professional.profesionGrado
-                            .map(g => `${g.profesion} MP ${g.numeroMatricula}`)
-                            .join('\n')
-                        : (prescription.professional?.enrollment ? `MP ${prescription.professional.enrollment}\n` : '')}`,
-                    bold: true, fontSize: 9
-                }
-            ]).alignment('center').margin([0, 25, 0, 0]).end);
+            pdf.add(new Txt(this.getSignatureContent(prescription.professional, prescription.organizacion))
+                .alignment('center')
+                .margin([0, 25, 0, 0])
+                .end);
         } else {
             // Si no hay prescriptionId, mostrar código de barras y firma en columnas
             this.addProfessionalSignature(pdf, prescription.professional, [barcodeImg]);
@@ -194,7 +190,7 @@ export class UnifiedPrinterComponent {
     async printAndesPrescription(prescription: AndesPrescriptions) {
         await this._generatePdf(async (pdf) => {
             await this.addAndesPage(pdf, prescription);
-            if (prescription.medicamento.tipoReceta === 'duplicado') {
+            if (prescription.medicamento?.tipoReceta === 'duplicado') {
                 pdf.add({ text: '', pageBreak: 'after' });
                 await this.addAndesPage(pdf, prescription, 'DUPLICADO');
             }
@@ -202,7 +198,7 @@ export class UnifiedPrinterComponent {
     }
 
     private async addAndesPage(pdf: PdfMakeWrapper, prescription: AndesPrescriptions, label?: string) {
-        if (prescription.estadoActual.tipo === 'vencida') {
+        if (prescription.estadoActual?.tipo === 'vencida') {
             pdf.watermark({
                 text: 'Receta no valida para dispensa',
                 color: 'grey',
@@ -211,7 +207,7 @@ export class UnifiedPrinterComponent {
                 fontSize: 60
             });
         }
-        if (prescription.estadoActual.tipo === 'finalizada' || prescription.estadoActual.tipo === 'dispensada') {
+        if (prescription.estadoActual?.tipo === 'finalizada' || prescription.estadoActual?.tipo === 'dispensada') {
             pdf.watermark({
                 text: 'DISPENSADA',
                 color: 'grey',
@@ -232,8 +228,10 @@ export class UnifiedPrinterComponent {
             barcodeRecetaImg = await new Img(barcodeRecetaBase64).fit([230, 60]).alignment('center').margin([0, 5]).build();
         }
 
+        const profNombre = prescription.profesional?.nombre || '';
+        const profApellido = prescription.profesional?.apellido || '';
         pdf.info({
-            title: 'Receta digital ' + prescription.profesional.nombre + ', ' + prescription.profesional.apellido,
+            title: 'Receta digital ' + profNombre + ', ' + profApellido,
             author: 'Andes'
         });
 
@@ -249,17 +247,25 @@ export class UnifiedPrinterComponent {
         pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
         pdf.add(new Txt('\n').end);
 
-        const patients = await this.patientsService.getPatientByDni(prescription.paciente.documento).toPromise();
-        const patient = patients[0];
+        let patient = null;
+        if (prescription.paciente?.documento) {
+            try {
+                const patients = await this.patientsService.getPatientByDni(prescription.paciente.documento).toPromise();
+                patient = patients && patients.length ? patients[0] : null;
+            } catch (e) {
+                // ignore
+            }
+        }
 
         this.addPatientData(pdf, {
-            firstname: `${prescription.paciente.nombre}`,
-            lastname: `${prescription.paciente.apellido}`,
-            autopercibido: `${patient.nombreAutopercibido || ''}`, dni: `${prescription.paciente.documento}`,
-            dob: prescription.paciente.fechaNacimiento,
-            sex: `${prescription.paciente.sexo}`,
-            obraSocial: prescription.paciente.obraSocial?.nombre,
-            affiliateNumber: prescription.paciente.obraSocial?.numeroAfiliado
+            firstname: `${prescription.paciente?.nombre || ''}`,
+            lastname: `${prescription.paciente?.apellido || ''}`,
+            autopercibido: `${patient?.nombreAutopercibido || ''}`,
+            dni: `${prescription.paciente?.documento || ''}`,
+            dob: prescription.paciente?.fechaNacimiento,
+            sex: `${prescription.paciente?.sexo || ''}`,
+            obraSocial: prescription.paciente?.obraSocial?.nombre,
+            affiliateNumber: prescription.paciente?.obraSocial?.numeroAfiliado
         });
 
         pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
@@ -268,11 +274,26 @@ export class UnifiedPrinterComponent {
         pdf.add(new Canvas([new Line(1, [515, 1]).end]).end);
         pdf.add(new Txt('\n').end);
 
+        const isMagistral = !!(prescription.medicamento?.esMagistral || (prescription as any).esMagistral);
+        const name = isMagistral
+            ? (prescription.medicamento?.magistral?.nombre || (prescription as any).magistral?.nombre || '')
+            : (prescription.medicamento?.concepto?.term || (prescription as any).concepto?.term || (prescription as any).insumo?.nombre || (prescription as any).insumo?.concepto?.term || '');
+
+        const cantEnvases = prescription.medicamento?.cantEnvases || (prescription as any).cantEnvases || 1;
+        const cantidad = prescription.medicamento?.cantidad || (prescription as any).cantidad || 1;
+        const unidadMedida = prescription.medicamento?.magistral?.unidadMedida || (prescription as any).magistral?.unidadMedida;
+
+        const cantText = isMagistral
+            ? (unidadMedida
+                ? `${cantEnvases} x ${cantidad} ${unidadMedida}`
+                : `${cantEnvases} envase(s)`)
+            : `${cantEnvases} envase(s) de ${cantidad} unidad(es)`;
+
         pdf.add(new Columns([
-            new Txt('' + prescription.medicamento.concepto.term).bold().end,
+            new Txt('' + name + (isMagistral ? '\n(Preparación Magistral)' : '')).bold().end,
             new Columns([
                 new Txt(' ').end,
-                new Txt(`   ${prescription.medicamento.cantEnvases} envase(s) de ${prescription.medicamento.cantidad} unidad(es)`).bold().end]
+                new Txt(`   ${cantText}`).bold().end]
             ).end
         ]).end);
         pdf.add(new Txt('\n').end);
@@ -283,14 +304,15 @@ export class UnifiedPrinterComponent {
         if (prescription.diagnostico) {
             pdf.add(new Txt('\n').end);
             pdf.add(new Txt('Diagnóstico').bold().end);
-            pdf.add(new Txt('' + (prescription.diagnostico.term ? prescription.diagnostico.term : prescription.diagnostico.descripcion)).end);
+            const diagText = prescription.diagnostico.term || prescription.diagnostico.descripcion || prescription.diagnostico;
+            pdf.add(new Txt('' + diagText).end);
         }
-        if (prescription.medicamento.dosisDiaria.notaMedica) {
+        if (prescription.medicamento?.dosisDiaria?.notaMedica) {
             pdf.add(new Txt('\n').end);
-            pdf.add(new Txt('Nota medica').bold().end);
+            pdf.add(new Txt('Nota médica').bold().end);
             pdf.add(new Txt('' + prescription.medicamento.dosisDiaria.notaMedica).end);
         }
-        if (prescription.dispensa.length > 0) {
+        if (prescription.dispensa?.length) {
             pdf.add(new Txt('\n').end);
             pdf.add(new Txt('Observaciones').bold().end);
             prescription.dispensa.forEach(supply => {
@@ -300,8 +322,15 @@ export class UnifiedPrinterComponent {
             });
         }
         pdf.add(new Txt('\n').end);
-        pdf.add(new Txt('Dosis: ' + (prescription.medicamento.dosisDiaria.dosis ? prescription.medicamento.dosisDiaria.dosis : 'No informado') + (`${typeof (prescription.medicamento.dosisDiaria.intervalo) === 'string' ? ` por ${prescription.medicamento.dosisDiaria.intervalo}` : ''}`)).end);
-        pdf.add(new Txt('Duración tratamiento: ' + (prescription.medicamento.dosisDiaria.dias ? prescription.medicamento.dosisDiaria.dias + ' dia/s' : 'No informado')).end);
+
+        const dosis = prescription.medicamento?.dosisDiaria?.dosis || 'No informado';
+        const intervalo = prescription.medicamento?.dosisDiaria?.intervalo;
+        const intervaloStr = typeof intervalo === 'string' ? ` por ${intervalo}` : (intervalo?.nombre ? ` por ${intervalo.nombre}` : '');
+        const dias = prescription.medicamento?.dosisDiaria?.dias;
+        const diasStr = dias ? `${dias} día/s` : 'No informado';
+
+        pdf.add(new Txt('Dosis: ' + dosis + intervaloStr).end);
+        pdf.add(new Txt('Duración tratamiento: ' + diasStr).end);
         pdf.add(new Txt('\n').end);
         pdf.add(new Txt('\n').end);
 
@@ -314,12 +343,9 @@ export class UnifiedPrinterComponent {
             pdf.add(new Columns([barcodeImg]).end);
         }
 
-        pdf.add(new Txt([
-            { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
-            { text: `\n ${prescription.profesional.apellido}`, fontSize: 14, bold: true },
-            { text: `\n MP ${prescription.profesional.matricula}`, bold: true, fontSize: 10 },
-            { text: `\n ${prescription.organizacion ? `Organización: ${prescription.organizacion.nombre} - ${this.getOrganizacionDireccion(prescription.organizacion.direccion)}` : ''}`, fontSize: 9, bold: true },
-        ]).alignment('center').end);
+        pdf.add(new Txt(this.getSignatureContent(prescription.profesional, prescription.organizacion))
+            .alignment('center')
+            .end);
 
         if ((prescription.estadoActual.tipo === 'finalizada' || prescription.estadoActual.tipo === 'dispensada') && prescription.estadoDispensaActual.fecha) {
             pdf.add(new Txt(`Fecha dispensación: ${this.datePipe.transform(prescription.estadoDispensaActual.fecha, 'dd/MM/yyyy')}`).end);
@@ -431,12 +457,9 @@ export class UnifiedPrinterComponent {
 
         pdf.add(new Columns([barcodeImg]).end);
 
-        pdf.add(new Txt([
-            { text: 'Este documento ha sido firmado \n electronicamente por Dr.:', fontSize: 9, bold: true, italics: true },
-            { text: `\n ${prescription.profesional.apellido}, ${prescription.profesional.nombre}`, fontSize: 14, bold: true },
-            { text: `\n MP ${prescription.profesional.matricula}`, bold: true, fontSize: 10 },
-            { text: `\n ${prescription.organizacion ? `Organizacion: ${prescription.organizacion.nombre}` : ''}`, fontSize: 9, bold: true },
-        ]).alignment('center').end);
+        pdf.add(new Txt(this.getSignatureContent(prescription.profesional, prescription.organizacion))
+            .alignment('center')
+            .end);
 
         pdf.footer(new Txt([
             { text: '  Esta receta fue creada por emisor inscripto y valido en el Registro de Recetarios Electronicos \n del Ministerio de Salud de la Nacion - ', italics: true },
@@ -627,28 +650,83 @@ export class UnifiedPrinterComponent {
             },
             {
                 stack: [
-                    new Txt([
-                        { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true },
-                        { text: `\n ${professional.businessName}`, fontSize: 14, bold: true },
-                        {
-                            text: `${organizacion ?
-                                `\n Organizacion: ${organizacion.nombre} - ${this.getOrganizacionDireccion(organizacion.direccion)}` :
-                                ''}`, fontSize: 9, bold: true
-                        },
-                        {
-                            text: `\n ${professional?.profesionGrado?.length ?
-                                professional.profesionGrado
-                                    .map((g: any) => `${g.profesion} MP ${g.numeroMatricula}`)
-                                    .join('\n')
-                                : (professional?.enrollment ? `MP ${professional.enrollment}\n` : '')}`,
-                            bold: true, fontSize: 9
-                        }
-                    ]).alignment('center').margin([0, 25, 0, 0]).end
+                    new Txt(this.getSignatureContent(professional, organizacion))
+                        .alignment('center')
+                        .margin([0, 25, 0, 0])
+                        .end
                 ],
                 alignment: 'center',
                 width: '50%'
             }
         ]).alignment('center').width('100%').end);
+    }
+
+    private getProfessionalName(prof: any): string {
+        if (!prof) {
+            return '';
+        }
+        if (prof.businessName) {
+            return prof.businessName;
+        }
+        if (prof.apellido && prof.nombre) {
+            return `${prof.apellido.toUpperCase()}, ${prof.nombre.toUpperCase()}`;
+        }
+        if (prof.apellido) {
+            return prof.apellido.toUpperCase();
+        }
+        if (prof.nombre) {
+            return prof.nombre.toUpperCase();
+        }
+        return '';
+    }
+
+    private getProfessionalMatriculas(prof: any): string {
+        if (!prof) {
+            return '';
+        }
+        if (prof.profesionGrado && Array.isArray(prof.profesionGrado) && prof.profesionGrado.length > 0) {
+            return prof.profesionGrado
+                .map((g: any) => {
+                    const mat = g.numeroMatricula || g.matricula;
+                    if (g.profesion && mat) {
+                        return `${g.profesion} MP ${mat}`;
+                    } else if (mat) {
+                        return `MP ${mat}`;
+                    }
+                    return '';
+                })
+                .filter((s: string) => !!s)
+                .join('\n');
+        }
+        const enrollment = prof.enrollment || prof.matricula;
+        if (enrollment) {
+            return prof.profesion ? `${prof.profesion} MP ${enrollment}` : `MP ${enrollment}`;
+        }
+        return '';
+    }
+
+    private getSignatureContent(professional: any, organizacion?: any): any[] {
+        const name = this.getProfessionalName(professional);
+        const matriculas = this.getProfessionalMatriculas(professional);
+        const orgStr = organizacion ? `\n Organización: ${organizacion.nombre}${this.getOrganizacionDireccion(organizacion.direccion) ? ' - ' + this.getOrganizacionDireccion(organizacion.direccion) : ''}` : '';
+
+        const content: any[] = [
+            { text: 'Este documento ha sido firmado \n electrónicamente por Dr.:', fontSize: 9, bold: true, italics: true }
+        ];
+
+        if (name) {
+            content.push({ text: `\n ${name}`, fontSize: 14, bold: true });
+        }
+
+        if (matriculas) {
+            content.push({ text: `\n ${matriculas}`, fontSize: 9, bold: true });
+        }
+
+        if (orgStr) {
+            content.push({ text: orgStr, fontSize: 9, bold: true });
+        }
+
+        return content;
     }
 
     private addPatientData(pdf: PdfMakeWrapper, data: { lastname: string; firstname: string; autopercibido: string; dni: string; dob?: Date | string; sex: string; obraSocial?: string; affiliateNumber?: string }) {

@@ -322,44 +322,72 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
 
     // Métodos auxiliares para trabajar con prescripciones mixtas
     isAndesPrescription(item: MixedPrescription): item is AndesPrescriptions {
-        return 'idAndes' in item || 'paciente' in item;
+        if (!item) return false;
+        return (item as any).isFromAndes === true || 'idAndes' in item || 'idPrestacion' in item || 'idRegistro' in item || 'insumo' in item || (!!(item as any).paciente && !(item as any).patient);
     }
 
     isLocalPrescription(item: MixedPrescription): item is Prescriptions {
-        return 'patient' in item && '_id' in item;
+        if (!item) return false;
+        return !this.isAndesPrescription(item);
+    }
+
+    isMagistralSupply(supp: any): boolean {
+        if (!supp) return false;
+        return supp.isMagistral || supp.supply?.isMagistral || supp.supply?.type === 'magistral';
+    }
+
+    isMagistralAndes(element: any): boolean {
+        if (!element) return false;
+        return !!(
+            element.esMagistral ||
+            element.medicamento?.esMagistral ||
+            element.medicamento?.magistral ||
+            element.medicamento?.tipo === 'magistral' ||
+            element.insumo?.tipo === 'magistral' ||
+            element.insumo?.esMagistral
+        );
     }
 
     getPatientName(item: MixedPrescription): string {
+        if (!item) return '';
         const dni = this.getPatientDni(item);
         if (dni && this.patientsData[dni]) {
             return `${this.patientsData[dni].lastName} ${this.patientNamePipe.transform(this.patientsData[dni])}`;
         }
         if ((item as any).patient) {
-            return `${(item as any).patient.lastName} ${this.patientNamePipe.transform((item as any).patient)}`;
+            const lastName = (item as any).patient.lastName || '';
+            return `${lastName} ${this.patientNamePipe.transform((item as any).patient)}`.trim();
         }
-        if (this.isAndesPrescription(item)) {
-            return `${item.paciente.apellido} ${item.paciente.nombre}`;
+        if (this.isAndesPrescription(item) && (item as any).paciente) {
+            const pac = (item as any).paciente;
+            const apellido = pac?.apellido || '';
+            const nombre = pac?.nombre || '';
+            return `${apellido} ${nombre}`.trim() || 'Desconocido';
         }
-        return '';
+        return 'Desconocido';
     }
 
     getPatientDni(item: MixedPrescription): string {
+        if (!item) return '';
         if (this.isAndesPrescription(item)) {
-            return item.paciente.documento;
+            return (item as any).paciente?.documento || (item as any).patient?.dni || '';
         } else {
-            return item.patient.dni;
+            return (item as any).patient?.dni || '';
         }
     }
 
     getPrescriptionDate(item: MixedPrescription): Date {
+        if (!item) return new Date();
         if (this.isAndesPrescription(item)) {
-            return new Date(item.fechaPrestacion);
+            const rawDate = (item as any).fechaPrestacion || (item as any).fechaRegistro || (item as any).date || (item as any).origenExterno?.fecha || (item as any).createdAt;
+            return rawDate ? new Date(rawDate) : new Date();
         } else {
             return new Date(item.date);
         }
     }
 
     getPrescriptionStatus(item: MixedPrescription): string {
+        if (!item) return '';
         if (this.isAndesPrescription(item)) {
             // Manejar tanto formato viejo de Andes como nuevo (status a nivel raiz)
             const currentStatus = item.estadoActual?.tipo || (item as any).status;
@@ -426,9 +454,11 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     }
 
     canPrint(prescription: MixedPrescription): boolean {
+        if (!prescription) return false;
         if (this.isAndesPrescription(prescription)) {
             // Las prescripciones de ANDES se pueden imprimir si no están vencidas
-            return !['VENCIDA', 'SUSPENDIDA', 'FINALIZADA'].includes(this.normalizeStatus(prescription.estadoActual.tipo));
+            const status = prescription.estadoActual?.tipo || (prescription as any).status;
+            return !['VENCIDA', 'SUSPENDIDA', 'FINALIZADA'].includes(this.normalizeStatus(status));
         } else {
             return (prescription.professional.userId === this.authService.getLoggedUserId()) && this.normalizeStatus(prescription.status) !== 'VENCIDA' && this.normalizeStatus(prescription.status) !== 'SUSPENDIDA';
         }
