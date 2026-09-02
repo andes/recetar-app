@@ -172,7 +172,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
             if (this.professionalForm) {
                 this.professionalForm.patchValue({ ambito: this.ambito });
                 this.configureOrganizacionByAmbito();
-                
+
                 // Si cambiamos a ámbito privado, desactivar medicamentos magistrales que estén activos
                 if (this.ambito === 'privado') {
                     this.suppliesForm.controls.forEach((supplyControl: FormGroup) => {
@@ -490,7 +490,7 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
         const control = this.suppliesForm.at(index) as FormGroup;
         const supplyControl = control.get('supply');
         const itemName = item.nombre || item.insumo || item.name || item.supply || item.term || '';
-        
+
         control.patchValue({
             unidadMedida: item.unidadMedida || null
         });
@@ -597,27 +597,24 @@ export class ProfessionalFormComponent implements OnInit, OnDestroy {
         const descriptionControl = control.get('supply.description');
         const quantityPresentationControl = control.get('quantityPresentation');
         const quantityControl = control.get('quantity');
-
         if (isMagistral) {
+            quantityPresentationControl?.clearValidators();
+
             nameControl?.setValidators([Validators.required]);
             descriptionControl?.clearValidators();
-
-            quantityControl?.setValidators([Validators.required, Validators.min(1)]);
-            quantityControl?.enable();
-            quantityPresentationControl?.setValidators([Validators.required, Validators.min(1)]);
-            quantityPresentationControl?.enable();
+            if (control.get('unidadMedida') && control.get('unidadMedida')?.value) {
+                quantityPresentationControl?.setValidators([Validators.required, Validators.min(1)]);
+            }
         } else {
             nameControl?.setValidators([Validators.required, medicationSelectedValidator()]);
             descriptionControl?.clearValidators();
-
             // Rehabilitar y validar quantity para medicamentos SNOMED
-            quantityControl?.setValidators([Validators.required, Validators.min(1)]);
-            quantityControl?.enable();
-
             quantityPresentationControl?.setValidators([Validators.required, Validators.min(1)]);
-            quantityPresentationControl?.enable();
-        }
 
+        }
+        quantityControl?.setValidators([Validators.required, Validators.min(1)]);
+        quantityControl?.enable();
+        quantityPresentationControl?.enable();
         nameControl?.updateValueAndValidity();
         descriptionControl?.updateValueAndValidity();
         quantityPresentationControl?.updateValueAndValidity();
