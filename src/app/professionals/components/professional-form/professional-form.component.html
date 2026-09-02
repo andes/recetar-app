@@ -156,7 +156,7 @@
                                             <div *ngIf="control.get('isMagistral')?.value" fxLayout="column"
                                                 fxLayoutGap="10px">
                                                 <div fxLayout="row" fxLayoutGap="10px">
-                                                    <mat-form-field appearance="fill" fxFlex="40">
+                                                    <mat-form-field *ngIf="!(control.get('unidadMedida')?.value === null)" appearance="fill" fxFlex="40">
                                                         <mat-label>Cantidad</mat-label>
                                                         <input [tabIndex]="5 + i" type="number" matInput
                                                             formControlName="quantityPresentation" required>
@@ -171,9 +171,8 @@
                                                         </mat-error>
                                                     </mat-form-field>
                                                     <span *ngIf="control.get('unidadMedida')?.value" class="unidad-medida" style="font-weight: 500; color: #555; margin-bottom: 20px; align-self: center;">
-                                                        {{ control.get('unidadMedida')?.value }}
+                                                        {{ control.get('unidadMedida')?.value }} X
                                                     </span>
-                                                    <span style="font-weight: 500; color: #555; margin-bottom: 20px; align-self: center;">x</span>
                                                     <mat-form-field appearance="fill" fxFlex="40">
                                                         <mat-label>Cant. de envases</mat-label>
                                                         <input [tabIndex]="6 + i" type="number" matInput
