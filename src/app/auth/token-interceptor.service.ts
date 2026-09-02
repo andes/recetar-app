@@ -23,6 +23,8 @@ export class TokenInterceptorService implements HttpInterceptor {
         return next.handle(request).pipe(catchError(error => {
             if (error instanceof HttpErrorResponse && error.status === 406) {
                 return this.handle406Error(request, next);
+            } else if (error instanceof HttpErrorResponse && error.status === 401) {
+                return this.handle401Error();
             } else if (error instanceof HttpErrorResponse && error.status === 417) {
                 this.handle417Error(request, next);
                 return throwError(error.error.message);
@@ -80,6 +82,15 @@ export class TokenInterceptorService implements HttpInterceptor {
                     return next.handle(this.addToken(request, jwt));
                 }));
         }
+    }
+
+    // session expired handler (absolute timeout)
+    private handle401Error() {
+        return this.authService.logout().pipe(
+            switchMap(() => {
+                this.router.navigate(['/auth/login']);
+                return throwError('La sesión expiró, debe volver a iniciar sesión');
+            }));
     }
 
     // user credentials handler
