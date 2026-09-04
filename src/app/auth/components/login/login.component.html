@@ -9,7 +9,7 @@
   <div class="welcome-panel">
     <mat-card fxLayout="column" fxLayoutAlign="space-between">
       <mat-card-title>
-        <h2 class="text-center">¡Bienvenidos a RecetAr, la página web de Receta Electrónica de Neuquén!</h2>
+        <h2 class="text-center">Bienvenido al Sistema de<br>Receta Electrónica de Neuquén</h2>
       </mat-card-title>
       <mat-card-content>
         <p>En el marco de la nueva Ley Nacional de Receta Electrónica, el Decreto 345/2024 establece un cambio
@@ -67,28 +67,30 @@
             </mat-form-field>
             <div class="boton-olvidar-clave">
               <a class="hover" justify="end" (click)="forgot()">
-                (olvidé mi contraseña)
+                Olvidé mi contraseña
               </a>
             </div>
           </div>
           <mat-error *ngIf="error" class="text-center login-error">
             {{ error }}
           </mat-error>
-          <div fxLayout="row" fxLayoutAlign="center" class="login-action" fxLayoutGap="0.5rem">
-            <button class="boton-iniciar-sesion" mat-raised-button type="submit" *ngIf="!showSubmit" fxFlex.lg="50%"
-                    fxFlex.sm="100%">
+          <div *ngIf="passwordExpired" class="text-center login-error">
+            <a *ngIf="!resendingEmail" class="resend-link" (click)="resendEmail()">¿No recibiste el correo? Reenviar correo</a>
+            <span *ngIf="resendingEmail" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="8px" class="resending">
+              <mat-spinner [color]="spinnerColor" [diameter]="16"></mat-spinner>
+              <div class="ml-2">Reenviando correo...</div>
+            </span>
+          </div>
+          <div fxLayout="column" fxLayoutAlign="center stretch" class="login-action" fxLayoutGap="0.5rem">
+            <button class="boton-iniciar-sesion" mat-raised-button type="submit" *ngIf="!showSubmit" fxFlex="100%">
               Iniciar sesión
             </button>
-            <div fxLayout="column" fxLayoutAlingn="center" fxLayoutGap="0.5rem">
-              <button mat-raised-button color="primary" (click)="newUser()" *ngIf="!showSubmit" fxFlex.lg="50%"
-                      fxFlex.sm="100%">
-                Registrarse Profesional
-              </button>
-              <button mat-raised-button color="primary" (click)="newUserPharmacist()" *ngIf="!showSubmit"
-                      fxFlex.lg="50%" fxFlex.sm="100%">
-                Registrarse Farmacia
-              </button>
-            </div>
+            <button mat-raised-button color="primary" (click)="newUser()" *ngIf="!showSubmit" fxFlex="100%">
+              Registrarse Profesional
+            </button>
+            <button mat-raised-button color="primary" (click)="newUserPharmacist()" *ngIf="!showSubmit" fxFlex="100%">
+              Registrarse Farmacia
+            </button>
             <mat-spinner [color]="spinnerColor" [diameter]="spinnerDiameter" *ngIf="showSubmit">
             </mat-spinner>
           </div>

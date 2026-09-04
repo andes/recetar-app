@@ -16,6 +16,9 @@ export class LoginComponent implements OnInit {
 
   loginForm: FormGroup;
   error: string;
+  passwordExpired = false;
+  resendingEmail = false;
+  resendIdentifier: string;
   readonly spinnerColor: ThemePalette = 'primary';
   readonly spinnerDiameter: number = 30;
   showSubmit = false;
@@ -51,6 +54,7 @@ export class LoginComponent implements OnInit {
   onSubmitEvent(loginForm: FormGroup, loginNgForm: FormGroupDirective): void {
     if (this.loginForm.valid) {
 
+      this.resendIdentifier = this.loginForm.value.identifier;
       this.showSubmit = true;
       this.authService.login(this.loginForm.value).subscribe(
         res => {
@@ -78,7 +82,13 @@ export class LoginComponent implements OnInit {
         err => {
           loginNgForm.resetForm();
           loginForm.reset();
-          this.error = err;
+          if (typeof err === 'object' && err !== null && err.code === 'PASSWORD_EXPIRED') {
+            this.passwordExpired = true;
+            this.error = err.message;
+          } else {
+            this.passwordExpired = false;
+            this.error = err;
+          }
           this.showSubmit = false;
         });
     }
@@ -92,6 +102,22 @@ export class LoginComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog was closed');
     });
+  }
+
+  resendEmail(): void {
+    const identifier = this.resendIdentifier;
+    if (!identifier || this.resendingEmail) { return; }
+    this.resendingEmail = true;
+    this.authService.resendPasswordExpiry(identifier).subscribe(
+      () => {
+        this.resendingEmail = false;
+        this.error = 'Se ha reenviado el correo electrónico con las instrucciones para cambiar su contraseña.';
+      },
+      () => {
+        this.resendingEmail = false;
+        this.error = 'No se pudo reenviar el correo. Por favor, intente nuevamente.';
+      }
+    );
   }
 
   showInformation(): void {
