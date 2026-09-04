@@ -79,6 +79,10 @@ export class AuthService {
         return this.http.post<any>(`${this.apiEndPoint}/auth/recovery-password`, data);
     }
 
+    resendPasswordExpiry(identifier: string) {
+        return this.http.post<any>(`${this.apiEndPoint}/auth/resend-password-expiry-notification`, { identifier });
+    }
+
     register(data) {
         return this.http.post<any>(`${this.apiEndPoint}/auth/register`, data);
     }

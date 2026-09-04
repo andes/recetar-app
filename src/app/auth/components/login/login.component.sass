@@ -33,7 +33,8 @@ $panels-height-xl: 325px
 
                 @media (min-width: $larger-devices) and (max-width: $xx-larger-devices)
                     .login-error
-                        margin-bottom: -15px!important
+                        font-size: 13px
+                        margin-bottom: 8px!important
 
             mat-card-actions
                 padding: 0!important
@@ -80,6 +81,28 @@ $panels-height-xl: 325px
 .boton-olvidar-clave
     padding-top: 0.2rem
     padding-bottom:1rem
+    font-size: 12px
 
 mat-card-content
     margin-bottom:0px!important
+
+// Permite que el panel del formulario crezca para mostrar errores y botones sin solaparse
+.cards-container .form-panel
+    mat-card
+        height: auto
+        min-height: 20.21rem
+        max-height: none
+        overflow: visible
+        @media (min-width: $x-small-devices) and (max-width: $larger-devices)
+            min-height: 0
+
+.login-action
+    margin-top: 0.5rem
+
+.resend-link
+    cursor: pointer
+    text-decoration: underline
+
+.resending
+    font-size: 12px
+    color: #555
