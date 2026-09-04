@@ -13,8 +13,9 @@ import { AuthService } from '@auth/services/auth.service';
 import { detailExpand, arrowDirection } from '@animations/animations.template';
 import { DialogReportComponent } from '../dialog-report/dialog-report.component';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, startWith } from 'rxjs/operators';
 import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unified-printer.component';
+import { getPrescriptionStatus } from '@shared/utils/prescription-status';
 
 @Component({
     selector: 'app-prescription-list',
@@ -495,7 +496,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
 
     calculateCanDispense(prescription: any): boolean {
         if ('status' in prescription) {
-            return prescription.status === 'Pendiente' && moment() >= moment(prescription.date);
+            return prescription.status === 'Pendiente' && moment() >= moment(prescription.date).startOf('day');
         } else if ('estadoActual' in prescription) {
             return prescription.estadoActual.tipo === 'vigente';
         }
@@ -537,12 +538,7 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
     }
 
     getStatus(prescription: any): string {
-        if ('estadoActual' in prescription) {
-            return this.normalizeStatus(prescription.estadoActual?.tipo);
-        } else if ('status' in prescription) {
-            return this.normalizeStatus(prescription.status);
-        }
-        return '';
+        return getPrescriptionStatus(prescription);
     }
 
     getStatusColor(prescription: any): string {
@@ -551,22 +547,5 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
             return 'red';
         }
         return '#000000de';
-    }
-
-    private normalizeStatus(status: string): string {
-        if (!status) {
-            return '';
-        }
-        const statusLower = status.toLowerCase();
-        const statusMap: { [key: string]: string } = {
-            'vigente': 'VIGENTE',
-            'finalizada': 'FINALIZADA',
-            'vencida': 'VENCIDA',
-            'suspendida': 'SUSPENDIDA',
-            'rechazada': 'RECHAZADA',
-            'pendiente': 'VIGENTE',
-            'dispensada': 'FINALIZADA'
-        };
-        return statusMap[statusLower] || status.toUpperCase();
     }
 }
