@@ -48,6 +48,10 @@ export class TokenInterceptorService implements HttpInterceptor {
             }
         }
 
+        if (err.error && err.error.code) {
+            return throwError({ message: errorMessage, code: err.error.code });
+        }
+
         return throwError(errorMessage);
     }
 
