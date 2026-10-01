@@ -9,15 +9,18 @@ import { CanvasComponent } from './canvas.component';
     template: `
         <app-canvas
             [noCard]="noCard"
-            [showHeader]="false"
+            [showHeader]="showHeader"
             [showFooter]="false"
-            [showSidebar]="false">
+            [showSidebar]="false"
+            [flush]="flush">
             <div class="projected-content">hello</div>
         </app-canvas>
     `
 })
 class TestHostComponent {
     noCard = false;
+    showHeader = false;
+    flush = false;
 }
 
 describe('CanvasComponent', () => {
@@ -69,5 +72,22 @@ describe('CanvasComponent', () => {
     it('hides the header and footer when those inputs are false', () => {
         expect(hostFixture.debugElement.query(By.css('app-header'))).toBeNull();
         expect(hostFixture.debugElement.query(By.css('app-footer'))).toBeNull();
+    });
+
+    it('applies has-header only when the header is shown', () => {
+        expect(canvasDebug.nativeElement.classList.contains('has-header')).toBeFalse();
+
+        host.showHeader = true;
+        hostFixture.detectChanges();
+
+        expect(canvasDebug.nativeElement.classList.contains('has-header')).toBeTrue();
+    });
+
+    it('adds flush to the body and content inner when flush=true', () => {
+        host.flush = true;
+        hostFixture.detectChanges();
+
+        expect(canvasDebug.query(By.css('.canvas-body.flush'))).toBeTruthy();
+        expect(contentInner.nativeElement.classList.contains('flush')).toBeTrue();
     });
 });

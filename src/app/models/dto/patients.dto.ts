@@ -1,3 +1,5 @@
+import { PatientContacto, PatientDireccion } from '@interfaces/patients';
+
 export interface PatientPayload {
     dni: string;
     firstName: string;
@@ -7,6 +9,8 @@ export interface PatientPayload {
     nombreAutopercibido?: string;
     genero?: string;
     cuil?: string;
+    contactos?: PatientContacto[];
+    direcciones?: PatientDireccion[];
 }
 
 export function toPatientPayload(data: {
@@ -16,8 +20,10 @@ export function toPatientPayload(data: {
     sex?: string;
     fechaNac?: Date | string | null;
     nombreAutopercibido?: string;
-    genero?: string;
+    genero?: string | null;
     cuil?: string;
+    contactos?: PatientContacto[];
+    direcciones?: PatientDireccion[];
 }): PatientPayload {
     const payload: PatientPayload = {
         dni: data.dni || '',
@@ -33,5 +39,7 @@ export function toPatientPayload(data: {
     if (data.nombreAutopercibido) { payload.nombreAutopercibido = data.nombreAutopercibido; }
     if (data.genero) { payload.genero = data.genero; }
     if (data.cuil) { payload.cuil = data.cuil; }
+    if (data.contactos?.length) { payload.contactos = data.contactos; }
+    if (data.direcciones?.length) { payload.direcciones = data.direcciones; }
     return payload;
 }

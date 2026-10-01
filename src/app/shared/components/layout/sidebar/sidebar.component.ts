@@ -4,9 +4,6 @@ import { RouterModule } from '@angular/router';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { ThemeService } from '@shared/services/theme.service';
 
 export interface SidebarItem {
     icon: string;
@@ -33,13 +30,7 @@ export class SidebarComponent {
     @Input() overlayOpen = false;
     @Output() toggled = new EventEmitter<void>();
 
-    logoPath$: Observable<string>;
-
-    constructor(private themeService: ThemeService) {
-        this.logoPath$ = this.themeService.isDarkMode$.pipe(
-            map(isDark => isDark ? 'assets/logo-light.svg' : 'assets/logo.svg')
-        );
-    }
+    readonly logoPath = 'assets/logo-light.svg';
 
     @HostBinding('class.sidebar-host-overlay-open') get isOverlayOpen() {
         return this.overlayOpen;

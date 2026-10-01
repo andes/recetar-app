@@ -7,7 +7,10 @@ import { SidebarItem } from '@shared/components/layout/sidebar/sidebar.component
 import { SidebarService } from '@shared/services/sidebar.service';
 import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unified-printer.component';
 import { NotificationService } from '@shared/services/notification.service';
+import { AmbitoService } from '@auth/services/ambito.service';
+import { isDispenseBlockedByPublication } from '@shared/utils/publication.util';
 import { DispenseService, MixedPrescription, DispenseReplacement } from '../../services/dispense.service';
+import { isAndesPrescription } from '../../services/prescription-source.util';
 import AndesPrescriptions from '@interfaces/andesPrescriptions';
 import { Prescriptions } from '@interfaces/prescriptions';
 import { Observable, Subject, Subscription, merge } from 'rxjs';
@@ -34,15 +37,13 @@ export class DispenseHomeComponent implements OnInit, OnDestroy {
     statusControl = new FormControl('');
     sexoControl = new FormControl('');
 
-    showFilters = false;
     selectedPrescription: MixedPrescription | null = null;
     drawerOpen = false;
     pageIndex = 0;
     pageSize = 15;
-    private _total = 0;
+    ambito: 'publico' | 'privado' | null = null;
     private destroy$ = new Subject<void>();
     private prescriptionsSub: Subscription | null = null;
-    private totalSub: Subscription | null = null;
 
     statusOptions = [
         { value: '', label: 'Todos los estados' },
@@ -73,20 +74,13 @@ export class DispenseHomeComponent implements OnInit, OnDestroy {
         return count;
     }
 
-    get resultsFrom(): number {
-        return this._total === 0 ? 0 : this.pageIndex * this.pageSize + 1;
-    }
-
-    get resultsTo(): number {
-        return Math.min(this.resultsFrom + this.pageSize - 1, this._total);
-    }
-
     constructor(
         private sidebarService: SidebarService,
         private dispenseService: DispenseService,
         private printer: UnifiedPrinterComponent,
         private dialog: MatDialog,
         private notification: NotificationService,
+        private ambitoService: AmbitoService,
     ) {
         this.prescriptions$ = this.dispenseService.prescriptions$;
         this.loading$ = this.dispenseService.loading$;
@@ -97,7 +91,12 @@ export class DispenseHomeComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.sidebarItems = this.sidebarService.getItems();
         this.prescriptionsSub = this.prescriptions$.subscribe((list) => this.syncSelection(list));
-        this.totalSub = this.total$.subscribe((total) => { this._total = total; });
+
+        this.ambitoService.getAmbitoSeleccionado
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((ambito) => {
+                this.ambito = ambito;
+            });
 
         const search$ = this.searchControl.valueChanges.pipe(
             debounceTime(500),
@@ -186,8 +185,23 @@ export class DispenseHomeComponent implements OnInit, OnDestroy {
     }
 
     onDispense(prescription: MixedPrescription): void {
+        if (this.isDispenseBlocked(prescription)) {
+            this.notification.warning('Receta pendiente de publicación electrónica. Solo dispensable en ámbito público.');
+            return;
+        }
         this.closeDrawer();
         this.openDispenseConfirmDialog(prescription);
+    }
+
+    isDispenseBlocked(prescription: MixedPrescription): boolean {
+        if (this.dispenseService.isAndesPrescription(prescription)) {
+            return false;
+        }
+        return isDispenseBlockedByPublication((prescription as Prescriptions).estadoPublicacion, this.ambito);
+    }
+
+    isDispenseBlockedSelected(): boolean {
+        return !!this.selectedPrescription && this.isDispenseBlocked(this.selectedPrescription);
     }
 
     private openDispenseConfirmDialog(prescription: MixedPrescription): void {
@@ -227,8 +241,7 @@ export class DispenseHomeComponent implements OnInit, OnDestroy {
     }
 
     private extractPrescriptionInfo(p: MixedPrescription): { medication: FrequentMedication; quantity: number } {
-        const isAndes = (item: MixedPrescription): item is AndesPrescriptions => 'estadoActual' in item;
-        if (isAndes(p)) {
+        if (isAndesPrescription(p)) {
             const concepto = p.medicamento?.concepto;
             return {
                 medication: {
@@ -316,6 +329,5 @@ export class DispenseHomeComponent implements OnInit, OnDestroy {
         this.destroy$.next();
         this.destroy$.complete();
         this.prescriptionsSub?.unsubscribe();
-        this.totalSub?.unsubscribe();
     }
 }

@@ -98,6 +98,19 @@ export class HeaderComponent implements OnInit, OnDestroy {
           this.matriculaCount = 0;
         }
       });
+
+    if (this.authService.isProfessionalRole() || this.authService.isProfessionalPublicRole()) {
+      this.profileService.getProfessionalProfile()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (profile) => {
+            this.matriculaCount = profile.profesionGrado?.length || 0;
+          },
+          error: () => {
+            this.matriculaCount = 0;
+          }
+        });
+    }
   }
 
   private getMatriculaCount(user: User): number {
@@ -105,9 +118,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
       return 0;
     }
     if (this.authService.isProfessionalRole() || this.authService.isProfessionalPublicRole()) {
-      return user.profesionGrado?.length || 0;
+      return this.matriculaCount;
     }
-    return (user.responsibleDTEnrollment || user.enrollment) ? 1 : 0;
+    return user.responsibleDTEnrollment ? 1 : 0;
   }
 
   ngOnDestroy(): void {

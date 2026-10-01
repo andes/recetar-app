@@ -54,6 +54,10 @@ export class ProfessionalDialogComponent implements OnInit {
         this.dialogRef.close('suspend_andes');
     }
 
+    confirmSuspendLocal() {
+        this.dialogRef.close('suspend_local');
+    }
+
     isAndesPrescription(item: Prescriptions | AndesPrescriptions): item is AndesPrescriptions {
         return 'idAndes' in item || 'paciente' in item;
     }

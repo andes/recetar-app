@@ -1,6 +1,6 @@
 @use 'styles/variables' as *
 
-$sidebar-width: 260px
+$sidebar-width: 240px
 $sidebar-collapsed-width: 76px
 
 :host
@@ -13,7 +13,9 @@ $sidebar-collapsed-width: 76px
     --header-gap: 12px
     --sidebar-width: #{$sidebar-width}
     --sidebar-collapsed-width: #{$sidebar-collapsed-width}
-    padding-top: var(--header-area)
+
+    &.has-header
+        padding-top: var(--header-area)
 
     @media (min-width: $small-devices + 1px)
         --header-height: 60px
@@ -46,6 +48,10 @@ $sidebar-collapsed-width: 76px
             @media (min-width: $small-devices + 1px)
                 margin-left: calc(8px + var(--sidebar-collapsed-width) + var(--header-gap))
 
+    &.flush
+        padding: 0
+        gap: 0
+
     .canvas-content
         flex: 1
         min-width: 0
@@ -68,6 +74,10 @@ $sidebar-collapsed-width: 76px
                 @media (min-width: $small-devices + 1px)
                     padding: 0 var(--space-6)
 
+            &.flush
+                max-width: none
+                padding: 0
+
         .page-header
             display: flex
             justify-content: space-between
@@ -81,7 +91,6 @@ $sidebar-collapsed-width: 76px
             p
                 margin: 0
                 color: var(--text-secondary)
-                font-size: 0.85rem
 
         .page-header-actions
             display: flex

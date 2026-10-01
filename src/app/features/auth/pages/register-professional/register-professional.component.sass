@@ -1,0 +1,19 @@
+@use 'styles/variables' as *
+@use 'styles/split-screen' as *
+
+.form-panel
+    @media (min-width: $small-devices + 1px)
+        padding-inline: var(--space-6)
+
+.form-grid
+    display: grid
+    grid-template-columns: 1fr
+    gap: 16px
+
+    @media (min-width: $small-devices + 1px)
+        grid-template-columns: 1fr 1fr
+
+.turnstile-wrap
+    display: flex
+    justify-content: center
+    margin: 16px 0 4px

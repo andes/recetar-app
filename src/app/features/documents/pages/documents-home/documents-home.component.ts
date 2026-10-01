@@ -1,12 +1,12 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, takeUntil, tap, filter, catchError } from 'rxjs/operators';
 
 import { SidebarItem } from '@shared/components/layout/sidebar/sidebar.component';
 import { SidebarService } from '@shared/services/sidebar.service';
+import { NotificationService } from '@shared/services/notification.service';
 import { ToggleOption } from '@shared/ui/toggle.component';
 import { AuthService } from '@auth/services/auth.service';
 import { AmbitoService } from '@auth/services/ambito.service';
@@ -42,7 +42,6 @@ export class DocumentsHomeComponent implements OnInit, OnDestroy {
     filterDateFrom = new FormControl('');
     filterDateTo = new FormControl('');
     filterStatus = new FormControl('');
-    showFilters = false;
 
     drawerOpen = false;
     selectedDocument: DocumentItemData | null = null;
@@ -72,9 +71,6 @@ export class DocumentsHomeComponent implements OnInit, OnDestroy {
 
     stats: DocumentsStats = {
         totals: { receta: 0, certificados: 0, practicas: 0, insumos: 0 },
-        prescriptions: { pendiente: 0, dispensada: 0, vencida: 0 },
-        certificates: { total: 0, anulados: 0 },
-        practices: { active: 0, completed: 0, cancelled: 0 },
     };
 
     private load$ = new Subject<void>();
@@ -91,7 +87,7 @@ export class DocumentsHomeComponent implements OnInit, OnDestroy {
         private andesPrescriptionsService: AndesPrescriptionsService,
         private printer: UnifiedPrinterComponent,
         private dialog: MatDialog,
-        private snackBar: MatSnackBar,
+        private notification: NotificationService,
         private statsService: DocumentsStatsService,
         private cdr: ChangeDetectorRef
     ) { }
@@ -188,12 +184,6 @@ export class DocumentsHomeComponent implements OnInit, OnDestroy {
         }
     }
 
-    get resultsRange(): { from: number; to: number } {
-        const from = this.totalResults === 0 ? 0 : this.pageIndex * this.pageSize + 1;
-        const to = Math.min(from + this.pageSize - 1, this.totalResults);
-        return { from, to };
-    }
-
     get currentItems(): DocumentItemData[] {
         switch (this.selectedType) {
             case 'receta': return this.dataSourcePrescriptions;
@@ -215,10 +205,6 @@ export class DocumentsHomeComponent implements OnInit, OnDestroy {
 
     isLoading(): boolean {
         return this.loadingPrescriptions || this.loadingCertificates || this.loadingPractices || this.loadingSupplies;
-    }
-
-    toggleFilters(): void {
-        this.showFilters = !this.showFilters;
     }
 
     clearSearch(): void {
@@ -259,7 +245,21 @@ export class DocumentsHomeComponent implements OnInit, OnDestroy {
     }
 
     canDeleteSelected(): boolean {
-        return this.selectedType === 'receta' || this.selectedType === 'practicas';
+        if (this.selectedType === 'practicas') { return true; }
+        if (this.selectedType !== 'receta' || !this.selectedDocument) { return false; }
+        if (this.isAndesPrescription(this.selectedDocument as MixedPrescription)) { return true; }
+        return this.isLocalPendiente(this.selectedDocument as Prescriptions);
+    }
+
+    canSuspendSelected(): boolean {
+        if (this.selectedType !== 'receta' || !this.selectedDocument) { return false; }
+        if (this.isAndesPrescription(this.selectedDocument as MixedPrescription)) { return false; }
+        return this.isLocalPendiente(this.selectedDocument as Prescriptions);
+    }
+
+    private isLocalPendiente(prescription: Prescriptions): boolean {
+        const status = (prescription?.status || '').toLowerCase();
+        return status === 'pendiente' || status === 'vigente';
     }
 
     canAnulateSelected(): boolean {
@@ -286,6 +286,11 @@ export class DocumentsHomeComponent implements OnInit, OnDestroy {
         }
     }
 
+    suspendSelected(): void {
+        if (!this.selectedDocument || this.selectedType !== 'receta') { return; }
+        this.suspendPrescription(this.selectedDocument as Prescriptions);
+    }
+
     anulateSelected(): void {
         if (!this.selectedDocument || this.selectedType !== 'certificados') { return; }
         this.anulateCertificate(this.selectedDocument as Certificate);
@@ -293,6 +298,46 @@ export class DocumentsHomeComponent implements OnInit, OnDestroy {
 
     private docId(item: DocumentItemData): string {
         return (item as { _id?: string })._id || '';
+    }
+
+    private groupPrescriptions(list: MixedPrescription[]): MixedPrescription[] {
+        const groupTime = new Map<string, number>();
+        for (const item of list) {
+            const groupId = this.treatmentGroupIdOf(item);
+            if (!groupId) { continue; }
+            const time = this.itemTime(item);
+            groupTime.set(groupId, Math.max(groupTime.get(groupId) ?? 0, time));
+        }
+
+        return [...list].sort((a, b) => {
+            const groupA = this.treatmentGroupIdOf(a);
+            const groupB = this.treatmentGroupIdOf(b);
+            const timeA = groupA ? (groupTime.get(groupA) ?? this.itemTime(a)) : this.itemTime(a);
+            const timeB = groupB ? (groupTime.get(groupB) ?? this.itemTime(b)) : this.itemTime(b);
+            if (timeA !== timeB) { return timeB - timeA; }
+            return this.ordenOf(a) - this.ordenOf(b);
+        });
+    }
+
+    private treatmentGroupIdOf(item: MixedPrescription): string | null {
+        if (this.isAndesPrescription(item)) { return null; }
+        const prescription = item as Prescriptions;
+        return prescription.tratamientoProlongado && prescription.treatmentGroupId
+            ? prescription.treatmentGroupId
+            : null;
+    }
+
+    private ordenOf(item: MixedPrescription): number {
+        if (this.isAndesPrescription(item)) { return 0; }
+        return (item as Prescriptions).ordenTratamiento ?? 0;
+    }
+
+    private itemTime(item: MixedPrescription): number {
+        const raw = this.isAndesPrescription(item)
+            ? ((item as AndesPrescriptions).fechaRegistro || (item as AndesPrescriptions).fechaPrestacion)
+            : ((item as Prescriptions).createdAt || (item as Prescriptions).date);
+        const time = raw ? new Date(raw as string | Date).getTime() : 0;
+        return Number.isFinite(time) ? time : 0;
     }
 
     private loadData() {
@@ -321,7 +366,7 @@ export class DocumentsHomeComponent implements OnInit, OnDestroy {
                             const term = searchTerm.toLowerCase();
                             items = items.filter(p => this.matchesPrescription(p, term));
                         }
-                        this.dataSourcePrescriptions = items;
+                        this.dataSourcePrescriptions = this.groupPrescriptions(items);
                         this.totalPrescriptions = response.total;
                         this.loadingPrescriptions = false;
                     })
@@ -444,7 +489,7 @@ export class DocumentsHomeComponent implements OnInit, OnDestroy {
             : (item.supplies?.map(s => s.supply?.name || '').join(', ') || '');
         const dialogRef = this.dialog.open(ConfirmDialogComponent, {
             panelClass: ['confirm-dialog-panel', 'dialog-sm'],
-            data: { title: 'Eliminar receta', message: `¿Eliminar la receta de "${label}"?` }
+            data: { title: 'Eliminar receta', message: `¿Eliminar la receta de "${label}"?`, danger: true }
         });
         dialogRef.afterClosed().pipe(
             filter(result => result === true),
@@ -459,12 +504,37 @@ export class DocumentsHomeComponent implements OnInit, OnDestroy {
             })
         ).subscribe({
             next: () => {
-                this.snackBar.open('Receta eliminada', 'Cerrar', { duration: 3000 });
+                this.notification.success('Receta eliminada');
                 this.closeDrawer();
                 this.load$.next();
             },
-            error: () => {
-                this.snackBar.open('Error al eliminar la receta', 'Cerrar', { duration: 3000 });
+            error: (error) => {
+                this.notification.httpError(error);
+            }
+        });
+    }
+
+    suspendPrescription(item: Prescriptions): void {
+        const label = item.supplies?.map(s => s.supply?.name || '').join(', ') || '';
+        const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+            panelClass: ['confirm-dialog-panel', 'dialog-sm'],
+            data: {
+                title: 'Suspender receta',
+                message: `¿Suspender la receta de "${label}"? Una vez suspendida no podrá dispensarse.`,
+                danger: true,
+            }
+        });
+        dialogRef.afterClosed().pipe(
+            filter(result => result === true),
+            switchMap(() => this.prescriptionsService.suspendPrescription(item._id))
+        ).subscribe({
+            next: () => {
+                this.notification.success('Receta suspendida');
+                this.closeDrawer();
+                this.load$.next();
+            },
+            error: (error) => {
+                this.notification.httpError(error);
             }
         });
     }
@@ -472,19 +542,19 @@ export class DocumentsHomeComponent implements OnInit, OnDestroy {
     deletePractice(item: Practice): void {
         const dialogRef = this.dialog.open(ConfirmDialogComponent, {
             panelClass: ['confirm-dialog-panel', 'dialog-sm'],
-            data: { title: 'Eliminar práctica', message: `¿Eliminar la práctica "${item.practice}"?` }
+            data: { title: 'Eliminar práctica', message: `¿Eliminar la práctica "${item.practice}"?`, danger: true }
         });
         dialogRef.afterClosed().pipe(
             filter(result => result === true),
             switchMap(() => this.practicesService.deletePractice(item._id!))
         ).subscribe({
             next: () => {
-                this.snackBar.open('Práctica eliminada', 'Cerrar', { duration: 3000 });
+                this.notification.success('Práctica eliminada');
                 this.closeDrawer();
                 this.load$.next();
             },
             error: () => {
-                this.snackBar.open('Error al eliminar la práctica', 'Cerrar', { duration: 3000 });
+                this.notification.error('Error al eliminar la práctica');
             }
         });
     }
@@ -492,19 +562,19 @@ export class DocumentsHomeComponent implements OnInit, OnDestroy {
     anulateCertificate(item: Certificate): void {
         const dialogRef = this.dialog.open(ConfirmDialogComponent, {
             panelClass: ['confirm-dialog-panel', 'dialog-sm'],
-            data: { title: 'Anular certificado', message: '¿Anular este certificado?' }
+            data: { title: 'Anular certificado', message: '¿Anular este certificado?', danger: true }
         });
         dialogRef.afterClosed().pipe(
             filter(result => result === true),
             switchMap(() => this.certificatesService.anulateCertificate(item))
         ).subscribe({
             next: () => {
-                this.snackBar.open('Certificado anulado', 'Cerrar', { duration: 3000 });
+                this.notification.success('Certificado anulado');
                 this.closeDrawer();
                 this.load$.next();
             },
             error: () => {
-                this.snackBar.open('Error al anular el certificado', 'Cerrar', { duration: 3000 });
+                this.notification.error('Error al anular el certificado');
             }
         });
     }

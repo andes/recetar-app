@@ -4,6 +4,41 @@ import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
+export interface AndesFormacionGradoData {
+    renovacion: boolean;
+    papelesVerificados: boolean;
+    matriculado: boolean;
+    profesion: {
+        _id: string;
+        codigo: number;
+        nombre: string;
+        tipoDeFormacion: string;
+        id: string;
+    };
+    entidadFormadora: {
+        _id: string;
+        codigo: number;
+        nombre: string;
+        id: string;
+    };
+    titulo: string;
+    fechaEgreso: string;
+    matriculacion: Array<{
+        baja: {
+            motivo: string;
+            fecha: string | null;
+        };
+        matriculaNumero: number;
+        libro: string;
+        folio: string;
+        inicio: string;
+        fin: string;
+        id: string | null;
+    }>;
+    fechaDeInscripcion: string;
+    id: string | null;
+}
+
 export interface AndesProfessionalData {
     _id?: string;
     id: string;
@@ -15,40 +50,8 @@ export interface AndesProfessionalData {
     cuit: string;
     nacionalidad?: string;
     habilitado: boolean;
-    profesiones: Array<{
-        renovacion: boolean;
-        papelesVerificados: boolean;
-        matriculado: boolean;
-        profesion: {
-            _id: string;
-            codigo: number;
-            nombre: string;
-            tipoDeFormacion: string;
-            id: string;
-        };
-        entidadFormadora: {
-            _id: string;
-            codigo: number;
-            nombre: string;
-            id: string;
-        };
-        titulo: string;
-        fechaEgreso: string;
-        matriculacion: Array<{
-            baja: {
-                motivo: string;
-                fecha: string | null;
-            };
-            matriculaNumero: number;
-            libro: string;
-            folio: string;
-            inicio: string;
-            fin: string;
-            id: string | null;
-        }>;
-        fechaDeInscripcion: string;
-        id: string | null;
-    }>;
+    formacionGrado: AndesFormacionGradoData[];
+    profesiones?: AndesFormacionGradoData[];
 }
 
 export interface AndesApiResponse<T> {
@@ -226,7 +229,8 @@ export class AndesSearchService {
                 let latestMatricula = '';
                 let latestEndDate = new Date(0);
 
-                professional.profesiones.forEach((profesion) => {
+                const formaciones = professional.formacionGrado ?? professional.profesiones ?? [];
+                formaciones.forEach((profesion) => {
                     profesion.matriculacion.forEach((mat) => {
                         const endDate = new Date(mat.fin);
                         if (endDate > new Date() && endDate > latestEndDate) {

@@ -113,7 +113,7 @@ export class UnifiedPrinterComponent {
             firstname: `${prescription.patient.firstName}`,
             lastname: `${prescription.patient.lastName}`,
             autopercibido: `${prescription.patient.nombreAutopercibido || ''}`,
-            dni: `${prescription.patient.dni}`,
+            dni: prescription.patient.dni || 'Sin DNI',
             dob: prescription.patient.fechaNac,
             sex: `${prescription.patient.sex}`,
             obraSocial: prescription.patient.obraSocial?.nombre,
@@ -141,6 +141,11 @@ export class UnifiedPrinterComponent {
                 pdf.add(new Txt('' + supply.diagnostic ? supply.diagnostic : 'Sin datos registrados').end);
             }
         });
+        if (prescription.tratamientoProlongado) {
+            pdf.add(new Txt('\n').end);
+            pdf.add(new Txt('Tratamiento prolongado').bold().end);
+            pdf.add(new Txt(`${prescription.tratamientoProlongado} meses`).end);
+        }
         if (prescription.observation) {
             pdf.add(new Txt('\n').end);
             pdf.add(new Txt('Observaciones').bold().end);
@@ -268,7 +273,7 @@ export class UnifiedPrinterComponent {
         this.addPatientData(pdf, {
             firstname: `${prescription.paciente.nombre}`,
             lastname: `${prescription.paciente.apellido}`,
-            autopercibido: `${patient.nombreAutopercibido || ''}`, dni: `${prescription.paciente.documento}`,
+            autopercibido: `${patient.nombreAutopercibido || ''}`, dni: prescription.paciente.documento || 'Sin DNI',
             dob: prescription.paciente.fechaNacimiento,
             sex: `${prescription.paciente.sexo}`,
             obraSocial: prescription.paciente.obraSocial?.nombre,
@@ -366,7 +371,7 @@ export class UnifiedPrinterComponent {
                 firstname: `${certificate.patient.firstName}`,
                 lastname: `${certificate.patient.lastName}`,
                 autopercibido: `${certificate.patient.nombreAutopercibido || ''}`,
-                dni: `${certificate.patient.dni}`,
+                dni: certificate.patient.dni || 'Sin DNI',
                 dob: certificate.patient.fechaNac,
                 sex: `${certificate.patient.sex}`,
                 obraSocial: certificate.patient.obraSocial?.nombre,
@@ -478,7 +483,7 @@ export class UnifiedPrinterComponent {
                 firstname: `${practice.patient.firstName}`,
                 lastname: `${practice.patient.lastName}`,
                 autopercibido: `${practice.patient.nombreAutopercibido || ''}`,
-                dni: `${practice.patient.dni}`,
+                dni: practice.patient.dni || 'Sin DNI',
                 dob: null,
                 sex: `${practice.patient.sex}`,
                 obraSocial: practice.patient.obraSocial?.nombre,

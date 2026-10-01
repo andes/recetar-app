@@ -17,8 +17,10 @@ La app usa **Angular Material** como librería de componentes UI. Cada feature m
 - Formularios: ~~`MatFormField`, `MatInput`, `MatSelect`, `MatAutocomplete`, `MatDatepicker`~~ → **usar inputs nativos con tokens CSS del proyecto**
 - Botones: `MatButton`, `MatIconButton`, `MatMenu`
 - Datos: `MatTable`, `MatSort`, `MatPaginator`, `MatCard`
-- Feedback: `MatDialog`, `MatSnackBar`, `MatProgressSpinner`
-- Navegación: `MatMenu`, `MatList`, `MatTabs`
+- Feedback: `MatDialog`, `MatProgressSpinner`
+- Navegación: `MatMenu`, `MatList`
+- Notificaciones: `NotificationService` (snackbar propio de la app). **No usar `MatSnackBar` directamente** ni `snackBar.open(...)` en componentes.
+- Tabs: `ui-tabs` (barra de tabs visual). **No usar `MatTabs`/`mat-tab-group`** para este patrón.
 
 **Importante:** Angular Material v20.x usa M3 (Material Design 3). Los tokens CSS de state layer usan prefijo `--mat-*`, no `--mdc-*` (ej: `--mat-list-list-item-hover-state-layer-color`, no `--mdc-list-list-item-hover-state-layer-color`).
 
@@ -169,23 +171,38 @@ avatares de UI (el de Material queda para fotos de perfil).
 
 ### `ui-badge-chip`
 
-Chip de estado semántico, wrapper de `<mat-chip disableRipple>`.
+Chip de estado semántico, wrapper de `<mat-chip disableRipple>` que encapsula
+las clases de variante/tamaño del design system.
 
 | Input | Tipo | Default | Descripción |
 |---|---|---|---|
-| `variant` | `'success'`\|`'info'`\|`'warning'`\|`'error'` | `'success'` | Color del chip |
+| `variant` | `'neutral'`\|`'success'`\|`'info'`\|`'warning'`\|`'error'`\|`'primary'`\|`'secondary'` | `'neutral'` | Color del chip. `neutral` usa el fondo por defecto (`--bg-over-body`); `primary` es **sólido** (fondo `--primary` + texto blanco); `secondary` es el tinte violeta |
+| `status` | `string` | `''` | Si se pasa, resuelve `variant` + label con `shared/utils/status.utils` (tiene prioridad sobre `variant`) |
 | `size` | `'sm'`\|`'md'` | `'sm'` | Compacto o normal |
+| `icon` | `string` | `undefined` | Ícono Material opcional a la izquierda |
+| `dot` | `boolean` | `false` | Muestra un punto de color (`currentColor`) antes del texto |
 
 ```html
-<ui-badge-chip variant="success" size="sm">
-  <mat-icon matChipAvatar>check_circle</mat-icon>
-  Validado
+<!-- Estado: variante + label resueltos del status -->
+<ui-badge-chip [status]="status"></ui-badge-chip>
+
+<!-- Con punto de color -->
+<ui-badge-chip [status]="getStatus()" [dot]="true"></ui-badge-chip>
+
+<!-- Variante explícita con contenido custom -->
+<ui-badge-chip variant="warning" icon="schedule">
+  Vence en {{ daysToExpire }} días
+</ui-badge-chip>
+
+<!-- Chip neutro para metadata (fecha, código) -->
+<ui-badge-chip variant="info">
+  <strong class="mono text-sm">{{ date | date:"dd MMM yyyy" }}</strong>
 </ui-badge-chip>
 ```
 
-**Cuándo usar:** cualquier indicador de estado o categoría que use los tokens semánticos
-del sistema de diseño (success, info, warning, error). Genérico. **No usar**
-`<mat-chip class="success sm">` manualmente.
+**Cuándo usar:** cualquier indicador de estado, categoría o metadata que use los tokens
+semánticos del sistema de diseño. Genérico. **No usar** `<mat-chip class="success sm">`
+manualmente.
 
 ### `ui-table`
 
@@ -233,6 +250,101 @@ columns: ColumnDef[] = [
 
 Si una tabla no necesita detalle expandible, usar `[expandable]="false"`. El clic en fila emite `rowClick` y no expande nada.
 
+### `ui-tabs`
+
+Barra de tabs visual con icono, label, contador opcional, estado de error y subrayado activo. Es el patrón de las tabs del “Paso 2: Documento” de Nueva prescripción.
+
+| Input | Tipo | Default | Descripción |
+|---|---|---|---|
+| `items` | `UiTabItem[]` | `[]` | Tabs a renderizar |
+| `value` | `string` | `''` | Valor de la tab activa |
+| `stretch` | `boolean` | `true` | `true`: tabs de ancho completo; `false`: tabs compactas de 160px alineadas a la izquierda |
+
+| Output | Tipo | Descripción |
+|---|---|---|
+| `valueChange` | `EventEmitter<string>` | Emite el `value` de la tab seleccionada |
+
+`UiTabItem`:
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `value` | `string` | Identificador de la tab |
+| `label` | `string` | Texto visible |
+| `icon` | `string` | Ícono Material opcional |
+| `count` | `number` | Contador opcional (se muestra con `ui-badge-chip`) |
+| `error` | `boolean` | Muestra ícono de error en la tab |
+| `disabled` | `boolean` | Deshabilita la tab |
+
+```html
+<!-- Ancho completo (Paso 2: Documento) -->
+<ui-tabs [items]="typeTabs" [value]="activeType" (valueChange)="onTypeChange($event)"></ui-tabs>
+
+<!-- Compacto, alineado a la izquierda (formulario de paciente) -->
+<ui-tabs [items]="tabItems" [value]="activeTab" [stretch]="false"
+    (valueChange)="onTabChange($event)"></ui-tabs>
+```
+
+**Cuándo usar:** cualquier barra de tabs visual. El componente solo renderiza la barra; el panel activo lo decide el consumidor con `@if`. **No usar** `mat-tab-group`/`MatTabs` para este patrón.
+
+### `ui-alert`
+
+Aviso inline con ícono y variante semántica.
+
+| Input | Tipo | Default | Descripción |
+|---|---|---|---|
+| `variant` | `'warning' \| 'success' \| 'error' \| 'info' \| 'neutral'` | `'warning'` | Estilo semántico |
+| `icon` | `string` | según variante | Ícono Material |
+| `fullwidth` | `boolean` | `false` | Ocupa todo el ancho |
+| `transparent` | `boolean` | `false` | Sin fondo ni borde |
+| `textAlign` | `'left' \| 'center' \| 'right'` | `'left'` | Alineación |
+| `action` / `actionUrl` | `string` | `undefined` | Acción tipo link |
+| `hasActionsSlot` | `boolean` | `false` | Habilita el slot `[alertActions]` |
+
+```html
+<ui-alert variant="error" [fullwidth]="true">
+    La eliminación es definitiva en ANDES.
+</ui-alert>
+```
+
+**Cuándo usar:** avisos inline, advertencias y confirmaciones contextuales. **No crear** `div.warning`, `div.alert` ni estilos custom de alerta.
+
+### `ui-drawer`
+
+Drawer lateral sobre `mat-drawer`, con header, cuerpo y footer.
+
+| Input | Tipo | Default | Descripción |
+|---|---|---|---|
+| `title` | `string` | `''` | Título del header; si está vacío no se muestra |
+| `open` | `boolean` | `false` | Abre/cierra el drawer |
+| `disableClose` | `boolean` | `false` | Bloquea cierre por backdrop/ESC |
+| `hasBackdrop` | `boolean` | `true` | Muestra backdrop |
+
+| Output | Tipo | Descripción |
+|---|---|---|
+| `closed` | `EventEmitter<void>` | Emite al cerrar |
+
+Slots: `[drawerContent]` (cuerpo) y `[drawerFooter]` (acciones).
+
+```html
+<ui-drawer [open]="drawerOpen" title="Detalle del paciente" (closed)="closeDrawer()">
+    <app-patient-detail-panel drawerContent [patient]="selectedPatient" />
+
+    <div class="drawer-actions" drawerFooter>
+        <button matButton="filled" class="block">Editar</button>
+        <button matButton="outlined" class="block mat-error">Eliminar</button>
+    </div>
+
+    <div class="drawer-page-content">
+        <!-- contenido principal de la página -->
+    </div>
+</ui-drawer>
+```
+
+Reglas:
+- Las acciones van en `[drawerFooter]` con `.drawer-actions`, no dentro del cuerpo scrolleable.
+- El contenido por defecto va dentro de un wrapper estático (por ejemplo `.drawer-page-content`).
+- No poner `@if`/`@else` como hijo directo de `ui-drawer`: Angular no proyecta de forma confiable templates de control flow con múltiples raíces. Usar un wrapper estático.
+
 ## Principios De Diseño
 
 - **Claridad ante todo:** cada pantalla comunica una sola acción principal. Sin ruido visual.
@@ -275,11 +387,11 @@ Acento de acción. Uso exclusivo en botones, links, toggles, focus rings y eleme
 
 | Token SASS | Valor HEX | Uso |
 |---|---|---|
-| `$secondary` | `#4F46E5` | Botones primarios, links, focus rings. |
-| `$secondary-dark` | `#3730A3` | Estados hover de botones. |
-| `$secondary-light` | `#6366F1` | Variante clara para badges y chips. |
+| `$secondary` | `#7a61fe` | Botones, links, focus rings. |
+| `$secondary-dark` | `#6246e0` | Estados hover de botones. |
+| `$secondary-light` | `#a58fff` | Variante clara para badges y chips. |
 
-Escala completa: `$secondary-50` (`#EEF2FF`) a `$secondary-600` (`#4F46E5`).
+Escala completa: `$secondary-50` (`#f5f2ff`) a `$secondary-600` (`#6246e0`).
 
 ### 1.3 Neutros y Superficies de Sistema
 
@@ -432,9 +544,9 @@ $primary-dark: #111827
 $primary-light: #374151
 
 // Colores secundarios
-$secondary: #4F46E5
-$secondary-dark: #3730A3
-$secondary-light: #6366F1
+$secondary: #7a61fe
+$secondary-dark: #6246e0
+$secondary-light: #a58fff
 
 // Neutros y superficies
 $bg-body: #f5f7fb
@@ -504,6 +616,8 @@ El toggle está en el `SidebarComponent` al fondo, antes del footer. Usa íconos
 
 No usar valores fijos de color; siempre referenciar variables CSS que tengan definición dark correspondiente.
 
+**Ojo con `--primary`:** es el color institucional (casi negro en claro) y se usa como fondo del header/sidebar. **No** usarlo como color de texto ni como fondo de componentes chicos (label de botón tonal, toggle activo, link) porque en dark queda oscuro sobre oscuro. Para texto usar `--text-primary`; para acento/interactivo usar `--secondary`. Tampoco usar `--bg-card` como color de texto (en dark es oscuro).
+
 ### Panel con fondo oscuro
 
 Para superficies con fondo oscuro que necesitan texto claro (ej: panel institucional del login), aplicar `class="dark-mode"` al contenedor. Esto hace que `--text-primary`, `--text-secondary` y `--text-disabled` hereden los valores de modo oscuro dentro de ese scope, sin necesidad de crear variables nuevas ni reglas de `color` en el componente.
@@ -551,6 +665,42 @@ El componente solo define `background: var(--primary)` en su SASS. Los colores d
 - Usar `MatDialog` con config `{ disableClose: true }` para acciones críticas.
 - Confirmaciones: diálogo con botón primario y cancelar.
 
+### Notificaciones
+
+- Usar siempre `NotificationService` (`@shared/services/notification.service.ts`).
+- Métodos disponibles: `success(message, description?)`, `error(...)`, `warning(...)`, `info(...)` y `httpError(error)`.
+- El servicio abre `NotificationSnackbarComponent`, el snackbar propio de la app, con estilos, iconos, duración y posición definidos por el design system.
+- **Prohibido** inyectar `MatSnackBar` o llamar `snackBar.open(...)` en componentes de features.
+- `MatSnackBarModule` solo se importa en la infraestructura del servicio, no en módulos de feature.
+- Para errores HTTP usar `notification.httpError(error)`; para mensajes de negocio usar el método semántico que corresponda.
+
+```ts
+this.notification.success('Paciente guardado correctamente');
+this.notification.warning('No se puede editar un paciente sin identificador.');
+this.notification.error('No fue posible validar el paciente');
+this.notification.httpError(error);
+```
+
+### Acciones de página y proyección
+
+- Las acciones del header de una página van en un `<div pageActions>` como hijo directo de `app-canvas`, no dentro del contenido.
+- Usar un wrapper estático para las acciones y para el contenido condicional.
+- No usar `@if`/`@else` como hijo directo de componentes con `ng-content` (`app-canvas`, `ui-drawer`): envolver en un contenedor estático.
+
+```html
+<app-canvas [noCard]="true" pageTitle="Pacientes">
+    <div pageActions>
+        @if (mode === 'list') {
+            <button matButton="filled">Nuevo paciente</button>
+        }
+    </div>
+
+    <div class="page-content">
+        @if (mode === 'list') { ... } @else { ... }
+    </div>
+</app-canvas>
+```
+
 ## Reglas De Estilo Globales
 
 1. **Usar los tokens de `_variables.sass`** en lugar de colores, sombras o radios hardcodeados.
@@ -564,6 +714,10 @@ El componente solo define `background: var(--primary)` en su SASS. Los colores d
 9. **CSS mínimo — solo layout.** Los archivos `.sass` de componentes deben contener exclusivamente reglas de layout y espaciado (`display`, `grid`, `flex`, `padding`, `margin`, `gap`, `width`, `height`, `overflow`, `position`, `align-items`, `justify-content`, `box-sizing`). La tipografía la definen los elementos HTML semánticos (`<h1>`–`<h6>`, `<p>`, `<label>`, `<span>`) cuyos estilos heredan de la configuración global de Material Typography. Los colores se aplican mediante `var(--xxx)` definidos en `:root`. No se deben definir `font-size`, `font-weight`, `line-height`, `letter-spacing`, `font-family`, `text-transform`, `color` ni `background` con valores hardcodeados (hex, `rgb()`, `rgba()`, `hsl()`) en ningún componente.
 10. **Labels de formulario sin clases.** Para etiquetas de campos de formulario usar el elemento HTML nativo `<label>` sin ninguna clase CSS adicional. Los estilos del `<label>` están definidos globalmente en `src/styles.sass` y no deben redeclararse ni sobrescribirse en componentes. No usar `class="field-label"` ni otras clases en etiquetas `<label>`.
 11. **Global solo para Material overrides y utilidades genéricas.** `src/styles.sass` solo debe contener overrides de componentes Angular Material (`.mat-mdc-*`, `.mdc-*`) y clases utilitarias verdaderamente genéricas (`.wrapper`, `.text-center`, `.mono`, `.dark-mode`). No crear clases globales con nombres específicos de feature o componente (ej: `.badge-count`, `.type-btn`). El estilo específico de un componente va en su propio `.sass`.
+12. **Notificaciones:** usar `NotificationService`. No inyectar `MatSnackBar` ni usar `snackBar.open(...)` en features.
+13. **Tabs:** usar `ui-tabs` para barras de tabs visuales. No usar `mat-tab-group`/`MatTabs` para este patrón.
+14. **Acciones de página:** usar `[pageActions]` en `app-canvas`. No poner acciones dentro del contenido.
+15. **Proyección:** no usar `@if`/`@else` como hijo directo de `app-canvas` o `ui-drawer`; envolver en un wrapper estático.
 
 ## 12. Patrón de tabla de resultados
 
@@ -650,3 +804,226 @@ columns: ColumnDef[] = [
 - **Paginador:** `<ui-paginator>` con `pageSizeOptions="[5, 10, 25]"`.
 - **Carga:** `<div class="loading-container"><mat-spinner diameter="40"></mat-spinner></div>`. La clase puede definirse en el componente si el contexto lo requiere.
 - **CSS del componente.** En el `.sass` del componente van las clases específicas de la feature (display de celdas, layout, etc.). `styles.sass` solo contiene overrides de Material y utilidades verdaderamente genéricas (`.text-center`, `.mono`, `.wrapper`, etc.).
+
+## 13. Patrones De Ítem Y Utilidades Globales
+
+### Utilidades globales (`styles.sass`)
+
+| Clase | Uso |
+|---|---|
+| `.text-subtitle` | Nombre de entidad (paciente/medicamento/profesional): negrita y algo mayor que body |
+| `.text-label` / `.text-value` | Par etiqueta/valor de un dato |
+| `.text-success` / `.text-error` / `.text-warning` | Color de texto por estado |
+| `.text-highlight-1` … `.text-highlight-5` | Acentos de texto de la serie highlight (`--highlight-1..5`) |
+| `.bg-highlight-1` … `.bg-highlight-5` | Fondos suaves de la serie highlight (`--highlight-N-bg`, con variante dark) |
+| `.data-field` | Contenedor en columna para label + valor |
+| `.field-grid` (+ `.field-grid-full`) | Grid de datos etiquetados (1 col mobile / 2 col desktop) |
+| `.form-actions` | Footer de acciones de formulario (stack mobile / fila a la derecha en desktop) |
+| `.chip-row` | Fila de chips/badges (flex, `gap`, `flex-wrap`) |
+| `.med-type` (+ `.duplicado` / `.triplicado` / `.anulado`) | Indicador de tipo de medicamento |
+| `.truncate` | Truncado a una línea con ellipsis |
+| `.selectable` | Borde activo/hover del `ui-card` de un ítem seleccionable |
+| `.drawer-actions` | Fila de acciones del footer de un drawer (botones full-width) |
+
+### `ui-list-item`
+
+Contenedor canónico de ítem de listado. Encapsula el `ui-card`, el borde
+seleccionable, el layout content/side y el apilado de acciones (columna en desktop,
+fila en mobile). Slots `[itemContent]` y `[itemActions]`; output `(select)`.
+
+```html
+<ui-list-item [selected]="selected" (select)="onSelect()">
+  <div itemContent> … contenido del ítem … </div>
+  <div itemActions> … botones full-width … </div>
+</ui-list-item>
+```
+
+Reglas:
+- **No** redefinir `:host`, `*-content`, `*-side`, `*-actions` ni media queries en el
+  componente del ítem: los aporta `ui-list-item`.
+- Acciones: botones de texto full-width (`matButton` tonal/outlined/filled) con
+  `class="block"`, apilados. **No** usar `mat-icon-button` sueltos para las acciones.
+- Chips de estado: `<ui-badge-chip [status]="...">` o `[variant]`.
+- Fila identidad: `<ui-entity icon="person" [container]="false">` con `[entityName]`
+  (`text-subtitle`) y `[entityMeta]`.
+- Fila de badges: `class="chip-row"`.
+- Íconos: `mat-icon.sm` / `.xs` + `text-secondary` (sin tamaños inline).
+
+### `ui-entity`
+
+Ícono + nombre + meta. Con `container=false` (ítems) renderiza un `mat-icon` compacto;
+con `container=true` (default, drawers) usa `ui-icon` con `variant`/`size`.
+El slot `[entityIcon]` permite reemplazar el ícono por contenido custom (por ejemplo
+`ui-patient-avatar`) sin salir de `ui-entity`.
+
+```html
+<ui-entity icon="person" variant="primary">
+  <span entityName class="text-subtitle">{{ name }}</span>
+  <span entityMeta>DNI {{ dni }}</span>
+</ui-entity>
+
+<ui-entity>
+  <ui-patient-avatar entityIcon [sex]="patient.sex" [genero]="patient.genero" />
+  <span entityName class="text-subtitle">{{ displayName }}</span>
+  <span entityMeta>{{ dniLabel }}</span>
+</ui-entity>
+```
+
+### `ui-patient-avatar`
+
+Avatar de paciente con ícono y fondo por sexo/género. Contenedor de 36px, radio `--radius-md`.
+
+| Input | Tipo | Descripción |
+|---|---|---|
+| `sex` | `string` | Sexo del paciente (`Femenino`, `Masculino`, `Otro`). |
+| `genero` | `string` | Género autopercibido. |
+
+Reglas: femenino → `female` + `--highlight-2-bg`; masculino → `male` + `--highlight-5-bg`;
+otros → `transgender` + `--highlight-1-bg`. Se considera “otros” cuando el sexo es Otro (o
+vacío/desconocido) o cuando el género no coincide con el derivado del sexo (`mujer` para
+Femenino, `varon` para Masculino); así los pacientes con el género completado
+automáticamente por ANDES conservan su ícono de sexo.
+
+### `ui-med-avatar`
+
+Avatar cuadrado (36px, radio `--radius-md`, fondo `--primary-100`) con ícono Material.
+Se usa para medicamentos y para los ítems del historial de documentos (draft/historial).
+
+| Input | Tipo | Default | Descripción |
+|---|---|---|---|
+| `icon` | `string` | `'science'` | Ícono Material a mostrar. |
+
+```html
+<ui-med-avatar />
+<ui-med-avatar icon="verified" />
+```
+
+### `ui-detail-panel`
+
+Shell canónico de panel de detalle (drawer): header opcional (badge/fecha) + cuerpo con scroll.
+
+```html
+<ui-detail-panel>
+  <div detailHeader> … badge + fecha … </div>
+  <ui-detail-section label="Paciente"> … </ui-detail-section>
+</ui-detail-panel>
+```
+
+### `ui-detail-section`
+
+Sección etiquetada dentro de un panel. `variant`: `default` | `info` (fondo `--secondary-50`, ej. indicaciones) | `neutral` (fondo `--primary-50`, ej. diagnóstico/observaciones) | `warning` (fondo `--warning-bg`, ej. datos autopercibidos). La primera sección no lleva margen superior.
+
+```html
+<ui-detail-section label="Diagnóstico" variant="neutral">
+  <p class="text-sm">{{ diagnostic | capitalize }}</p>
+</ui-detail-section>
+```
+
+### `ui-results-list`
+
+Listado de resultados: contador ("Mostrando X–Y de N"), carga/vacío, contenido y paginador. El vacío se puede customizar con el slot `[empty]`.
+
+| Input | Tipo | Default |
+|---|---|---|
+| `loading` | boolean | false |
+| `total` | number | 0 |
+| `label` | string | '' |
+| `emptyIcon` / `emptyMessage` | string | — |
+| `pageSize` / `pageIndex` | number | 10 / 0 |
+| `pageSizeOptions` | number[] | [5, 10, 25] |
+| `countMode` | `'range' \| 'loaded'` | `'range'` | `'loaded'` muestra “Mostrando N resultados cargados” para listados con “Cargar más” |
+
+Output `page`.
+
+```html
+<ui-results-list [loading]="loading" [total]="total" label="Recetas"
+  [pageSize]="pageSize" [pageIndex]="pageIndex" [pageSizeOptions]="[5, 15, 30]"
+  (page)="onPageChange($event)">
+  <app-document-item *ngFor="let item of items" …></app-document-item>
+</ui-results-list>
+```
+
+### `ui-results-toolbar`
+
+Card de búsqueda + filtros de un listado: barra de búsqueda (con botón limpiar), toggle de filtros (con contador) y botón actualizar. El estado de apertura de filtros es interno.
+
+| Input | Tipo | Default |
+|---|---|---|
+| `control` | `FormControl` | — (requerido) |
+| `placeholder` | string | '' |
+| `isLoading` | boolean | false |
+| `showFilters` | boolean | false |
+| `showRefresh` | boolean | true |
+| `filterCount` | number | 0 |
+| `hasActiveFilters` | boolean | false |
+
+Outputs: `refresh`, `clearSearch`, `searchEnter`, `clearFilters`.
+Slots: `[searchExtra]` (contenido dentro del card, debajo de la fila) y `[filters]` (los `.filter-group`).
+
+```html
+<ui-results-toolbar [control]="searchControl" placeholder="Buscar…"
+  [isLoading]="loading" [showFilters]="true" [filterCount]="activeFilterCount"
+  [hasActiveFilters]="hasActiveFilters" (refresh)="refresh()"
+  (clearSearch)="onClearSearch()" (clearFilters)="onClear()">
+  <div class="filter-group" filters>
+    <label>Estado</label>
+    <ui-field-input type="select" [control]="statusControl">…</ui-field-input>
+  </div>
+</ui-results-toolbar>
+```
+
+### `ui-field-input`
+
+Input/select nativo con el estilo de campo unificado (mismo que `ui-date-field`). Usar en paneles de filtros y formularios en lugar de redefinir `.filter-input`.
+
+```html
+<ui-field-input type="select" [control]="statusControl">
+  <option *ngFor="let o of statusOptions" [value]="o.value">{{ o.label }}</option>
+</ui-field-input>
+```
+
+## 14. Botones: variantes de estado (error / warn)
+
+**En Angular Material v20 (M3) el input `color` de los botones es inerte**
+(`color="warn"` / `color="error"` no aplican ninguna clase). **No usar `color=`**;
+aplicar la clase explícita del design system.
+
+| Semántica | Clase | Variantes |
+|---|---|---|
+| **Destructivo** (Eliminar, Anular, Quitar, Suspender) | `class="mat-error"` | inline/lists: `matButton="outlined"`. Acción principal de un diálogo de confirmación: `matButton="filled"` |
+| **Cautela** (Deshacer, Desactivar PIN) | `class="mat-warn"` | `matButton="outlined"` / `"tonal"` según contexto |
+| **Confirmación / éxito** (Aceptar de un diálogo de operación exitosa) | `class="mat-success"` | `matButton="filled"` |
+| **Neutral** (Cancelar, Continuar) | — | sin clase de estado (usar `outlined`/`tonal`/`filled` base) |
+
+```html
+<!-- Destructivo inline -->
+<button matButton="outlined" class="mat-error">Eliminar</button>
+
+<!-- Destructivo: CTA principal de un diálogo de confirmación -->
+<button matButton="filled" class="mat-error">Confirmar</button>
+
+<!-- Cautela -->
+<button matButton="outlined" class="mat-warn">
+  <mat-icon>undo</mat-icon> Deshacer
+</button>
+```
+
+`styles.sass` define `.mat-error` / `.mat-warn` / `.mat-success` para `outlined`, `tonal`,
+`filled`, `raised`, `text` e icon-buttons, de modo que la clase pinta el estado en reposo
+(no solo en `:hover`). Para un confirm destructivo, la pantalla puede pasar un flag al
+diálogo (ej. `ConfirmDialogComponent` acepta `data.danger`) en vez de duplicar el
+componente. **Nunca** usar `style="background-color: green; color: white"` inline para
+botones de éxito: usar `class="mat-success"`.
+
+## 15. Checklist rápido antes de tocar UI
+
+- **Notificación** → `NotificationService`, nunca `MatSnackBar`/`snackBar.open`.
+- **Tabs** → `ui-tabs`; `stretch=false` para tabs compactas. Nunca `mat-tab-group`.
+- **Alerta inline** → `ui-alert`, nunca un `div` custom.
+- **Card** → `ui-card` / `ui-item-card`, nunca un `div` con estilos de card.
+- **Estado / badge** → `ui-badge-chip`, nunca `mat-chip` manual.
+- **Drawer** → `ui-drawer` con acciones en `drawerFooter` y wrapper estático.
+- **Acción de página** → `<div pageActions>` en `app-canvas`.
+- **Proyección** → evitar `@if`/`@else` como hijo directo de `app-canvas`/`ui-drawer`.
+- **Formularios** → inputs nativos con tokens; no `MatFormField`.
+- **Botones de estado** → `mat-error` / `mat-warn` / `mat-success`; no `color=`.

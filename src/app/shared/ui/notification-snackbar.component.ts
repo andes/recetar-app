@@ -17,46 +17,72 @@ const ICON_MAP: Record<string, string> = {
     template: `
             <div class="snackbar" [ngClass]="panelClass">
             <span class="material-symbols-outlined snackbar-icon">{{ icon }}</span>
-            <span class="snackbar-label">{{ message }}</span>
+            <div class="snackbar-content">
+                <span class="snackbar-label">{{ message }}</span>
+                <span class="snackbar-description" *ngIf="description">{{ description }}</span>
+            </div>
             <button class="snackbar-close material-symbols-outlined" (click)="dismiss()">close</button>
         </div>
     `,
     styles: [`
         .snackbar {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 12px;
             padding: 14px 16px;
             border-radius: var(--radius-lg);
-            background: var(--bg-card);
+            background: var(--snackbar-bg);
+            color: var(--text-primary-light);
             box-shadow: var(--elevation-3);
             min-width: 320px;
             max-width: 600px;
         }
         .snackbar-icon {
             flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 22px;
             width: 22px;
-            height: 22px;
+            height: 20px;
+            line-height: 1;
         }
-        .snackbar-label {
+        .snackbar-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
             flex: 1;
             min-width: 0;
+        }
+        .snackbar-label {
             font-size: 14px;
             font-weight: 500;
             line-height: 1.4;
+            color: var(--text-primary-light);
+            white-space: pre-wrap;
+        }
+        .snackbar-description {
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1.4;
+            color: var(--text-primary-light);
+            opacity: 0.85;
             white-space: pre-wrap;
         }
         .snackbar-close {
             flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             background: none;
             border: none;
             cursor: pointer;
             font-size: 18px;
             width: 18px;
-            height: 18px;
+            height: 20px;
             padding: 0;
             line-height: 1;
+            color: var(--text-primary-light);
             transition: opacity 0.15s;
             opacity: 0.6;
         }
@@ -64,32 +90,23 @@ const ICON_MAP: Record<string, string> = {
             opacity: 1;
         }
 
-        .notification-success .snackbar-icon { color: var(--success-text); }
-        .notification-success .snackbar-label { color: var(--success-text); }
-        .notification-success .snackbar-close { color: var(--success-text); }
-
-        .notification-error .snackbar-icon { color: var(--error-fill); }
-        .notification-error .snackbar-label { color: var(--error-fill); }
-        .notification-error .snackbar-close { color: var(--error-fill); }
-
-        .notification-warning .snackbar-icon { color: var(--warning-fill); }
-        .notification-warning .snackbar-label { color: var(--warning-fill); }
-        .notification-warning .snackbar-close { color: var(--warning-fill); }
-
-        .notification-info .snackbar-icon { color: var(--info-text); }
-        .notification-info .snackbar-label { color: var(--info-text); }
-        .notification-info .snackbar-close { color: var(--info-text); }
+        .notification-success .snackbar-icon { color: var(--snackbar-icon-success); }
+        .notification-error .snackbar-icon { color: var(--snackbar-icon-error); }
+        .notification-warning .snackbar-icon { color: var(--snackbar-icon-warning); }
+        .notification-info .snackbar-icon { color: var(--snackbar-icon-info); }
     `]
 })
 export class NotificationSnackbarComponent {
     protected message: string;
+    protected description: string;
     protected icon: string;
     protected panelClass: string;
 
     private ref = inject(MatSnackBarRef);
 
-    constructor(@Inject(MAT_SNACK_BAR_DATA) data: { message: string; panelClass: string }) {
+    constructor(@Inject(MAT_SNACK_BAR_DATA) data: { message: string; description?: string; panelClass: string }) {
         this.message = data.message;
+        this.description = data.description || '';
         this.panelClass = data.panelClass;
         this.icon = ICON_MAP[data.panelClass] || 'info_outline';
     }

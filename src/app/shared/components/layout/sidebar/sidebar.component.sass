@@ -7,7 +7,7 @@
     width: var(--sidebar-width)
     height: 100vh
     z-index: 1000
-    background: var(--bg-card)
+    background: var(--sidebar-bg)
     display: flex
     flex-direction: column
     overflow: hidden
@@ -20,7 +20,6 @@
         left: 8px
         height: auto
         border-radius: $radius-md
-        box-shadow: var(--elevation-3)
         transform: translateX(0)
 
 :host.sidebar-host-overlay-open
@@ -35,12 +34,18 @@
     margin: 0 12px
     border-radius: $radius-sm
     border: 1px solid transparent
-    color: var(--text-primary)
+    color: var(--text-primary-light)
     font-size: 0.9rem
     transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease
+    --mdc-list-list-item-label-text-color: var(--text-primary-light)
+    --mat-list-list-item-label-text-color: var(--text-primary-light)
+    --mdc-list-list-item-hover-label-text-color: var(--text-primary-light)
+    --mat-list-list-item-hover-label-text-color: var(--text-primary-light)
+    --mdc-list-list-item-focus-label-text-color: var(--text-primary-light)
+    --mat-list-list-item-focus-label-text-color: var(--text-primary-light)
 
     .mat-icon
-        color: var(--text-primary)
+        color: var(--text-primary-light)
         font-size: 20px
         width: 20px
         height: 20px
@@ -48,19 +53,25 @@
         flex-shrink: 0
 
     &:focus, &:hover
-        background: var(--primary-200)
-
-    &.active-item
-        background: var(--btn-base-bg)
-        color: var(--btn-base-text)
-        --mdc-list-list-item-hover-label-text-color: var(--btn-base-text)
-        --mdc-list-list-item-label-text-color: var(--btn-base-text)
+        background: var(--sidebar-hover-bg)
+        color: var(--text-primary-light)
 
         .mat-icon
-            color: var(--btn-base-text)
+            color: var(--text-primary-light)
 
-        .mdc-list-item__primary-text
-            color: var(--btn-base-text)
+    &.active-item
+        background: var(--text-primary-light)
+        color: var(--text-primary)
+        font-weight: 500;
+        --mdc-list-list-item-label-text-color: var(--text-primary)
+        --mat-list-list-item-label-text-color: var(--text-primary)
+        --mdc-list-list-item-hover-label-text-color: var(--text-primary)
+        --mat-list-list-item-hover-label-text-color: var(--text-primary)
+        --mdc-list-list-item-focus-label-text-color: var(--text-primary)
+        --mat-list-list-item-focus-label-text-color: var(--text-primary)
+
+        .mat-icon
+            color: var(--text-primary)
 
 .sidebar
     width: 100%
@@ -100,7 +111,7 @@
     height: var(--header-height)
     min-height: var(--header-height)
     padding: 0 var(--space-5)
-    border-bottom: 1px solid var(--border-color)
+    border-bottom: 1px solid var(--sidebar-brand-border)
     flex-shrink: 0
     box-sizing: border-box
 
@@ -135,7 +146,7 @@
 
     .sidebar
         width: 100%
-        background: var(--bg-card)
+        background: var(--sidebar-bg)
         overflow-y: auto
         display: flex
         flex-direction: column

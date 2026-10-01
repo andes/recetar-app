@@ -3,7 +3,6 @@ import { Adapter, asRecord } from './adapter';
 import { SubOrganizacion } from './organizaciones';
 export class User {
     _id: string;
-    enrollment: string;
     responsibleDTEnrollment?: string;
     authorizationDisposition?: string;
     authorizationExpiration?: Date;
@@ -16,13 +15,6 @@ export class User {
     lastLogin?: Date;
     createdAt?: Date;
     updatedAt?: Date;
-    profesionGrado?: Array<{
-        profesion: string;
-        codigoProfesion: string;
-        numeroMatricula: string;
-        vencimiento?: string;
-        estado?: 'vigente' | 'vencida' | 'suspendida' | 'inhabilitada' | 'baja';
-    }>;
     organizaciones?: SubOrganizacion[];
 }
 
@@ -35,7 +27,6 @@ export class UserAdapter implements Adapter<User> {
 
         return {
             _id: data['_id'] as string,
-            enrollment: data['enrollment'] as string,
             responsibleDTEnrollment: data['responsibleDTEnrollment'] as string,
             authorizationDisposition: data['authorizationDisposition'] as string,
             authorizationExpiration: data['authorizationExpiration'] ? new Date(data['authorizationExpiration'] as string | number | Date) : undefined,
@@ -48,7 +39,6 @@ export class UserAdapter implements Adapter<User> {
             lastLogin: data['lastLogin'] ? new Date(data['lastLogin'] as string | number | Date) : undefined,
             createdAt: data['createdAt'] ? new Date(data['createdAt'] as string | number | Date) : undefined,
             updatedAt: data['updatedAt'] ? new Date(data['updatedAt'] as string | number | Date) : undefined,
-            profesionGrado: data['profesionGrado'] as User['profesionGrado'],
             organizaciones: data['organizaciones'] as SubOrganizacion[]
         } as User;
     }

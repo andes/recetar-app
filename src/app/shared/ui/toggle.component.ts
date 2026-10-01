@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, booleanAttribute } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -24,6 +24,7 @@ export interface ToggleOption {
                 type="button"
                 class="toggle-btn"
                 [class.active]="value === opt.value"
+                [disabled]="disabled"
                 (click)="select(opt.value)">
                 <span class="toggle-icon-box" [ngClass]="'color-' + (opt.color || 'primary')">
                     <mat-icon *ngIf="opt.icon">{{ opt.icon }}</mat-icon>
@@ -41,6 +42,8 @@ export interface ToggleOption {
                 type="button"
                 class="toggle-btn"
                 [class.active]="value === opt.value"
+                [disabled]="disabled"
+                [ngClass]="'color-' + (opt.color || 'primary')"
                 (click)="select(opt.value)">
                 <mat-icon *ngIf="opt.icon" class="toggle-icon">{{ opt.icon }}</mat-icon>
                 <small>{{ opt.label }}</small>
@@ -99,10 +102,23 @@ export interface ToggleOption {
             color: var(--text-primary);
         }
 
+        .toggle-btn:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+        }
+
         .toggle-btn.active {
             background: var(--bg-card);
-            color: var(--primary);
+            color: var(--text-primary);
             box-shadow: var(--shadow-sm);
+        }
+
+        .toggle-btn.color-success.active {
+            color: var(--success-text);
+        }
+
+        .toggle-btn.color-error.active {
+            color: var(--error-fill);
         }
 
         .toggle-icon {
@@ -200,12 +216,14 @@ export class UiToggleComponent {
     @Input() options: ToggleOption[] = [];
     @Input() value: string | null = null;
     @Input() variant: 'default' | 'big' = 'default';
+    @Input({ transform: booleanAttribute }) disabled = false;
     @Output() valueChange = new EventEmitter<string>();
 
     select(val: string): void {
-        if (val !== this.value) {
-            this.value = val;
-            this.valueChange.emit(val);
+        if (this.disabled || val === this.value) {
+            return;
         }
+        this.value = val;
+        this.valueChange.emit(val);
     }
 }

@@ -1,0 +1,81 @@
+name: E2E Playwright
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E
+        env:
+          CI: 'true'
+          E2E_START_APP: '0'
+          E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
+          E2E_API_URL: ${{ secrets.E2E_API_URL }}
+          E2E_DEFAULT_AMBITO: ${{ vars.E2E_DEFAULT_AMBITO }}
+          E2E_USER_PROFESSIONAL: ${{ secrets.E2E_USER_PROFESSIONAL }}
+          E2E_PASS_PROFESSIONAL: ${{ secrets.E2E_PASS_PROFESSIONAL }}
+          E2E_PROFESSIONAL_PIN: ${{ secrets.E2E_PROFESSIONAL_PIN }}
+          E2E_USER_PHARMACIST: ${{ secrets.E2E_USER_PHARMACIST }}
+          E2E_PASS_PHARMACIST: ${{ secrets.E2E_PASS_PHARMACIST }}
+          E2E_USER_AUDITOR: ${{ secrets.E2E_USER_AUDITOR }}
+          E2E_PASS_AUDITOR: ${{ secrets.E2E_PASS_AUDITOR }}
+          E2E_USER_ADMIN: ${{ secrets.E2E_USER_ADMIN }}
+          E2E_PASS_ADMIN: ${{ secrets.E2E_PASS_ADMIN }}
+          E2E_USER_PIN: ${{ secrets.E2E_USER_PIN }}
+          E2E_PASS_PIN: ${{ secrets.E2E_PASS_PIN }}
+          E2E_PIN_REQUIRED: ${{ secrets.E2E_PIN_REQUIRED }}
+          E2E_SKIP_MUTATIONS: ${{ secrets.E2E_SKIP_MUTATIONS }}
+          E2E_PATIENT_DNI: ${{ secrets.E2E_PATIENT_DNI }}
+          E2E_PATIENT_SEX: ${{ secrets.E2E_PATIENT_SEX }}
+          E2E_PHARMACY_CUIL: ${{ secrets.E2E_PHARMACY_CUIL }}
+          E2E_RENAPER_ENABLED: ${{ vars.E2E_RENAPER_ENABLED }}
+          E2E_RENAPER_POSITIVE_DNI: ${{ vars.E2E_RENAPER_POSITIVE_DNI }}
+          E2E_RENAPER_POSITIVE_SEX: ${{ vars.E2E_RENAPER_POSITIVE_SEX }}
+          E2E_RENAPER_NEGATIVE_DNI: ${{ vars.E2E_RENAPER_NEGATIVE_DNI }}
+          E2E_RENAPER_NEGATIVE_SEX: ${{ vars.E2E_RENAPER_NEGATIVE_SEX }}
+          E2E_ORG_PUBLIC_NAME: ${{ secrets.E2E_ORG_PUBLIC_NAME }}
+          E2E_ORG_PRIVATE_NAME: ${{ secrets.E2E_ORG_PRIVATE_NAME }}
+        run: npm run e2e
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: e2e/playwright-report
+          retention-days: 14
+
+      - name: Upload Playwright results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: e2e/test-results
+          retention-days: 14

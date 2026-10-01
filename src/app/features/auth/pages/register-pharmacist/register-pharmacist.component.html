@@ -1,0 +1,72 @@
+<app-canvas [showHeader]="false" [showSidebar]="false" [showFooter]="false" [noCard]="true" [flush]="true">
+    <div class="split-layout">
+        <div class="form-panel">
+            <div class="form-wrapper wide">
+                <div class="logo-area">
+                    <h1>RecetAR</h1>
+                    <span class="brand-subtitle">Receta Electrónica de Neuquén</span>
+                </div>
+
+                <div class="form-header">
+                    <h2>Crear cuenta de farmacia</h2>
+                    <p><small>Registrá tu farmacia para operar en RecetAR</small></p>
+                </div>
+
+                <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off" novalidate>
+
+                    @if (serverError) {
+                        <ui-alert variant="error" [fullwidth]="true">{{ serverError }}</ui-alert>
+                    }
+
+                    <div class="form-grid">
+                        <app-form-field type="text" label="CUIT de la farmacia" [control]="cuil" inputmode="numeric"
+                            [maxlength]="11" [errors]="fieldErrors['cuil']" [submitted]="submitted" [fullwidth]="true" />
+                        <app-form-field type="text" label="N° disposición de habilitación"
+                            [control]="disposicionHabilitacion" [errors]="fieldErrors['disposicionHabilitacion']"
+                            [submitted]="submitted" [fullwidth]="true" />
+                        <app-form-field type="text" label="Matrícula del director técnico" [control]="enrollment"
+                            [errors]="fieldErrors['enrollment']" [submitted]="submitted" [fullwidth]="true" />
+                        <app-form-field type="date" label="Vencimiento de habilitación"
+                            [control]="vencimientoHabilitacion" [errors]="fieldErrors['vencimientoHabilitacion']"
+                            [submitted]="submitted" [fullwidth]="true" />
+                        <app-form-field type="email" label="Email" [control]="email" autocomplete="email"
+                            [errors]="fieldErrors['email']" [submitted]="submitted" [fullwidth]="true" />
+                        <app-form-field type="password" label="Contraseña" [control]="password"
+                            autocomplete="new-password" [errors]="fieldErrors['password']" [submitted]="submitted"
+                            [fullwidth]="true" />
+                    </div>
+
+                    <div class="turnstile-wrap">
+                        <ngx-turnstile [siteKey]="siteKey" formControlName="captcha" theme="light"></ngx-turnstile>
+                    </div>
+                    @if (submitted && captcha.invalid) {
+                        <ui-alert variant="error" [fullwidth]="true">Completá el captcha para continuar.</ui-alert>
+                    }
+
+                    <div class="form-actions">
+                        <button matButton="outlined" type="button" (click)="cancel()">Cancelar</button>
+                        <button matButton="filled" type="submit" [disabled]="isSubmitting">
+                            @if (isSubmitting) {
+                                <mat-spinner diameter="20"></mat-spinner>
+                            } @else {
+                                Crear cuenta
+                            }
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="inst-panel">
+            <div class="inst-content">
+                <h2>Receta Electrónica</h2>
+                <p>
+                    En el marco de la Ley Nacional de Receta Electrónica, el Ministerio de Salud de la
+                    Provincia de Neuquén pone en funcionamiento <strong>RecetAR</strong>,
+                    accesible para profesionales de la salud y farmacias, tanto públicas como privadas.
+                </p>
+            </div>
+            <span class="inst-footer"><small>Ministerio de Salud · Provincia de Neuquén</small></span>
+        </div>
+    </div>
+</app-canvas>

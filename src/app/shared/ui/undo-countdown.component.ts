@@ -4,16 +4,16 @@ import {
     OnChanges,
     OnDestroy,
     SimpleChanges,
-} from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { MatIconModule } from "@angular/material/icon";
-import { MatTooltipModule } from "@angular/material/tooltip";
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 const GRACE_MS = 2 * 60 * 60 * 1000;
 
 @Component({
     standalone: true,
-    selector: "ui-undo-countdown",
+    selector: 'ui-undo-countdown',
     imports: [CommonModule, MatIconModule, MatTooltipModule],
     template: `
         <div class="undo-countdown" *ngIf="percent > 0" matTooltip="Tiempo restante para deshacer la dispensación"
@@ -72,15 +72,15 @@ const GRACE_MS = 2 * 60 * 60 * 1000;
     ],
 })
 export class UiUndoCountdownComponent implements OnChanges, OnDestroy {
-    @Input() dispensedAt = "";
+    @Input() dispensedAt = '';
 
     percent = 0;
-    label = "";
+    label = '';
 
     private timer: ReturnType<typeof setInterval> | null = null;
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (!changes["dispensedAt"]) {
+        if (!changes['dispensedAt']) {
             return;
         }
         this.update();
@@ -104,23 +104,23 @@ export class UiUndoCountdownComponent implements OnChanges, OnDestroy {
     private update(): void {
         if (!this.dispensedAt) {
             this.percent = 0;
-            this.label = "";
+            this.label = '';
             return;
         }
         const startedAt = new Date(this.dispensedAt).getTime();
         if (isNaN(startedAt)) {
             this.percent = 0;
-            this.label = "";
+            this.label = '';
             return;
         }
         const remainingMs = GRACE_MS - (Date.now() - startedAt);
         if (remainingMs <= 0) {
             this.percent = 0;
-            this.label = "";
+            this.label = '';
             return;
         }
         this.percent = Math.round((remainingMs / GRACE_MS) * 100);
         const totalSec = Math.ceil(remainingMs / 1000);
-        this.label = `${Math.floor(totalSec / 60)}:${String(totalSec % 60).padStart(2, "0")}`;
+        this.label = `${Math.floor(totalSec / 60)}:${String(totalSec % 60).padStart(2, '0')}`;
     }
 }

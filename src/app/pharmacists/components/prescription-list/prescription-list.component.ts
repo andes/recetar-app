@@ -12,7 +12,7 @@ import { DialogComponent } from '@pharmacists/components/dialog/dialog.component
 import { AuthService } from '@auth/services/auth.service';
 import { detailExpand, arrowDirection } from '@animations/animations.template';
 import { Subject } from 'rxjs';
-import { take, takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unified-printer.component';
 import { getHttpErrorMessage } from '@shared/utils/http-error.util';
 
@@ -352,14 +352,9 @@ export class PrescriptionListComponent implements OnInit, AfterContentInit, OnDe
 
     // Show a dialog
     openDialog(aDialogType: string, aPrescription?: Prescriptions | AndesPrescriptions, aText?: string): void {
-        const dialogRef = this.dialog.open(DialogComponent, {
+        this.dialog.open(DialogComponent, {
             width: '400px',
             data: { dialogType: aDialogType, prescription: aPrescription, text: aText }
-        });
-
-        dialogRef.afterClosed().pipe(take(1)).subscribe(() => {
-            // eslint-disable-next-line no-console
-            console.log('The dialog was closed');
         });
     }
 

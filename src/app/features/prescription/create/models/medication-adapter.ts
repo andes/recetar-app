@@ -6,7 +6,13 @@ export { toFrequentMedication, fromFrequentMedication } from '@shared/models/med
 export function toPrescriptionPayload(
     draft: DocumentDraft,
     date: Date,
-    professional: { userId: string; businessName: string; profesionGrado?: Array<{ profesion: string; codigoProfesion: string; numeroMatricula: string }> }
+    professional: {
+        userId: string;
+        businessName: string;
+        enrollment?: string;
+        cuil?: string;
+        profesionGrado?: Array<{ profesion: string; codigoProfesion: string; numeroMatricula: string }>;
+    }
 ): Record<string, unknown> {
 
     const patient = { ...draft.patient };
@@ -36,6 +42,7 @@ export function toPrescriptionPayload(
                 indication: m.indication,
                 duplicate: m.duplicate,
                 triplicate: m.triplicate,
+                ...(m.tratamientoProlongado ? { tratamientoProlongado: m.tratamientoProlongado } : {}),
                 ...(m.triplicate
                     ? {
                           triplicateData: {

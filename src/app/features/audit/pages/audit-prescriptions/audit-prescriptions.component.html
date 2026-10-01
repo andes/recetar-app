@@ -1,0 +1,63 @@
+<app-canvas [showSidebar]="true" [sidebarItems]="sidebarItems" [noCard]="true"
+    pageTitle="Auditoría de recetas" pageSubtitle="Consulte las recetas dispensadas por farmacia">
+
+    <ui-drawer [open]="drawerOpen" title="Detalle de receta" (closed)="closeDrawer()">
+        <app-prescription-detail-panel drawerContent [prescription]="selectedPrescription">
+        </app-prescription-detail-panel>
+
+        <div class="drawer-actions" drawerFooter *ngIf="canPrintSelected">
+            <button matButton="filled" color="secondary" class="block"
+                (click)="printPrescription(selectedPrescription)">
+                <mat-icon>print</mat-icon> Imprimir
+            </button>
+        </div>
+
+        <ui-results-toolbar [control]="cuitControl" placeholder="Ingrese el CUIT de la farmacia"
+            [isLoading]="loading" [showRefresh]="false" (clearSearch)="onClear()">
+            <div searchExtra class="dispenser-info" *ngIf="dispenser && !loading">
+                <ui-icon icon="local_pharmacy" variant="primary"></ui-icon>
+                <div class="dispenser-text">
+                    <strong class="dispenser-name">
+                        {{ (dispenser.businessName || dispenser.username) | titlecase }}
+                    </strong>
+                    <span class="dispenser-meta">
+                        <small *ngIf="dispenser.cuil || dispenser.username">
+                            CUIT/CUIL {{ dispenser.cuil || dispenser.username }}
+                        </small>
+                        <small *ngIf="dispenser.email">&middot; {{ dispenser.email }}</small>
+                    </span>
+                </div>
+            </div>
+
+            <div searchExtra class="field-footer" *ngIf="cuitControl.touched && cuitControl.invalid">
+                <small class="field-error" *ngIf="cuitControl.errors?.pattern">
+                    El CUIT debe contener solo números
+                </small>
+                <small class="field-error"
+                    *ngIf="cuitControl.errors?.minlength || cuitControl.errors?.maxlength">
+                    Debe ingresar entre 10 y 11 dígitos
+                </small>
+            </div>
+        </ui-results-toolbar>
+
+        <ui-results-list [loading]="loading" [total]="totalPrescriptions" label="Recetas"
+            [pageSize]="pageSize" [pageIndex]="pageIndex" [pageSizeOptions]="[10, 20, 30]"
+            (page)="onPageChange($event)">
+            <ng-container empty>
+                <ui-empty-state icon="search">
+                    @if (!hasSearched) {
+                        Ingrese el CUIT de una farmacia para ver sus recetas
+                    } @else {
+                        {{ dispenser ? "La farmacia no registra recetas dispensadas" : "No se encontró una farmacia con ese CUIT" }}
+                    }
+                </ui-empty-state>
+            </ng-container>
+            <app-prescription-item *ngFor="let prescription of prescriptions"
+                [prescription]="prescription"
+                [selected]="isSelected(prescription)"
+                (select)="openDrawer($event)"
+                (print)="printPrescription($event)">
+            </app-prescription-item>
+        </ui-results-list>
+    </ui-drawer>
+</app-canvas>

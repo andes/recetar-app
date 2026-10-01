@@ -1,0 +1,19 @@
+@use 'styles/variables' as *
+
+:host
+    display: block
+    width: 100%
+
+.page-actions
+    display: flex
+    align-items: center
+    gap: $space-3
+
+    .create-btn
+        background: var(--secondary)
+
+        &:hover
+            background: var(--secondary-dark)
+
+.drawer-actions mat-spinner
+    margin-right: var(--space-2)

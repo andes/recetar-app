@@ -24,6 +24,12 @@ export class SidebarService {
             );
         }
 
+        if (isProfessional || isAudit) {
+            items.push(
+                { icon: 'groups', label: 'Pacientes', route: '/pacientes' },
+            );
+        }
+
         if (isPharmacist) {
             items.push(
                 { icon: 'medication', label: 'Dispensar', route: '/dispensar-nuevo' },

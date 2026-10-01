@@ -13,6 +13,7 @@ interface JwtPayload {
     usrn?: string;
     sub?: string;
     bsname?: string;
+    cuil?: string;
     email?: string;
     rl?: string[];
 }
@@ -103,7 +104,7 @@ export class AuthService {
         return this.http.post<string>(`${this.apiEndPoint}/auth/recovery-password`, data);
     }
 
-    register(data: Record<string, unknown>): Observable<RegisterResponse> {
+    register(data: unknown): Observable<RegisterResponse> {
         return this.http.post<RegisterResponse>(`${this.apiEndPoint}/auth/register`, data);
     }
 
@@ -154,6 +155,11 @@ export class AuthService {
     getLoggedBusinessName(): string {
         const payLoadJwt = this.getDecodeJwt();
         return payLoadJwt?.bsname || '';
+    }
+
+    getLoggedCuil(): string {
+        const payLoadJwt = this.getDecodeJwt();
+        return payLoadJwt?.cuil || '';
     }
 
     getLoggedUserEmail(): string | null {

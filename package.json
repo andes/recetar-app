@@ -11,6 +11,12 @@
     "build:dev": "ng build --configuration=dev",
     "heroku-postbuild": "ng build --configuration=dev",
     "test": "ng test",
+    "e2e": "playwright test --config=e2e/playwright.config.ts",
+    "e2e:ui": "playwright test --config=e2e/playwright.config.ts --ui",
+    "e2e:headed": "playwright test --config=e2e/playwright.config.ts --headed",
+    "e2e:report": "playwright show-report e2e/playwright-report",
+    "e2e:install": "playwright install chromium",
+    "e2e:typecheck": "tsc -p e2e/tsconfig.json",
     "lint": "eslint -c .eslintrc.js --ext .ts .",
     "lint:fix": "eslint -c .eslintrc.js --ext .ts . --fix",
     "pwa": "ng build --configuration=production && start \"RecetAR\" cmd /c node server.js & start \"ngrok\" cmd /c ngrok http 8080",
@@ -55,6 +61,7 @@
     "@angular/cli": "^20.3.25",
     "@angular/compiler-cli": "^20.3.25",
     "@angular/language-service": "^20.3.25",
+    "@playwright/test": "^1.64.1",
     "@types/estree": "^1.0.2",
     "@types/jasmine": "~4.0.0",
     "@types/node": "^24.12.4",
@@ -74,3 +81,4 @@
     "typescript": "~5.8.3"
   }
 }
+

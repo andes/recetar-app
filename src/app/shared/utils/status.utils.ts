@@ -1,4 +1,4 @@
-export type StatusVariant = 'success' | 'info' | 'warning' | 'error' | 'primary';
+export type StatusVariant = 'success' | 'info' | 'warning' | 'error' | 'primary' | 'neutral';
 
 const STATUS_VARIANT_MAP: Record<string, StatusVariant> = {
     vigente: 'success',
@@ -10,9 +10,13 @@ const STATUS_VARIANT_MAP: Record<string, StatusVariant> = {
     suspendida: 'error',
     active: 'success',
     activo: 'success',
+    inactive: 'error',
+    inactivo: 'error',
     completed: 'success',
     cancelled: 'error',
     anulada: 'error',
+    validado: 'success',
+    temporal: 'neutral',
 };
 
 const STATUS_LABEL_MAP: Record<string, string> = {
@@ -25,9 +29,13 @@ const STATUS_LABEL_MAP: Record<string, string> = {
     suspendida: 'Suspendida',
     active: 'Activo',
     activo: 'Activo',
+    inactive: 'Inactivo',
+    inactivo: 'Inactivo',
     completed: 'Completada',
     cancelled: 'Cancelada',
     anulada: 'Anulada',
+    validado: 'Validado',
+    temporal: 'Temporal',
 };
 
 export function getStatusVariant(status?: string): StatusVariant {

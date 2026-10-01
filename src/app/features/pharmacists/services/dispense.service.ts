@@ -12,6 +12,7 @@ import { AndesPrescriptionsService } from '@services/andesPrescription.service';
 import { AuthService } from '@auth/services/auth.service';
 import { PrescriptionsAdapter } from '@interfaces/prescriptions';
 import { AndesPrescriptionsAdapter } from '@interfaces/andesPrescriptions';
+import { isAndesPrescription } from './prescription-source.util';
 
 export type MixedPrescription = Prescriptions | AndesPrescriptions;
 
@@ -150,6 +151,7 @@ export class DispenseService implements OnDestroy {
         const body: Record<string, unknown> = {
             userId: pharmacistId,
             businessName: this.authService.getLoggedBusinessName(),
+            cuil: this.authService.getLoggedCuil(),
         };
         if (replacement) { body.replacement = replacement; }
 
@@ -196,7 +198,7 @@ export class DispenseService implements OnDestroy {
     }
 
     isAndesPrescription(p: MixedPrescription): p is AndesPrescriptions {
-        return 'estadoActual' in p;
+        return isAndesPrescription(p);
     }
 
     getPrescriptionDate(p: MixedPrescription): Date {

@@ -5,13 +5,13 @@ import {
     EventEmitter,
     booleanAttribute,
     ViewEncapsulation,
-} from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { MatIconModule } from "@angular/material/icon";
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
     standalone: true,
-    selector: "ui-user-menu",
+    selector: 'ui-user-menu',
     encapsulation: ViewEncapsulation.None,
     imports: [CommonModule, MatIconModule],
     template: `

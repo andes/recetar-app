@@ -44,7 +44,7 @@
 
         &:focus-within
             border-color: var(--secondary)
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, .1)
+            box-shadow: var(--focus-ring)
 
     ::ng-deep .search-bar
         margin-bottom: 0
@@ -170,6 +170,14 @@
     grid-template-columns: 1fr 2fr
     gap: var(--space-3)
 
+.treatment-row
+    display: grid
+    grid-template-columns: 1fr
+    gap: var(--space-3)
+
+    @media (min-width: $small-devices + 1px)
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+
 .detail-actions
     display: flex
     gap: var(--space-3)
@@ -192,3 +200,4 @@
     to
         opacity: 1
         transform: translateY(0)
+

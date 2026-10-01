@@ -1,0 +1,25 @@
+<ui-list-item [selected]="selected" (select)="select.emit()">
+    <div itemContent>
+        <ui-entity>
+            <ui-patient-avatar entityIcon [sex]="patient.sex" [genero]="patient.genero"></ui-patient-avatar>
+            <span entityName class="name-row">
+                <span class="text-subtitle">{{ displayName }}</span>
+                <ui-badge-chip *ngIf="statusKey" [status]="statusKey" icon="verified_user"></ui-badge-chip>
+            </span>
+            <span entityMeta>
+                <span class="mono text-sm">
+                    {{ dniLabel }}
+                    <ng-container *ngIf="patient.sex"> &middot; {{ patient.sex }}</ng-container>
+                    <ng-container *ngIf="age !== null"> &middot; {{ age }} años</ng-container>
+                </span>
+            </span>
+        </ui-entity>
+    </div>
+
+    <div itemActions>
+        <button matButton="outlined" class="block" type="button" (click)="edit.emit()">
+            <mat-icon>edit</mat-icon>
+            Editar
+        </button>
+    </div>
+</ui-list-item>

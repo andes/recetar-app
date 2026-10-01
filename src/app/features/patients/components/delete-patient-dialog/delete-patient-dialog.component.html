@@ -1,0 +1,24 @@
+<h2 mat-dialog-title>Eliminar paciente</h2>
+
+<mat-dialog-content>
+    <p>
+        Vas a eliminar a <strong>{{ data.name }}</strong>
+        <ng-container *ngIf="data.dni"> (DNI {{ data.dni }})</ng-container>.
+    </p>
+
+    <ui-alert variant="error" [fullwidth]="true">
+        La eliminación es definitiva en ANDES y no se puede deshacer.
+        Los documentos ya emitidos en RecetAR conservan los datos del paciente.
+    </ui-alert>
+
+    <mat-checkbox [(ngModel)]="confirmed">
+        Entiendo que la acción es irreversible y quiero eliminar el paciente.
+    </mat-checkbox>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button matButton="outlined" type="button" (click)="close(false)">Cancelar</button>
+    <button matButton="filled" class="mat-error" type="button" [disabled]="!confirmed" (click)="close(true)">
+        Eliminar definitivamente
+    </button>
+</mat-dialog-actions>

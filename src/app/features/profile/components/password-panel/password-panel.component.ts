@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Subject } from 'rxjs';
 import { finalize, takeUntil } from 'rxjs/operators';
 import { FormFieldComponent } from '@shared/components/form-field/form-field.component';
+import { NotificationService } from '@shared/services/notification.service';
 import { getHttpErrorMessage } from '@shared/utils/http-error.util';
 import { AuthService } from '@auth/services/auth.service';
 
@@ -20,7 +20,6 @@ import { AuthService } from '@auth/services/auth.service';
         ReactiveFormsModule,
         MatButtonModule,
         MatProgressSpinnerModule,
-        MatSnackBarModule,
         FormFieldComponent,
     ]
 })
@@ -36,7 +35,7 @@ export class PasswordPanelComponent implements OnInit, OnDestroy {
 
     constructor(
         private fb: FormBuilder,
-        private snackBar: MatSnackBar,
+        private notification: NotificationService,
         private authService: AuthService,
     ) {
         this.passwordForm = this.fb.group({
@@ -93,16 +92,13 @@ export class PasswordPanelComponent implements OnInit, OnDestroy {
             .subscribe({
                 next: (res) => {
                     const message = res.message || res.mensaje || 'Contraseña cambiada exitosamente';
-                    this.snackBar.open(message, 'Cerrar', { duration: 5000 });
+                    this.notification.success(message);
                     this.passwordForm.reset();
                     this.submitted = false;
                 },
                 error: (error) => {
                     const msg = getHttpErrorMessage(error, 'Error al cambiar contraseña');
-                    this.snackBar.open(msg, 'Cerrar', {
-                        duration: 5000,
-                        panelClass: ['error-snackbar']
-                    });
+                    this.notification.error(msg);
                 }
             });
     }

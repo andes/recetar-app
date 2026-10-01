@@ -1,11 +1,11 @@
 <div class="edit-patient-header">
     <span>{{ isCreate ? 'Crear paciente' : 'Editar paciente' }}</span>
-    <mat-chip *ngIf="validationStatus" [class.success]="validationStatus === 'validado'"
-        [class.warning]="validationStatus === 'temporal'" class="sm">
-        <mat-icon>{{ validationStatus === 'validado' ? 'verified_user' : 'warning' }}</mat-icon>
+    <ui-badge-chip *ngIf="validationStatus"
+        [variant]="validationStatus === 'validado' ? 'success' : 'warning'"
+        [icon]="validationStatus === 'validado' ? 'verified_user' : 'warning'">
         {{ validationStatus === 'validado' ? 'Validado' : 'Sin validar' }}
-    </mat-chip>
-    <button *ngIf="!validationStatus || validationStatus === 'temporal'" matButton="tonal" color="info" type="button"
+    </ui-badge-chip>
+    <button *ngIf="(!validationStatus || validationStatus === 'temporal') && !sinDni" matButton="tonal" class="mat-info" type="button"
         class="validation-btn" (click)="onValidate()" [disabled]="isValidating" matTooltip="Validar con RENAPER">
         <mat-spinner *ngIf="isValidating" diameter="18" class="btn-spinner"></mat-spinner>
         <ng-container *ngIf="!isValidating">
@@ -16,6 +16,15 @@
 </div>
 
 <form [formGroup]="editForm" class="edit-patient-form">
+    <div class="dni-mode-row">
+        <ui-toggle [options]="dniModeOptions" [value]="dniMode" (valueChange)="onDniModeChange($event)">
+        </ui-toggle>
+    </div>
+
+    <p class="text-secondary" *ngIf="sinDni">
+        El paciente quedará como no validado. Podés agregar el DNI y validarlo más adelante.
+    </p>
+
     <div class="form-row">
         <app-form-field type="text" label="DNI" [control]="editForm.get('dni')" [submitted]="submitted" fullwidth
             suffixIcon="badge" placeholder="DNI" maxlength="8" inputmode="numeric"
@@ -27,24 +36,37 @@
         </app-form-field>
     </div>
 
+    <div class="name-mode-row">
+        <ui-toggle [options]="nameModeOptions" [value]="nameMode" [disabled]="!hasRealName"
+            (valueChange)="onNameModeChange($event)">
+        </ui-toggle>
+    </div>
+
     <div class="form-row">
         <app-form-field type="text" label="Apellido" [control]="editForm.get('lastName')" [submitted]="submitted"
             fullwidth placeholder="Apellido" [errors]="{ required: 'Debe ingresar el apellido' }">
         </app-form-field>
 
-        <app-form-field type="text" label="Nombre" [control]="editForm.get('firstName')" [submitted]="submitted"
-            fullwidth placeholder="Nombre" [errors]="{ required: 'Debe ingresar el nombre' }">
-        </app-form-field>
+        @if (nameMode === 'real') {
+            <app-form-field type="text" label="Nombre" [control]="editForm.get('firstName')" [submitted]="submitted"
+                fullwidth placeholder="Nombre" [errors]="{ required: 'Debe ingresar el nombre' }">
+            </app-form-field>
+        } @else {
+            <app-form-field type="text" label="Nombre autopercibido" [control]="editForm.get('nombreAutopercibido')"
+                [submitted]="submitted" fullwidth placeholder="Nombre autopercibido">
+            </app-form-field>
+        }
     </div>
 
     <div class="form-row">
-        <app-form-field type="text" label="Nombre autopercibido" [control]="editForm.get('nombreAutopercibido')"
-            [submitted]="submitted" fullwidth placeholder="Nombre autopercibido">
-        </app-form-field>
-
         <app-form-field *ngIf="showFechaNac" type="date" label="Fecha de nacimiento" [submitted]="submitted" fullwidth
             [control]="editForm.get('fechaNac')" [min]="minDateStr" [max]="maxDateStr"
             [errors]="{ required: 'Debe ingresar la fecha de nacimiento', invalidDate: 'Fecha inválida', futureDate: 'La fecha no puede ser futura', tooOldDate: 'La fecha debe ser posterior a 1900' }">
+        </app-form-field>
+
+        <app-form-field type="text" label="CUIL" [control]="editForm.get('cuil')" [submitted]="submitted" fullwidth
+            placeholder="11 dígitos" maxlength="11" inputmode="numeric"
+            [errors]="{ invalidFormat: 'El CUIL debe tener 11 dígitos', invalidCuil: 'El CUIL no es válido' }">
         </app-form-field>
     </div>
 

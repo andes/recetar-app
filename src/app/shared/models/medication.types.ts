@@ -19,6 +19,7 @@ export interface MedicationItem {
     indication: string;
     duplicate: boolean;
     triplicate: boolean;
+    tratamientoProlongado?: number;
     serie: string;
     numero: string;
     obraSocial?: {
@@ -26,6 +27,7 @@ export interface MedicationItem {
         codigoPuco?: number;
         numeroAfiliado?: string;
     };
+    sendError?: string;
 }
 
 export type PrescriptionItemResult =
