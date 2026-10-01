@@ -39,6 +39,7 @@
   --bg-over-body: #{$bg-over-body}
   --bg-card: #{$bg-card}
   --bg-raised: #{$bg-raised}
+  --bg-sidebar: #{$bg-sidebar}
   --text-primary: #{$text-primary}
   --text-primary-light: #{$text-primary-light}
   --text-secondary: #{$text-secondary}
@@ -53,14 +54,15 @@
   // Status colors
   --error-bg: #{$error-bg}
   --error-fill: #{$error-fill}
-  --error-fill: #{$error-fill}
+  --error-text: #{$error-text}
   --warning-bg: #{$warning-bg}
   --warning-fill: #{$warning-fill}
-  --warning-fill: #{$warning-fill}
+  --warning-text: #{$warning-text}
   --success-bg: #{$success-bg}
   --success-text: #{$success-text}
   --info-bg: #{$info-bg}
   --info-text: #{$info-text}
+
 
   // Gold accent (matrículas)
   --gold-bg: #{$gold-bg}
@@ -83,9 +85,13 @@
   --icon-btn-hover: #{$icon-btn-hover}
 
   // Role identity
+  --role-admin: #{$role-admin}
+  --role-professional: #{$role-professional}
+  --role-professional-public: #{$role-professional-public}
   --role-pharmacist: #{$role-pharmacist}
   --role-pharmacist-accent: #{$role-pharmacist-accent}
   --role-auditor: #{$role-auditor}
+  --role-app: #{$role-app}
 
   // Medication type colors
   --med-commercial-bg: #c3eff1
@@ -621,6 +627,15 @@ strong
   --icon-btn-bg: #{$icon-btn-bg-dark}
   --icon-btn-hover: #{$icon-btn-hover-dark}
 
+  // Role identity (mismos valores que en modo claro)
+  --role-admin: #{$role-admin}
+  --role-professional: #{$role-professional}
+  --role-professional-public: #{$role-professional-public}
+  --role-pharmacist: #{$role-pharmacist}
+  --role-pharmacist-accent: #{$role-pharmacist-accent}
+  --role-auditor: #{$role-auditor}
+  --role-app: #{$role-app}
+
   input
     color: #fff
     caret-color: #fff
@@ -710,6 +725,7 @@ body
 .mono
   font-family: var(--font-mono)
   line-height: normal
+  font-size: inherit
   color: var(--text-primary)
 
 .form-field
@@ -783,7 +799,16 @@ body.mat-typography
     line-height: 1
 
   .text-info
-    color: var(--info-text)
+    color: var(--text-info)
+
+  .text-error
+    color: var(--error-text)
+
+  .text-warning
+    color: var(--warning-text)
+
+  .text-highlight
+    color: var(--secondary)
 
   .text-secondary
     color: var(--text-secondary)
@@ -833,6 +858,10 @@ body.mat-typography
 
 .mat-dialog-container
   max-height: 90vh
+
+// ---- Overlay (dialogs/menus/selects) por encima del drawer (1300) ----
+.cdk-overlay-container
+  z-index: 1400
 
 // ---- Dialog size variants ----
 .dialog-sm

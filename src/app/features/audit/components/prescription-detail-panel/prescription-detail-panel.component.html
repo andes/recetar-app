@@ -1,0 +1,96 @@
+<div class="detail-panel">
+    <div class="detail-empty" *ngIf="!prescription">
+        <mat-icon>visibility_off</mat-icon>
+        <p>Seleccioná una receta para ver su detalle</p>
+    </div>
+
+    <ng-container *ngIf="prescription">
+        <div class="detail-top">
+            <mat-chip class="status-badge" [class]="getStatusVariant(prescription.status)">
+                {{ getStatusLabel(prescription.status) }}
+            </mat-chip>
+            <mat-chip class="info">
+                <strong class="mono text-sm">Receta: {{ prescription.date | date: "dd MMM yyyy" }}</strong>
+            </mat-chip>
+        </div>
+
+        <div class="detail-scroll">
+            <div class="section">
+                <label>Productos</label>
+                <div class="supply-row" *ngFor="let item of supplies">
+                    <div class="supply-main">
+                        <strong class="text-sm">{{ item.supply?.name | titlecase }}</strong>
+                        <small *ngIf="item.quantityPresentation">&middot; {{ item.quantityPresentation }}</small>
+                    </div>
+                    <mat-chip class="sm supply-qty">{{ item.quantity }}</mat-chip>
+                </div>
+            </div>
+
+            <div class="section">
+                <label>Paciente</label>
+                <div class="entity">
+                    <ui-icon icon="person" variant="primary"></ui-icon>
+                    <div class="entity-info">
+                        <strong class="text-lg">{{ patientName | titlecase }}</strong>
+                        <small>
+                            DNI {{ patientDni }}<ng-container *ngIf="patientSex"> &middot; {{ patientSex }}</ng-container>
+                        </small>
+                    </div>
+                </div>
+                <div class="p-fields" *ngIf="patientObraSocial || patientAfiliado">
+                    <div class="p-field" *ngIf="patientObraSocial">
+                        <span class="text-xs">Obra social</span>
+                        <strong class="text-sm">{{ patientObraSocial | titlecase }}</strong>
+                    </div>
+                    <div class="p-field" *ngIf="patientAfiliado">
+                        <span class="text-xs">Nº afiliado</span>
+                        <strong class="text-sm">{{ patientAfiliado }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" *ngIf="diagnostic">
+                <label>Diagnóstico</label>
+                <p class="diagnostic-box text-sm">{{ diagnostic | capitalize }}</p>
+            </div>
+
+            <div class="section" *ngIf="observation">
+                <label>Observaciones</label>
+                <p class="diagnostic-box text-sm">{{ observation | capitalize }}</p>
+            </div>
+
+            <div class="section">
+                <label>Profesional</label>
+                <div class="entity">
+                    <ui-icon icon="stethoscope"></ui-icon>
+                    <div class="entity-info">
+                        <strong class="text-sm">{{ professionalName | titlecase }}</strong>
+                        <small>Matrícula {{ professionalEnrollment || "—" }}</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" *ngIf="organization">
+                <label>Organización</label>
+                <div class="entity">
+                    <ui-icon icon="apartment"></ui-icon>
+                    <div class="entity-info">
+                        <strong class="text-sm">{{ organization | titlecase }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" *ngIf="isDispensed">
+                <label>Dispensación</label>
+                <div class="entity">
+                    <ui-icon icon="check_circle" variant="success"></ui-icon>
+                    <div class="entity-info">
+                        <strong class="text-sm">{{ dispensedAt | date: "dd/MM/yyyy HH:mm" }}</strong>
+                        <small *ngIf="dispensedByName">{{ dispensedByName | titlecase }}</small>
+                        <small *ngIf="getDispenserCuil()">CUIL {{ getDispenserCuil() }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+</div>

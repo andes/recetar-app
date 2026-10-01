@@ -1,0 +1,103 @@
+@use 'styles/variables' as *
+
+:host
+    display: flex
+    width: 100%
+    min-width: 0
+
+.prescription-item
+    cursor: pointer
+    text-align: left
+    min-width: 0
+
+    ::ng-deep
+        .ui-card
+            transition: border-color .12s, background-color .12s, box-shadow .12s
+
+        .ui-card-body
+            display: flex
+            flex-direction: column
+            padding: 0
+            min-width: 0
+
+    &:hover ::ng-deep .ui-card,
+    &.selected ::ng-deep .ui-card
+        border: 1px solid var(--secondary)
+
+.pi-content
+    flex: 1
+    min-width: 0
+    display: flex
+    flex-direction: column
+    gap: var(--space-2)
+    padding: var(--space-3) var(--space-4)
+
+.pi-tags
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+    flex-wrap: wrap
+
+.pi-date,
+.pi-count
+    display: inline-flex
+    align-items: center
+    gap: 4px
+    color: var(--text-secondary)
+
+.pi-icon
+    font-size: 16px
+    width: 16px
+    height: 16px
+    line-height: 16px
+    color: currentColor
+
+.pi-identity,
+.pi-detail-row
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+    min-width: 0
+
+    .mat-icon
+        color: var(--text-secondary)
+        font-size: 18px
+        width: 18px
+        height: 18px
+        line-height: 18px
+        flex-shrink: 0
+
+    .pi-name,
+    span
+        min-width: 0
+        overflow: hidden
+        text-overflow: ellipsis
+        white-space: nowrap
+
+.pi-side
+    flex-shrink: 0
+    display: flex
+    justify-content: center
+    padding: 0 var(--space-4) var(--space-3)
+
+.pi-actions
+    display: flex
+    flex-direction: row
+    gap: var(--space-2)
+
+    .block
+        flex: 1
+
+    .mat-icon
+        margin-right: 2px
+
+@media (min-width: $small-devices + 1px)
+    .prescription-item ::ng-deep .ui-card-body
+        flex-direction: row
+
+    .pi-side
+        width: 200px
+        padding: var(--space-4)
+
+    .pi-actions
+        flex-direction: column

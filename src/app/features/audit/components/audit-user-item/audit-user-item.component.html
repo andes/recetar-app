@@ -1,0 +1,35 @@
+<ui-card
+    *ngIf="user"
+    class="audit-user-item"
+    [class.selected]="selected"
+    (click)="onSelect()">
+
+    <div class="au-content">
+        <div class="au-tags">
+            <mat-chip class="sm" [class]="statusVariant">{{ statusLabel }}</mat-chip>
+            <span class="role-label text-sm" [style.color]="roleColor">
+                <mat-icon class="role-icon">{{ roleIcon }}</mat-icon>{{ roleName | titlecase }}
+            </span>
+            <small class="role-extra text-sm" *ngIf="extraRolesCount > 0">(+{{ extraRolesCount }})</small>
+            <span class="au-username text-sm" *ngIf="user.username">
+                <mat-icon>account_circle</mat-icon>{{ user.username }}
+            </span>
+            <span class="au-last-login text-caption">
+                Último acceso: {{ user.lastLogin ? (user.lastLogin | date: "dd/MM/yyyy") : "—" }}
+            </span>
+        </div>
+
+        <div class="au-identity">
+            <mat-icon>person</mat-icon>
+            <strong class="au-name">{{ user.businessName | titlecase }}</strong>
+            <small class="au-detail" *ngIf="user.cuil">&middot; CUIL {{ user.cuil }}</small>
+            <small class="au-detail" *ngIf="user.email">&middot; {{ user.email }}</small>
+        </div>
+    </div>
+
+    <div class="au-side" (click)="$event.stopPropagation()">
+        <button matButton="tonal" class="block" (click)="onSelect()">
+            <mat-icon>edit</mat-icon> Editar
+        </button>
+    </div>
+</ui-card>

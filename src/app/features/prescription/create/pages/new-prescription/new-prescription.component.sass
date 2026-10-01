@@ -414,7 +414,7 @@
         align-items: baseline
         justify-content: space-between
         gap: var(--space-3)
-        margin-bottom: 2px
+        margin-bottom: 3px
         min-width: 0
 
     .sidebar-item-name
@@ -426,17 +426,23 @@
         white-space: nowrap
         text-overflow: ellipsis
 
-    .sidebar-item-price,
-    .sidebar-item-magistral
-        white-space: nowrap
-        flex-shrink: 0
-
     .sidebar-item-detail
-        color: var(--text-secondary)
         overflow: hidden
         white-space: nowrap
         text-overflow: ellipsis
         text-transform: capitalize
+        display: flex
+        align-items: center
+        gap: 5px
+
+        &.end
+            margin-top: 5px
+            justify-content: flex-end
+
+    .sidebar-item-treatment
+        display: block
+        text-align: right
+        margin-top: 2px
 
     .sidebar-magistral-org-warning
         margin-top: 10px
@@ -546,26 +552,7 @@
     align-items: center
     gap: 5px
     margin-top: 2px
-    font-size: 11px
     font-weight: 500
-
-    .type-bar
-        width: 3px
-        height: 14px
-        border-radius: 2px
-        flex-shrink: 0
-
-    &.duplicado .type-bar
-        background: var(--warning-fill)
-
-    &.duplicado .type-label
-        color: var(--warning-fill)
-
-    &.triplicado .type-bar
-        background: var(--error-fill)
-
-    &.triplicado .type-label
-        color: var(--error-fill)
 
 @keyframes slideUp
     from

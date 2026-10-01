@@ -185,7 +185,8 @@
             <!-- ==================== CARD PASO 2 — DOCUMENTOS ==================== -->
             <ui-card title="Paso 2: Documento"
                 [subtitle]="draft.patient ? 'Armá los medicamentos y completá los datos antes de emitir la receta.' : 'Requiere paciente seleccionado'"
-                [dashed]="!draft.patient" [disabled]="!draft.patient" class="step-card">
+                [dashed]="!draft.patient" [disabled]="!draft.patient" [accent]="creatingDocument === 'prescription'"
+                class="step-card">
                 <span cardAction *ngIf="creatingDocument">
                     <button matButton="tonal" class="btn-icon btn-info" matTooltip="Volver a documentos"
                         (click)="backToDocuments()">
@@ -324,33 +325,34 @@
                             <div class="sidebar-item-name">{{ (item.supply?.nombre || item.magistral?.nombre ||
                                 'Medicamento') | titlecase }}</div>
                             <mat-chip disableRipple *ngIf="item.supply?.precio != null"
-                                class="info sm sidebar-item-price">
-                                <strong class="mono">${{ item.supply.precio.toFixed(2) }}</strong>
+                                class="success sm">
+                                <strong class="mono"><small>${{ item.supply.precio.toFixed(2) }}</small></strong>
                             </mat-chip>
                             <mat-chip disableRipple *ngIf="item.type === 'magistral'"
                                 class="secondary sm sidebar-item-magistral">
                                 Magistral
                             </mat-chip>
                         </div>
-                        <div class="sidebar-item-detail">
-                            <small *ngIf="item.supply?.presentacion">{{ item.supply.presentacion }} · </small>
-                            <small>{{ item.quantity }} unid.</small>
-                            <small *ngIf="item.supply?.accion_descrip"> · {{ item.supply.accion_descrip }}</small>
-                            <small *ngIf="item.diagnostic" class="sidebar-magistral-diagnostic">
-                                · {{ item.diagnostic | titlecase }}
-                            </small>
+                        <div class="sidebar-item-detail text-secondary">
+                            <span *ngIf="item.supply?.presentacion" class="text-caption">{{ item.supply.presentacion }} | </span>
+                            <span class="text-caption">{{ item.quantity }} unid.</span>
+                            <span *ngIf="item.supply?.accion_descrip" class="text-caption">
+                                | {{ item.supply.accion_descrip }}
+                            </span>
+                            <span *ngIf="item.diagnostic" class="sidebar-magistral-diagnostic text-caption">
+                                | {{ item.diagnostic | titlecase }}
+                            </span>
                             <small *ngIf="hasDifferentObraSocial(item)" class="sidebar-os-badge">
-                                · {{ item.obraSocial?.nombre }}
+                                | {{ item.obraSocial?.nombre }}
                             </small>
                         </div>
-                        <div class="medication-type-indicator duplicado" *ngIf="item.duplicate">
-                            <small class="type-bar"></small>
-                            <small class="type-label">Duplicado</small>
+                        <div class="sidebar-item-detail end">
+                            <span *ngIf="item.duplicate" class="text-caption">Duplicado</span>
+                            <span *ngIf="item.triplicate" class="text-caption">Triplicado</span>
+                            <span *ngIf="(item.duplicate || item.triplicate) && item.tratamientoProlongado" class="text-caption">•</span>
+                            <span *ngIf="item.tratamientoProlongado" class="text-caption">{{ item.tratamientoProlongado }} meses</span>
                         </div>
-                        <div class="medication-type-indicator triplicado" *ngIf="item.triplicate">
-                            <small class="type-bar"></small>
-                            <small class="type-label">Triplicado</small>
-                        </div>
+
                         <ui-alert *ngIf="magistralOrgChanged(item)" variant="warning" [fullwidth]="true"
                             class="sidebar-magistral-org-warning">
                             <span class="text-caption">Registrado originalmente para {{ item.magistralOrg?.nombre

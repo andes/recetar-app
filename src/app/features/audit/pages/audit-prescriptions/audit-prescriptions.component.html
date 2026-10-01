@@ -1,0 +1,90 @@
+<app-canvas [showSidebar]="true" [sidebarItems]="sidebarItems" [noCard]="true"
+    pageTitle="Auditoría de recetas" pageSubtitle="Consulte las recetas dispensadas por farmacia">
+
+    <ui-drawer [open]="drawerOpen" title="Detalle de receta" (closed)="closeDrawer()">
+        <app-prescription-detail-panel drawerContent [prescription]="selectedPrescription">
+        </app-prescription-detail-panel>
+
+        <div class="drawer-actions" drawerFooter *ngIf="canPrintSelected">
+            <button matButton="filled" color="secondary" class="block"
+                (click)="printPrescription(selectedPrescription)">
+                <mat-icon>print</mat-icon> Imprimir
+            </button>
+        </div>
+
+        <div class="search-card-wrap">
+            <ui-card stretch>
+                <ui-search-bar [control]="cuitControl"
+                    placeholder="Ingrese el CUIT de la farmacia"
+                    [isLoading]="loading" [stretch]="true">
+                    <button matButton="tonal" class="btn-icon" searchAction *ngIf="cuitControl.value"
+                        matTooltip="Borrar búsqueda" (click)="onClear()">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                </ui-search-bar>
+
+                <div class="dispenser-info" *ngIf="dispenser && !loading">
+                    <ui-icon icon="local_pharmacy" variant="primary"></ui-icon>
+                    <div class="dispenser-text">
+                        <strong class="dispenser-name">
+                            {{ (dispenser.businessName || dispenser.username) | titlecase }}
+                        </strong>
+                        <span class="dispenser-meta">
+                            <small *ngIf="dispenser.cuil || dispenser.username">
+                                CUIT/CUIL {{ dispenser.cuil || dispenser.username }}
+                            </small>
+                            <small *ngIf="dispenser.email">&middot; {{ dispenser.email }}</small>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="field-footer" *ngIf="cuitControl.touched && cuitControl.invalid">
+                    <small class="field-error" *ngIf="cuitControl.errors?.pattern">
+                        El CUIT debe contener solo números
+                    </small>
+                    <small class="field-error"
+                        *ngIf="cuitControl.errors?.minlength || cuitControl.errors?.maxlength">
+                        Debe ingresar entre 10 y 11 dígitos
+                    </small>
+                </div>
+            </ui-card>
+        </div>
+
+        <div class="results-card-wrap">
+            <div class="results-count" *ngIf="hasSearched && !loading && totalPrescriptions > 0">
+                <span class="results-count-type">Recetas</span>
+                <small class="results-count-range">
+                    Mostrando {{ resultsFrom }}&ndash;{{ resultsTo }} de {{ totalPrescriptions }} resultados
+                </small>
+            </div>
+
+            <div *ngIf="loading && !prescriptions.length" class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+            </div>
+
+            <div *ngIf="!loading && hasSearched && totalPrescriptions === 0" class="empty-container">
+                <ui-empty-state icon="search">
+                    {{ dispenser ? "La farmacia no registra recetas dispensadas" : "No se encontró una farmacia con ese CUIT" }}
+                </ui-empty-state>
+            </div>
+
+            <div *ngIf="!hasSearched" class="empty-container">
+                <ui-empty-state icon="search">Ingrese el CUIT de una farmacia para ver sus recetas</ui-empty-state>
+            </div>
+
+            <div class="audit-items" *ngIf="!loading && totalPrescriptions > 0">
+                <app-prescription-item *ngFor="let prescription of prescriptions"
+                    [prescription]="prescription"
+                    [selected]="isSelected(prescription)"
+                    (select)="openDrawer($event)"
+                    (print)="printPrescription($event)">
+                </app-prescription-item>
+            </div>
+
+            <ui-paginator *ngIf="hasSearched && totalPrescriptions > 0"
+                [length]="totalPrescriptions" [pageSize]="pageSize" [pageIndex]="pageIndex"
+                [pageSizeOptions]="[10, 20, 30]" (page)="onPageChange($event)">
+            </ui-paginator>
+        </div>
+    </ui-drawer>
+</app-canvas>

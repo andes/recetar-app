@@ -543,7 +543,7 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
             case 'prescription': {
                 const prescription = event.document as Prescriptions;
                 this.draftService.setPatient(patient);
-                const items = prescription.supplies.map(s => this.supplyToMedicationItem(s));
+                const items = prescription.supplies.map(s => this.supplyToMedicationItem(s, prescription.tratamientoProlongado));
                 const currentCount = this.draft.medications.length;
                 const available = this.MAX_MEDICATIONS - currentCount;
                 if (available <= 0) {
@@ -584,7 +584,7 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
         }
     }
 
-    private supplyToMedicationItem(s: Prescriptions['supplies'][0]): MedicationItem {
+    private supplyToMedicationItem(s: Prescriptions['supplies'][0], tratamientoProlongado?: number): MedicationItem {
         const sup = s.supply as unknown as Record<string, unknown> | undefined;
 
         if (sup?.type === 'magistral') {
@@ -601,6 +601,7 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
                 indication: s.indication || '',
                 duplicate: s.duplicate || false,
                 triplicate: s.triplicate || false,
+                tratamientoProlongado,
                 serie: s.triplicateData?.serie || '',
                 numero: s.triplicateData?.numero?.toString() || '',
                 obraSocial: s.obraSocial as MedicationItem['obraSocial'],
@@ -633,6 +634,7 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
             indication: s.indication || '',
             duplicate: s.duplicate || false,
             triplicate: s.triplicate || false,
+            tratamientoProlongado,
             serie: s.triplicateData?.serie || '',
             numero: s.triplicateData?.numero?.toString() || '',
             obraSocial: s.obraSocial as MedicationItem['obraSocial'],

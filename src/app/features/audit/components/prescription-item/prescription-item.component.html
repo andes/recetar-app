@@ -1,0 +1,51 @@
+<ui-card
+    *ngIf="prescription"
+    class="prescription-item"
+    [class.selected]="selected"
+    (click)="onSelect()">
+
+    <div class="pi-content">
+        <div class="pi-tags">
+            <mat-chip class="sm" [class]="getStatusVariant(prescription.status)">
+                {{ getStatusLabel(prescription.status) }}
+            </mat-chip>
+            <span class="pi-date text-sm">
+                <mat-icon class="pi-icon">event</mat-icon>Receta: {{ prescription.date | date: "dd/MM/yyyy" }}
+            </span>
+            <span class="pi-date text-sm" *ngIf="dispensedAt">
+                <mat-icon class="pi-icon">event_available</mat-icon>Dispensada: {{ dispensedAt | date: "dd/MM/yyyy" }}
+            </span>
+            <span class="pi-count text-sm">
+                <mat-icon class="pi-icon">medication</mat-icon>{{ suppliesCount }}
+                {{ suppliesCount === 1 ? "producto" : "productos" }}
+            </span>
+        </div>
+
+        <div class="pi-identity">
+            <mat-icon>person</mat-icon>
+            <strong class="pi-name">{{ patientName | titlecase }}</strong>
+            <small *ngIf="prescription.patient?.dni">&middot; DNI {{ prescription.patient.dni }}</small>
+        </div>
+
+        <div class="pi-detail-row" *ngIf="firstSupplyName">
+            <mat-icon>medication</mat-icon>
+            <span>{{ firstSupplyName | titlecase }}</span>
+        </div>
+
+        <div class="pi-detail-row" *ngIf="prescription.professional?.businessName">
+            <mat-icon>stethoscope</mat-icon>
+            <small>{{ prescription.professional.businessName | titlecase }}</small>
+        </div>
+    </div>
+
+    <div class="pi-side" (click)="$event.stopPropagation()">
+        <div class="pi-actions">
+            <button matButton="tonal" class="block" (click)="onSelect()">
+                <mat-icon>visibility</mat-icon> Ver detalle
+            </button>
+            <button *ngIf="canPrint" matButton="outlined" class="block" (click)="onPrint()">
+                <mat-icon>print</mat-icon> Imprimir
+            </button>
+        </div>
+    </div>
+</ui-card>

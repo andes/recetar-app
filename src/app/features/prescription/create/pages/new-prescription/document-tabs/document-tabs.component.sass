@@ -134,14 +134,12 @@
         white-space: normal
 
     .item-meta
-        font-size: 12px
         display: flex
-        gap: 4px
-        align-items: flex-start
+        align-items: center
         min-width: 0
+        color: var(--text-secondary)
 
         .item-meta-text
-            color: var(--text-secondary)
             display: -webkit-box
             -webkit-line-clamp: 1
             -webkit-box-orient: vertical
@@ -149,17 +147,6 @@
             text-overflow: ellipsis
             white-space: normal
             min-width: 0
-
-        .item-meta-label
-            flex-shrink: 0
-            margin-right: 2px
-
-        &.item-meta-single
-            .item-meta-text
-                -webkit-line-clamp: 1
-
-        &.item-meta-gap
-            margin-bottom: 4px
 
         &.diagnostic-text
             display: -webkit-box
@@ -170,6 +157,12 @@
             white-space: normal
             gap: 0
             line-height: 1.4
+
+        &.item-meta-single
+            display: flex
+            align-items: center
+            gap: 5px
+            min-width: 0
 
 .history-empty
     text-align: center
@@ -257,6 +250,11 @@
         gap: var(--space-3)
         width: 100%
 
+    .draft-description
+        display: flex
+        flex-direction: column
+        width: 100%
+
     .item-icon-box
         background: var(--med-commercial-bg)
         color: var(--med-commercial-icon)
@@ -283,6 +281,12 @@
     .item-body
         flex: 1
         min-width: 0
+
+    .draft-treatment
+        align-self: flex-start
+        flex-shrink: 0
+        display: flex
+        gap: 5px
 
     .item-title
         text-transform: none
@@ -376,7 +380,6 @@
     border-bottom: 1px solid var(--border-color)
     font-size: 13px
     font-weight: 500
-    color: var(--text-secondary)
     align-items: center
     display: flex
     gap: var(--space-2)
@@ -494,7 +497,7 @@
         flex: 1
 
 :host ::ng-deep .accordion .rx-detail-label
-    color: var(--text-disabled)
+    color: var(--text-secondary)
 
 :host ::ng-deep .accordion .rx-detail-value
     font-size: 13.5px
@@ -504,7 +507,6 @@
 
     &.mono
         font-family: var(--font-mono)
-        font-size: 14px
         font-weight: 500
 
 :host ::ng-deep .accordion .rx-detail-name
@@ -521,9 +523,6 @@
     padding: 10px 12px
     background: var(--bg-over-body)
     border-radius: 6px
-
-:host ::ng-deep .accordion .rx-detail-full
-    width: 100%
 
 :host ::ng-deep .accordion .rx-detail-muted
     color: var(--text-disabled)
@@ -650,3 +649,95 @@
 
     &:hover
         background: transparent
+
+// ==================== RX HISTORY ITEM (2 filas) ====================
+
+.history-panel .rx-history-item
+    flex-direction: column
+    align-items: stretch
+    gap: 6px
+
+    .rx-badges
+        display: flex
+        align-items: center
+        justify-content: flex-start
+        flex-wrap: wrap
+        gap: 8px
+
+    .rx-main
+        display: flex
+        flex-direction: column
+        gap: 8px
+        min-width: 0
+
+        @media (min-width: $small-devices + 1px)
+            flex-direction: row
+            align-items: center
+            gap: var(--space-3)
+
+        .item-body
+            flex: 1
+            min-width: 0
+
+        .item-title
+            display: block
+            white-space: nowrap
+            overflow: hidden
+            text-overflow: ellipsis
+            -webkit-line-clamp: unset
+            -webkit-box-orient: unset
+
+        .item-meta
+            min-width: 0
+            overflow: hidden
+            gap: 5px
+            color: var(--text-secondary)
+
+        .rx-reuse-btn
+            flex-shrink: 0
+            align-self: flex-end
+
+            @media (min-width: $small-devices + 1px)
+                align-self: center
+
+// ==================== TREATMENT RECETAS (nested list) ====================
+
+:host ::ng-deep .accordion .rx-treatment-chip
+    flex-shrink: 0
+    white-space: nowrap
+
+:host ::ng-deep .accordion .rx-treatment-recetas
+    margin-top: 20px
+
+:host ::ng-deep .accordion .rx-treatment-recetas-title
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+    margin-bottom: var(--space-2);
+
+:host ::ng-deep .accordion .rx-treatment-receta
+    display: flex
+    align-items: center
+    gap: 8px
+    padding: 4px
+    border-bottom: 1px solid var(--border-color)
+
+    &:last-child
+        border-bottom: none
+
+:host ::ng-deep .accordion .rx-treatment-receta-date
+    flex-shrink: 0
+    font-family: var(--font-mono)
+    color: var(--text-primary)
+
+:host ::ng-deep .accordion .rx-treatment-receta-dispensed
+    flex: 1
+    text-align: center
+    color: var(--text-secondary)
+
+:host ::ng-deep .accordion .rx-treatment-receta-status
+    margin-left: auto
+    flex-shrink: 0
+    display: inline-flex

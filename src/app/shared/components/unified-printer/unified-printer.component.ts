@@ -141,6 +141,11 @@ export class UnifiedPrinterComponent {
                 pdf.add(new Txt('' + supply.diagnostic ? supply.diagnostic : 'Sin datos registrados').end);
             }
         });
+        if (prescription.tratamientoProlongado) {
+            pdf.add(new Txt('\n').end);
+            pdf.add(new Txt('Tratamiento prolongado').bold().end);
+            pdf.add(new Txt(`${prescription.tratamientoProlongado} meses`).end);
+        }
         if (prescription.observation) {
             pdf.add(new Txt('\n').end);
             pdf.add(new Txt('Observaciones').bold().end);

@@ -4,12 +4,22 @@ import Supply from '@interfaces/supplies';
 import { Patient } from '@interfaces/patients';
 import AndesPrescriptions from './andesPrescriptions';
 
+// Datos de la farmacia/usuario farmacéutico que dispensó
+export interface DispenserInfo {
+    _id?: string;
+    businessName?: string;
+    cuil?: string;
+    username?: string;
+    email?: string;
+}
+
 // Interfaz para la respuesta mixta de prescripciones
 export interface PrescriptionsResponse {
     prescriptions: (Prescriptions | AndesPrescriptions)[];
     total: number;
     offset: number;
     limit: number;
+    dispenser?: DispenserInfo | null;
     sources?: {
         local: number;
         andes: number;
@@ -70,6 +80,9 @@ export class Prescriptions {
     date: Date;
     diagnostic?: string;
     observation?: string;
+    tratamientoProlongado?: number;
+    treatmentGroupId?: string;
+    trimestral?: boolean;
     createdAt?: Date;
     updatedAt?: Date;
     triple?: boolean;
@@ -97,6 +110,9 @@ export class PrescriptionsAdapter implements Adapter<Prescriptions> {
             date: new Date(data['date'] as string | number | Date),
             diagnostic: data['diagnostic'] as string,
             observation: data['observation'] as string,
+            tratamientoProlongado: (data['tratamientoProlongado'] as number) ?? (data['trimestral'] ? 3 : undefined),
+            treatmentGroupId: data['treatmentGroupId'] as string,
+            trimestral: data['trimestral'] as boolean,
             createdAt: data['createdAt'] ? new Date(data['createdAt'] as string | number | Date) : undefined,
             updatedAt: data['updatedAt'] ? new Date(data['updatedAt'] as string | number | Date) : undefined,
             triple: data['triple'] as boolean,

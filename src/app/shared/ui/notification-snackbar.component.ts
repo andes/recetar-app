@@ -17,14 +17,17 @@ const ICON_MAP: Record<string, string> = {
     template: `
             <div class="snackbar" [ngClass]="panelClass">
             <span class="material-symbols-outlined snackbar-icon">{{ icon }}</span>
-            <span class="snackbar-label">{{ message }}</span>
+            <div class="snackbar-content">
+                <span class="snackbar-label">{{ message }}</span>
+                <span class="snackbar-description" *ngIf="description">{{ description }}</span>
+            </div>
             <button class="snackbar-close material-symbols-outlined" (click)="dismiss()">close</button>
         </div>
     `,
     styles: [`
         .snackbar {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 12px;
             padding: 14px 16px;
             border-radius: var(--radius-lg);
@@ -39,12 +42,24 @@ const ICON_MAP: Record<string, string> = {
             width: 22px;
             height: 22px;
         }
-        .snackbar-label {
+        .snackbar-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
             flex: 1;
             min-width: 0;
+        }
+        .snackbar-label {
             font-size: 14px;
             font-weight: 500;
             line-height: 1.4;
+            white-space: pre-wrap;
+        }
+        .snackbar-description {
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1.4;
+            opacity: 0.85;
             white-space: pre-wrap;
         }
         .snackbar-close {
@@ -64,32 +79,38 @@ const ICON_MAP: Record<string, string> = {
             opacity: 1;
         }
 
-        .notification-success .snackbar-icon { color: var(--success-text); }
-        .notification-success .snackbar-label { color: var(--success-text); }
+        .notification-success .snackbar-icon,
+        .notification-success .snackbar-label,
+        .notification-success .snackbar-description,
         .notification-success .snackbar-close { color: var(--success-text); }
 
-        .notification-error .snackbar-icon { color: var(--error-fill); }
-        .notification-error .snackbar-label { color: var(--error-fill); }
+        .notification-error .snackbar-icon,
+        .notification-error .snackbar-label,
+        .notification-error .snackbar-description,
         .notification-error .snackbar-close { color: var(--error-fill); }
 
-        .notification-warning .snackbar-icon { color: var(--warning-fill); }
-        .notification-warning .snackbar-label { color: var(--warning-fill); }
+        .notification-warning .snackbar-icon,
+        .notification-warning .snackbar-label,
+        .notification-warning .snackbar-description,
         .notification-warning .snackbar-close { color: var(--warning-fill); }
 
-        .notification-info .snackbar-icon { color: var(--info-text); }
-        .notification-info .snackbar-label { color: var(--info-text); }
+        .notification-info .snackbar-icon,
+        .notification-info .snackbar-label,
+        .notification-info .snackbar-description,
         .notification-info .snackbar-close { color: var(--info-text); }
     `]
 })
 export class NotificationSnackbarComponent {
     protected message: string;
+    protected description: string;
     protected icon: string;
     protected panelClass: string;
 
     private ref = inject(MatSnackBarRef);
 
-    constructor(@Inject(MAT_SNACK_BAR_DATA) data: { message: string; panelClass: string }) {
+    constructor(@Inject(MAT_SNACK_BAR_DATA) data: { message: string; description?: string; panelClass: string }) {
         this.message = data.message;
+        this.description = data.description || '';
         this.panelClass = data.panelClass;
         this.icon = ICON_MAP[data.panelClass] || 'info_outline';
     }

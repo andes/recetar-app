@@ -7,7 +7,7 @@
     width: var(--sidebar-width)
     height: 100vh
     z-index: 1000
-    background: var(--bg-card)
+    background: var(--bg-sidebar)
     display: flex
     flex-direction: column
     overflow: hidden
@@ -20,7 +20,6 @@
         left: 8px
         height: auto
         border-radius: $radius-md
-        box-shadow: var(--elevation-3)
         transform: translateX(0)
 
 :host.sidebar-host-overlay-open
@@ -135,7 +134,7 @@
 
     .sidebar
         width: 100%
-        background: var(--bg-card)
+        background: var(--bg-sidebar)
         overflow-y: auto
         display: flex
         flex-direction: column

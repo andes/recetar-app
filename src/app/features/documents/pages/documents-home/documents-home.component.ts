@@ -72,9 +72,6 @@ export class DocumentsHomeComponent implements OnInit, OnDestroy {
 
     stats: DocumentsStats = {
         totals: { receta: 0, certificados: 0, practicas: 0, insumos: 0 },
-        prescriptions: { pendiente: 0, dispensada: 0, vencida: 0 },
-        certificates: { total: 0, anulados: 0 },
-        practices: { active: 0, completed: 0, cancelled: 0 },
     };
 
     private load$ = new Subject<void>();

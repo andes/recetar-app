@@ -1,0 +1,81 @@
+@use 'styles/variables' as *
+
+:host
+    display: block
+    width: 100%
+
+.search-card-wrap
+    display: flex
+    margin-bottom: var(--space-4)
+
+.dispenser-info
+    display: flex
+    align-items: center
+    gap: var(--space-3)
+    margin-top: var(--space-4)
+    padding-top: var(--space-4)
+    border-top: 1px solid var(--border-color)
+
+.dispenser-text
+    display: flex
+    flex-direction: column
+    min-width: 0
+    gap: var(--space-1)
+
+.dispenser-name
+    min-width: 0
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+.dispenser-meta
+    display: flex
+    flex-wrap: wrap
+    gap: var(--space-1)
+
+.field-footer
+    display: flex
+    justify-content: space-between
+    align-items: center
+    gap: var(--space-2)
+    margin-top: var(--space-2)
+
+.field-error
+    color: var(--error-fill)
+
+.results-card-wrap
+    display: flex
+    flex-direction: column
+    gap: var(--space-3)
+    min-height: 0
+
+.results-count
+    display: flex
+    align-items: baseline
+    gap: var(--space-4)
+
+.results-count-type
+    font-weight: 500
+
+.results-count-range
+    color: var(--text-secondary)
+
+.loading-container
+    display: flex
+    justify-content: center
+    padding: $space-8
+
+.empty-container
+    padding: $space-6
+
+.audit-items
+    display: flex
+    flex-direction: column
+    gap: var(--space-3)
+
+.drawer-actions
+    display: flex
+    gap: var(--space-2)
+
+    .block
+        flex: 1

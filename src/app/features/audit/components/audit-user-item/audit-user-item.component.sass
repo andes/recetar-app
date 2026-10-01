@@ -1,0 +1,114 @@
+@use 'styles/variables' as *
+
+:host
+    display: flex
+    width: 100%
+    min-width: 0
+
+.audit-user-item
+    cursor: pointer
+    text-align: left
+    min-width: 0
+
+    ::ng-deep
+        .ui-card
+            transition: border-color .12s, background-color .12s, box-shadow .12s
+
+        .ui-card-body
+            display: flex
+            padding: 0
+            min-width: 0
+
+    &:hover ::ng-deep .ui-card,
+    &.selected ::ng-deep .ui-card
+        border: 1px solid var(--secondary)
+
+.au-content
+    flex: 1
+    min-width: 0
+    display: flex
+    flex-direction: column
+    gap: var(--space-2)
+    padding: var(--space-3) var(--space-4)
+
+.au-tags
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+    flex-wrap: wrap
+
+.role-label
+    display: inline-flex
+    align-items: center
+    gap: 4px
+
+    .role-icon
+        color: currentColor
+        font-size: 16px
+        width: 16px
+        height: 16px
+        line-height: 16px
+        flex-shrink: 0
+
+.role-extra
+    color: var(--text-secondary)
+
+.au-username
+    display: inline-flex
+    align-items: center
+    gap: 4px
+    color: var(--text-secondary)
+
+    .mat-icon
+        font-size: 16px
+        width: 16px
+        height: 16px
+        line-height: 16px
+
+.au-last-login
+    margin-left: auto
+    color: var(--text-secondary)
+
+.au-identity
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+    min-width: 0
+
+    .mat-icon
+        color: var(--text-secondary)
+        font-size: 18px
+        width: 18px
+        height: 18px
+        line-height: 18px
+        flex-shrink: 0
+
+    .au-name
+        min-width: 0
+        overflow: hidden
+        text-overflow: ellipsis
+        white-space: nowrap
+
+    .au-detail
+        color: var(--text-secondary)
+        font-size: 12px
+        flex-shrink: 0
+
+.au-side
+    flex-shrink: 0
+    width: 160px
+    display: flex
+    flex-direction: column
+    justify-content: center
+    padding: var(--space-4)
+
+    .block
+        width: 100%
+
+@media (max-width: $small-devices)
+    :host ::ng-deep .ui-card-body
+        flex-direction: column
+
+    .au-side
+        width: 100%
+        padding-top: 0

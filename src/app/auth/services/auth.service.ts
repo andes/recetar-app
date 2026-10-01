@@ -13,6 +13,7 @@ interface JwtPayload {
     usrn?: string;
     sub?: string;
     bsname?: string;
+    cuil?: string;
     email?: string;
     rl?: string[];
 }
@@ -154,6 +155,11 @@ export class AuthService {
     getLoggedBusinessName(): string {
         const payLoadJwt = this.getDecodeJwt();
         return payLoadJwt?.bsname || '';
+    }
+
+    getLoggedCuil(): string {
+        const payLoadJwt = this.getDecodeJwt();
+        return payLoadJwt?.cuil || '';
     }
 
     getLoggedUserEmail(): string | null {

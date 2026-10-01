@@ -1,0 +1,118 @@
+@use 'styles/variables' as *
+
+:host
+    display: flex
+    flex-direction: column
+    width: 100%
+    min-height: 0
+
+.detail-panel
+    display: flex
+    flex-direction: column
+    flex: 1
+    min-height: 0
+    overflow: hidden
+    color: var(--text-primary)
+
+.detail-empty
+    text-align: center
+    padding: var(--space-10) var(--space-5)
+    color: var(--text-secondary)
+
+    .mat-icon
+        margin-bottom: var(--space-2)
+
+    p
+        margin: 0
+
+.detail-top
+    padding: var(--space-3) var(--space-5)
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: var(--space-2)
+    border-bottom: 1px solid var(--border-color)
+    flex-shrink: 0
+
+.detail-scroll
+    flex: 1
+    min-height: 0
+    overflow-y: auto
+    padding: var(--space-5) var(--space-5) var(--space-6)
+
+.section
+    margin-top: var(--space-6)
+
+    &:first-child
+        margin-top: 0
+
+    .diagnostic-box
+        border-radius: var(--radius-sm)
+        padding: var(--space-3)
+        background-color: var(--primary-50)
+
+    p
+        margin: 0
+        font-style: italic
+
+.supply-row
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: var(--space-3)
+    padding: var(--space-2) 0
+    border-bottom: 1px solid var(--border-color)
+
+    &:last-child
+        border-bottom: none
+
+.supply-main
+    display: flex
+    align-items: baseline
+    gap: var(--space-2)
+    min-width: 0
+
+    strong
+        min-width: 0
+        overflow: hidden
+        text-overflow: ellipsis
+        white-space: nowrap
+
+    small
+        color: var(--text-secondary)
+        flex-shrink: 0
+
+.supply-qty
+    flex-shrink: 0
+
+.entity
+    display: flex
+    align-items: center
+    gap: var(--space-3)
+
+.entity-info
+    display: flex
+    flex-direction: column
+    min-width: 0
+
+    strong
+        color: var(--text-primary)
+        font-weight: 600
+        line-height: 1.4
+
+    small
+        margin-top: var(--space-1)
+
+.p-fields
+    margin-top: var(--space-4)
+    padding-top: var(--space-3)
+    border-top: 1px solid var(--border-color)
+
+.p-field
+    display: flex
+    flex-direction: column
+    padding: var(--space-2) 0
+
+    span
+        color: var(--text-secondary)
+        margin-bottom: var(--space-1)

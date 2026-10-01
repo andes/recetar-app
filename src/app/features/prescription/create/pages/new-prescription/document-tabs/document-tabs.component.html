@@ -26,12 +26,12 @@
     <div class="rx-detail">
         <div class="rx-detail-row">
             <label class="rx-detail-label">Medicamento</label>
-            <span class="rx-detail-value rx-detail-full rx-detail-name">{{ getPrescriptionMedName(p) | titlecase
+            <span class="rx-detail-value  rx-detail-name">{{ getPrescriptionMedName(p) | titlecase
                 }}</span>
         </div>
         <div class="rx-detail-row" *ngIf="getRxTipoReceta(p)">
             <label class="rx-detail-label">Tipo</label>
-            <span class="rx-detail-value rx-detail-full">{{ getRxTipoReceta(p) }}</span>
+            <span class="rx-detail-value ">{{ getRxTipoReceta(p) }}</span>
         </div>
         <div class="rx-detail-row row-cols row-cols-3">
             <div class="col">
@@ -46,21 +46,38 @@
             </div>
             <div class="col">
                 <label class="rx-detail-label">Código</label>
-                <span class="rx-detail-value mono" [class.rx-detail-muted]="!getRxCode(p)">
+                <small class="rx-detail-value mono" [class.rx-detail-muted]="!getRxCode(p)">
                     {{ getRxCode(p) || '—' }}
-                </span>
+                </small>
             </div>
         </div>
         <div class="rx-detail-row">
             <label class="rx-detail-label">Diagnóstico</label>
-            <span class="rx-detail-value rx-detail-full rx-detail-text" [class.rx-detail-muted]="!getRxDiagnostic(p)">
+            <span class="rx-detail-value  rx-detail-text" [class.rx-detail-muted]="!getRxDiagnostic(p)">
                 {{ getRxDiagnostic(p) || 'Sin diagnóstico' }}
             </span>
         </div>
         <div class="rx-detail-row">
             <label class="rx-detail-label">Indicaciones</label>
-            <span class="rx-detail-value rx-detail-full rx-detail-text" [class.rx-detail-muted]="!getRxIndications(p)">
+            <span class="rx-detail-value  rx-detail-text" [class.rx-detail-muted]="!getRxIndications(p)">
                 {{ getRxIndications(p) || 'Sin indicaciones' }}
+            </span>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #treatmentRecetas let-entry>
+    <div class="rx-treatment-recetas">
+        <label class="rx-detail-label">Recetas del tratamiento</label>
+        <div class="rx-treatment-receta" *ngFor="let r of entry.recetas">
+            <span class="rx-treatment-receta-date text-caption">{{ r.date | date:'dd/MM/yyyy' }}</span>
+            <span class="rx-treatment-receta-dispensed text-caption" *ngIf="r.dispensedAt">
+                Dispensada el {{ r.dispensedAt | date:'dd/MM/yyyy' }}
+            </span>
+            <span class="rx-treatment-receta-status">
+                <mat-chip disableRipple [class]="getStatusVariant(r.status) + ' sm text-caption'">{{
+                    getStatusLabel(r.status)
+                    }}</mat-chip>
             </span>
         </div>
     </div>
@@ -70,7 +87,7 @@
     <div class="rx-detail">
         <div class="rx-detail-row">
             <label class="rx-detail-label">Tipo de certificado</label>
-            <span class="rx-detail-value rx-detail-full rx-detail-name">{{ c.certificate | titlecase }}</span>
+            <span class="rx-detail-value  rx-detail-name">{{ c.certificate | titlecase }}</span>
         </div>
         <div class="rx-detail-row row-cols row-cols-3">
             <div class="col">
@@ -99,7 +116,7 @@
         </div>
         <div class="rx-detail-row" *ngIf="isCertificateAnulated(c)">
             <label class="rx-detail-label"></label>
-            <span class="rx-detail-value rx-detail-full anulate-text">{{ getCertAnulateLabel(c) }}</span>
+            <span class="rx-detail-value  anulate-text">{{ getCertAnulateLabel(c) }}</span>
         </div>
     </div>
 </ng-template>
@@ -108,15 +125,15 @@
     <div class="rx-detail">
         <div class="rx-detail-row">
             <label class="rx-detail-label">Practica</label>
-            <span class="rx-detail-value rx-detail-full rx-detail-name">{{ p.practice | titlecase }}</span>
+            <span class="rx-detail-value  rx-detail-name">{{ p.practice | titlecase }}</span>
         </div>
         <div class="rx-detail-row" *ngIf="p.diagnostic">
             <label class="rx-detail-label">Diagnostico</label>
-            <span class="rx-detail-value rx-detail-full rx-detail-text">{{ p.diagnostic }}</span>
+            <span class="rx-detail-value  rx-detail-text">{{ p.diagnostic }}</span>
         </div>
         <div class="rx-detail-row" *ngIf="p.indications">
             <label class="rx-detail-label">Indicaciones</label>
-            <span class="rx-detail-value rx-detail-full rx-detail-text">{{ p.indications }}</span>
+            <span class="rx-detail-value  rx-detail-text">{{ p.indications }}</span>
         </div>
         <div class="rx-detail-row row-cols row-cols-2">
             <div class="col">
@@ -174,7 +191,7 @@
                 <h3>Receta en construcción</h3>
                 <p>Editá cantidades o quitá medicamentos antes de emitir.</p>
             </div>
-            <button matButton="tonal" color="info" (click)="createDocument.emit('prescription')">
+            <button matButton="tonal"(click)="createDocument.emit('prescription')">
                 <mat-icon>add</mat-icon>
                 Medicamento
             </button>
@@ -186,10 +203,10 @@
                 <p>{{ draftCertificate ? 'Editá los datos o quitá el certificado antes de emitir.' : 'Completá los datos
                     del certificado antes de emitir.' }}</p>
             </div>
-            <button matButton="tonal" color="info"
+            <button matButton="tonal"
                 (click)="draftCertificate ? editCertificate.emit() : createDocument.emit('certificate')">
                 <mat-icon>{{ draftCertificate ? 'edit' : 'add' }}</mat-icon>
-                {{ draftCertificate ? 'Editar certificado' : 'Crear certificado' }}
+                {{ draftCertificate ? 'Editar certificado' : 'Certificado' }}
             </button>
         </div>
 
@@ -199,10 +216,10 @@
                 <p>{{ draftPractice ? 'Editá los datos o quitá la práctica antes de emitir.' : 'Completá los datos de la
                     práctica antes de emitir.' }}</p>
             </div>
-            <button matButton="tonal" color="info"
+            <button matButton="tonal"
                 (click)="draftPractice ? editPractice.emit() : createDocument.emit('practice')">
                 <mat-icon>{{ draftPractice ? 'edit' : 'add' }}</mat-icon>
-                {{ draftPractice ? 'Editar práctica' : 'Crear práctica' }}
+                {{ draftPractice ? 'Editar práctica' : 'Práctica' }}
             </button>
         </div>
 
@@ -218,26 +235,38 @@
                                 <mat-icon class="sm">science</mat-icon>
                             </div>
                             <div class="item-body">
-                                <div *ngIf="med.duplicate" class="medication-type-indicator duplicado">
-                                    <small class="type-label">Duplicado</small>
-                                </div>
-                                <div *ngIf="med.triplicate" class="medication-type-indicator triplicado">
-                                    <small class="type-label">Triplicado</small>
-                                </div>
+
                                 <div class="item-title">
                                     {{ (med.supply?.nombre || med.magistral?.nombre || 'Medicamento') | titlecase }}
                                 </div>
-                                <div class="item-meta item-meta-gap" *ngIf="med.type === 'magistral' || med.supply?.presentacion">
-                                    <small class="item-meta-text">{{ med.type === 'magistral' ? 'Magistral' : med.supply?.presentacion }}</small>
+                                <div class="item-meta item-meta-gap"
+                                    *ngIf="med.type === 'magistral' || med.supply?.presentacion">
+                                    <small class="item-meta-text text-secondary">{{ med.type === 'magistral' ?
+                                        'Magistral' :
+                                        med.supply?.presentacion }}</small>
                                 </div>
-                                <div class="item-meta item-meta-single" *ngIf="med.diagnostic">
-                                    <small class="item-meta-label">Diagnóstico:</small>
-                                    <small class="item-meta-text">{{ med.diagnostic | titlecase }}</small>
-                                </div>
-                                <div class="item-meta item-meta-single" *ngIf="med.indication">
-                                    <small class="item-meta-label">Indicaciones:</small>
-                                    <small class="item-meta-text">{{ med.indication | titlecase }}</small>
-                                </div>
+
+                            </div>
+                            <div class="draft-treatment">
+                                <mat-chip *ngIf="med.duplicate" disableRipple
+                                    class="warning sm duplicado">Duplicado</mat-chip>
+                                <mat-chip *ngIf="med.triplicate" disableRipple
+                                    class="error sm triplicado">Triplicado</mat-chip>
+                                <mat-chip *ngIf="med.tratamientoProlongado" disableRipple class="info sm">Tratamiento {{
+                                    med.tratamientoProlongado }}
+                                    meses</mat-chip>
+                            </div>
+                        </div>
+                        <div class="draft-description">
+                            <div class="item-meta item-meta-single" *ngIf="med.diagnostic">
+                                <span class="item-meta-label text-caption">Diagnóstico:</span>
+                                <span class="item-meta-text text-secondary text-caption">{{ med.diagnostic | titlecase
+                                    }}</span>
+                            </div>
+                            <div class="item-meta item-meta-single" *ngIf="med.indication">
+                                <span class="item-meta-label text-caption">Indicaciones:</span>
+                                <span class="item-meta-text text-secondary text-caption">{{ med.indication | titlecase
+                                    }}</span>
                             </div>
                         </div>
                         <div class="draft-divider"></div>
@@ -280,43 +309,49 @@
 
             <div class="accordion-wrapper" *ngIf="prescriptions.length > 0">
                 <div class="accordion-wrapper-header">
-                    <ui-icon icon="history" variant="transparent" size="md" />
+                    <ui-icon icon="history" size="md" />
                     Historial de recetas
                 </div>
                 <mat-accordion class="accordion">
-                    <mat-expansion-panel *ngFor="let p of prescriptions" class="history-panel" togglePosition="before"
-                        [expanded]="expandedPrescription === p" (opened)="expandedPrescription = p"
-                        (closed)="expandedPrescription === p && (expandedPrescription = null)">
+                    <mat-expansion-panel *ngFor="let entry of prescriptionEntries" class="history-panel"
+                        togglePosition="before" [expanded]="expandedEntryKey === entry.key"
+                        (opened)="expandedEntryKey = entry.key"
+                        (closed)="expandedEntryKey === entry.key && (expandedEntryKey = null)">
                         <mat-expansion-panel-header class="history-panel-header">
-                            <div class="history-item">
-                                <div class="item-icon-box">
-                                    <mat-icon class="sm">science</mat-icon>
+                            <div class="history-item rx-history-item">
+                                <div class="rx-main">
+                                    <div class="item-body">
+                                        <div class="item-title">{{ getPrescriptionMedName(entry.base) | titlecase }}
+                                        </div>
+                                        <div class="item-meta">
+                                            <small class="item-meta-text text-caption mono">{{ entry.recetas[0].date |
+                                                date:'dd/MM/yyyy'}}</small>
+                                            <small *ngIf="isRxDuplicate(entry.base) || isRxTriplicate(entry.base)"
+                                                class="item-meta-text">•</small>
+                                            <small *ngIf="isRxDuplicate(entry.base)"
+                                                class="item-meta-text">Duplicado</small>
+                                            <small *ngIf="isRxTriplicate(entry.base)"
+                                                class="item-meta-text">Triplicado</small>
+                                            <small *ngIf="entry.isGroup" class="item-meta-text">•</small>
+                                            <small *ngIf="entry.isGroup" class="item-meta-text">Tratamiento {{
+                                                getTreatmentMonths(entry) }} meses</small>
+
+                                        </div>
+                                    </div>
+                                    <button matButton="outlined" color="info" class="btn-sm rx-reuse-btn"
+                                        title="Reutilizar receta"
+                                        (click)="$event.stopPropagation(); duplicateDocument.emit({ type: 'prescription', document: entry.base })">
+                                        Reutilizar
+                                    </button>
                                 </div>
-                                <div class="item-body">
-                                    <div *ngIf="isRxDuplicate(p)" class="medication-type-indicator duplicado">
-                                        <small class="type-label">Duplicado</small>
-                                    </div>
-                                    <div *ngIf="isRxTriplicate(p)" class="medication-type-indicator triplicado">
-                                        <small class="type-label">Triplicado</small>
-                                    </div>
-                                    <div class="item-title">{{ getPrescriptionMedName(p) | titlecase }}</div>
-                                    <div class="item-meta">
-                                        <small class="item-meta-text">{{ p.date | date:'dd/MM/yyyy' }}</small>
-                                        <small *ngIf="getPrescriptionSubtitle(p)" class="item-meta-text"> · {{
-                                            getPrescriptionSubtitle(p) | titlecase }}</small>
-                                    </div>
-                                </div>
-                                <mat-chip disableRipple [class]="getStatusVariant(p.status) + ' sm'">{{
-                                    getStatusLabel(p.status)
-                                    }}</mat-chip>
-                                <button matButton="outlined" color="info" class="btn-sm" title="Reutilizar receta"
-                                    (click)="$event.stopPropagation(); duplicateDocument.emit({ type: 'prescription', document: p })">
-                                    Reutilizar
-                                </button>
                             </div>
                         </mat-expansion-panel-header>
                         <ng-container
-                            *ngTemplateOutlet="prescriptionExpanded; context: { $implicit: p }"></ng-container>
+                            *ngTemplateOutlet="prescriptionExpanded; context: { $implicit: entry.base }"></ng-container>
+                        <ng-container *ngIf="entry.isGroup">
+                            <ng-container
+                                *ngTemplateOutlet="treatmentRecetas; context: { $implicit: entry }"></ng-container>
+                        </ng-container>
                     </mat-expansion-panel>
                 </mat-accordion>
                 <div class="accordion-wrapper-footer">
@@ -327,7 +362,7 @@
 
             <div class="accordion-wrapper" *ngIf="prescriptions.length === 0">
                 <div class="accordion-wrapper-header">
-                    <ui-icon icon="history" variant="transparent" size="md" />
+                    <ui-icon icon="history" size="sm" />
                     Historial de recetas
                 </div>
                 <ui-alert variant="neutral" fullwidth transparent>

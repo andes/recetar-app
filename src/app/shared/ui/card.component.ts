@@ -8,7 +8,8 @@ import { UiIconComponent } from './icon.component';
     imports: [CommonModule, UiIconComponent],
     template: `
         <div class="ui-card" [class.disabled]="disabled" [class.dashed]="dashed"
-            [class.hidden]="hidden" [class.stretch]="stretch" [class.bordered]="bordered">
+            [class.hidden]="hidden" [class.stretch]="stretch" [class.bordered]="bordered"
+            [class.accent]="accent">
 
             <div class="ui-card-header" *ngIf="title">
                 <div class="ui-card-icon">
@@ -37,8 +38,8 @@ import { UiIconComponent } from './icon.component';
 
         .ui-card {
             background: var(--bg-card);
+            border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
-            box-shadow: var(--elevation-3);
             overflow: hidden;
             display: flex;
             flex: 1;
@@ -46,12 +47,14 @@ import { UiIconComponent } from './icon.component';
         }
 
         .ui-card.bordered {
-            box-shadow: none;
             border: 1px solid var(--border-color);
         }
 
+        .ui-card.accent {
+            border-color: var(--secondary);
+        }
+
         .ui-card.dashed {
-            box-shadow: none;
             border: 2px dashed var(--secondary-200);
         }
 
@@ -125,4 +128,5 @@ export class UiCardComponent {
     @Input({ transform: booleanAttribute }) hidden = false;
     @Input({ transform: booleanAttribute }) stretch = false;
     @Input({ transform: booleanAttribute }) bordered = false;
+    @Input({ transform: booleanAttribute }) accent = false;
 }
