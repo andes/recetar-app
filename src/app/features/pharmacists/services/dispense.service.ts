@@ -150,6 +150,7 @@ export class DispenseService implements OnDestroy {
         const body: Record<string, unknown> = {
             userId: pharmacistId,
             businessName: this.authService.getLoggedBusinessName(),
+            cuil: this.authService.getLoggedCuil(),
         };
         if (replacement) { body.replacement = replacement; }
 

@@ -100,16 +100,16 @@ $highlight-dark: #EC4899
 // ========================================
 // Neutral surfaces & text
 // ========================================
-$bg-body: #f8f7ff
+$bg-body: #ffffff
 $bg-card: #FFFFFF
-$bg-over-body: #e8e7f1
+$bg-over-body: #e9eaec
 $bg-raised: #FFFFFF
+$bg-sidebar: #e6e8ef
 $text-primary: #212026
 $text-primary-light: #ffffff
-$text-secondary: #6f7c95
+$text-secondary: #7d8187
 $text-disabled: #94A3B8
-$icon-muted: #9ca3af
-$border-color: #e0e0e0
+$border-color: #d4dbe0
 $border-strong: #cbd5e1
 $hover-bg: #eef2ff
 $footer-bg: #e8e7f1
@@ -118,11 +118,13 @@ $icon-muted: #94A3B8
 // ========================================
 // Status colors
 // ========================================
-$error-bg: #FEECEB
+$error-bg: #ffe7e9
 $error-fill: #ff2f76
-$warning-bg: #FEF5E7
+$error-text: #e66d89
+$warning-bg: #fff7d7
+$warning-text: #fdea7a
 $warning-fill: #f59e0b
-$success-bg: #E8F6EF
+$success-bg: #dbf4e5
 $success-text: #1A7A4A
 $info-bg: #E8F3FA
 $info-text: #0b6bd4
@@ -136,10 +138,11 @@ $gold-fill: #B98900
 // ========================================
 // Chip (badge) backgrounds — status
 // ========================================
-$chip-success-bg: #BFE3CE
-$chip-warning-bg: #ffeea9
-$chip-error-bg: #F6C5C0
-$chip-info-bg: #c4e0ff
+$chip-success-bg: #dbf4e5
+$chip-warning-bg: #fff7d7
+$chip-error-bg: #ffe7e9
+$chip-info-bg: #def4ff
+$chip-secondary-bg: #e9e1ff
 
 $chip-success-bg-dark: #1E4A34
 $chip-warning-bg-dark: #4A3A1E
@@ -151,10 +154,21 @@ $chip-primary-bg-dark: #2C3340
 // ========================================
 // Role identity colors
 // ========================================
-$role-pharmacist: #4E6B1A
+$role-admin: #f16566
+$role-professional: #00a0bc
+$role-professional-public: #00b170
+$role-pharmacist: #b9a700
 $role-pharmacist-accent: #A6C257
-$role-auditor: #3E1D90
+$role-auditor: #336cdf
+$role-app: #3f51b5
 
+// Medication type colors
+$med-commercial-bg: #c3eff1
+$med-commercial-icon: #0d6d8a
+$med-generic-bg: #e4daff
+$med-generic-icon: #6523b9
+
+// Document type icon colors
 $cert-bg: #effcf5
 $cert-icon: #60be8f
 $pract-bg: #fff6eb
@@ -162,6 +176,19 @@ $pract-icon: #ff9d16
 $receta: #6366f1
 $receta-bg: #eef0ff
 $receta-icon: #6366f1
+
+// Document / medication type colors — dark
+$med-commercial-bg-dark: #153038
+$med-commercial-icon-dark: #5fd0df
+$med-generic-bg-dark: #271d3f
+$med-generic-icon-dark: #b79bff
+$cert-bg-dark: #15301f
+$cert-icon-dark: #6fd79c
+$pract-bg-dark: #33270f
+$pract-icon-dark: #f6b24d
+$receta-dark: #8f90f6
+$receta-bg-dark: #20214a
+$receta-icon-dark: #8f90f6
 
 // ========================================
 // Elevation (primary-based shadows)
@@ -180,22 +207,22 @@ $shadow-lg: $elevation-3
 // Dark mode tokens
 // ========================================
 $bg-body-dark: #0f172a
+$bg-over-body-dark: #232d3e
 $bg-card-dark: #1e293b
 $bg-raised-dark: #334155
+$bg-sidebar-dark: #111827
 $text-primary-dark: #f8fafc
 $text-secondary-dark: #cbd5e1
 $text-disabled-dark: #64748b
 $icon-muted-dark: #94a3b8
 $border-color-dark: #334155
 $border-strong-dark: #475569
-$hover-bg-dark: #e8e9eb
+$hover-bg-dark: #253246
 $footer-bg-dark: #020617
 
 $error-bg-dark: #3D1F1E
-$error-fill-dark: #E67E71
 $error-fill-dark: #dc2626
 $warning-bg-dark: #3D2F16
-$warning-fill-dark: #F5A623
 $warning-fill-dark: #d97706
 $success-bg-dark: #1A3A28
 $success-text-dark: #5CBF7A
@@ -203,6 +230,12 @@ $info-bg-dark: #1A2A3A
 $info-text-dark: #6BB5E0
 $gold-bg-dark: #3A2E12
 $gold-fill-dark: #E8C24A
+
+// Dark tint scales (fondos sutiles que en claro usan las escalas 50/100/200)
+$primary-50-dark: #182132
+$primary-100-dark: #1f2a3d
+$primary-200-dark: #2b3a52
+$secondary-50-dark: #201838
 
 $elevation-0-dark: none
 $elevation-1-dark: 0 2px 12px rgba(0, 0, 0, 0.30)

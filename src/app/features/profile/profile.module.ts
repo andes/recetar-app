@@ -17,7 +17,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { SharedModule } from '@shared/shared.module';
 import { FormFieldComponent } from '@shared/components/form-field/form-field.component';
 import { CanvasComponent } from '@shared/components/layout/canvas/canvas.component';
-import { UiCardComponent, UiIconComponent, UiAlertComponent } from '@shared/ui';
+import { UiCardComponent, UiIconComponent, UiAlertComponent, UiBadgeChipComponent } from '@shared/ui';
 import { AccountPanelComponent } from './components/account-panel/account-panel.component';
 import { PasswordPanelComponent } from './components/password-panel/password-panel.component';
 import { PinPanelComponent } from './components/pin-panel/pin-panel.component';
@@ -49,6 +49,7 @@ import { OrganizationsPanelComponent } from './components/organizations-panel/or
         UiCardComponent,
         UiIconComponent,
         UiAlertComponent,
+        UiBadgeChipComponent,
         AccountPanelComponent,
         PasswordPanelComponent,
         PinPanelComponent,

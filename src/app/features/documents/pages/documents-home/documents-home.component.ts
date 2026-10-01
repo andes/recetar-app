@@ -42,7 +42,6 @@ export class DocumentsHomeComponent implements OnInit, OnDestroy {
     filterDateFrom = new FormControl('');
     filterDateTo = new FormControl('');
     filterStatus = new FormControl('');
-    showFilters = false;
 
     drawerOpen = false;
     selectedDocument: DocumentItemData | null = null;
@@ -72,9 +71,6 @@ export class DocumentsHomeComponent implements OnInit, OnDestroy {
 
     stats: DocumentsStats = {
         totals: { receta: 0, certificados: 0, practicas: 0, insumos: 0 },
-        prescriptions: { pendiente: 0, dispensada: 0, vencida: 0 },
-        certificates: { total: 0, anulados: 0 },
-        practices: { active: 0, completed: 0, cancelled: 0 },
     };
 
     private load$ = new Subject<void>();
@@ -188,12 +184,6 @@ export class DocumentsHomeComponent implements OnInit, OnDestroy {
         }
     }
 
-    get resultsRange(): { from: number; to: number } {
-        const from = this.totalResults === 0 ? 0 : this.pageIndex * this.pageSize + 1;
-        const to = Math.min(from + this.pageSize - 1, this.totalResults);
-        return { from, to };
-    }
-
     get currentItems(): DocumentItemData[] {
         switch (this.selectedType) {
             case 'receta': return this.dataSourcePrescriptions;
@@ -215,10 +205,6 @@ export class DocumentsHomeComponent implements OnInit, OnDestroy {
 
     isLoading(): boolean {
         return this.loadingPrescriptions || this.loadingCertificates || this.loadingPractices || this.loadingSupplies;
-    }
-
-    toggleFilters(): void {
-        this.showFilters = !this.showFilters;
     }
 
     clearSearch(): void {
@@ -444,7 +430,7 @@ export class DocumentsHomeComponent implements OnInit, OnDestroy {
             : (item.supplies?.map(s => s.supply?.name || '').join(', ') || '');
         const dialogRef = this.dialog.open(ConfirmDialogComponent, {
             panelClass: ['confirm-dialog-panel', 'dialog-sm'],
-            data: { title: 'Eliminar receta', message: `¿Eliminar la receta de "${label}"?` }
+            data: { title: 'Eliminar receta', message: `¿Eliminar la receta de "${label}"?`, danger: true }
         });
         dialogRef.afterClosed().pipe(
             filter(result => result === true),
@@ -472,7 +458,7 @@ export class DocumentsHomeComponent implements OnInit, OnDestroy {
     deletePractice(item: Practice): void {
         const dialogRef = this.dialog.open(ConfirmDialogComponent, {
             panelClass: ['confirm-dialog-panel', 'dialog-sm'],
-            data: { title: 'Eliminar práctica', message: `¿Eliminar la práctica "${item.practice}"?` }
+            data: { title: 'Eliminar práctica', message: `¿Eliminar la práctica "${item.practice}"?`, danger: true }
         });
         dialogRef.afterClosed().pipe(
             filter(result => result === true),
@@ -492,7 +478,7 @@ export class DocumentsHomeComponent implements OnInit, OnDestroy {
     anulateCertificate(item: Certificate): void {
         const dialogRef = this.dialog.open(ConfirmDialogComponent, {
             panelClass: ['confirm-dialog-panel', 'dialog-sm'],
-            data: { title: 'Anular certificado', message: '¿Anular este certificado?' }
+            data: { title: 'Anular certificado', message: '¿Anular este certificado?', danger: true }
         });
         dialogRef.afterClosed().pipe(
             filter(result => result === true),

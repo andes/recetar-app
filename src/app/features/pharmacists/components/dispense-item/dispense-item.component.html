@@ -1,27 +1,25 @@
-<ui-card
+<ui-list-item
     *ngIf="prescription"
     class="dispense-item"
+    [selected]="selected"
     [class.dispensed]="isDispensed"
-    [class.selected]="selected"
-    (click)="onSelect()"
+    [class.expired]="isExpired"
+    (select)="onSelect()"
 >
-    <div class="di-content">
-        <div class="di-tags">
+    <div itemContent>
+        <div class="chip-row">
             <div class="rx-head">
-                <mat-icon>event</mat-icon>
+                <mat-icon class="sm text-secondary">event</mat-icon>
                 <strong class="text-sm">{{
                     creationDate | date: "d MMM yyyy"
                 }}</strong>
             </div>
-            <mat-chip class="sm" [class]="getStatusVariant(status)">
-                {{ getStatusLabel(status) }}
-            </mat-chip>
-            <mat-chip class="sm" [class]="daysToExpire < 5 ? 'error' : 'warning'"
-                *ngIf="isPending && daysToExpire !== null && daysToExpire < 10"
-            >
+            <ui-badge-chip [status]="status"></ui-badge-chip>
+            <ui-badge-chip [variant]="daysToExpire < 5 ? 'error' : 'warning'"
+                *ngIf="isPending && daysToExpire !== null && daysToExpire < 10">
                 Vence en {{ daysToExpire }}
                 {{ daysToExpire === 1 ? "día" : "días" }}
-            </mat-chip>
+            </ui-badge-chip>
             <ui-undo-countdown
                 *ngIf="canCancelDispense"
                 [dispensedAt]="dispensedAt"
@@ -29,55 +27,51 @@
         </div>
 
         <div class="rx-head">
-            <mat-icon size="sm" color="neutral">pill</mat-icon>
+            <mat-icon class="sm text-secondary">pill</mat-icon>
             <div class="rx-title">
-                <h3>{{ medicineName | titlecase }}</h3>
-                <strong *ngIf="medicineType" class="rx-type-indicator {{ medicineType }}">
+                <h3 class="text-subtitle">{{ medicineName | titlecase }}</h3>
+                <strong *ngIf="medicineType" class="med-type {{ medicineType }}">
                     {{ medicineType | titlecase }}
                 </strong>
             </div>
         </div>
 
-        <div class="di-patient">
-            <mat-icon>person</mat-icon>
-            <strong>{{ patientFullName | titlecase }}</strong>
-            <small *ngIf="patientDni">&middot; DNI {{ patientDni }}</small>
-        </div>
+        <ui-entity icon="person" [container]="false">
+            <span entityName class="truncate">{{ patientFullName | titlecase }}</span>
+            <small entityMeta class="text-xs text-secondary" *ngIf="patientDni">DNI {{ patientDni }}</small>
+        </ui-entity>
     </div>
 
-    <div class="di-side">
-        <div class="di-actions" (click)="$event.stopPropagation()">
-            <button matButton="tonal" class="block" (click)="onPrint()">
-                <mat-icon>print</mat-icon> Imprimir
-            </button>
+    <div itemActions>
+        <button matButton="tonal" class="block" (click)="onPrint()">
+            <mat-icon>print</mat-icon> Imprimir
+        </button>
+        <button
+            [matButton]="isPending ? 'filled' : 'outlined'"
+            color="secondary"
+            class="block"
+            [disabled]="!isPending"
+            (click)="onDispense()"
+            *ngIf="!isDispensed"
+        >
+            <mat-icon>done_all</mat-icon> Dispensar
+        </button>
+        <span
+            *ngIf="isDispensed"
+            class="undo-btn-wrap"
+            [matTooltip]="
+                undoDisabled ? 'Ya no se puede deshacer la dispensa' : ''
+            "
+            matTooltipPosition="above"
+        >
             <button
-                [matButton]="isPending ? 'filled' : 'outlined'"
-                color="secondary"
-                class="block"
-                [disabled]="!isPending"
-                (click)="onDispense()"
-                *ngIf="!isDispensed"
+                matButton="outlined"
+                class="mat-warn block"
+                [disabled]="undoDisabled"
+                (click)="onCancelDispense()"
             >
-                <mat-icon>done_all</mat-icon> Dispensar
+                <mat-icon>undo</mat-icon> Deshacer
             </button>
-            <span
-                *ngIf="isDispensed"
-                class="undo-btn-wrap"
-                [matTooltip]="
-                    undoDisabled ? 'Ya no se puede deshacer la dispensa' : ''
-                "
-                matTooltipPosition="above"
-            >
-                <button
-                    matButton="outlined"
-                    color="warn"
-                    class="block"
-                    [disabled]="undoDisabled"
-                    (click)="onCancelDispense()"
-                >
-                    <mat-icon>undo</mat-icon> Deshacer
-                </button>
-            </span>
-        </div>
+        </span>
     </div>
-</ui-card>
+</ui-list-item>

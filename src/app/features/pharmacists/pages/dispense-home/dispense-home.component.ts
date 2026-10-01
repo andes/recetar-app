@@ -34,15 +34,12 @@ export class DispenseHomeComponent implements OnInit, OnDestroy {
     statusControl = new FormControl('');
     sexoControl = new FormControl('');
 
-    showFilters = false;
     selectedPrescription: MixedPrescription | null = null;
     drawerOpen = false;
     pageIndex = 0;
     pageSize = 15;
-    private _total = 0;
     private destroy$ = new Subject<void>();
     private prescriptionsSub: Subscription | null = null;
-    private totalSub: Subscription | null = null;
 
     statusOptions = [
         { value: '', label: 'Todos los estados' },
@@ -73,14 +70,6 @@ export class DispenseHomeComponent implements OnInit, OnDestroy {
         return count;
     }
 
-    get resultsFrom(): number {
-        return this._total === 0 ? 0 : this.pageIndex * this.pageSize + 1;
-    }
-
-    get resultsTo(): number {
-        return Math.min(this.resultsFrom + this.pageSize - 1, this._total);
-    }
-
     constructor(
         private sidebarService: SidebarService,
         private dispenseService: DispenseService,
@@ -97,7 +86,6 @@ export class DispenseHomeComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.sidebarItems = this.sidebarService.getItems();
         this.prescriptionsSub = this.prescriptions$.subscribe((list) => this.syncSelection(list));
-        this.totalSub = this.total$.subscribe((total) => { this._total = total; });
 
         const search$ = this.searchControl.valueChanges.pipe(
             debounceTime(500),
@@ -316,6 +304,5 @@ export class DispenseHomeComponent implements OnInit, OnDestroy {
         this.destroy$.next();
         this.destroy$.complete();
         this.prescriptionsSub?.unsubscribe();
-        this.totalSub?.unsubscribe();
     }
 }

@@ -169,23 +169,38 @@ avatares de UI (el de Material queda para fotos de perfil).
 
 ### `ui-badge-chip`
 
-Chip de estado semántico, wrapper de `<mat-chip disableRipple>`.
+Chip de estado semántico, wrapper de `<mat-chip disableRipple>` que encapsula
+las clases de variante/tamaño del design system.
 
 | Input | Tipo | Default | Descripción |
 |---|---|---|---|
-| `variant` | `'success'`\|`'info'`\|`'warning'`\|`'error'` | `'success'` | Color del chip |
+| `variant` | `'neutral'`\|`'success'`\|`'info'`\|`'warning'`\|`'error'`\|`'primary'`\|`'secondary'` | `'neutral'` | Color del chip. `neutral` usa el fondo por defecto (`--bg-over-body`) |
+| `status` | `string` | `''` | Si se pasa, resuelve `variant` + label con `shared/utils/status.utils` (tiene prioridad sobre `variant`) |
 | `size` | `'sm'`\|`'md'` | `'sm'` | Compacto o normal |
+| `icon` | `string` | `undefined` | Ícono Material opcional a la izquierda |
+| `dot` | `boolean` | `false` | Muestra un punto de color (`currentColor`) antes del texto |
 
 ```html
-<ui-badge-chip variant="success" size="sm">
-  <mat-icon matChipAvatar>check_circle</mat-icon>
-  Validado
+<!-- Estado: variante + label resueltos del status -->
+<ui-badge-chip [status]="status"></ui-badge-chip>
+
+<!-- Con punto de color -->
+<ui-badge-chip [status]="getStatus()" [dot]="true"></ui-badge-chip>
+
+<!-- Variante explícita con contenido custom -->
+<ui-badge-chip variant="warning" icon="schedule">
+  Vence en {{ daysToExpire }} días
+</ui-badge-chip>
+
+<!-- Chip neutro para metadata (fecha, código) -->
+<ui-badge-chip variant="info">
+  <strong class="mono text-sm">{{ date | date:"dd MMM yyyy" }}</strong>
 </ui-badge-chip>
 ```
 
-**Cuándo usar:** cualquier indicador de estado o categoría que use los tokens semánticos
-del sistema de diseño (success, info, warning, error). Genérico. **No usar**
-`<mat-chip class="success sm">` manualmente.
+**Cuándo usar:** cualquier indicador de estado, categoría o metadata que use los tokens
+semánticos del sistema de diseño. Genérico. **No usar** `<mat-chip class="success sm">`
+manualmente.
 
 ### `ui-table`
 
@@ -504,6 +519,8 @@ El toggle está en el `SidebarComponent` al fondo, antes del footer. Usa íconos
 
 No usar valores fijos de color; siempre referenciar variables CSS que tengan definición dark correspondiente.
 
+**Ojo con `--primary`:** es el color institucional (casi negro en claro) y se usa como fondo del header/sidebar. **No** usarlo como color de texto ni como fondo de componentes chicos (label de botón tonal, toggle activo, link) porque en dark queda oscuro sobre oscuro. Para texto usar `--text-primary`; para acento/interactivo usar `--secondary`. Tampoco usar `--bg-card` como color de texto (en dark es oscuro).
+
 ### Panel con fondo oscuro
 
 Para superficies con fondo oscuro que necesitan texto claro (ej: panel institucional del login), aplicar `class="dark-mode"` al contenedor. Esto hace que `--text-primary`, `--text-secondary` y `--text-disabled` hereden los valores de modo oscuro dentro de ese scope, sin necesidad de crear variables nuevas ni reglas de `color` en el componente.
@@ -650,3 +667,173 @@ columns: ColumnDef[] = [
 - **Paginador:** `<ui-paginator>` con `pageSizeOptions="[5, 10, 25]"`.
 - **Carga:** `<div class="loading-container"><mat-spinner diameter="40"></mat-spinner></div>`. La clase puede definirse en el componente si el contexto lo requiere.
 - **CSS del componente.** En el `.sass` del componente van las clases específicas de la feature (display de celdas, layout, etc.). `styles.sass` solo contiene overrides de Material y utilidades verdaderamente genéricas (`.text-center`, `.mono`, `.wrapper`, etc.).
+
+## 13. Patrones De Ítem Y Utilidades Globales
+
+### Utilidades globales (`styles.sass`)
+
+| Clase | Uso |
+|---|---|
+| `.text-subtitle` | Nombre de entidad (paciente/medicamento/profesional): negrita y algo mayor que body |
+| `.text-label` / `.text-value` | Par etiqueta/valor de un dato |
+| `.text-success` / `.text-error` / `.text-warning` | Color de texto por estado |
+| `.data-field` | Contenedor en columna para label + valor |
+| `.field-grid` (+ `.field-grid-full`) | Grid de datos etiquetados (1 col mobile / 2 col desktop) |
+| `.form-actions` | Footer de acciones de formulario (stack mobile / fila a la derecha en desktop) |
+| `.chip-row` | Fila de chips/badges (flex, `gap`, `flex-wrap`) |
+| `.med-type` (+ `.duplicado` / `.triplicado` / `.anulado`) | Indicador de tipo de medicamento |
+| `.truncate` | Truncado a una línea con ellipsis |
+| `.selectable` | Borde activo/hover del `ui-card` de un ítem seleccionable |
+| `.drawer-actions` | Fila de acciones del footer de un drawer (botones full-width) |
+
+### `ui-list-item`
+
+Contenedor canónico de ítem de listado. Encapsula el `ui-card`, el borde
+seleccionable, el layout content/side y el apilado de acciones (columna en desktop,
+fila en mobile). Slots `[itemContent]` y `[itemActions]`; output `(select)`.
+
+```html
+<ui-list-item [selected]="selected" (select)="onSelect()">
+  <div itemContent> … contenido del ítem … </div>
+  <div itemActions> … botones full-width … </div>
+</ui-list-item>
+```
+
+Reglas:
+- **No** redefinir `:host`, `*-content`, `*-side`, `*-actions` ni media queries en el
+  componente del ítem: los aporta `ui-list-item`.
+- Acciones: botones de texto full-width (`matButton` tonal/outlined/filled) con
+  `class="block"`, apilados. **No** usar `mat-icon-button` sueltos para las acciones.
+- Chips de estado: `<ui-badge-chip [status]="...">` o `[variant]`.
+- Fila identidad: `<ui-entity icon="person" [container]="false">` con `[entityName]`
+  (`text-subtitle`) y `[entityMeta]`.
+- Fila de badges: `class="chip-row"`.
+- Íconos: `mat-icon.sm` / `.xs` + `text-secondary` (sin tamaños inline).
+
+### `ui-entity`
+
+Ícono + nombre + meta. Con `container=false` (ítems) renderiza un `mat-icon` compacto;
+con `container=true` (default, drawers) usa `ui-icon` con `variant`/`size`.
+
+```html
+<ui-entity icon="person" variant="primary">
+  <span entityName class="text-subtitle">{{ name }}</span>
+  <span entityMeta>DNI {{ dni }}</span>
+</ui-entity>
+```
+
+### `ui-detail-panel`
+
+Shell canónico de panel de detalle (drawer): header opcional (badge/fecha) + cuerpo con scroll.
+
+```html
+<ui-detail-panel>
+  <div detailHeader> … badge + fecha … </div>
+  <ui-detail-section label="Paciente"> … </ui-detail-section>
+</ui-detail-panel>
+```
+
+### `ui-detail-section`
+
+Sección etiquetada dentro de un panel. `variant`: `default` | `info` (fondo `--secondary-50`, ej. indicaciones) | `neutral` (fondo `--primary-50`, ej. diagnóstico/observaciones). La primera sección no lleva margen superior.
+
+```html
+<ui-detail-section label="Diagnóstico" variant="neutral">
+  <p class="text-sm">{{ diagnostic | capitalize }}</p>
+</ui-detail-section>
+```
+
+### `ui-results-list`
+
+Listado de resultados: contador ("Mostrando X–Y de N"), carga/vacío, contenido y paginador. El vacío se puede customizar con el slot `[empty]`.
+
+| Input | Tipo | Default |
+|---|---|---|
+| `loading` | boolean | false |
+| `total` | number | 0 |
+| `label` | string | '' |
+| `emptyIcon` / `emptyMessage` | string | — |
+| `pageSize` / `pageIndex` | number | 10 / 0 |
+| `pageSizeOptions` | number[] | [5, 10, 25] |
+
+Output `page`.
+
+```html
+<ui-results-list [loading]="loading" [total]="total" label="Recetas"
+  [pageSize]="pageSize" [pageIndex]="pageIndex" [pageSizeOptions]="[5, 15, 30]"
+  (page)="onPageChange($event)">
+  <app-document-item *ngFor="let item of items" …></app-document-item>
+</ui-results-list>
+```
+
+### `ui-results-toolbar`
+
+Card de búsqueda + filtros de un listado: barra de búsqueda (con botón limpiar), toggle de filtros (con contador) y botón actualizar. El estado de apertura de filtros es interno.
+
+| Input | Tipo | Default |
+|---|---|---|
+| `control` | `FormControl` | — (requerido) |
+| `placeholder` | string | '' |
+| `isLoading` | boolean | false |
+| `showFilters` | boolean | false |
+| `showRefresh` | boolean | true |
+| `filterCount` | number | 0 |
+| `hasActiveFilters` | boolean | false |
+
+Outputs: `refresh`, `clearSearch`, `searchEnter`, `clearFilters`.
+Slots: `[searchExtra]` (contenido dentro del card, debajo de la fila) y `[filters]` (los `.filter-group`).
+
+```html
+<ui-results-toolbar [control]="searchControl" placeholder="Buscar…"
+  [isLoading]="loading" [showFilters]="true" [filterCount]="activeFilterCount"
+  [hasActiveFilters]="hasActiveFilters" (refresh)="refresh()"
+  (clearSearch)="onClearSearch()" (clearFilters)="onClear()">
+  <div class="filter-group" filters>
+    <label>Estado</label>
+    <ui-field-input type="select" [control]="statusControl">…</ui-field-input>
+  </div>
+</ui-results-toolbar>
+```
+
+### `ui-field-input`
+
+Input/select nativo con el estilo de campo unificado (mismo que `ui-date-field`). Usar en paneles de filtros y formularios en lugar de redefinir `.filter-input`.
+
+```html
+<ui-field-input type="select" [control]="statusControl">
+  <option *ngFor="let o of statusOptions" [value]="o.value">{{ o.label }}</option>
+</ui-field-input>
+```
+
+## 14. Botones: variantes de estado (error / warn)
+
+**En Angular Material v20 (M3) el input `color` de los botones es inerte**
+(`color="warn"` / `color="error"` no aplican ninguna clase). **No usar `color=`**;
+aplicar la clase explícita del design system.
+
+| Semántica | Clase | Variantes |
+|---|---|---|
+| **Destructivo** (Eliminar, Anular, Quitar, Suspender) | `class="mat-error"` | inline/lists: `matButton="outlined"`. Acción principal de un diálogo de confirmación: `matButton="filled"` |
+| **Cautela** (Deshacer, Desactivar PIN) | `class="mat-warn"` | `matButton="outlined"` / `"tonal"` según contexto |
+| **Confirmación / éxito** (Aceptar de un diálogo de operación exitosa) | `class="mat-success"` | `matButton="filled"` |
+| **Neutral** (Cancelar, Continuar) | — | sin clase de estado (usar `outlined`/`tonal`/`filled` base) |
+
+```html
+<!-- Destructivo inline -->
+<button matButton="outlined" class="mat-error">Eliminar</button>
+
+<!-- Destructivo: CTA principal de un diálogo de confirmación -->
+<button matButton="filled" class="mat-error">Confirmar</button>
+
+<!-- Cautela -->
+<button matButton="outlined" class="mat-warn">
+  <mat-icon>undo</mat-icon> Deshacer
+</button>
+```
+
+`styles.sass` define `.mat-error` / `.mat-warn` / `.mat-success` para `outlined`, `tonal`,
+`filled`, `raised`, `text` e icon-buttons, de modo que la clase pinta el estado en reposo
+(no solo en `:hover`). Para un confirm destructivo, la pantalla puede pasar un flag al
+diálogo (ej. `ConfirmDialogComponent` acepta `data.danger`) en vez de duplicar el
+componente. **Nunca** usar `style="background-color: green; color: white"` inline para
+botones de éxito: usar `class="mat-success"`.

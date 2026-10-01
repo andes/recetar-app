@@ -1,56 +1,53 @@
-<ui-card
+<ui-list-item
     *ngIf="document"
     class="document-item"
-    [class.selected]="selected"
-    (click)="onSelect()"
->
-    <div class="di-info">
-        <div class="di-row-top">
+    [selected]="selected"
+    (select)="onSelect()">
+
+    <div itemContent>
+        <div class="chip-row">
             <div class="rx-head" *ngIf="date">
-                <mat-icon>event</mat-icon>
+                <mat-icon class="sm text-secondary">event</mat-icon>
                 <strong class="text-sm">{{ date | date: "d MMM yyyy" }}</strong>
             </div>
-            <mat-chip class="sm" [class]="statusVariant">{{ statusLabel }}</mat-chip>
+            <ui-badge-chip [variant]="statusVariant">{{ statusLabel }}</ui-badge-chip>
         </div>
 
         <div class="di-row-two">
-            <div class="di-cell-patient" *ngIf="hasPatient">
-                <div class="rx-head">
-                    <mat-icon>person</mat-icon>
-                    <strong class="di-patient-name">{{ patientFullName | titlecase }}</strong>
-                </div>
-                <small class="di-patient-dni" *ngIf="patientDni">DNI {{ patientDni }}</small>
-            </div>
+            <ui-entity *ngIf="hasPatient" icon="person" [container]="false">
+                <span entityName class="text-subtitle truncate">{{ patientFullName | titlecase }}</span>
+                <small entityMeta class="text-xs text-secondary" *ngIf="patientDni">DNI {{ patientDni }}</small>
+            </ui-entity>
 
-            <div class="di-cell-med">
-                <div class="rx-head">
-                    <mat-icon size="sm" color="neutral">{{ icon }}</mat-icon>
-                    <div class="rx-title">
-                        <h3>{{ title | titlecase }}</h3>
-                        <div class="rx-subline" *ngIf="medicineType || medicationDetail || subtitle">
-                            <strong *ngIf="medicineType" class="rx-type-indicator {{ medicineType }}">
-                                {{ medicineType | titlecase }}
-                            </strong>
-                            <small class="di-med-detail" *ngIf="medicationDetail">{{ medicationDetail | capitalize }}</small>
-                            <small class="di-med-subtitle" *ngIf="!medicationDetail && subtitle">{{ subtitle | titlecase }}</small>
-                        </div>
+            <div class="rx-head">
+                <mat-icon class="sm text-secondary">{{ icon }}</mat-icon>
+                <div class="rx-title">
+                    <h3 class="text-subtitle truncate">{{ title | titlecase }}</h3>
+                    <div class="rx-subline" *ngIf="medicineType || medicationDetail || subtitle">
+                        <strong *ngIf="medicineType" class="med-type {{ medicineType }}">
+                            {{ medicineType | titlecase }}
+                        </strong>
+                        <small class="text-xs text-secondary truncate" *ngIf="medicationDetail">
+                            {{ medicationDetail | capitalize }}
+                        </small>
+                        <small class="text-xs text-secondary truncate" *ngIf="!medicationDetail && subtitle">
+                            {{ subtitle | titlecase }}
+                        </small>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="di-side">
-        <div class="di-actions" (click)="$event.stopPropagation()">
-            <button matIconButton *ngIf="canPrint" matTooltip="Imprimir" (click)="onPrint()">
-                <mat-icon>print</mat-icon>
-            </button>
-            <button matIconButton *ngIf="canAnulate" matTooltip="Anular" (click)="onAnulate()">
-                <mat-icon>block</mat-icon>
-            </button>
-            <button matIconButton *ngIf="canRemove" matTooltip="Eliminar" (click)="onRemove()">
-                <mat-icon>delete</mat-icon>
-            </button>
-        </div>
+    <div itemActions>
+        <button matButton="tonal" class="block" *ngIf="canPrint" (click)="onPrint()">
+            <mat-icon>print</mat-icon> Imprimir
+        </button>
+        <button matButton="outlined" class="mat-error block" *ngIf="canAnulate" (click)="onAnulate()">
+            <mat-icon>block</mat-icon> Anular
+        </button>
+        <button matButton="outlined" class="mat-error block" *ngIf="canRemove" (click)="onRemove()">
+            <mat-icon>delete</mat-icon> Eliminar
+        </button>
     </div>
-</ui-card>
+</ui-list-item>

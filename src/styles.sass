@@ -16,7 +16,6 @@
 
   // Secondary palette
   --secondary: #{$secondary}
-  --secondary-rgb: 103, 58, 222
   --secondary-dark: #{$secondary-dark}
   --secondary-light: #{$secondary-light}
   --secondary-50: #{$secondary-50}
@@ -39,6 +38,7 @@
   --bg-over-body: #{$bg-over-body}
   --bg-card: #{$bg-card}
   --bg-raised: #{$bg-raised}
+  --bg-sidebar: #{$bg-sidebar}
   --text-primary: #{$text-primary}
   --text-primary-light: #{$text-primary-light}
   --text-secondary: #{$text-secondary}
@@ -48,19 +48,19 @@
   --border-strong: #{$border-strong}
   --hover-bg: #{$hover-bg}
   --footer-bg: #{$footer-bg}
-  --icon-muted: #{$icon-muted}
 
   // Status colors
   --error-bg: #{$error-bg}
   --error-fill: #{$error-fill}
-  --error-fill: #{$error-fill}
+  --error-text: #{$error-text}
   --warning-bg: #{$warning-bg}
   --warning-fill: #{$warning-fill}
-  --warning-fill: #{$warning-fill}
+  --warning-text: #{$warning-text}
   --success-bg: #{$success-bg}
   --success-text: #{$success-text}
   --info-bg: #{$info-bg}
   --info-text: #{$info-text}
+
 
   // Gold accent (matrículas)
   --gold-bg: #{$gold-bg}
@@ -83,24 +83,28 @@
   --icon-btn-hover: #{$icon-btn-hover}
 
   // Role identity
+  --role-admin: #{$role-admin}
+  --role-professional: #{$role-professional}
+  --role-professional-public: #{$role-professional-public}
   --role-pharmacist: #{$role-pharmacist}
   --role-pharmacist-accent: #{$role-pharmacist-accent}
   --role-auditor: #{$role-auditor}
+  --role-app: #{$role-app}
 
   // Medication type colors
-  --med-commercial-bg: #c3eff1
-  --med-commercial-icon: #0d6d8a
-  --med-generic-bg: #e4daff
-  --med-generic-icon: #6523b9
+  --med-commercial-bg: #{$med-commercial-bg}
+  --med-commercial-icon: #{$med-commercial-icon}
+  --med-generic-bg: #{$med-generic-bg}
+  --med-generic-icon: #{$med-generic-icon}
 
   // Document type icon colors
-  --cert-bg: #effcf5
-  --cert-icon: #60be8f
-  --pract-bg: #fff6eb
-  --pract-icon: #ff9d16
-  --receta: #6366f1
-  --receta-bg: #eef0ff
-  --receta-icon: #6366f1
+  --cert-bg: #{$cert-bg}
+  --cert-icon: #{$cert-icon}
+  --pract-bg: #{$pract-bg}
+  --pract-icon: #{$pract-icon}
+  --receta: #{$receta}
+  --receta-bg: #{$receta-bg}
+  --receta-icon: #{$receta-icon}
 
   // Radius scale
   --radius-xs: #{$radius-xs}
@@ -306,12 +310,21 @@ strong
     &:hover
       --mat-button-outlined-outline-color: var(--error-bg)
       --mat-button-outlined-label-text-color: var(--error-fill)
-      background: #fef2f2
+      background: var(--error-bg)
+
+  &.mat-success
+    --mat-button-outlined-outline-color: var(--success-text)
+    --mat-button-outlined-label-text-color: var(--success-text)
+
+    &:hover
+      --mat-button-outlined-outline-color: var(--success-text)
+      --mat-button-outlined-label-text-color: var(--success-text)
+      background: var(--success-bg)
 
 // ---- Tonal (matButton="tonal") ----
 .mat-tonal-button
   --mat-button-tonal-container-color: var(--bg-over-body)
-  --mat-button-tonal-label-text-color: var(--primary)
+  --mat-button-tonal-label-text-color: var(--text-primary)
   --mat-button-tonal-container-shape: var(--radius-md)
   --mat-button-tonal-label-text-weight: 400
   --mat-button-tonal-label-text-size: 0.9375rem
@@ -321,18 +334,32 @@ strong
 
 .mat-tonal-button.mat-info
   &:hover
-    --mat-button-tonal-label-text-color: #3A53DE
-    --mat-button-tonal-container-color: #D8DFF9
+    --mat-button-tonal-label-text-color: var(--secondary-600)
+    --mat-button-tonal-container-color: var(--secondary-100)
 
 .mat-tonal-button.mat-warn
+  --mat-button-tonal-label-text-color: var(--warning-fill)
+  --mat-button-tonal-container-color: var(--warning-bg)
+
   &:hover
     --mat-button-tonal-label-text-color: var(--warning-fill)
     --mat-button-tonal-container-color: var(--warning-bg)
 
 .mat-tonal-button.mat-error
+  --mat-button-tonal-label-text-color: var(--error-fill)
+  --mat-button-tonal-container-color: var(--error-bg)
+
   &:hover
-    --mat-button-tonal-label-text-color: #dc2626
-    --mat-button-tonal-container-color: #ffdbdb
+    --mat-button-tonal-label-text-color: var(--error-fill)
+    --mat-button-tonal-container-color: var(--error-bg)
+
+.mat-tonal-button.mat-success
+  --mat-button-tonal-label-text-color: var(--success-text)
+  --mat-button-tonal-container-color: var(--success-bg)
+
+  &:hover
+    --mat-button-tonal-label-text-color: var(--success-text)
+    --mat-button-tonal-container-color: var(--success-bg)
 
 // ---- Info variant (blue) ----
 .mat-info
@@ -355,11 +382,12 @@ strong
   &.mat-icon-button:hover
     color: var(--error-fill)
 
-.mat-warn
-  color: var(--warning-fill)
+// ---- Success variant (green, for confirmations) ----
+.mat-success
+  color: var(--success-text)
 
   &.mat-icon-button:hover
-    color: var(--warning-fill)
+    color: var(--success-text)
 
 // ---- Filled (matButton="filled") ----
 .mat-mdc-unelevated-button
@@ -389,8 +417,8 @@ strong
       color: #fff !important
 
     &:hover
-      --mdc-filled-button-container-color: #b45309 !important
-      --mat-button-filled-container-color: #b45309 !important
+      --mdc-filled-button-container-color: color-mix(in srgb, var(--warning-fill) 85%, black) !important
+      --mat-button-filled-container-color: color-mix(in srgb, var(--warning-fill) 85%, black) !important
 
   &.mat-error
     --mdc-filled-button-container-color: var(--error-fill) !important
@@ -403,8 +431,22 @@ strong
       color: #fff !important
 
     &:hover
-      --mdc-filled-button-container-color: #991b1b !important
-      --mat-button-filled-container-color: #991b1b !important
+      --mdc-filled-button-container-color: color-mix(in srgb, var(--error-fill) 85%, black) !important
+      --mat-button-filled-container-color: color-mix(in srgb, var(--error-fill) 85%, black) !important
+
+  &.mat-success
+    --mdc-filled-button-container-color: var(--success-text) !important
+    --mat-button-filled-container-color: var(--success-text) !important
+    --mdc-filled-button-label-text-color: #fff !important
+    --mat-button-filled-label-text-color: #fff !important
+    color: #fff !important
+
+    .mdc-button__label
+      color: #fff !important
+
+    &:hover
+      --mdc-filled-button-container-color: color-mix(in srgb, var(--success-text) 85%, black) !important
+      --mat-button-filled-container-color: color-mix(in srgb, var(--success-text) 85%, black) !important
 
   &.mat-secondary
     --mdc-filled-button-container-color: var(--secondary) !important
@@ -437,6 +479,28 @@ strong
 
   @media (min-width: $small-devices + 1px)
     --mat-button-protected-label-text-size: 0.8125rem
+
+  &.mat-warn
+    --mat-button-protected-container-color: var(--warning-fill)
+    --mat-button-protected-label-text-color: #fff
+
+  &.mat-error
+    --mat-button-protected-container-color: var(--error-fill)
+    --mat-button-protected-label-text-color: #fff
+
+  &.mat-success
+    --mat-button-protected-container-color: var(--success-text)
+    --mat-button-protected-label-text-color: #fff
+
+// ---- Text (matButton) ----
+.mat-mdc-button.mat-warn
+  --mat-button-text-label-text-color: var(--warning-fill)
+
+.mat-mdc-button.mat-error
+  --mat-button-text-label-text-color: var(--error-fill)
+
+.mat-mdc-button.mat-success
+  --mat-button-text-label-text-color: var(--success-text)
 
 // ---- Icon button (mat-icon-button) ----
 .mat-mdc-icon-button
@@ -567,8 +631,10 @@ strong
 
 .dark-mode
   --bg-body: #{$bg-body-dark}
+  --bg-over-body: #{$bg-over-body-dark}
   --bg-card: #{$bg-card-dark}
   --bg-raised: #{$bg-raised-dark}
+  --bg-sidebar: #{$bg-sidebar-dark}
   --text-primary: #{$text-primary-dark}
   --text-secondary: #{$text-secondary-dark}
   --text-disabled: #{$text-disabled-dark}
@@ -580,18 +646,33 @@ strong
 
   --error-bg: #{$error-bg-dark}
   --error-fill: #{$error-fill-dark}
-  --error-fill: #{$error-fill-dark}
   --warning-bg: #{$warning-bg-dark}
-  --warning-fill: #{$warning-fill-dark}
   --warning-fill: #{$warning-fill-dark}
   --success-bg: #{$success-bg-dark}
   --success-text: #{$success-text-dark}
-  --success-bg-dark: #{$success-bg-dark}
-  --success-text-dark: #{$success-text-dark}
   --info-bg: #{$info-bg-dark}
   --info-text: #{$info-text-dark}
   --gold-bg: #{$gold-bg-dark}
   --gold-fill: #{$gold-fill-dark}
+
+  // Tint scales (fondos sutiles)
+  --primary-50: #{$primary-50-dark}
+  --primary-100: #{$primary-100-dark}
+  --primary-200: #{$primary-200-dark}
+  --secondary-50: #{$secondary-50-dark}
+
+  // Tipo de medicamento / documento
+  --med-commercial-bg: #{$med-commercial-bg-dark}
+  --med-commercial-icon: #{$med-commercial-icon-dark}
+  --med-generic-bg: #{$med-generic-bg-dark}
+  --med-generic-icon: #{$med-generic-icon-dark}
+  --cert-bg: #{$cert-bg-dark}
+  --cert-icon: #{$cert-icon-dark}
+  --pract-bg: #{$pract-bg-dark}
+  --pract-icon: #{$pract-icon-dark}
+  --receta: #{$receta-dark}
+  --receta-bg: #{$receta-bg-dark}
+  --receta-icon: #{$receta-icon-dark}
 
   // Chip (badge) backgrounds
   --chip-success-bg: #{$chip-success-bg-dark}
@@ -620,6 +701,17 @@ strong
 
   --icon-btn-bg: #{$icon-btn-bg-dark}
   --icon-btn-hover: #{$icon-btn-hover-dark}
+
+  --focus-ring: 0 0 0 3px rgba(139, 105, 239, 0.25)
+
+  // Role identity (mismos valores que en modo claro)
+  --role-admin: #{$role-admin}
+  --role-professional: #{$role-professional}
+  --role-professional-public: #{$role-professional-public}
+  --role-pharmacist: #{$role-pharmacist}
+  --role-pharmacist-accent: #{$role-pharmacist-accent}
+  --role-auditor: #{$role-auditor}
+  --role-app: #{$role-app}
 
   input
     color: #fff
@@ -710,11 +802,112 @@ body
 .mono
   font-family: var(--font-mono)
   line-height: normal
+  font-size: inherit
   color: var(--text-primary)
 
 .form-field
   flex: 1
   min-width: 0
+
+// ---- Labeled data field (label + valor) ----
+.data-field
+  display: flex
+  flex-direction: column
+  gap: var(--space-1)
+  min-width: 0
+  padding: var(--space-2) 0
+
+// ---- Grid de datos etiquetados ----
+.field-grid
+  display: grid
+  grid-template-columns: 1fr
+  gap: var(--space-3)
+
+  @media (min-width: $small-devices + 1px)
+    grid-template-columns: repeat(2, 1fr)
+
+.field-grid-full
+  grid-column: 1 / -1
+
+// ---- Encabezado de formulario/panel (título + subtítulo) ----
+.form-head
+  margin-bottom: var(--space-5)
+
+  h3
+    margin: 0
+
+  p
+    margin: var(--space-1) 0 0
+    color: var(--text-secondary)
+
+// ---- Acciones de un formulario ----
+.form-actions
+  display: flex
+  flex-direction: column-reverse
+  align-items: stretch
+  gap: var(--space-2)
+  margin-top: var(--space-6)
+  padding-top: var(--space-4)
+  border-top: 1px solid var(--border-color)
+
+  button
+    width: 100%
+
+  @media (min-width: $small-devices + 1px)
+    flex-direction: row
+    justify-content: flex-end
+    align-items: center
+    gap: var(--space-4)
+
+    button
+      width: auto
+
+// ---- Selectable item surface (borde activo/hover sobre ui-card) ----
+.selectable
+  .ui-card.ui-card
+    transition: border-color .12s, background-color .12s, box-shadow .12s
+
+  &:hover .ui-card.ui-card,
+  &.selected .ui-card.ui-card
+    border-color: var(--secondary)
+
+// ---- Chip row (fila de chips/badges de un item) ----
+.chip-row
+  display: flex
+  align-items: center
+  gap: var(--space-2)
+  flex-wrap: wrap
+
+// ---- Truncado de texto en una línea ----
+.truncate
+  min-width: 0
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
+
+// ---- Tipo de medicamento (duplicado / triplicado / anulado) ----
+.med-type
+  font-size: 0.75rem
+  font-weight: 600
+  line-height: 1.3
+
+  &.duplicado
+    color: var(--warning-fill)
+
+  &.triplicado
+    color: var(--error-fill)
+
+  &.anulado
+    color: var(--error-fill)
+
+// ---- Acciones del footer de un drawer ----
+.drawer-actions
+  display: flex
+  gap: var(--space-2)
+  width: 100%
+
+  > *
+    flex: 1
 
 .wrapper
   width: 80%
@@ -766,6 +959,24 @@ body.mat-typography
   .text-base
     font-size: 0.875rem
 
+  // Nombre de entidad (paciente, medicamento, profesional): negrita y algo
+  // más grande que el texto de body. Regla global única.
+  .text-subtitle
+    font-size: 0.9375rem
+    font-weight: 600
+    line-height: 1.3
+
+  // Valor de un dato etiquetado (par de text-label).
+  .text-value
+    font-size: 0.8125rem
+    line-height: 1.4
+
+  // Etiqueta de un dato (par de text-value).
+  .text-label
+    font-size: 0.75rem
+    line-height: 1.4
+    color: var(--text-secondary)
+
   .text-lg
     font-size: 1.2rem
     font-weight: 700
@@ -783,7 +994,19 @@ body.mat-typography
     line-height: 1
 
   .text-info
-    color: var(--info-text)
+    color: var(--text-info)
+
+  .text-error
+    color: var(--error-text)
+
+  .text-success
+    color: var(--success-text)
+
+  .text-warning
+    color: var(--warning-text)
+
+  .text-highlight
+    color: var(--secondary)
 
   .text-secondary
     color: var(--text-secondary)
@@ -833,6 +1056,10 @@ body.mat-typography
 
 .mat-dialog-container
   max-height: 90vh
+
+// ---- Overlay (dialogs/menus/selects) por encima del drawer (1300) ----
+.cdk-overlay-container
+  z-index: 1400
 
 // ---- Dialog size variants ----
 .dialog-sm

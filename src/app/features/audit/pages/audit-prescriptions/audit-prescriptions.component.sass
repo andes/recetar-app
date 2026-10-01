@@ -1,0 +1,44 @@
+@use 'styles/variables' as *
+
+:host
+    display: block
+    width: 100%
+
+.dispenser-info
+    display: flex
+    align-items: center
+    gap: var(--space-3)
+    margin-top: var(--space-4)
+    padding-top: var(--space-4)
+    border-top: 1px solid var(--border-color)
+
+.dispenser-text
+    display: flex
+    flex-direction: column
+    min-width: 0
+    gap: var(--space-1)
+
+.dispenser-name
+    min-width: 0
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+.dispenser-meta
+    display: flex
+    flex-wrap: wrap
+    gap: var(--space-1)
+
+.field-footer
+    display: flex
+    justify-content: space-between
+    align-items: center
+    gap: var(--space-2)
+    margin-top: var(--space-2)
+
+.field-error
+    color: var(--error-fill)
+
+
+
+
