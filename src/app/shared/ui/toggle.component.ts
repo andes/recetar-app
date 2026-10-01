@@ -41,6 +41,7 @@ export interface ToggleOption {
                 type="button"
                 class="toggle-btn"
                 [class.active]="value === opt.value"
+                [ngClass]="'color-' + (opt.color || 'primary')"
                 (click)="select(opt.value)">
                 <mat-icon *ngIf="opt.icon" class="toggle-icon">{{ opt.icon }}</mat-icon>
                 <small>{{ opt.label }}</small>
@@ -101,8 +102,16 @@ export interface ToggleOption {
 
         .toggle-btn.active {
             background: var(--bg-card);
-            color: var(--primary);
+            color: var(--text-primary);
             box-shadow: var(--shadow-sm);
+        }
+
+        .toggle-btn.color-success.active {
+            color: var(--success-text);
+        }
+
+        .toggle-btn.color-error.active {
+            color: var(--error-fill);
         }
 
         .toggle-icon {

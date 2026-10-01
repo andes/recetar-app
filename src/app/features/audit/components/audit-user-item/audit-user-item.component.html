@@ -1,0 +1,37 @@
+<ui-list-item *ngIf="user" class="audit-user-item" [selected]="selected" (select)="onSelect()">
+
+    <div itemContent>
+        <div class="chip-row">
+            <mat-icon class="sm text-secondary">badge</mat-icon>
+            <span class="role-label text-sm text-highlight">
+                {{ roleName | titlecase }}<span *ngIf="extraRolesCount > 0">(+{{ extraRolesCount }})</span>
+            </span>
+            <span class="au-username text-sm text-secondary" *ngIf="user.username">
+                <mat-icon class="xs">account_circle</mat-icon>{{ user.username }}
+            </span>
+            <ui-badge-chip [variant]="statusVariant">{{ statusLabel }}</ui-badge-chip>
+
+            <span class="au-last-login text-caption text-secondary">
+                Último acceso: {{ user.lastLogin ? (user.lastLogin | date: "dd/MM/yyyy") : "—" }}
+            </span>
+        </div>
+
+        <ui-entity icon="person" [container]="false">
+            <span entityName class="text-subtitle truncate">{{ user.businessName | titlecase }}</span>
+            <small entityMeta class="text-xs text-secondary" *ngIf="user.cuil || user.email">
+                <ng-container *ngIf="user.cuil">CUIL {{ user.cuil }}</ng-container>
+                <ng-container *ngIf="user.cuil && user.email"> &middot; </ng-container>
+                <ng-container *ngIf="user.email">{{ user.email }}</ng-container>
+            </small>
+        </ui-entity>
+    </div>
+
+    <div itemActions>
+        <button matButton="tonal" class="block" (click)="onSelect()">
+            <mat-icon>edit</mat-icon> Editar
+        </button>
+        <button matButton="outlined" class="mat-error block" (click)="onRemove()">
+            <mat-icon>delete</mat-icon> Eliminar
+        </button>
+    </div>
+</ui-list-item>

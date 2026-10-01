@@ -1,15 +1,5 @@
 @use 'styles/variables' as *
 
-.panel-head
-    margin-bottom: $space-5
-
-    h3
-        margin: 0
-
-    p
-        margin: $space-1 0 0
-        color: var(--text-secondary)
-
 .loading-container
     display: flex
     flex-direction: column
@@ -44,10 +34,6 @@
         flex-direction: column
         gap: $space-1
 
-.status-description
-    color: var(--text-secondary)
-    margin: 0
-
 .actions-section
     display: flex
     gap: $space-3
@@ -77,18 +63,4 @@
         flex-direction: column
         gap: $space-4
 
-.form-actions
-    display: flex
-    justify-content: flex-end
-    gap: $space-3
-    margin-top: $space-4
-    padding-top: $space-4
-    border-top: 1px solid var(--border-color)
 
-    button[type="submit"]
-        display: flex
-        align-items: center
-        gap: $space-2
-
-        mat-spinner
-            display: inline-block

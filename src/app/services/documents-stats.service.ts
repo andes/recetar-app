@@ -10,20 +10,6 @@ export interface DocumentsStats {
         practicas: number;
         insumos: number;
     };
-    prescriptions: {
-        pendiente: number;
-        dispensada: number;
-        vencida: number;
-    };
-    certificates: {
-        total: number;
-        anulados: number;
-    };
-    practices: {
-        active: number;
-        completed: number;
-        cancelled: number;
-    };
 }
 
 @Injectable({

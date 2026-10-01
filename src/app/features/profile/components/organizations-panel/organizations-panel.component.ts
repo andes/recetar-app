@@ -9,6 +9,7 @@ import { Subject } from 'rxjs';
 import { finalize, take, takeUntil } from 'rxjs/operators';
 import { getHttpErrorMessage } from '@shared/utils/http-error.util';
 import { UiEmptyStateComponent } from '@shared/ui/empty-state.component';
+import { UiBadgeChipComponent } from '@shared/ui/badge-chip.component';
 import { SubOrganization } from '@interfaces/organizations';
 import { OrganizationsService } from '../../services/organizations.service';
 import { OrganizationsSisaService } from '@services/organizations-sisa.service';
@@ -27,6 +28,7 @@ import { OrganizationsDialogComponent } from '../organizations-dialog/organizati
         MatProgressSpinnerModule,
         MatSnackBarModule,
         UiEmptyStateComponent,
+        UiBadgeChipComponent,
     ]
 })
 export class OrganizationsPanelComponent implements OnInit, OnDestroy {

@@ -1,4 +1,4 @@
-<div class="panel-head">
+<div class="form-head">
     <h3>PIN de seguridad</h3>
     <p>Gestioná tu PIN de seguridad para recetas.</p>
 </div>
@@ -41,7 +41,7 @@
                     <mat-icon>edit</mat-icon>
                     Cambiar PIN
                 </button>
-                <button matButton="tonal" color="warn" (click)="toggleDisableForm()">
+                <button matButton="tonal" class="mat-warn" (click)="toggleDisableForm()">
                     <mat-icon>lock_open</mat-icon>
                     Desactivar PIN
                 </button>
@@ -148,7 +148,7 @@
                     <button type="button" matButton="tonal" (click)="cancelForm()" [disabled]="isSaving">
                         Cancelar
                     </button>
-                    <button type="submit" matButton="tonal" color="warn" [disabled]="isSaving">
+                    <button type="submit" matButton="tonal" class="mat-warn" [disabled]="isSaving">
                         @if (isSaving) {
                             <mat-spinner diameter="20"></mat-spinner>
                             <span>Desactivando...</span>

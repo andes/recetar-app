@@ -1,135 +1,105 @@
-<div class="preview-card">
-    <div class="preview-empty" *ngIf="!document">
+<ui-detail-panel *ngIf="document; else empty">
+
+    <ui-badge-chip detailHeader [variant]="statusVariant" [dot]="true">{{ statusLabel }}</ui-badge-chip>
+    <ui-badge-chip detailHeader variant="info" *ngIf="documentDate">
+        <strong class="mono text-sm">{{ documentDate | date: "dd MMM yyyy" }}</strong>
+    </ui-badge-chip>
+
+    <!-- RECETA -->
+    <div class="med" *ngIf="type === 'receta'">
+        <label>{{ andes ? "Genérico" : "Comercial" }}</label>
+        <h3 class="text-subtitle">{{ medicationName | titlecase }}</h3>
+        <small class="med-brand" *ngIf="medicationDetail">{{ medicationDetail | capitalize }}</small>
+        <strong *ngIf="medicineType" class="med-type {{ medicineType }}">
+            {{ medicineType | titlecase }}
+        </strong>
+
+        <div class="med-bottom">
+            <div class="med-qty">
+                <span class="text-2xl">{{ quantity }}</span>
+                <label>{{ quantity === 1 ? "envase" : "envases" }}</label>
+            </div>
+            <div class="med-qty" *ngIf="units">
+                <span class="text-2xl">{{ units }}</span>
+                <label>unidades</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- CERTIFICADO -->
+    <div class="med" *ngIf="type === 'certificados'">
+        <label>Certificado</label>
+        <h3 class="text-subtitle">{{ medicationName | titlecase }}</h3>
+    </div>
+
+    <ui-detail-section label="Vigencia" *ngIf="type === 'certificados'">
+        <ui-entity icon="event" variant="primary">
+            <strong entityName class="text-value">
+                {{ certificateStartDate | date: "dd/MM/yyyy" }} – {{ certificateEndDate | date: "dd/MM/yyyy" }}
+            </strong>
+            <small entityMeta class="text-xs text-secondary" *ngIf="certificate?.cantDias">
+                {{ certificate?.cantDias }} día(s)
+            </small>
+        </ui-entity>
+    </ui-detail-section>
+
+    <ui-detail-section label="Anulación" *ngIf="type === 'certificados' && certificateAnulated">
+        <ui-entity icon="block" variant="error">
+            <strong entityName class="text-value">{{ certificateAnulateLabel }}</strong>
+        </ui-entity>
+    </ui-detail-section>
+
+    <!-- PRÁCTICA -->
+    <div class="med" *ngIf="type === 'practicas'">
+        <label>Práctica</label>
+        <h3 class="text-subtitle">{{ medicationName | titlecase }}</h3>
+    </div>
+
+    <ui-detail-section label="Paciente" *ngIf="type !== 'insumos'">
+        <ui-entity icon="person" variant="primary">
+            <strong entityName class="text-subtitle">{{ patientName | titlecase }}</strong>
+            <small entityMeta>
+                DNI {{ patientDni }}<ng-container *ngIf="patientSex"> &middot; {{ patientSex }}</ng-container>
+            </small>
+        </ui-entity>
+        <div class="p-fields" *ngIf="patientObraSocial || patientAfiliado">
+            <div class="data-field" *ngIf="patientObraSocial">
+                <span class="text-label">Obra social</span>
+                <strong class="text-value">{{ patientObraSocial | titlecase }}</strong>
+            </div>
+            <div class="data-field" *ngIf="patientAfiliado">
+                <span class="text-label">Nº afiliado</span>
+                <strong class="text-value">{{ patientAfiliado }}</strong>
+            </div>
+        </div>
+    </ui-detail-section>
+
+    <ui-detail-section label="Diagnóstico" variant="neutral" *ngIf="diagnosis">
+        <p class="text-sm">{{ diagnosis | capitalize }}</p>
+    </ui-detail-section>
+
+    <ui-detail-section label="Indicaciones" variant="info" *ngIf="indications">
+        <p class="text-sm">{{ indications | capitalize }}</p>
+    </ui-detail-section>
+
+    <ui-detail-section label="Profesional" *ngIf="type !== 'insumos'">
+        <ui-entity icon="stethoscope">
+            <strong entityName class="text-value">{{ professionalName | titlecase }}</strong>
+            <small entityMeta class="text-xs text-secondary">Matrícula {{ professionalEnrollment || "—" }}</small>
+        </ui-entity>
+    </ui-detail-section>
+
+    <ui-detail-section label="Organización" *ngIf="organization">
+        <ui-entity icon="apartment">
+            <strong entityName class="text-value">{{ organization | titlecase }}</strong>
+        </ui-entity>
+    </ui-detail-section>
+
+</ui-detail-panel>
+
+<ng-template #empty>
+    <div class="preview-empty">
         <mat-icon>visibility_off</mat-icon>
         <p>Seleccioná un documento para ver su detalle</p>
     </div>
-
-    <ng-container *ngIf="document">
-        <div class="top">
-            <div class="top-left">
-                <mat-chip class="status-badge" [class]="statusVariant">
-                    <span class="status-dot"></span>{{ statusLabel }}
-                </mat-chip>
-            </div>
-            <mat-chip class="info" *ngIf="documentDate">
-                <strong class="mono text-sm">{{ documentDate | date: "dd MMM yyyy" }}</strong>
-            </mat-chip>
-        </div>
-
-        <div class="preview-scroll">
-            <!-- RECETA -->
-            <ng-container *ngIf="type === 'receta'">
-                <div class="med">
-                    <label>{{ andes ? "Genérico" : "Comercial" }}</label>
-                    <h3 class="text-lg">{{ medicationName | titlecase }}</h3>
-                    <small class="med-brand" *ngIf="medicationDetail">{{ medicationDetail | capitalize }}</small>
-                    <strong *ngIf="medicineType" class="rx-type-indicator {{ medicineType }}">
-                        {{ medicineType | titlecase }}
-                    </strong>
-
-                    <div class="med-bottom">
-                        <div class="med-qty">
-                            <span class="text-2xl">{{ quantity }}</span>
-                            <label>{{ quantity === 1 ? "envase" : "envases" }}</label>
-                        </div>
-                        <div class="med-qty" *ngIf="units">
-                            <span class="text-2xl">{{ units }}</span>
-                            <label>unidades</label>
-                        </div>
-                    </div>
-                </div>
-            </ng-container>
-
-            <!-- CERTIFICADO -->
-            <ng-container *ngIf="type === 'certificados'">
-                <div class="med">
-                    <label>Certificado</label>
-                    <h3 class="text-lg">{{ medicationName | titlecase }}</h3>
-                </div>
-                <div class="section dispense-section">
-                    <label>Vigencia</label>
-                    <div class="entity">
-                        <ui-icon icon="event" variant="primary"></ui-icon>
-                        <div class="entity-info">
-                            <strong class="text-sm">
-                                {{ certificateStartDate | date: "dd/MM/yyyy" }} – {{ certificateEndDate | date: "dd/MM/yyyy" }}
-                            </strong>
-                            <small *ngIf="certificate?.cantDias">{{ certificate?.cantDias }} día(s)</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="section dispense-section" *ngIf="certificateAnulated">
-                    <label>Anulación</label>
-                    <div class="entity">
-                        <ui-icon icon="block" variant="error"></ui-icon>
-                        <div class="entity-info">
-                            <strong class="text-sm">{{ certificateAnulateLabel }}</strong>
-                        </div>
-                    </div>
-                </div>
-            </ng-container>
-
-            <!-- PRÁCTICA -->
-            <ng-container *ngIf="type === 'practicas'">
-                <div class="med">
-                    <label>Práctica</label>
-                    <h3 class="text-lg">{{ medicationName | titlecase }}</h3>
-                </div>
-            </ng-container>
-
-            <div class="body">
-                <div class="section" *ngIf="type !== 'insumos'">
-                    <label>Paciente</label>
-                    <div class="entity">
-                        <ui-icon icon="person" variant="primary"></ui-icon>
-                        <div class="entity-info">
-                            <strong class="text-lg">{{ patientName | titlecase }}</strong>
-                            <small>DNI {{ patientDni }}<ng-container *ngIf="patientSex"> &middot; {{ patientSex }}</ng-container></small>
-                        </div>
-                    </div>
-                    <div class="p-fields" *ngIf="patientObraSocial || patientAfiliado">
-                        <div class="p-field" *ngIf="patientObraSocial">
-                            <span class="text-xs">Obra social</span>
-                            <strong class="text-sm">{{ patientObraSocial | titlecase }}</strong>
-                        </div>
-                        <div class="p-field" *ngIf="patientAfiliado">
-                            <span class="text-xs">Nº afiliado</span>
-                            <strong class="text-sm">{{ patientAfiliado }}</strong>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="section" *ngIf="diagnosis">
-                    <label>Diagnóstico</label>
-                    <p class="diagnostic-box text-sm">{{ diagnosis | capitalize }}</p>
-                </div>
-
-                <div class="section" *ngIf="indications">
-                    <label>Indicaciones</label>
-                    <p class="indications-box text-sm">{{ indications | capitalize }}</p>
-                </div>
-
-                <div class="section" *ngIf="type !== 'insumos'">
-                    <label>Profesional</label>
-                    <div class="entity">
-                        <ui-icon icon="stethoscope"></ui-icon>
-                        <div class="entity-info">
-                            <strong class="text-sm">{{ professionalName | titlecase }}</strong>
-                            <small>Matrícula {{ professionalEnrollment || "—" }}</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="section" *ngIf="organization">
-                    <label>Organización</label>
-                    <div class="entity">
-                        <ui-icon icon="apartment"></ui-icon>
-                        <div class="entity-info">
-                            <strong class="text-sm">{{ organization | titlecase }}</strong>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </ng-container>
-</div>
+</ng-template>

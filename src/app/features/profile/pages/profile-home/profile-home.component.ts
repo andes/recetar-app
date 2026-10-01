@@ -183,31 +183,31 @@ formatVencimiento(value: string | Date): string {
         return months > 0 && months < 12;
     }
 
-    estadoMatricula(estado?: 'vigente' | 'vencida' | 'suspendida' | 'inhabilitada' | 'baja'): { label: string; badgeClass: string } {
+    estadoMatricula(estado?: 'vigente' | 'vencida' | 'suspendida' | 'inhabilitada' | 'baja'): { label: string; variant: 'success' | 'warning' | 'error' } {
         switch (estado) {
             case 'vencida':
-                return { label: 'Vencida', badgeClass: 'badge-error' };
+                return { label: 'Vencida', variant: 'error' };
             case 'suspendida':
-                return { label: 'Suspendida', badgeClass: 'badge-warning' };
+                return { label: 'Suspendida', variant: 'warning' };
             case 'inhabilitada':
-                return { label: 'Inhabilitada', badgeClass: 'badge-warning' };
+                return { label: 'Inhabilitada', variant: 'warning' };
             case 'baja':
-                return { label: 'Dada de baja', badgeClass: 'badge-error' };
+                return { label: 'Dada de baja', variant: 'error' };
             case 'vigente':
             default:
-                return { label: 'Vigente', badgeClass: 'badge-success' };
+                return { label: 'Vigente', variant: 'success' };
         }
     }
 
-    estadoHabilitacion(expiration?: string | Date): { label: string; badgeClass: string } {
+    estadoHabilitacion(expiration?: string | Date): { label: string; variant: 'success' | 'error' } {
         if (!expiration) {
-            return { label: 'Vigente', badgeClass: 'badge-success' };
+            return { label: 'Vigente', variant: 'success' };
         }
         const end = expiration instanceof Date ? expiration : new Date(expiration);
         if (isNaN(end.getTime()) || end.getTime() >= Date.now()) {
-            return { label: 'Vigente', badgeClass: 'badge-success' };
+            return { label: 'Vigente', variant: 'success' };
         }
-        return { label: 'Vencida', badgeClass: 'badge-error' };
+        return { label: 'Vencida', variant: 'error' };
     }
 
     private monthsUntil(value: string | Date): number {

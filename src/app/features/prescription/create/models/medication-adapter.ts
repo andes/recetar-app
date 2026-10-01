@@ -36,6 +36,7 @@ export function toPrescriptionPayload(
                 indication: m.indication,
                 duplicate: m.duplicate,
                 triplicate: m.triplicate,
+                ...(m.tratamientoProlongado ? { tratamientoProlongado: m.tratamientoProlongado } : {}),
                 ...(m.triplicate
                     ? {
                           triplicateData: {

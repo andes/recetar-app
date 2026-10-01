@@ -108,6 +108,44 @@
     border-top: 5px solid var(--text-secondary)
     pointer-events: none
 
+.input-wrap.has-suffix
+    input,
+    select,
+    textarea
+        padding-right: var(--space-10)
+
+.field-suffix
+    position: absolute
+    right: var(--space-3)
+    top: 0
+    bottom: 0
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+    pointer-events: none
+    
+    &:empty
+        display: none
+
+.input-wrap.has-prefix
+    input,
+    select,
+    textarea
+        padding-left: var(--space-10)
+
+.field-prefix
+    position: absolute
+    left: var(--space-3)
+    display: flex
+    align-items: center
+    justify-content: center
+    color: var(--text-secondary)
+    font-size: 20px
+    width: 20px
+    height: 20px
+    line-height: 20px
+    pointer-events: none
+
 .field-error
     display: block
     font-size: 0.8125rem

@@ -1,0 +1,48 @@
+<ui-list-item
+    *ngIf="prescription"
+    class="prescription-item"
+    [selected]="selected"
+    (select)="onSelect()">
+
+    <div itemContent>
+        <div class="chip-row">
+            <ui-badge-chip [status]="prescription.status"></ui-badge-chip>
+            <span class="pi-meta text-sm text-secondary">
+                <mat-icon class="xs">event</mat-icon>Receta: {{ prescription.date | date: "dd/MM/yyyy" }}
+            </span>
+            <span class="pi-meta text-sm text-secondary" *ngIf="dispensedAt">
+                <mat-icon class="xs">event_available</mat-icon>Dispensada: {{ dispensedAt | date: "dd/MM/yyyy" }}
+            </span>
+            <span class="pi-meta text-sm text-secondary">
+                <mat-icon class="xs">medication</mat-icon>{{ suppliesCount }}
+                {{ suppliesCount === 1 ? "producto" : "productos" }}
+            </span>
+        </div>
+
+        <ui-entity icon="person" [container]="false">
+            <span entityName class="text-subtitle truncate">{{ patientName | titlecase }}</span>
+            <small entityMeta class="text-xs text-secondary" *ngIf="prescription.patient?.dni">
+                DNI {{ prescription.patient.dni }}
+            </small>
+        </ui-entity>
+
+        <div class="pi-detail" *ngIf="firstSupplyName">
+            <mat-icon class="sm text-secondary">medication</mat-icon>
+            <span class="text-value truncate">{{ firstSupplyName | titlecase }}</span>
+        </div>
+
+        <div class="pi-detail" *ngIf="prescription.professional?.businessName">
+            <mat-icon class="sm text-secondary">stethoscope</mat-icon>
+            <small class="text-value truncate">{{ prescription.professional.businessName | titlecase }}</small>
+        </div>
+    </div>
+
+    <div itemActions>
+        <button matButton="tonal" class="block" (click)="onSelect()">
+            <mat-icon>visibility</mat-icon> Ver detalle
+        </button>
+        <button *ngIf="canPrint" matButton="outlined" class="block" (click)="onPrint()">
+            <mat-icon>print</mat-icon> Imprimir
+        </button>
+    </div>
+</ui-list-item>

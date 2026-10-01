@@ -2,7 +2,6 @@ import { Component, Input } from '@angular/core';
 import { MixedPrescription } from '../../services/dispense.service';
 import { Prescriptions } from '@interfaces/prescriptions';
 import AndesPrescriptions from '@interfaces/andesPrescriptions';
-import { getStatusLabel, getStatusVariant } from '@shared/utils/status.utils';
 
 @Component({
     selector: 'app-dispense-preview-panel',
@@ -33,10 +32,6 @@ export class DispensePreviewPanelComponent {
         if (this.andes) { return this.andes.idAndes || this.andes._id || ''; }
         return (this.local as Prescriptions).prescriptionId || this.prescription._id || '';
     }
-
-    getStatusVariant = getStatusVariant;
-
-    getStatusLabel = getStatusLabel;
 
     getPatientName(): string {
         const andes = this.andes;

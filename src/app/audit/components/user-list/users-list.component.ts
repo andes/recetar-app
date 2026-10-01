@@ -285,7 +285,7 @@ export class UsersListComponent implements OnInit, AfterContentInit, OnDestroy {
 
     getRoleColor(role: string): string {
         const apiRole = this.apiRoles.find(r => r.role === role);
-        return apiRole?.color || '#757575';
+        return apiRole?.color || 'var(--text-disabled)';
     }
 
     getUserRolesTooltip(user: User): string {

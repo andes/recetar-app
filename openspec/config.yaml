@@ -1,0 +1,26 @@
+schema: spec-driven
+githubCopilot:
+  cloudAgent: false
+
+context: |
+  Este repositorio (recetar-app) es el hogar de los specs OpenSpec del frontend
+  Angular de RecetAR. Los changes viven en openspec/changes y las specs
+  (fuente de verdad) en openspec/specs.
+
+  Alcance multi-repo:
+    - recetar-app: frontend Angular 20; codigo principal de este repo.
+    - recetar-api: backend; hogar de los specs del circuito de recetas y de los
+      contratos REST que consume este frontend.
+    - api (ANDES): sistema externo. No usa OpenSpec; cualquier dependencia se
+      documenta como contrato/dependencia dentro de los changes.
+
+  El frontend se organiza por features en src/app/features/ (auth, dashboard,
+  prescription, profile, documents, pharmacists, audit) y comparte UI en
+  src/app/shared/ui/. Respetar los skills de .opencode/skills/ y el contrato de
+  refactor en docs/refactor/recetar-app-refactor-contract.md.
+
+  Verificacion: npm run lint; npm run build; tests con
+  npm test -- --watch=false --browsers=ChromeHeadless.
+
+  Escribir todos los artefactos (proposal, specs, design, tasks) en espanol.
+  No mezclar refactors de frontend y backend en el mismo change.

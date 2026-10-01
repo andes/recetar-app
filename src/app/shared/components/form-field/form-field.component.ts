@@ -18,19 +18,30 @@ import { MatIconModule } from '@angular/material/icon';
     }
 })
 export class FormFieldComponent {
-    @Input({ required: true }) type!: 'text' | 'number' | 'select' | 'date' | 'textarea' | 'password';
+    @Input({ required: true }) type!: 'text' | 'number' | 'select' | 'date' | 'textarea' | 'password' | 'email';
     @Input({ required: true }) label!: string;
     @Input({ required: true }) control!: AbstractControl;
     @Input() placeholder?: string;
+    @Input() prefixIcon?: string;
     @Input() suffixIcon?: string;
     @Output() suffixClick = new EventEmitter<void>();
-    @Input() options?: string[];
+    @Input() options?: Array<string | { value: string; label: string }>;
     @Input() maxlength?: number;
     @Input() inputmode?: string;
     @Input() autocomplete?: string;
     @Input() min?: string;
     @Input() max?: string;
     @Input() errors?: Record<string, string>;
+    @Input() serverError?: string;
     @Input({ transform: booleanAttribute }) fullwidth = false;
     @Input({ transform: booleanAttribute }) submitted = false;
+    @Input({ transform: booleanAttribute }) hasSuffix = false;
+
+    optionValue(opt: string | { value: string; label: string }): string {
+        return typeof opt === 'string' ? opt : opt.value;
+    }
+
+    optionLabel(opt: string | { value: string; label: string }): string {
+        return typeof opt === 'string' ? opt : opt.label;
+    }
 }
