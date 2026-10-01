@@ -1,0 +1,214 @@
+<ui-card icon="person_add" title="Crear nuevo usuario" subtitle="Complete la información del nuevo usuario">
+    <form [formGroup]="userForm" (ngSubmit)="onSave()" class="user-form" autocomplete="off">
+
+        <!-- ==================== Tipo de usuario ==================== -->
+        <section class="form-section">
+            <header class="section-header">
+                <mat-icon>admin_panel_settings</mat-icon>
+                <h2>Tipo de usuario</h2>
+            </header>
+
+            <ui-role-select [roles]="availableRoleOptions" [selected]="selectedRoleObjects"
+                [error]="isFieldInvalid('roles') ? getFieldError('roles') : ''"
+                (selectedChange)="onRolesChange($event)" (conflict)="onRoleConflict()">
+            </ui-role-select>
+        </section>
+
+        <!-- ==================== Documento / identificación ==================== -->
+        <section class="form-section" *ngIf="showIdentityStep">
+            <header class="section-header">
+                <mat-icon>{{ hasPharmacyRole() ? 'fingerprint' : 'badge' }}</mat-icon>
+                <h2>{{ hasPharmacyRole() ? 'Identificación de la farmacia' : 'Identificación del profesional' }}</h2>
+            </header>
+
+            <ui-alert
+                *ngIf="(hasProfessionalRole() && !hasProfessionalData()) || (hasPharmacyRole() && !hasPharmacyData())"
+                variant="warning" [fullwidth]="true">
+                {{ hasPharmacyRole()
+                    ? 'La farmacia debe estar en los padrones provinciales para poder ser agregada aquí.'
+                    : 'El profesional debe estar en los padrones provinciales para poder ser agregado aquí.' }}
+            </ui-alert>
+
+            <!-- Documento / username (profesional o auditor) -->
+            <ng-container *ngIf="hasProfessionalRole() || hasOnlyAuditorRole()">
+                <ng-container *ngIf="!hasProfessionalData()">
+                    <app-form-field type="text"
+                        [label]="hasOnlyAuditorRole() ? 'Nombre de usuario' : 'Documento (DNI)'"
+                        [control]="userForm.get('username')"
+                        [placeholder]="hasOnlyAuditorRole() ? 'Ingrese el nombre de usuario' : 'Ingrese el número de documento'"
+                        prefixIcon="badge"
+                        [errors]="{ required: 'Este campo es obligatorio', minlength: 'Debe tener al menos 3 caracteres' }"
+                        [serverError]="serverErrors['username']" [hasSuffix]="true">
+                        <span fieldSuffix>
+                            <mat-spinner *ngIf="isValidatingUsername" diameter="18"></mat-spinner>
+                            <mat-icon *ngIf="!isValidatingUsername && isUsernameValid && hasProfessionalRole()"
+                                class="input-status success">check_circle</mat-icon>
+                        </span>
+                    </app-form-field>
+                    <small class="field-hint" *ngIf="usernameValidationMessage && hasProfessionalRole()"
+                        [class.success-hint]="isUsernameValid" [class.error-hint]="!isUsernameValid">
+                        {{ usernameValidationMessage }}
+                    </small>
+
+                    <ui-alert *ngIf="professionalNotFound && hasProfessionalRole()" variant="error" [fullwidth]="true">
+                        Este DNI no se puede ingresar.
+                    </ui-alert>
+                </ng-container>
+            </ng-container>
+
+            <!-- CUIL (farmacia) -->
+            <ng-container *ngIf="hasPharmacyRole() && !hasPharmacyData()">
+                <app-form-field type="text" label="CUIL"
+                    [control]="userForm.get('cuil')" placeholder="20-12345678-9" [maxlength]="13"
+                    prefixIcon="fingerprint"
+                    [errors]="{ required: 'Este campo es obligatorio', pattern: 'El CUIL debe tener 11 dígitos' }"
+                    [serverError]="serverErrors['cuil']" [hasSuffix]="true">
+                    <span fieldSuffix>
+                        <mat-spinner *ngIf="isValidatingCuil" diameter="18"></mat-spinner>
+                        <mat-icon *ngIf="!isValidatingCuil && isCuilValid" class="input-status success">check_circle</mat-icon>
+                    </span>
+                </app-form-field>
+                <small class="field-hint" *ngIf="cuilValidationMessage"
+                    [class.success-hint]="isCuilValid" [class.error-hint]="!isCuilValid">
+                    {{ cuilValidationMessage }}
+                </small>
+
+                <ui-alert *ngIf="pharmacyNotFound && hasPharmacyRole()" variant="error" [fullwidth]="true">
+                    Este CUIL no se puede ingresar.
+                </ui-alert>
+            </ng-container>
+
+            <!-- Datos encontrados -->
+            <ui-card *ngIf="hasProfessionalData()" [dashed]="true"
+                title="Profesional encontrado" subtitle="Datos de los padrones provinciales">
+                <ui-icon cardIcon icon="check_circle" variant="success" size="md"></ui-icon>
+                <span cardAction>
+                    <button mat-icon-button type="button" (click)="clearFoundData()" matTooltip="Buscar otro profesional">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                </span>
+                <div class="found-grid">
+                    <div class="found-item">
+                        <span class="found-label text-xs">Nombre</span>
+                        <strong class="text-sm">{{ foundProfessionalData.nombre }} {{ foundProfessionalData.apellido }}</strong>
+                    </div>
+                    <div class="found-item" *ngIf="foundProfessionalData.cuit">
+                        <span class="found-label text-xs">CUIL</span>
+                        <strong class="text-sm mono">{{ formatCuilString(foundProfessionalData.cuit) }}</strong>
+                    </div>
+                    <div class="found-item" *ngIf="foundProfessionalData.documento">
+                        <span class="found-label text-xs">Documento</span>
+                        <strong class="text-sm">{{ foundProfessionalData.documento }}</strong>
+                    </div>
+                    <div class="found-item" *ngIf="foundProfessionalData.sexo">
+                        <span class="found-label text-xs">Sexo</span>
+                        <strong class="text-sm">{{ foundProfessionalData.sexo }}</strong>
+                    </div>
+                    <div class="found-item found-item-wide"
+                        *ngIf="foundProfessionalData.profesiones && foundProfessionalData.profesiones.length">
+                        <span class="found-label text-xs">Profesiones</span>
+                        <strong class="text-sm">
+                            <ng-container *ngFor="let profession of foundProfessionalData.profesiones; let last = last">
+                                {{ profession.profesion?.nombre }} (Mat. {{ getProfessionMatricula(profession) }})<span *ngIf="!last">, </span>
+                            </ng-container>
+                        </strong>
+                    </div>
+                </div>
+            </ui-card>
+
+            <ui-card *ngIf="hasPharmacyData()" [dashed]="true" icon="local_pharmacy"
+                title="Farmacia encontrada" subtitle="Datos de los padrones provinciales">
+                <span cardAction>
+                    <button mat-icon-button type="button" (click)="clearFoundData()" matTooltip="Buscar otra farmacia">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                </span>
+                <div class="found-grid">
+                    <div class="found-item">
+                        <span class="found-label text-xs">Denominación</span>
+                        <strong class="text-sm">{{ foundPharmacyData.denominacion || foundPharmacyData.razonSocial }}</strong>
+                    </div>
+                    <div class="found-item" *ngIf="foundPharmacyData.cuit">
+                        <span class="found-label text-xs">CUIT</span>
+                        <strong class="text-sm mono">{{ formatCuilString(foundPharmacyData.cuit) }}</strong>
+                    </div>
+                    <div class="found-item" *ngIf="foundPharmacyData.DTResponsable">
+                        <span class="found-label text-xs">Responsable</span>
+                        <strong class="text-sm">{{ foundPharmacyData.DTResponsable }}</strong>
+                    </div>
+                    <div class="found-item" *ngIf="foundPharmacyData.matriculaDTResponsable">
+                        <span class="found-label text-xs">Matrícula</span>
+                        <strong class="text-sm">{{ foundPharmacyData.matriculaDTResponsable }}</strong>
+                    </div>
+                    <div class="found-item found-item-wide" *ngIf="foundPharmacyData.domicilio">
+                        <span class="found-label text-xs">Dirección</span>
+                        <strong class="text-sm">
+                            {{ foundPharmacyData.domicilio.valor }}
+                            <span *ngIf="foundPharmacyData.domicilio.ubicacion">
+                                , {{ foundPharmacyData.domicilio.ubicacion.localidad.nombre }}
+                                <span *ngIf="foundPharmacyData.domicilio.ubicacion.provincia">
+                                    , {{ foundPharmacyData.domicilio.ubicacion.provincia.nombre }}
+                                </span>
+                            </span>
+                        </strong>
+                    </div>
+                    <div class="found-item">
+                        <span class="found-label text-xs">Estado</span>
+                        <strong class="text-sm" [class.status-active]="foundPharmacyData.activo"
+                            [class.status-inactive]="!foundPharmacyData.activo">
+                            {{ foundPharmacyData.activo ? 'Activa' : 'Inactiva' }}
+                        </strong>
+                    </div>
+                    <div class="found-item" *ngIf="foundPharmacyData.telefono">
+                        <span class="found-label text-xs">Teléfono</span>
+                        <strong class="text-sm">{{ foundPharmacyData.telefono }}</strong>
+                    </div>
+                    <div class="found-item" *ngIf="foundPharmacyData.email">
+                        <span class="found-label text-xs">Email</span>
+                        <strong class="text-sm">{{ foundPharmacyData.email }}</strong>
+                    </div>
+                </div>
+            </ui-card>
+        </section>
+
+        <!-- ==================== Información del usuario ==================== -->
+        <section class="form-section" *ngIf="showUserInfo">
+            <header class="section-header">
+                <mat-icon>person</mat-icon>
+                <h2>Información del usuario</h2>
+            </header>
+
+            <app-form-field *ngIf="showBusinessNameField" class="field-full" type="text" label="Nombre"
+                [control]="userForm.get('businessName')" placeholder="Ingrese el nombre del negocio"
+                prefixIcon="store"
+                [errors]="{ required: 'Este campo es obligatorio', minlength: 'Debe tener al menos 2 caracteres' }"
+                [serverError]="serverErrors['businessName']">
+            </app-form-field>
+
+            <app-form-field type="email" label="Email" [control]="userForm.get('email')"
+                placeholder="usuario@ejemplo.com" autocomplete="off" prefixIcon="email"
+                [errors]="{ required: 'Este campo es obligatorio', email: 'Ingrese un email válido' }"
+                [serverError]="serverErrors['email']">
+            </app-form-field>
+
+            <app-form-field type="password" label="Contraseña" [control]="userForm.get('password')"
+                placeholder="Ingrese la contraseña" autocomplete="new-password" prefixIcon="lock"
+                [errors]="{ required: 'Este campo es obligatorio', minlength: 'Debe tener al menos 6 caracteres' }"
+                [serverError]="serverErrors['password']">
+            </app-form-field>
+        </section>
+    </form>
+
+    <div class="form-actions">
+        <button mat-stroked-button type="button" (click)="onCancel()" [disabled]="isLoading">
+            <mat-icon>close</mat-icon>
+            Cancelar
+        </button>
+        <button mat-flat-button type="button" (click)="onSave()" [disabled]="isLoading || userForm.invalid"
+            class="save-btn">
+            <mat-spinner *ngIf="isLoading" diameter="18"></mat-spinner>
+            <mat-icon *ngIf="!isLoading">save</mat-icon>
+            {{ isLoading ? 'Guardando...' : 'Crear usuario' }}
+        </button>
+    </div>
+</ui-card>

@@ -1,10 +1,14 @@
 <div class="form-field">
     <label>{{ label }}</label>
     <div class="input-wrap"
-        [class.error]="control?.invalid && control?.touched"
+        [class.error]="(control?.invalid && control?.touched) || !!serverError"
         [class.disabled]="control?.disabled"
         [class.select-wrap]="type === 'select'"
-        [class.textarea]="type === 'textarea'">
+        [class.textarea]="type === 'textarea'"
+        [class.has-suffix]="suffixIcon || hasSuffix"
+        [class.has-prefix]="!!prefixIcon">
+
+        <mat-icon *ngIf="prefixIcon" class="field-prefix">{{ prefixIcon }}</mat-icon>
 
         <ng-container [ngSwitch]="type">
             <select *ngSwitchCase="'select'" [formControl]="control">
@@ -22,6 +26,10 @@
                 [min]="min" [max]="max" />
         </ng-container>
 
+        <div class="field-suffix">
+            <ng-content select="[fieldSuffix]"></ng-content>
+        </div>
+
         <button *ngIf="suffixIcon" type="button" class="field-icon-btn" (click)="suffixClick.emit()" tabindex="-1">
             <mat-icon>{{ suffixIcon }}</mat-icon>
         </button>
@@ -32,4 +40,6 @@
             {{ entry.value }}
         </span>
     </ng-container>
+
+    <span class="field-error" *ngIf="serverError">{{ serverError }}</span>
 </div>

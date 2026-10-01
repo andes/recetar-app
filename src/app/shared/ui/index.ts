@@ -14,5 +14,6 @@ export { UiDateFieldComponent } from './date-field.component';
 export { UiPaginatorComponent } from './paginator.component';
 export { UiDraftTagComponent } from './draft-tag.component';
 export { UiDrawerComponent } from './drawer.component';
+export { UiRoleSelectComponent } from './role-select.component';
 export { UiUserMenuComponent } from './user-menu.component';
 export type { ToggleOption } from './toggle.component';

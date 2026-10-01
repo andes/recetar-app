@@ -1,0 +1,61 @@
+<div class="panel" *ngIf="user; else empty">
+    <div class="panel-scroll" [formGroup]="form">
+        <div class="section readonly">
+            <label>Información</label>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="text-xs">CUIL</span>
+                    <strong class="text-sm mono">{{ user.cuil || "—" }}</strong>
+                </div>
+                <div class="info-item">
+                    <span class="text-xs">Matrícula</span>
+                    <strong class="text-sm">{{ user.enrollment || "—" }}</strong>
+                </div>
+                <div class="info-item">
+                    <span class="text-xs">Último acceso</span>
+                    <strong class="text-sm">{{ user.lastLogin ? (user.lastLogin | date: "dd/MM/yyyy") : "—" }}</strong>
+                </div>
+                <div class="info-item">
+                    <span class="text-xs">Alta</span>
+                    <strong class="text-sm">{{ user.createdAt ? (user.createdAt | date: "dd/MM/yyyy") : "—" }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <label>Estado</label>
+            <ui-toggle [options]="statusOptions" [value]="statusValue" (valueChange)="onStatusChange($event)">
+            </ui-toggle>
+        </div>
+
+        <app-form-field type="text" label="Nombre" [control]="form.get('businessName')"
+            placeholder="Nombre del usuario"
+            [errors]="{ required: 'Este campo es obligatorio', minlength: 'Debe tener al menos 2 caracteres' }"
+            [serverError]="serverErrors['businessName']">
+        </app-form-field>
+
+        <app-form-field type="text" label="Nombre de usuario" [control]="form.get('username')"
+            placeholder="Nombre de usuario"
+            [errors]="{ minlength: 'Debe tener al menos 3 caracteres' }"
+            [serverError]="serverErrors['username']">
+        </app-form-field>
+
+        <app-form-field type="email" label="Email" [control]="form.get('email')"
+            placeholder="correo@dominio.com"
+            [errors]="{ required: 'Este campo es obligatorio', email: 'Ingrese un email válido' }"
+            [serverError]="serverErrors['email']">
+        </app-form-field>
+
+        <ui-role-select label="Roles" [roles]="roles" [selected]="selectedRoles"
+            [saving]="saving" [error]="showError('roles') ? getError('roles') : ''"
+            (selectedChange)="onRolesChange($event)" (conflict)="onRoleConflict()">
+        </ui-role-select>
+    </div>
+</div>
+
+<ng-template #empty>
+    <div class="panel-empty">
+        <mat-icon>visibility_off</mat-icon>
+        <p>Seleccioná un usuario para editarlo</p>
+    </div>
+</ng-template>

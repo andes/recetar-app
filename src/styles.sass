@@ -83,9 +83,13 @@
   --icon-btn-hover: #{$icon-btn-hover}
 
   // Role identity
+  --role-admin: #{$role-admin}
+  --role-professional: #{$role-professional}
+  --role-professional-public: #{$role-professional-public}
   --role-pharmacist: #{$role-pharmacist}
   --role-pharmacist-accent: #{$role-pharmacist-accent}
   --role-auditor: #{$role-auditor}
+  --role-app: #{$role-app}
 
   // Medication type colors
   --med-commercial-bg: #c3eff1
@@ -621,6 +625,15 @@ strong
   --icon-btn-bg: #{$icon-btn-bg-dark}
   --icon-btn-hover: #{$icon-btn-hover-dark}
 
+  // Role identity (mismos valores que en modo claro)
+  --role-admin: #{$role-admin}
+  --role-professional: #{$role-professional}
+  --role-professional-public: #{$role-professional-public}
+  --role-pharmacist: #{$role-pharmacist}
+  --role-pharmacist-accent: #{$role-pharmacist-accent}
+  --role-auditor: #{$role-auditor}
+  --role-app: #{$role-app}
+
   input
     color: #fff
     caret-color: #fff
@@ -833,6 +846,10 @@ body.mat-typography
 
 .mat-dialog-container
   max-height: 90vh
+
+// ---- Overlay (dialogs/menus/selects) por encima del drawer (1300) ----
+.cdk-overlay-container
+  z-index: 1400
 
 // ---- Dialog size variants ----
 .dialog-sm

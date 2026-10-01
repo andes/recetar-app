@@ -1,0 +1,79 @@
+<app-canvas [showSidebar]="true" [sidebarItems]="sidebarItems" [noCard]="true"
+    pageTitle="Gestión de usuarios" pageSubtitle="Administre los usuarios del sistema">
+
+    <div class="page-actions" pageActions *ngIf="!showCreateForm">
+        <button matButton="filled" color="secondary" class="create-btn" (click)="showCreateUserForm()">
+            <mat-icon>person_add</mat-icon> Crear usuario
+        </button>
+    </div>
+
+    <ng-container *ngIf="!showCreateForm">
+        <ui-drawer [open]="drawerOpen" title="Editar usuario" (closed)="closeDrawer()">
+            <app-audit-user-detail-panel drawerContent
+                [user]="selectedUser"
+                [roles]="availableRoleOptions"
+                [saving]="saving"
+                (save)="onSaveUser($event)"
+                (formStateChange)="onFormState($event)">
+            </app-audit-user-detail-panel>
+
+            <div class="drawer-actions" drawerFooter>
+                <button matButton="filled" color="secondary" class="block"
+                    [disabled]="!canSave || saving" (click)="detailPanel?.submit()">
+                    <mat-spinner *ngIf="saving" diameter="18"></mat-spinner>
+                    <mat-icon *ngIf="!saving">save</mat-icon>
+                    Guardar
+                </button>
+                <button matButton="outlined" class="mat-error block"
+                    [disabled]="saving || !selectedUser" (click)="onDeleteUser(selectedUser)">
+                    <mat-icon>delete</mat-icon> Eliminar
+                </button>
+            </div>
+
+            <div class="search-card-wrap">
+                <ui-card stretch>
+                    <ui-search-bar [control]="searchControl"
+                        placeholder="Buscar por nombre, usuario, email o CUIL"
+                        [isLoading]="loadingUsers" [stretch]="true">
+                        <button matButton="tonal" class="btn-icon" searchAction *ngIf="searchControl.value"
+                            matTooltip="Borrar búsqueda" (click)="searchControl.setValue('')">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </ui-search-bar>
+                </ui-card>
+            </div>
+
+            <div class="results-card-wrap">
+                <div class="results-count" *ngIf="!loadingUsers && totalUsers > 0">
+                    <span class="results-count-type">Usuarios</span>
+                    <small class="results-count-range">
+                        Mostrando {{ resultsFrom }}&ndash;{{ resultsTo }} de {{ totalUsers }} resultados
+                    </small>
+                </div>
+
+                <div *ngIf="loadingUsers && !users.length" class="loading-container">
+                    <mat-spinner diameter="40"></mat-spinner>
+                </div>
+
+                <div *ngIf="!loadingUsers && totalUsers === 0" class="empty-container">
+                    <ui-empty-state icon="people">No se encontraron usuarios</ui-empty-state>
+                </div>
+
+                <div class="audit-items" *ngIf="!loadingUsers && totalUsers > 0">
+                    <app-audit-user-item *ngFor="let user of users" [user]="user"
+                        [selected]="isSelected(user)" (select)="openDrawer($event)">
+                    </app-audit-user-item>
+                </div>
+
+                <ui-paginator [length]="totalUsers" [pageSize]="usersPageSize" [pageIndex]="usersPageIndex"
+                    [pageSizeOptions]="[10, 20, 30]" (page)="onPageChange($event)">
+                </ui-paginator>
+            </div>
+        </ui-drawer>
+    </ng-container>
+
+    <div *ngIf="showCreateForm">
+        <app-user-create (cancelCreate)="onCancelCreateUser()" (userCreated)="onUserCreated()">
+        </app-user-create>
+    </div>
+</app-canvas>

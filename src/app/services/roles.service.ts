@@ -20,11 +20,12 @@ export class RolesService {
 
     // Mapeo de traducciones y colores para los roles
     private roleTranslations: { [key: string]: { displayName: string; color: string } } = {
-        'admin': { displayName: 'Administrador', color: '#f44336' },
-        'professional': { displayName: 'Profesional Privado', color: '#2196f3' },
-        'professional-public': { displayName: 'Profesional Público', color: '#1976d2' },
-        'pharmacist': { displayName: 'Farmacéutico', color: '#4caf50' },
-        'auditor': { displayName: 'Auditor', color: '#ff9800' },
+        'admin': { displayName: 'Administrador', color: 'var(--role-admin)' },
+        'professional': { displayName: 'Profesional Privado', color: 'var(--role-professional)' },
+        'professional-public': { displayName: 'Profesional Público', color: 'var(--role-professional-public)' },
+        'pharmacist': { displayName: 'Farmacéutico', color: 'var(--role-pharmacist)' },
+        'auditor': { displayName: 'Auditor', color: 'var(--role-auditor)' },
+        'app': { displayName: 'Aplicación', color: 'var(--role-app)' },
     };
 
     constructor(private http: HttpClient) { }
@@ -49,7 +50,7 @@ export class RolesService {
         return {
             ...role,
             displayName: translation?.displayName || role.name || role.role,
-            color: translation?.color || '#757575' // Color gris por defecto
+            color: translation?.color || 'var(--text-disabled)' // Color gris por defecto
         };
     }
 
@@ -58,7 +59,7 @@ export class RolesService {
     }
 
     getRoleColor(roleKey: string): string {
-        return this.roleTranslations[roleKey]?.color || '#757575';
+        return this.roleTranslations[roleKey]?.color || 'var(--text-disabled)';
     }
 
     isPharmacistRole(roleKey: string): boolean {

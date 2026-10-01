@@ -57,9 +57,12 @@ export class UserService {
         username?: string;
         cuil?: string;
         enrollment?: string;
-        roles: Array<{ role: string }>;
+        roles: Array<{ _id?: string; role: string }>;
     }): Observable<User> {
-        return this.http.post<User>(`${environment.API_END_POINT}/users`, userData).pipe(
+        return this.http.post<User>(`${environment.API_END_POINT}/users`, {
+            ...userData,
+            roles: this.toRoleIds(userData.roles)
+        }).pipe(
             map((user) => this.userAdapter.adapt(user))
         );
     }
@@ -68,16 +71,29 @@ export class UserService {
         email?: string;
         username?: string;
         businessName?: string;
-        roles?: Array<{ _id: string; role: string }>;
+        roles?: Array<{ _id?: string; role: string }>;
         isActive?: boolean;
     }): Observable<User> {
-        return this.http.patch<User>(`${environment.API_END_POINT}/users/${id}`, updateData).pipe(
+        const payload = updateData.roles
+            ? { ...updateData, roles: this.toRoleIds(updateData.roles) }
+            : updateData;
+        return this.http.patch<User>(`${environment.API_END_POINT}/users/${id}`, payload).pipe(
             map((user) => this.userAdapter.adapt(user))
         );
     }
 
+    private toRoleIds(roles?: Array<{ _id?: string; role: string }>): string[] {
+        return (roles || [])
+            .map((role) => role._id)
+            .filter((id): id is string => !!id);
+    }
+
     updateIsActive(id: string, isActive: boolean): Observable<User> {
         return this.updateUser(id, { isActive });
+    }
+
+    deleteUser(id: string): Observable<void> {
+        return this.http.delete<void>(`${environment.API_END_POINT}/users/${id}`);
     }
 
     updateUserOrganizaciones(_id: string, organizaciones: SubOrganizacion[]): Observable<User> {
