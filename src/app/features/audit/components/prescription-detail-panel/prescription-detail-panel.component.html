@@ -1,0 +1,73 @@
+<ui-detail-panel *ngIf="prescription; else empty">
+
+    <ui-badge-chip detailHeader [status]="prescription.status" [dot]="true"></ui-badge-chip>
+    <ui-badge-chip detailHeader variant="info">
+        <strong class="mono text-sm">Receta: {{ prescription.date | date: "dd MMM yyyy" }}</strong>
+    </ui-badge-chip>
+
+    <ui-detail-section label="Productos">
+        <div class="supply-row" *ngFor="let item of supplies">
+            <div class="supply-main">
+                <strong class="text-value">{{ item.supply?.name | titlecase }}</strong>
+                <small *ngIf="item.quantityPresentation">&middot; {{ item.quantityPresentation }}</small>
+            </div>
+            <ui-badge-chip variant="neutral" class="supply-qty">{{ item.quantity }}</ui-badge-chip>
+        </div>
+    </ui-detail-section>
+
+    <ui-detail-section label="Paciente">
+        <ui-entity icon="person" variant="primary">
+            <strong entityName class="text-subtitle">{{ patientName | titlecase }}</strong>
+            <small entityMeta>
+                DNI {{ patientDni }}<ng-container *ngIf="patientSex"> &middot; {{ patientSex }}</ng-container>
+            </small>
+        </ui-entity>
+        <div class="p-fields" *ngIf="patientObraSocial || patientAfiliado">
+            <div class="data-field" *ngIf="patientObraSocial">
+                <span class="text-label">Obra social</span>
+                <strong class="text-value">{{ patientObraSocial | titlecase }}</strong>
+            </div>
+            <div class="data-field" *ngIf="patientAfiliado">
+                <span class="text-label">Nº afiliado</span>
+                <strong class="text-value">{{ patientAfiliado }}</strong>
+            </div>
+        </div>
+    </ui-detail-section>
+
+    <ui-detail-section label="Diagnóstico" variant="neutral" *ngIf="diagnostic">
+        <p class="text-sm">{{ diagnostic | capitalize }}</p>
+    </ui-detail-section>
+
+    <ui-detail-section label="Observaciones" variant="neutral" *ngIf="observation">
+        <p class="text-sm">{{ observation | capitalize }}</p>
+    </ui-detail-section>
+
+    <ui-detail-section label="Profesional">
+        <ui-entity icon="stethoscope">
+            <strong entityName class="text-value">{{ professionalName | titlecase }}</strong>
+            <small entityMeta class="text-xs text-secondary">Matrícula {{ professionalEnrollment || "—" }}</small>
+        </ui-entity>
+    </ui-detail-section>
+
+    <ui-detail-section label="Organización" *ngIf="organization">
+        <ui-entity icon="apartment">
+            <strong entityName class="text-value">{{ organization | titlecase }}</strong>
+        </ui-entity>
+    </ui-detail-section>
+
+    <ui-detail-section label="Dispensación" *ngIf="isDispensed">
+        <ui-entity icon="check_circle" variant="success">
+            <strong entityName class="text-value">{{ dispensedAt | date: "dd/MM/yyyy HH:mm" }}</strong>
+            <small entityMeta class="text-xs text-secondary" *ngIf="dispensedByName">{{ dispensedByName | titlecase }}</small>
+            <small entityMeta class="text-xs text-secondary mono" *ngIf="getDispenserCuil()">CUIL {{ getDispenserCuil() }}</small>
+        </ui-entity>
+    </ui-detail-section>
+
+</ui-detail-panel>
+
+<ng-template #empty>
+    <div class="detail-empty">
+        <mat-icon>visibility_off</mat-icon>
+        <p>Seleccioná una receta para ver su detalle</p>
+    </div>
+</ng-template>

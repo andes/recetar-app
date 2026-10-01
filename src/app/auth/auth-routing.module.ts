@@ -26,11 +26,11 @@ const routes: Routes = [
       },
       {
         path: 'new-user',
-        loadComponent: () => import('@auth/components/new-user/new-user.component').then(m => m.NewUserComponent),
+        loadComponent: () => import('@features/auth/pages/register-professional/register-professional.component').then(m => m.RegisterProfessionalComponent),
       },
       {
         path: 'new-user-pharmacist',
-        loadComponent: () => import('@auth/components/new-user-pharmacist/new-user-pharmacist.component').then(m => m.NewUserPharmacistComponent),
+        loadComponent: () => import('@features/auth/pages/register-pharmacist/register-pharmacist.component').then(m => m.RegisterPharmacistComponent),
       },
       {
         path: 'confirm-update/:token',

@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SharedModule } from '@shared/shared.module';
 import { UiToggleComponent } from '@shared/ui/toggle.component';
@@ -13,6 +12,14 @@ import { UiPaginatorComponent } from '@shared/ui/paginator.component';
 import { UiSearchBarComponent } from '@shared/ui/search-bar.component';
 import { UiDrawerComponent } from '@shared/ui/drawer.component';
 import { UiEmptyStateComponent } from '@shared/ui/empty-state.component';
+import { UiListItemComponent } from '@shared/ui/list-item.component';
+import { UiEntityComponent } from '@shared/ui/entity.component';
+import { UiBadgeChipComponent } from '@shared/ui/badge-chip.component';
+import { UiDetailPanelComponent } from '@shared/ui/detail-panel.component';
+import { UiDetailSectionComponent } from '@shared/ui/detail-section.component';
+import { UiResultsListComponent } from '@shared/ui/results-list.component';
+import { UiFieldInputComponent } from '@shared/ui/field-input.component';
+import { UiResultsToolbarComponent } from '@shared/ui/results-toolbar.component';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 import { DocumentItemComponent } from './components/document-item/document-item.component';
 import { DocumentDetailPanelComponent } from './components/document-detail-panel/document-detail-panel.component';
@@ -30,7 +37,6 @@ import { DocumentsRoutingModule, routingComponents } from './documents-routing.m
         ReactiveFormsModule,
         FlexLayoutModule,
         MatDialogModule,
-        MatSnackBarModule,
         MatProgressSpinnerModule,
         SharedModule,
         ConfirmDialogComponent,
@@ -41,6 +47,14 @@ import { DocumentsRoutingModule, routingComponents } from './documents-routing.m
         UiSearchBarComponent,
         UiDrawerComponent,
         UiEmptyStateComponent,
+        UiListItemComponent,
+        UiEntityComponent,
+        UiBadgeChipComponent,
+        UiDetailPanelComponent,
+        UiDetailSectionComponent,
+        UiResultsListComponent,
+        UiFieldInputComponent,
+        UiResultsToolbarComponent,
         DocumentsRoutingModule,
     ]
 })

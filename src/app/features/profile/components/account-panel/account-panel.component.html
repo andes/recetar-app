@@ -1,6 +1,6 @@
-<div class="panel-head">
+<div class="form-head">
     <h3>Datos de cuenta</h3>
-    <p>Actualizá tu nombre, usuario y correo electrónico.</p>
+    <p>Actualizá los datos de tu cuenta.</p>
 </div>
 
 @if (isLoading) {
@@ -13,15 +13,30 @@
 @if (!isLoading) {
     <form [formGroup]="accountForm" (ngSubmit)="onSubmit()" autocomplete="off" novalidate>
         <div class="form-fields">
+            <div>
             <app-form-field type="text" [label]="nameLabel" [control]="businessName"
                 placeholder="Tu nombre"
                 [errors]="{ 'required': 'El nombre es obligatorio', 'minlength': 'Mínimo 3 caracteres' }"
                 [submitted]="submitted" [fullwidth]="true"></app-form-field>
 
-            @if (!isPharmacist) {
-                <ui-alert variant="info" transparent>
-                    Este es el nombre que aparecerá en las recetas y documentos emitidos.
+                @if (!isPharmacist) {
+                    <span class="text-caption text-info">
+                        Este es el nombre que aparecerá en las recetas y documentos emitidos.
+                    </span>
+                }
+            </div>
+
+            @if (isProfessional) {
+                <app-form-field type="text" label="CUIL" [control]="cuil" inputmode="numeric" [maxlength]="11"
+                    placeholder="11 dígitos"
+                    [errors]="{ 'invalidFormat': 'El CUIL debe tener 11 dígitos', 'invalidCuil': 'El CUIL no es válido' }"
+                    [submitted]="submitted" [fullwidth]="true"></app-form-field>
+                
+                    @if (cuilInvalido) {
+                <ui-alert variant="warning" [fullwidth]="true">
+                    El CUIL guardado no es válido. Ingresá uno nuevo (11 dígitos) para poder emitir recetas.
                 </ui-alert>
+                }
             }
 
             <app-form-field type="text" label="Nombre de usuario" [control]="username"

@@ -14,12 +14,13 @@ import { AuthService } from '@auth/services/auth.service';
 import { servicesOnRun } from '@auth/token-initializer';
 // moduules
 import { AuthModule } from '@auth/auth.module';
-import { AuditModule } from '@audit/audit.module';
+import { AuditFeatureModule } from './features/audit/audit.module';
 import { PharmacistsModule } from '@pharmacists/pharmacists.module';
 import { ProfessionalsModule } from '@professionals/professionals.module';
 import { DashboardModule } from '@dashboard/dashboard.module';
 import { PrescriptionCreateModule } from './features/prescription/create/prescription-create.module';
 import { ProfileModule } from './features/profile/profile.module';
+import { PatientsModule } from './features/patients/patients.module';
 import { DocumentsModule } from '@features/documents/documents.module';
 import { PharmacistsModule as PharmacistsFeatureModule } from './features/pharmacists/pharmacists.module';
 // flex-layout
@@ -49,10 +50,11 @@ import { ServiceWorkerModule } from '@angular/service-worker';
         AuthModule,
         PharmacistsModule,
         ProfessionalsModule,
-        AuditModule,
+        AuditFeatureModule,
         DashboardModule,
         PrescriptionCreateModule,
         ProfileModule,
+        PatientsModule,
         DocumentsModule,
         PharmacistsFeatureModule,
         AppRoutingModule,

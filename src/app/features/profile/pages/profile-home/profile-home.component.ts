@@ -1,15 +1,16 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { Subject } from 'rxjs';
-import { takeUntil, finalize } from 'rxjs/operators';
+import { Subject, of } from 'rxjs';
+import { takeUntil, finalize, catchError } from 'rxjs/operators';
 import { SidebarItem } from '@shared/components/layout/sidebar/sidebar.component';
 import { SidebarService } from '@shared/services/sidebar.service';
+import { NotificationService } from '@shared/services/notification.service';
 import { getHttpErrorMessage } from '@shared/utils/http-error.util';
 import { ProfileService } from '../../services/profile.service';
 import { AuthService } from '@auth/services/auth.service';
 import { SecurityPinService } from '../../services/security-pin.service';
 import { User } from '@interfaces/users';
+import { ProfessionalProfile } from '@interfaces/professionals';
 
 interface ProfileSection {
     id: 'cuenta' | 'password' | 'pin' | 'organizaciones';
@@ -28,6 +29,7 @@ export class ProfileHomeComponent implements OnInit, OnDestroy {
     sidebarItems: SidebarItem[] = [];
     isLoading = false;
     currentUser: User | null = null;
+    professionalProfile: ProfessionalProfile | null = null;
     isPharmacist = false;
     isProfessional = false;
     roleLabel = '';
@@ -39,7 +41,7 @@ export class ProfileHomeComponent implements OnInit, OnDestroy {
 
     constructor(
         private route: ActivatedRoute,
-        private snackBar: MatSnackBar,
+        private notification: NotificationService,
         private profileService: ProfileService,
         private sidebarService: SidebarService,
         private authService: AuthService,
@@ -58,6 +60,7 @@ export class ProfileHomeComponent implements OnInit, OnDestroy {
         }
         this.loadCurrentUser();
         if (this.isProfessional) {
+            this.loadProfessionalProfile();
             this.loadPinStatus();
         }
     }
@@ -83,7 +86,7 @@ export class ProfileHomeComponent implements OnInit, OnDestroy {
         this.selected = id;
     }
 
-onAccountSaved(): void {
+    onAccountSaved(): void {
         this.loadCurrentUser();
     }
 
@@ -110,12 +113,18 @@ onAccountSaved(): void {
                 },
                 error: (error) => {
                     const msg = getHttpErrorMessage(error, 'Error al cargar los datos del usuario');
-                    this.snackBar.open(msg, 'Cerrar', {
-                        duration: 5000,
-                        panelClass: ['error-snackbar']
-                    });
+                    this.notification.error(msg);
                 }
             });
+    }
+
+    private loadProfessionalProfile(): void {
+        this.profileService.getProfessionalProfile().pipe(
+            takeUntil(this.destroy$),
+            catchError(() => of(null))
+        ).subscribe((profile) => {
+            this.professionalProfile = profile;
+        });
     }
 
     private loadPinStatus(): void {
@@ -131,8 +140,8 @@ onAccountSaved(): void {
             });
     }
 
-get matriculas(): User['profesionGrado'] {
-        return this.currentUser?.profesionGrado || [];
+    get matriculas(): ProfessionalProfile['profesionGrado'] {
+        return this.professionalProfile?.profesionGrado || [];
     }
 
     get organizacionesCount(): number {
@@ -147,7 +156,7 @@ get matriculas(): User['profesionGrado'] {
         return this.pinActive ? 'Protege tus recetas' : 'Activá tu PIN';
     }
 
-formatVencimiento(value: string | Date): string {
+    formatVencimiento(value: string | Date): string {
         const date = value instanceof Date ? value : new Date(value);
         if (isNaN(date.getTime())) {
             return String(value);
@@ -183,31 +192,33 @@ formatVencimiento(value: string | Date): string {
         return months > 0 && months < 12;
     }
 
-    estadoMatricula(estado?: 'vigente' | 'vencida' | 'suspendida' | 'inhabilitada' | 'baja'): { label: string; badgeClass: string } {
+    estadoMatricula(estado?: string): { label: string; variant: 'success' | 'warning' | 'error' } {
         switch (estado) {
             case 'vencida':
-                return { label: 'Vencida', badgeClass: 'badge-error' };
+                return { label: 'Vencida', variant: 'error' };
             case 'suspendida':
-                return { label: 'Suspendida', badgeClass: 'badge-warning' };
+                return { label: 'Suspendida', variant: 'warning' };
+            case 'sin-matricula':
+                return { label: 'Sin matrícula', variant: 'error' };
             case 'inhabilitada':
-                return { label: 'Inhabilitada', badgeClass: 'badge-warning' };
+                return { label: 'Inhabilitada', variant: 'warning' };
             case 'baja':
-                return { label: 'Dada de baja', badgeClass: 'badge-error' };
+                return { label: 'Dada de baja', variant: 'error' };
             case 'vigente':
             default:
-                return { label: 'Vigente', badgeClass: 'badge-success' };
+                return { label: 'Vigente', variant: 'success' };
         }
     }
 
-    estadoHabilitacion(expiration?: string | Date): { label: string; badgeClass: string } {
+    estadoHabilitacion(expiration?: string | Date): { label: string; variant: 'success' | 'error' } {
         if (!expiration) {
-            return { label: 'Vigente', badgeClass: 'badge-success' };
+            return { label: 'Vigente', variant: 'success' };
         }
         const end = expiration instanceof Date ? expiration : new Date(expiration);
         if (isNaN(end.getTime()) || end.getTime() >= Date.now()) {
-            return { label: 'Vigente', badgeClass: 'badge-success' };
+            return { label: 'Vigente', variant: 'success' };
         }
-        return { label: 'Vencida', badgeClass: 'badge-error' };
+        return { label: 'Vencida', variant: 'error' };
     }
 
     private monthsUntil(value: string | Date): number {

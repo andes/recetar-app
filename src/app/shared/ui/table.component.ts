@@ -152,7 +152,7 @@ export class UiTableDetailDirective { }
         }
         .ui-table-detail-inner {
             padding: 14px 14px 14px 40px;
-            background: #fafbfc;
+            background: var(--bg-over-body);
         }
         .ui-table.dense .mat-mdc-header-row {
             height: 28px;

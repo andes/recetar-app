@@ -32,10 +32,10 @@
       <div class="user-menu-wrapper" [class.open]="menuOpen">
         <ui-user-menu [open]="menuOpen" (openChange)="menuOpen = $event">
           <button type="button" class="user-trigger" menuTrigger>
-            <span class="user-avatar">{{ userInitials }}</span>
+            <span class="user-avatar text-xs">{{ userInitials }}</span>
             <span class="user-info">
-              <span class="user-info-name">{{ businessName$ | async | titlecase }}</span>
-              <span *ngIf="roleLabel" class="user-info-role">{{ roleLabel }}</span>
+              <span class="user-info-name text-xs">{{ businessName$ | async | titlecase }}</span>
+              <span *ngIf="roleLabel" class="user-info-role text-xs">{{ roleLabel }}</span>
             </span>
             <span class="user-chevron">
               <svg viewBox="0 0 24 24" width="16" height="16">

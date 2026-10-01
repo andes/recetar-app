@@ -178,6 +178,16 @@
                 </app-form-field>
             </div>
 
+            <div class="treatment-row">
+                <app-form-field type="select" label="Tratamiento prolongado"
+                    [control]="detailForm.get('tratamiento')" [options]="treatmentOptions">
+                </app-form-field>
+                <app-form-field *ngIf="detailForm.get('tratamiento')?.value === 'custom'" type="number"
+                    label="Cantidad de meses" [control]="detailForm.get('treatmentMonths')" min="2" max="12"
+                    [errors]="{ required: 'Ingresá los meses', min: 'Mínimo 2 meses', max: 'Máximo 12 meses' }">
+                </app-form-field>
+            </div>
+
             <div class="detail-actions">
                 <button matButton="filled" (click)="confirmMedication()">
                     <mat-icon>{{ editMedicationIndex != null ? 'save' : 'add_circle' }}</mat-icon>

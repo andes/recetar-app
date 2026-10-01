@@ -8,6 +8,7 @@ import { MedicationSearchComponent } from '@shared/components/medication-search/
 import { MedicationItemComponent } from '@shared/ui/medication-item.component';
 import { MedicationItem, FrequentMedication, PrescriptionItemResult } from '@shared/models/medication.types';
 import { MixedPrescription } from '../../services/dispense.service';
+import { isAndesPrescription } from '../../services/prescription-source.util';
 import AndesPrescriptions from '@interfaces/andesPrescriptions';
 import { Prescriptions } from '@interfaces/prescriptions';
 
@@ -50,7 +51,7 @@ export class DispenseConfirmDialogComponent {
 
     get patientName(): string {
         const p = this.data.prescription;
-        if ('estadoActual' in p) {
+        if (isAndesPrescription(p)) {
             const andes = p as AndesPrescriptions;
             return `${andes.paciente?.apellido || ''}, ${andes.paciente?.nombre || ''}`.replace(/^,\s*/, '');
         }

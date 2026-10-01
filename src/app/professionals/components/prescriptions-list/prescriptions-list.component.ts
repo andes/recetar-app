@@ -518,10 +518,40 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
             });
     }
 
+    canSuspendLocal(prescription: MixedPrescription): boolean {
+        if (!this.isLocalPrescription(prescription)) {
+            return false;
+        }
+        return prescription.professional?.userId === this.authService.getLoggedUserId()
+            && this.normalizeStatus(prescription.status) === 'VIGENTE';
+    }
+
+    suspendLocalDialog(prescription: MixedPrescription): void {
+        this.openDialog('suspend_local', prescription);
+    }
+
+    suspendLocalPrescription(prescription: Prescriptions): void {
+        this.prescriptionService.suspendPrescription(prescription._id)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: () => {
+                    this.openSuccessDialog('suspend_local_success');
+                    if (this.selectedType === 'receta') {
+                        this.loadPrescriptions(
+                            this.prescriptionsPageIndex * this.prescriptionsPageSize,
+                            this.prescriptionsPageSize
+                        );
+                    }
+                },
+                error: () => {
+                    this.openSuccessDialog('suspend_local_error');
+                }
+            });
+    }
+
     anulateDialogCertificate(certificate: Certificate) {
         this.openDialog('anulate_certificate', certificate);
     }
-
 
     deleteDialogPractice(practice: Practice) {
         this.openDialog('delete_practice', practice);
@@ -549,6 +579,8 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
             } else if (result === 'suspend_andes') {
                 // Suspender prescripción de ANDES
                 this.suspendAndesPrescription(aItem as AndesPrescriptions);
+            } else if (result === 'suspend_local') {
+                this.suspendLocalPrescription(aItem as Prescriptions);
             }
         });
     }

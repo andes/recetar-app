@@ -1,0 +1,23 @@
+<app-canvas [showSidebar]="true" [sidebarItems]="sidebarItems" [noCard]="true" [pageTitle]="pageTitle"
+    [pageSubtitle]="pageSubtitle">
+
+    <div class="patient-edit-page">
+        @if (loading) {
+            <div class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+            </div>
+        } @else if (loadError) {
+            <ui-alert variant="error" [fullwidth]="true">
+                No pudimos cargar el paciente. Volvé al listado e intentá nuevamente.
+            </ui-alert>
+            <button matButton="outlined" type="button" (click)="goToList()">
+                <mat-icon>arrow_back</mat-icon>
+                Volver al listado
+            </button>
+        } @else {
+            <app-patient-edit-form [patient]="patient" [mode]="isCreate ? 'create' : 'edit'"
+                (saved)="onSaved($event)" (cancelled)="onCancel()">
+            </app-patient-edit-form>
+        }
+    </div>
+</app-canvas>

@@ -1,66 +1,47 @@
+<div class="auth-shell">
+    <div class="logo">
+        <img src="assets/img/LogoRecetar.png" class="icon-login">
+        <h1 class="title-login">RecetAR</h1>
+    </div>
 
-<!-- Logo -->
-<div fxLayout="column" fxLayoutAlign="space-evenly center" class="logo">
-  <img src="assets/img/LogoRecetar.png" class="icon-login">
-  <h1 class="title-login">RecetAR</h1>
-</div>
+    <ui-card class="auth-card">
+        <div class="form-head text-center">
+            <h2>Restablecer contraseña</h2>
+        </div>
 
-<div fxLayout="row" fxLayoutAlign="space-evenly start" fxLayoutGap="20px" class="cards-container" fxFill>
+        @if (mailEnviado) {
+            <ui-alert variant="success" [fullwidth]="true">
+                Hemos enviado un e-mail para regenerar su contraseña.
+            </ui-alert>
+        } @else {
+            <p class="text-sm text-secondary">
+                Por favor, ingrese su usuario. Recibirá un correo electrónico con instrucciones para restablecer su contraseña.
+            </p>
 
-  <!-- panel "Forgot form" -->
-  <div  class="form-panel">
-    <mat-card fxLayout="column" fxLayoutAlign="space-between">
-      <mat-card-title><h2 class="text-center">Restablecer contraseña</h2></mat-card-title>
-      @if (!mailEnviado) {
-        <span>
-          Por favor, ingrese su usuario. Recibirá un correo electrónico con instrucciones para restablecer su contraseña.
-        </span>
-      }
-      @if (mailEnviado) {
-        <span>
-          Hemos enviado un e-mail para regenerar su contraseña.
-        </span>
-      }
-      @if (!mailEnviado) {
-        <mat-card-content>
-          <form [formGroup]="forgotForm"  #forgotNgForm="ngForm" (ngSubmit)="onSubmitEvent(forgotForm, forgotNgForm)" class="form-container" >
-            <div fxLayout fxLayout="column" fxLayoutAlign="center" class="container" fxLayoutGap="20px">
-              <mat-form-field>
-                <input matInput placeholder="Ingrese su Usuario" formControlName="usuario" autocomplete="off">
-                @if (usuario.errors?.required ) {
-                  <mat-error>
-                    Usuario es requerido
-                  </mat-error>
+            <form [formGroup]="forgotForm" #forgotNgForm="ngForm"
+                (ngSubmit)="onSubmitEvent(forgotForm, forgotNgForm)">
+                <app-form-field type="text" label="Usuario" [control]="usuario"
+                    placeholder="Ingrese su Usuario"
+                    [errors]="{ required: 'Usuario es requerido' }">
+                </app-form-field>
+
+                @if (error) {
+                    <ui-alert variant="error" [fullwidth]="true">{{ error }}</ui-alert>
                 }
-              </mat-form-field>
-            </div>
-            @if (error) {
-              <mat-error class="text-center login-error">
-                {{ error }}
-              </mat-error>
-            }
-            <div fxLayout="row" fxLayoutAlign="center">
-              @if (!showSubmit) {
-                <div fxLayout="row" fxLayoutGap="10px" fxFlex="100%">
-                  @if (!showSubmit) {
-                    <button matButton="raised" color="primary" (click)="cancelar()" fxFlex="100%">
-                      Cancelar
+
+                <div class="form-actions">
+                    <button type="button" matButton="outlined" (click)="cancelar()" [disabled]="showSubmit">
+                        Cancelar
                     </button>
-                  }
-                  @if (!showSubmit) {
-                    <button matButton="raised" color="primary" type="submit" fxFlex="50%">
-                      Recuperar Contraseña
+                    <button type="submit" matButton="filled" [disabled]="showSubmit">
+                        @if (showSubmit) {
+                            <mat-spinner diameter="20"></mat-spinner>
+                        } @else {
+                            Recuperar contraseña
+                        }
                     </button>
-                  }
                 </div>
-              }
-              @if (showSubmit) {
-                <mat-spinner [color]="spinnerColor" [diameter]="spinnerDiameter"></mat-spinner>
-              }
-            </div>
-          </form>
-        </mat-card-content>
-      }
-    </mat-card>
-  </div>
+            </form>
+        }
+    </ui-card>
 </div>

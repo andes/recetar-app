@@ -8,13 +8,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { getHttpErrorMessage } from '@shared/utils/http-error.util';
 import { Subject, timer } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { FormFieldComponent } from '@shared/components/form-field/form-field.component';
+import { UiCardComponent } from '@shared/ui/card.component';
+import { UiAlertComponent } from '@shared/ui/alert.component';
 
 @Component({
     selector: 'app-recovery-password',
@@ -25,13 +24,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
         ReactiveFormsModule,
         FormsModule,
         RouterModule,
-        FlexLayoutModule,
-        MatCardModule,
         MatIconModule,
-        MatFormFieldModule,
-        MatInputModule,
         MatButtonModule,
-        MatProgressSpinnerModule
+        MatProgressSpinnerModule,
+        FormFieldComponent,
+        UiCardComponent,
+        UiAlertComponent
     ]
 })
 export class RecoveryComponent implements OnInit, OnDestroy {

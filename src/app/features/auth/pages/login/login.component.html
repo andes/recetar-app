@@ -1,4 +1,4 @@
-<app-canvas [showHeader]="false" [showSidebar]="false" [showFooter]="false" [noCard]="true">
+<app-canvas [showHeader]="false" [showSidebar]="false" [showFooter]="false" [noCard]="true" [flush]="true">
 
     <div class="split-layout">
 
@@ -38,10 +38,10 @@
                         <small><a (click)="forgot()">Olvidé mi contraseña</a></small>
 
                         <div class="register-links">
-                            <button matButton="outlined" (click)="newUser()">
+                            <button matButton="outlined" type="button" (click)="newUser()">
                                 Registrarse como Profesional
                             </button>
-                            <button matButton="outlined" (click)="newUserPharmacist()">
+                            <button matButton="outlined" type="button" (click)="newUserPharmacist()">
                                 Registrarse como Farmacia
                             </button>
                         </div>

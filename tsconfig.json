@@ -30,9 +30,6 @@
       "@root/*": [
         "./*"
       ],
-      "@audit/*": [
-        "app/audit/*"
-      ],
       "@dashboard/*": [
         "app/features/dashboard/*"
       ],

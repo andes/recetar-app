@@ -40,20 +40,20 @@ import { CommonModule } from '@angular/common';
             height: 8px;
             border-radius: 50%;
             background: var(--secondary);
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, .18);
+            box-shadow: 0 0 0 4px rgba(89, 89, 255, .18);
             animation: draft-tag-pulse 1.6s infinite;
             flex-shrink: 0;
         }
 
         @keyframes draft-tag-pulse {
             0% {
-                box-shadow: 0 0 0 0 rgba(79, 70, 229, .4);
+                box-shadow: 0 0 0 0 rgba(89, 89, 255, .4);
             }
             70% {
-                box-shadow: 0 0 0 8px rgba(79, 70, 229, 0);
+                box-shadow: 0 0 0 8px rgba(89, 89, 255, 0);
             }
             100% {
-                box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
+                box-shadow: 0 0 0 0 rgba(89, 89, 255, 0);
             }
         }
     `]
@@ -62,3 +62,5 @@ export class UiDraftTagComponent {
     @Input() label = 'Borrador';
     @Input() hint = '';
 }
+
+

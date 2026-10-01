@@ -55,7 +55,7 @@ import { UiToggleComponent, ToggleOption } from './toggle.component';
 
         .search-bar:focus-within {
             border-color: var(--secondary);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, .1);
+            box-shadow: var(--focus-ring);
         }
 
         .input-wrap {

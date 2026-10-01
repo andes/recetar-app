@@ -10,13 +10,13 @@ import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/materia
         <mat-dialog-content><p>{{ data.message }}</p></mat-dialog-content>
         <mat-dialog-actions align="end">
             <button matButton="outlined" (click)="dialogRef.close(false)">Cancelar</button>
-            <button matButton="filled" (click)="dialogRef.close(true)">Confirmar</button>
+            <button matButton="filled" [class.mat-error]="data.danger" (click)="dialogRef.close(true)">Confirmar</button>
         </mat-dialog-actions>
     `
 })
 export class ConfirmDialogComponent {
     constructor(
         public dialogRef: MatDialogRef<ConfirmDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: { title: string; message: string }
+        @Inject(MAT_DIALOG_DATA) public data: { title: string; message: string; danger?: boolean }
     ) { }
 }

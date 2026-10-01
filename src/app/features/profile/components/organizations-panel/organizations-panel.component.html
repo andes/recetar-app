@@ -1,4 +1,4 @@
-<div class="panel-head">
+<div class="form-head">
     <h3>Organizaciones</h3>
     <p>Administrá las organizaciones asociadas a tu usuario.</p>
 </div>
@@ -29,9 +29,9 @@
                             @if (org.direccion || org.provincia) {
                                 <span class="org-address">{{ org.direccion }}{{ org.direccion && org.provincia ? ', ' : '' }}{{ org.provincia }}</span>
                             }
-                            <span class="badge" [ngClass]="org.ambito === 'publico' ? 'badge-success' : 'badge-info'">
+                            <ui-badge-chip [variant]="org.ambito === 'publico' ? 'success' : 'info'">
                                 {{ org.ambito === 'publico' ? 'Público' : 'Privado' }}
-                            </span>
+                            </ui-badge-chip>
                         </div>
                     </div>
                     <button matIconButton class="org-remove-btn" (click)="removeOrganization(org)" [disabled]="isSaving"

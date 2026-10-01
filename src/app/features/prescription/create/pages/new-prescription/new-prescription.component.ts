@@ -14,7 +14,7 @@ import { SidebarItem } from '@shared/components/layout/sidebar/sidebar.component
 import { SidebarService } from '@shared/services/sidebar.service';
 import { NotificationService } from '@shared/services/notification.service';
 import { Subject, of } from 'rxjs';
-import { debounceTime, distinctUntilChanged, catchError, takeUntil, finalize } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, catchError, takeUntil, finalize, map } from 'rxjs/operators';
 import { PrescriptionDraftService } from '../../services/prescription-draft.service';
 import { FrequencyTrackerService } from '@shared/services/frequency-tracker.service';
 import { AuthService } from '@auth/services/auth.service';
@@ -27,6 +27,13 @@ import { PendingPrescription } from '@features/profile/models/security-pin.model
 import { SubOrganization } from '@interfaces/organizations';
 import { UserService } from '@services/users.service';
 import { getInitials, formatName, formatDni, getAge } from '@utils/patient-format';
+import { getHttpErrorMessage } from '@shared/utils/http-error.util';
+
+interface ProfessionalPayload {
+    userId: string;
+    businessName: string;
+    organizacion?: { _id?: string; nombre: string };
+}
 
 @Component({
     selector: 'app-new-prescription',
@@ -66,10 +73,10 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
     hasPinActive = false;
     pendingPrescription: PendingPrescription | null = null;
     isSending = false;
+    sendError: string | null = null;
 
     userOrganizations: SubOrganization[] = [];
     organizationsLoading = false;
-    userProfesionGrado: Array<{ profesion: string; codigoProfesion: string; numeroMatricula: string }> = [];
 
     patientObrasSociales: { nombre: string; codigoPuco: number }[] = [];
 
@@ -98,15 +105,6 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.sidebarItems = this.sidebarService.getItems();
-
-        const userId = this.authService.getLoggedUserId();
-        if (userId) {
-            this.userService.getUserById(userId).pipe(
-                takeUntil(this.destroy$)
-            ).subscribe(user => {
-                this.userProfesionGrado = user.profesionGrado || [];
-            });
-        }
 
         this.patientSearchForm = this.fb.group({ patientTerm: [''] });
 
@@ -155,6 +153,10 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
         return this.pendingPrescription !== null;
     }
 
+    get hasDraftErrors(): boolean {
+        return this.draft.medications.some((med) => !!med.sendError) || !!this.sendError;
+    }
+
     discardPendingPrescription(): void {
         this.pendingPrescriptionService.clearDraft();
         this.pendingPrescription = null;
@@ -166,16 +168,19 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
 
         if (payload.patient) {
             const p = payload.patient;
-            this.draftService.setPatient(new Patient(
+            const patient = new Patient(
                 p.lastName || '',
                 p.firstName || '',
                 p.sex || '',
                 p.status || p.estado || '',
                 p.dni || '',
                 undefined,
-                p.idMPI || '',
+                undefined,
                 p.fechaNac || null,
-            ));
+            );
+            patient.idMPI = p.idMPI || p._id || '';
+            patient.estado = p.estado || p.status || '';
+            this.draftService.setPatient(patient);
         }
 
         if (payload.supplies && Array.isArray(payload.supplies)) {
@@ -438,12 +443,40 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
     get canFinalize(): boolean {
         if (!this.draft.patient) { return false; }
         if (this.draft.type === 'prescription' && !this.draft.organizacion) { return false; }
+        if (this.draft.type === 'prescription' && this.requiresPublicOrganization && this.draft.organizacion?.ambito === 'privado') {
+            return false;
+        }
         switch (this.draft.type) {
             case 'prescription': return this.draft.medications.length > 0;
             case 'certificate': return !!this.draft.certificateData;
             case 'practice': return !!this.draft.practiceData;
             default: return false;
         }
+    }
+
+    get hasMagistralInDraft(): boolean {
+        return this.draft.medications.some((item) => item.type === 'magistral');
+    }
+
+    get patientWithoutDni(): boolean {
+        return !!this.draft.patient && !this.draft.patient.dni;
+    }
+
+    get requiresPublicOrganization(): boolean {
+        return this.hasMagistralInDraft || this.patientWithoutDni;
+    }
+
+    get publicOrganizationRequiredMessage(): string {
+        if (!this.requiresPublicOrganization) {
+            return '';
+        }
+        if (this.patientWithoutDni && this.hasMagistralInDraft) {
+            return 'Este paciente sin DNI y los medicamentos magistrales solo pueden prescribirse en organizaciones públicas.';
+        }
+        if (this.patientWithoutDni) {
+            return 'Este paciente no tiene DNI: solo puede prescribirse en organizaciones públicas.';
+        }
+        return 'Los medicamentos magistrales solo pueden prescribirse en organizaciones públicas.';
     }
 
     get documentTypeLabel(): string {
@@ -463,10 +496,12 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
             this.loadPatientObrasSociales(p.dni || '', p.sex || '');
         } else {
             const fp = patient as FrequentPatient;
-            this.patientsService.getPatientByDni(fp.dni).subscribe({
-                next: (patients) => {
-                    if (patients.length > 0) {
-                        const p = patients[0];
+            const patientRequest = fp.dni
+                ? this.patientsService.getPatientByDni(fp.dni).pipe(map((patients) => patients[0] || null))
+                : this.patientsService.getPatientById(fp.id).pipe(catchError(() => of(null)));
+            patientRequest.subscribe({
+                next: (p) => {
+                    if (p) {
                         p.nombreAutopercibido = p.nombreAutopercibido || fp.nombreAutopercibido;
                         this.draftService.setPatient(p);
                         this.recordPatientFrequency(p);
@@ -475,6 +510,7 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
                         const p = new Patient(fp.lastName, '', fp.sex, '', fp.dni);
                         p.firstName = fp.firstName;
                         p.nombreAutopercibido = fp.nombreAutopercibido;
+                        p.idMPI = fp.id;
                         if (fp.fechaNac) { p.fechaNac = new Date(fp.fechaNac); }
                         p.obraSocial = { nombre: fp.insurance };
                         this.draftService.setPatient(p);
@@ -543,7 +579,7 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
             case 'prescription': {
                 const prescription = event.document as Prescriptions;
                 this.draftService.setPatient(patient);
-                const items = prescription.supplies.map(s => this.supplyToMedicationItem(s));
+                const items = prescription.supplies.map(s => this.supplyToMedicationItem(s, prescription.tratamientoProlongado));
                 const currentCount = this.draft.medications.length;
                 const available = this.MAX_MEDICATIONS - currentCount;
                 if (available <= 0) {
@@ -584,7 +620,7 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
         }
     }
 
-    private supplyToMedicationItem(s: Prescriptions['supplies'][0]): MedicationItem {
+    private supplyToMedicationItem(s: Prescriptions['supplies'][0], tratamientoProlongado?: number): MedicationItem {
         const sup = s.supply as unknown as Record<string, unknown> | undefined;
 
         if (sup?.type === 'magistral') {
@@ -601,6 +637,7 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
                 indication: s.indication || '',
                 duplicate: s.duplicate || false,
                 triplicate: s.triplicate || false,
+                tratamientoProlongado,
                 serie: s.triplicateData?.serie || '',
                 numero: s.triplicateData?.numero?.toString() || '',
                 obraSocial: s.obraSocial as MedicationItem['obraSocial'],
@@ -633,6 +670,7 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
             indication: s.indication || '',
             duplicate: s.duplicate || false,
             triplicate: s.triplicate || false,
+            tratamientoProlongado,
             serie: s.triplicateData?.serie || '',
             numero: s.triplicateData?.numero?.toString() || '',
             obraSocial: s.obraSocial as MedicationItem['obraSocial'],
@@ -649,6 +687,7 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
             sex: p.sex || '',
             fechaNac: p.fechaNac ? p.fechaNac.toISOString() : '',
             nombreAutopercibido: p.nombreAutopercibido || '',
+            genero: p.genero || '',
             status: p.status || p.estado || '',
         });
     }
@@ -699,11 +738,14 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
 
     finalizePrescription(): void {
         if (!this.draft.patient) { return; }
+        if (this.draft.type === 'prescription' && this.requiresPublicOrganization && this.draft.organizacion?.ambito === 'privado') {
+            this.notification.warning(this.publicOrganizationRequiredMessage);
+            return;
+        }
 
-        const professional = {
+        const professional: ProfessionalPayload = {
             userId: this.authService.getLoggedUserId(),
             businessName: this.authService.getLoggedBusinessName(),
-            profesionGrado: this.userProfesionGrado,
             ...(this.draft.organizacion ? {
                 organizacion: {
                     _id: this.draft.organizacion._id,
@@ -712,75 +754,155 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
             } : {}),
         };
 
+        if (this.draft.type === 'prescription') {
+            if (this.draft.medications.length === 0) { return; }
+            this.startPrescriptionSend(professional);
+            return;
+        }
+
         let payload: Record<string, unknown>;
-        let serviceCall: (payload: unknown, pin?: string) => any;
+        let serviceCall: (payload: unknown) => any;
         let successMsg: string;
 
-        switch (this.draft.type) {
-            case 'prescription':
-                if (this.draft.medications.length === 0) { return; }
-                payload = toPrescriptionPayload(this.draft, new Date(), professional);
-                serviceCall = (p, pin) => this.prescriptionsService.newPrescription(p as any, pin);
-                successMsg = 'Receta creada exitosamente';
-                break;
-            case 'certificate':
-                if (!this.draft.certificateData) { return; }
-                payload = toCertificatePayload(this.draft, professional);
-                serviceCall = (p) => this.certificatesService.newCertificate(p as any);
-                successMsg = 'Certificado creado exitosamente';
-                break;
-            case 'practice':
-                if (!this.draft.practiceData) { return; }
-                payload = toPracticePayload(this.draft, professional);
-                serviceCall = (p) => this.practicesService.newPractice(p as any);
-                successMsg = 'Práctica creada exitosamente';
-                break;
-            default:
-                return;
+        if (this.draft.type === 'certificate') {
+            if (!this.draft.certificateData) { return; }
+            payload = toCertificatePayload(this.draft, professional);
+            serviceCall = (p) => this.certificatesService.newCertificate(p as any);
+            successMsg = 'Certificado creado exitosamente';
+        } else if (this.draft.type === 'practice') {
+            if (!this.draft.practiceData) { return; }
+            payload = toPracticePayload(this.draft, professional);
+            serviceCall = (p) => this.practicesService.newPractice(p as any);
+            successMsg = 'Práctica creada exitosamente';
+        } else {
+            return;
         }
 
         this.pendingPrescriptionService.saveDraft(payload);
+        this.sendDocument(payload, serviceCall, successMsg);
+    }
 
-        if (this.hasPinActive && this.draft.type === 'prescription') {
-            this.openPinDialogAndSend(payload, serviceCall, successMsg);
+    private startPrescriptionSend(professional: ProfessionalPayload): void {
+        this.sendError = null;
+        if (this.hasPinActive) {
+            this.openPinDialogAndSendMedications(professional);
         } else {
-            this.sendDocument(payload, serviceCall, successMsg);
+            this.sendMedications(professional);
         }
     }
 
-    private openPinDialogAndSend(payload: Record<string, unknown>, serviceCall: (payload: unknown, pin?: string) => any, successMsg: string): void {
+    private openPinDialogAndSendMedications(professional: ProfessionalPayload, errorMessage?: string): void {
         const dialogRef = this.dialog.open(SecurityPinDialogComponent, {
             width: '400px',
-            disableClose: true
+            disableClose: true,
+            data: { title: 'Confirmar receta' }
         });
+
+        if (errorMessage) {
+            dialogRef.componentInstance.setError(errorMessage);
+        }
 
         dialogRef.afterClosed().subscribe((pin: string | null) => {
             if (pin) {
-                this.sendDocument(payload, serviceCall, successMsg, pin);
+                this.sendMedications(professional, pin);
             }
         });
     }
 
-    private sendDocument(payload: Record<string, unknown>, serviceCall: (payload: unknown, pin?: string) => any, successMsg: string, pin?: string): void {
-        this.isSending = true;
+    // Envía cada medicamento como una receta independiente: los que se publican
+    // se quitan del borrador y los que fallan quedan con su error inline.
+    private sendMedications(professional: ProfessionalPayload, pin?: string): void {
+        const items = [...this.draft.medications];
+        if (!items.length) { return; }
 
-        serviceCall(payload, pin).pipe(
+        items.forEach((item) => { item.sendError = undefined; });
+        this.draftService.setMedications(items);
+        this.isSending = true;
+        let successCount = 0;
+
+        const sendNext = (index: number): void => {
+            if (index >= items.length) {
+                this.finishMedicationSend(successCount, professional);
+                return;
+            }
+
+            const item = items[index];
+            const payload = toPrescriptionPayload({ ...this.draft, medications: [item] }, new Date(), professional);
+
+            this.prescriptionsService.newPrescription(payload as any, pin).pipe(
+                takeUntil(this.destroy$)
+            ).subscribe({
+                next: () => {
+                    successCount++;
+                    this.removeDraftMedication(item);
+                    sendNext(index + 1);
+                },
+                error: (error: any) => {
+                    if (error.status === 401 && this.hasPinActive) {
+                        this.isSending = false;
+                        this.openPinDialogAndSendMedications(professional, 'PIN incorrecto. Intentá de nuevo.');
+                        return;
+                    }
+                    this.setMedicationError(item, getHttpErrorMessage(error, 'No se pudo emitir la receta'));
+                    sendNext(index + 1);
+                }
+            });
+        };
+
+        sendNext(0);
+    }
+
+    private removeDraftMedication(item: MedicationItem): void {
+        const index = this.draft.medications.indexOf(item);
+        if (index >= 0) {
+            this.draftService.removeMedication(index);
+        }
+    }
+
+    private setMedicationError(item: MedicationItem, message: string): void {
+        const index = this.draft.medications.indexOf(item);
+        if (index >= 0) {
+            this.draftService.updateMedication(index, { sendError: message });
+        }
+    }
+
+    private finishMedicationSend(successCount: number, professional: ProfessionalPayload): void {
+        this.isSending = false;
+        const failed = this.draft.medications.filter((item) => !!item.sendError);
+
+        if (successCount > 0) {
+            this.notification.success(successCount === 1
+                ? 'Receta creada exitosamente'
+                : `${successCount} recetas creadas exitosamente`);
+        }
+
+        if (failed.length) {
+            this.pendingPrescriptionService.saveDraft(
+                toPrescriptionPayload({ ...this.draft, medications: failed }, new Date(), professional)
+            );
+        } else {
+            this.pendingPrescriptionService.clearDraft();
+            this.draftService.reset();
+            this.sendError = null;
+        }
+    }
+
+    private sendDocument(payload: Record<string, unknown>, serviceCall: (payload: unknown) => any, successMsg: string): void {
+        this.isSending = true;
+        this.sendError = null;
+
+        serviceCall(payload).pipe(
             takeUntil(this.destroy$),
             finalize(() => this.isSending = false)
         ).subscribe({
             next: () => {
                 this.pendingPrescriptionService.clearDraft();
                 this.draftService.reset();
+                this.sendError = null;
                 this.notification.success(successMsg);
             },
             error: (error: any) => {
-                if (error.status === 401 && this.hasPinActive && this.draft.type === 'prescription') {
-                    this.pendingPrescriptionService.incrementAttempts();
-                    this.notification.error('PIN incorrecto. Intentá de nuevo.');
-                    this.openPinDialogAndSend(payload, serviceCall, successMsg);
-                } else {
-                    this.notification.error(`Error al crear ${this.documentTypeLabel}. Podés reintentar desde el panel.`);
-                }
+                this.sendError = getHttpErrorMessage(error, 'No se pudo emitir el documento');
             }
         });
     }
@@ -796,6 +918,7 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
             sex: r.data['sex'] as string || '',
             fechaNac: r.data['fechaNac'] as string || '',
             nombreAutopercibido: r.data['nombreAutopercibido'] as string || '',
+            genero: r.data['genero'] as string || '',
             status: r.data['status'] as string || '',
         }));
     }
@@ -812,23 +935,6 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
 
     getItemObraSocialLabel(item: MedicationItem): string {
         return item.obraSocial?.nombre || this.draft.patient?.obraSocial?.nombre || '';
-    }
-
-    get patientAvatarIcon(): string {
-        if (!this.draft.patient) { return 'person'; }
-        const sex = this.draft.patient.sex || '';
-        if (/^f/i.test(sex)) { return 'female'; }
-        if (/^[fm]/i.test(sex)) { return 'male'; }
-        return 'transgender';
-    }
-
-    get isPatientFemale(): boolean {
-        return /^f/i.test(this.draft.patient?.sex || '');
-    }
-
-    get isPatientOther(): boolean {
-        const s = this.draft.patient?.sex || '';
-        return s !== '' && !/^[fm]/i.test(s);
     }
 
     get validationStatus(): string {

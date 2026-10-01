@@ -62,8 +62,6 @@ import { MatIconModule } from '@angular/material/icon';
         .icon-box.error     { background: var(--error-bg); color: var(--error-fill); }
         .icon-box.info      { background: var(--info-bg); color: var(--info-text); }
         .icon-box.gold      { background: var(--gold-bg); color: var(--gold-fill); }
-        .icon-box.commercial { background: var(--med-commercial-bg); color: var(--med-commercial-icon); }
-        .icon-box.generic    { background: var(--med-generic-bg); color: var(--med-generic-icon); }
     `]
 })
 export class UiIconComponent {

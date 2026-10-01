@@ -4,11 +4,11 @@ import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validatio
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Subject } from 'rxjs';
 import { finalize, takeUntil } from 'rxjs/operators';
 import { FormFieldComponent } from '@shared/components/form-field/form-field.component';
 import { UiAlertComponent } from '@shared/ui';
+import { NotificationService } from '@shared/services/notification.service';
 import { getHttpErrorMessage } from '@shared/utils/http-error.util';
 import { SecurityPinService } from '../../services/security-pin.service';
 
@@ -23,7 +23,6 @@ import { SecurityPinService } from '../../services/security-pin.service';
         MatButtonModule,
         MatIconModule,
         MatProgressSpinnerModule,
-        MatSnackBarModule,
         FormFieldComponent,
         UiAlertComponent,
     ]
@@ -50,7 +49,7 @@ export class PinPanelComponent implements OnInit, OnDestroy {
 
     constructor(
         private fb: FormBuilder,
-        private snackBar: MatSnackBar,
+        private notification: NotificationService,
         private securityPinService: SecurityPinService
     ) {
         this.setupForm = this.fb.group({
@@ -92,7 +91,7 @@ export class PinPanelComponent implements OnInit, OnDestroy {
                 },
                 error: (error) => {
                     const msg = getHttpErrorMessage(error, 'Error al cargar el estado del PIN');
-                    this.snackBar.open(msg, 'Cerrar', { duration: 5000 });
+                    this.notification.error(msg);
                 }
             });
     }
@@ -175,7 +174,7 @@ export class PinPanelComponent implements OnInit, OnDestroy {
             finalize(() => this.isSaving = false)
         ).subscribe({
             next: () => {
-                this.snackBar.open('PIN de seguridad activado', 'Cerrar', { duration: 5000 });
+                this.notification.success('PIN de seguridad activado');
                 this.hasPinActive = true;
                 this.showSetupForm = false;
                 this.setupForm.reset();
@@ -183,7 +182,7 @@ export class PinPanelComponent implements OnInit, OnDestroy {
             },
             error: (error) => {
                 const msg = getHttpErrorMessage(error, 'Error al activar el PIN');
-                this.snackBar.open(msg, 'Cerrar', { duration: 5000 });
+                this.notification.error(msg);
             }
         });
     }
@@ -206,14 +205,14 @@ export class PinPanelComponent implements OnInit, OnDestroy {
             finalize(() => this.isSaving = false)
         ).subscribe({
             next: () => {
-                this.snackBar.open('PIN de seguridad actualizado', 'Cerrar', { duration: 5000 });
+                this.notification.success('PIN de seguridad actualizado');
                 this.showChangeForm = false;
                 this.changeForm.reset();
                 this.statusChanged.emit();
             },
             error: (error) => {
                 const msg = getHttpErrorMessage(error, 'Error al cambiar el PIN');
-                this.snackBar.open(msg, 'Cerrar', { duration: 5000 });
+                this.notification.error(msg);
             }
         });
     }
@@ -235,7 +234,7 @@ export class PinPanelComponent implements OnInit, OnDestroy {
             finalize(() => this.isSaving = false)
         ).subscribe({
             next: () => {
-                this.snackBar.open('PIN de seguridad desactivado', 'Cerrar', { duration: 5000 });
+                this.notification.success('PIN de seguridad desactivado');
                 this.hasPinActive = false;
                 this.showDisableForm = false;
                 this.disableForm.reset();
@@ -243,7 +242,7 @@ export class PinPanelComponent implements OnInit, OnDestroy {
             },
             error: (error) => {
                 const msg = getHttpErrorMessage(error, 'Error al desactivar el PIN');
-                this.snackBar.open(msg, 'Cerrar', { duration: 5000 });
+                this.notification.error(msg);
             }
         });
     }

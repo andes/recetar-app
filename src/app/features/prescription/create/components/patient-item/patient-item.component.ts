@@ -3,17 +3,16 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Patient } from '@interfaces/patients';
+import { UiPatientAvatarComponent } from '@shared/ui';
 import { FrequentPatient } from '../../models/prescription-draft';
 import { formatDni, formatName, toPascalCase, getAge } from '@utils/patient-format';
 
 @Component({
     standalone: true,
     selector: 'app-patient-item',
-    imports: [CommonModule, MatIconModule, MatTooltipModule],
+    imports: [CommonModule, MatIconModule, MatTooltipModule, UiPatientAvatarComponent],
     template: `
-        <div class="item-avatar initials" [class.female]="isFemale" [class.other]="isOther">
-            <mat-icon>{{ avatarIcon }}</mat-icon>
-        </div>
+        <ui-patient-avatar [sex]="patient.sex" [genero]="patientGenero" />
         <div class="item-info">
             <div class="item-name">
                 {{ formatName(patient) }}
@@ -21,11 +20,14 @@ import { formatDni, formatName, toPascalCase, getAge } from '@utils/patient-form
                     &mdash; {{ toPascalCase(patient.nombreAutopercibido) }}
                 </span>
                 <mat-icon *ngIf="validationStatus === 'validado'" class="status-icon validated" matTooltip="Validado RENAPER">verified_user</mat-icon>
-                <mat-icon *ngIf="validationStatus === 'temporal'" class="status-icon temporal" matTooltip="Paciente temporal">warning</mat-icon>
+                <mat-icon *ngIf="validationStatus === 'temporal'" class="status-icon temporal" matTooltip="Paciente temporal">verified_user</mat-icon>
             </div>
                 <div class="item-detail">
                     <ng-container *ngIf="patient.dni">
                         DNI {{ formatDni(patient.dni) }}
+                    </ng-container>
+                    <ng-container *ngIf="!patient.dni">
+                        Sin DNI
                     </ng-container>
                     <ng-container *ngIf="patient.sex"> &middot; {{ patient.sex }}</ng-container>
                     <ng-container *ngIf="patient.fechaNac"> &middot; {{ getAge(patient.fechaNac) }} años</ng-container>
@@ -38,34 +40,6 @@ import { formatDni, formatName, toPascalCase, getAge } from '@utils/patient-form
             align-items: center;
             gap: var(--space-3);
             min-width: 0;
-        }
-
-        .item-avatar {
-            width: 36px;
-            height: 36px;
-            flex-shrink: 0;
-        }
-
-        .item-avatar.initials {
-            background: var(--secondary-50);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: var(--radius-md);
-        }
-
-        .item-avatar.initials .mat-icon {
-            font-size: 20px;
-            width: 20px;
-            height: 20px;
-        }
-
-        .item-avatar.initials.female {
-            background: var(--highlight-light);
-        }
-
-        .item-avatar.initials.other {
-            background: #d4f0f7;
         }
 
         .item-info {
@@ -116,19 +90,8 @@ import { formatDni, formatName, toPascalCase, getAge } from '@utils/patient-form
 export class PatientItemComponent {
     @Input({ required: true }) patient!: Patient | FrequentPatient;
 
-    get isFemale(): boolean {
-        return /^f/i.test(this.patient.sex || '');
-    }
-
-    get isOther(): boolean {
-        const s = this.patient.sex || '';
-        return s !== '' && !/^[fm]/i.test(s);
-    }
-
-    get avatarIcon(): string {
-        if (this.isFemale) { return 'female'; }
-        if (this.isOther) { return 'transgender'; }
-        return 'male';
+    get patientGenero(): string {
+        return 'genero' in this.patient ? (this.patient.genero || '') : '';
     }
 
     get validationStatus(): string {

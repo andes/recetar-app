@@ -26,7 +26,7 @@ export class Pharmacists {
 export class PharmacistsAdapter implements Adapter<Pharmacists> {
     adapt(item: unknown): Pharmacists {
         const data = asRecord(item);
-        const professions = data['profesiones'] as Array<{ matriculacion?: Array<{ matriculaNumero?: string }> }>;
+        const professions = (data['formacionGrado'] || data['profesiones']) as Array<{ matriculacion?: Array<{ matriculaNumero?: string }> }>;
         const enrollment = professions?.[0]?.matriculacion?.[0]?.matriculaNumero || '';
 
     // Cambiar campos

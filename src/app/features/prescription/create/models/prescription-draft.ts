@@ -40,6 +40,7 @@ export interface FrequentPatient {
     sex: string;
     fechaNac: string;
     nombreAutopercibido: string;
+    genero?: string;
     status: string;
 }
 

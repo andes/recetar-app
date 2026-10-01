@@ -26,6 +26,7 @@ export class CanvasComponent {
     @Input() sidebarItems: SidebarItem[] = [];
     @Input() adjustContent = false;
     @Input() noCard = false;
+    @Input() flush = false;
     @Input() pageTitle = '';
     @Input() pageSubtitle = '';
 
@@ -33,6 +34,10 @@ export class CanvasComponent {
     sidebarOpen = false;
 
     constructor(private breakpointService: BreakpointService) { }
+
+    @HostBinding('class.has-header') get hasHeader() {
+        return this.showHeader;
+    }
 
     @HostBinding('class.has-sidebar') get hasSidebar() {
         return this.showSidebar;

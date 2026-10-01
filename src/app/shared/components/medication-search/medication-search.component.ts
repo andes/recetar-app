@@ -88,6 +88,16 @@ export class MedicationSearchComponent implements OnInit, OnDestroy, OnChanges {
     detailForm: FormGroup;
     medDuplicate = false;
     medTriplicate = false;
+    readonly treatmentPresets = [3, 6, 12];
+    readonly treatmentMin = 2;
+    readonly treatmentMax = 12;
+    readonly treatmentOptions: Array<{ value: string; label: string }> = [
+        { value: 'none', label: 'Sin tratamiento' },
+        { value: '3', label: '3 meses' },
+        { value: '6', label: '6 meses' },
+        { value: '12', label: '12 meses' },
+        { value: 'custom', label: 'Personalizado' },
+    ];
 
     obraSocialInfo: { nombre: string; codigoPuco: number; numeroAfiliado: string } | null = null;
 
@@ -130,9 +140,15 @@ export class MedicationSearchComponent implements OnInit, OnDestroy, OnChanges {
             indication: [''],
             serie: [{ value: '', disabled: true }],
             numero: [{ value: '', disabled: true }],
+            tratamiento: ['none'],
+            treatmentMonths: [{ value: 3, disabled: true }],
         });
         this.manualMagistralCtrl = new FormControl('', [Validators.required, noWhitespaceValidator()]);
         this.frequentMedications = this.loadFrequentMedications();
+
+        this.detailForm.get('tratamiento')!.valueChanges.pipe(
+            takeUntil(this.destroy$)
+        ).subscribe((value: string) => this.updateTreatmentMonthsControl(value));
 
         if (this.editMedication) {
             this.enterEditMode(this.editMedication);
@@ -210,7 +226,8 @@ export class MedicationSearchComponent implements OnInit, OnDestroy, OnChanges {
         this.medSearchForm.get('medication')!.setValue('', { emitEvent: false });
         this.manualMagistralCtrl.reset('');
         this.setTriplicateFieldsEnabled(false);
-        this.detailForm.reset({ quantity: 1, diagnostic: '', indication: '', serie: '', numero: '' });
+        this.applyTreatment(undefined);
+        this.detailForm.reset({ quantity: 1, diagnostic: '', indication: '', serie: '', numero: '', tratamiento: 'none', treatmentMonths: 3 });
     }
 
     startManualMagistral(): void {
@@ -234,7 +251,8 @@ export class MedicationSearchComponent implements OnInit, OnDestroy, OnChanges {
         this.medTriplicate = false;
         this.obraSocialInfo = null;
         this.setTriplicateFieldsEnabled(false);
-        this.detailForm.reset({ quantity: 1, diagnostic: '', indication: '', serie: '', numero: '' });
+        this.applyTreatment(undefined);
+        this.detailForm.reset({ quantity: 1, diagnostic: '', indication: '', serie: '', numero: '', tratamiento: 'none', treatmentMonths: 3 });
     }
 
     private doSearch(term: string): void {
@@ -279,6 +297,7 @@ export class MedicationSearchComponent implements OnInit, OnDestroy, OnChanges {
             this.showMedDetail = true;
             this.medDuplicate = medication.duplicate;
             this.medTriplicate = medication.triplicate;
+            this.applyTreatment(medication.tratamientoProlongado);
             if (medication.triplicate) { this.setTriplicateFieldsEnabled(true); }
             this.obraSocialInfo = null;
             this.detailForm.patchValue({
@@ -304,6 +323,7 @@ export class MedicationSearchComponent implements OnInit, OnDestroy, OnChanges {
         this.showMedDetail = true;
         this.medDuplicate = medication.duplicate;
         this.medTriplicate = medication.triplicate;
+        this.applyTreatment(medication.tratamientoProlongado);
         if (medication.triplicate) {
             this.setTriplicateFieldsEnabled(true);
         }
@@ -330,6 +350,7 @@ export class MedicationSearchComponent implements OnInit, OnDestroy, OnChanges {
         this.showMedDetail = true;
         this.medDuplicate = false;
         this.medTriplicate = false;
+        this.applyTreatment(undefined);
         this.obraSocialInfo = null;
         this.setTriplicateFieldsEnabled(false);
         this.detailForm.reset({
@@ -338,6 +359,8 @@ export class MedicationSearchComponent implements OnInit, OnDestroy, OnChanges {
             indication: '',
             serie: '',
             numero: '',
+            tratamiento: 'none',
+            treatmentMonths: 3,
         });
     }
 
@@ -349,6 +372,7 @@ export class MedicationSearchComponent implements OnInit, OnDestroy, OnChanges {
         this.showMedDetail = true;
         this.medDuplicate = false;
         this.medTriplicate = false;
+        this.applyTreatment(undefined);
         this.obraSocialInfo = null;
         this.setTriplicateFieldsEnabled(false);
         this.detailForm.reset({
@@ -357,6 +381,8 @@ export class MedicationSearchComponent implements OnInit, OnDestroy, OnChanges {
             indication: '',
             serie: '',
             numero: '',
+            tratamiento: 'none',
+            treatmentMonths: 3,
         });
     }
 
@@ -398,6 +424,52 @@ export class MedicationSearchComponent implements OnInit, OnDestroy, OnChanges {
         }
         serie.updateValueAndValidity();
         numero.updateValueAndValidity();
+    }
+
+    private updateTreatmentMonthsControl(value: string): void {
+        const months = this.detailForm.get('treatmentMonths')!;
+        if (value === 'custom') {
+            months.enable();
+            months.setValidators([
+                Validators.required,
+                Validators.min(this.treatmentMin),
+                Validators.max(this.treatmentMax),
+            ]);
+        } else {
+            months.disable();
+            months.clearValidators();
+        }
+        months.updateValueAndValidity();
+    }
+
+    private applyTreatment(meses?: number): void {
+        const tratamiento = this.detailForm.get('tratamiento');
+        const months = this.detailForm.get('treatmentMonths');
+        if (meses == null) {
+            tratamiento?.setValue('none', { emitEvent: false });
+            this.updateTreatmentMonthsControl('none');
+            months?.setValue(3, { emitEvent: false });
+            return;
+        }
+        if (this.treatmentPresets.includes(meses)) {
+            tratamiento?.setValue(String(meses), { emitEvent: false });
+            this.updateTreatmentMonthsControl(String(meses));
+            months?.setValue(meses, { emitEvent: false });
+        } else {
+            tratamiento?.setValue('custom', { emitEvent: false });
+            this.updateTreatmentMonthsControl('custom');
+            months?.setValue(meses, { emitEvent: false });
+        }
+    }
+
+    private resolveTreatmentMonths(): number | undefined {
+        const value = this.detailForm.get('tratamiento')?.value;
+        if (!value || value === 'none') { return undefined; }
+        if (value === 'custom') {
+            const months = Number(this.detailForm.get('treatmentMonths')?.value);
+            return Number.isFinite(months) ? months : undefined;
+        }
+        return Number(value);
     }
 
     selectFrequentMedication(med: FrequentMedication): void {
@@ -446,6 +518,7 @@ export class MedicationSearchComponent implements OnInit, OnDestroy, OnChanges {
             indication: fv.indication || '',
             duplicate: this.medDuplicate,
             triplicate: this.medTriplicate,
+            tratamientoProlongado: this.resolveTreatmentMonths(),
             serie: fv.serie || '',
             numero: fv.numero || '',
             obraSocial: !this.obraSocialInfo?.nombre
@@ -482,6 +555,7 @@ export class MedicationSearchComponent implements OnInit, OnDestroy, OnChanges {
             indication: fv.indication || '',
             duplicate: this.medDuplicate,
             triplicate: this.medTriplicate,
+            tratamientoProlongado: this.resolveTreatmentMonths(),
             serie: fv.serie || '',
             numero: fv.numero || '',
         };

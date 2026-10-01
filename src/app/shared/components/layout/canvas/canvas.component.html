@@ -7,13 +7,13 @@
     (toggled)="sidebarCollapsed = !sidebarCollapsed">
 </app-sidebar>
 
-<div class="canvas-body" [class.has-sidebar]="showSidebar" [class.sidebar-collapsed]="sidebarCollapsed">
+<div class="canvas-body" [class.has-sidebar]="showSidebar" [class.sidebar-collapsed]="sidebarCollapsed" [class.flush]="flush">
     <main class="canvas-content" [class.adjust-content]="adjustContent">
-        <div class="canvas-content-inner" [class.no-card]="noCard">
+        <div class="canvas-content-inner" [class.no-card]="noCard" [class.flush]="flush">
             <div class="page-header" *ngIf="pageTitle">
                 <div class="page-header-content">
                     <h1>{{ pageTitle }}</h1>
-                    <p *ngIf="pageSubtitle">{{ pageSubtitle }}</p>
+                    <p *ngIf="pageSubtitle" class="text-sm">{{ pageSubtitle }}</p>
                 </div>
                 <div class="page-header-actions">
                     <ng-content select="[pageActions]"></ng-content>

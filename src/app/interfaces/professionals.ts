@@ -25,7 +25,7 @@ export class Professionals {
 export class ProfessionalsAdapter implements Adapter<Professionals> {
     adapt(item: unknown): Professionals {
         const data = asRecord(item);
-        const professions = data['profesiones'] as Array<{ matriculacion?: Array<{ matriculaNumero?: string }> }>;
+        const professions = (data['formacionGrado'] || data['profesiones']) as Array<{ matriculacion?: Array<{ matriculaNumero?: string }> }>;
         const enrollment = professions?.[0]?.matriculacion?.[0]?.matriculaNumero || '';
 
         return new Professionals(
@@ -39,4 +39,26 @@ export class ProfessionalsAdapter implements Adapter<Professionals> {
             new Date(data['created'] as string | number | Date)
         );
     }
+}
+
+export interface ProfessionalProfileProfesionGrado {
+    profesion: string;
+    codigoProfesion: string;
+    numeroMatricula: string;
+    vencimiento?: string;
+    estado?: 'vigente' | 'vencida' | 'suspendida' | 'sin-matricula' | 'baja';
+}
+
+// Perfil del profesional cacheado desde ANDES (GET /professionals/me).
+export interface ProfessionalProfile {
+    _id?: string;
+    userId?: string;
+    tipoDocumento: string;
+    documento: string;
+    nombre: string;
+    apellido: string;
+    sexo?: string;
+    cuit?: string;
+    profesionGrado: ProfessionalProfileProfesionGrado[];
+    actualizadoEn?: string | Date;
 }

@@ -7,7 +7,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -17,7 +16,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { SharedModule } from '@shared/shared.module';
 import { FormFieldComponent } from '@shared/components/form-field/form-field.component';
 import { CanvasComponent } from '@shared/components/layout/canvas/canvas.component';
-import { UiCardComponent, UiIconComponent, UiAlertComponent } from '@shared/ui';
+import { UiCardComponent, UiIconComponent, UiAlertComponent, UiBadgeChipComponent } from '@shared/ui';
 import { AccountPanelComponent } from './components/account-panel/account-panel.component';
 import { PasswordPanelComponent } from './components/password-panel/password-panel.component';
 import { PinPanelComponent } from './components/pin-panel/pin-panel.component';
@@ -36,7 +35,6 @@ import { OrganizationsPanelComponent } from './components/organizations-panel/or
         MatIconModule,
         MatButtonModule,
         MatProgressSpinnerModule,
-        MatSnackBarModule,
         MatChipsModule,
         MatTooltipModule,
         MatDialogModule,
@@ -49,6 +47,7 @@ import { OrganizationsPanelComponent } from './components/organizations-panel/or
         UiCardComponent,
         UiIconComponent,
         UiAlertComponent,
+        UiBadgeChipComponent,
         AccountPanelComponent,
         PasswordPanelComponent,
         PinPanelComponent,

@@ -104,6 +104,11 @@
                                         <mat-icon>print</mat-icon>
                                         <span>Imprimir receta</span>
                                     </button>
+                                    <button mat-menu-item type="button" *ngIf="canSuspendLocal(element)"
+                                        (click)="suspendLocalDialog(element)">
+                                        <mat-icon>block</mat-icon>
+                                        <span>Suspender receta</span>
+                                    </button>
                                     <button mat-menu-item type="button" *ngIf="canDelete(element)"
                                         (click)="deleteDialogPrescription(element)">
                                         <mat-icon>delete</mat-icon>
@@ -117,6 +122,11 @@
                                         (click)="printPrescription(element)" matTooltip="Imprimir"
                                         matTooltipPosition="above">
                                         <mat-icon>print</mat-icon>
+                                    </button>
+                                    <button mat-menu-item type="button" *ngIf="canSuspendLocal(element)"
+                                        (click)="suspendLocalDialog(element)" matTooltip="Suspender"
+                                        matTooltipPosition="above">
+                                        <mat-icon>block</mat-icon>
                                     </button>
                                     <button mat-menu-item type="button" *ngIf="canDelete(element)"
                                         (click)="deleteDialogPrescription(element)"

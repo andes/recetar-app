@@ -1,8 +1,9 @@
 import { Component, Input } from '@angular/core';
 import { MixedPrescription } from '../../services/dispense.service';
+import { isAndesPrescription } from '../../services/prescription-source.util';
 import { Prescriptions } from '@interfaces/prescriptions';
 import AndesPrescriptions from '@interfaces/andesPrescriptions';
-import { getStatusLabel, getStatusVariant } from '@shared/utils/status.utils';
+import { needsPublicationWarning, PUBLICATION_WARNING } from '@shared/utils/publication.util';
 
 @Component({
     selector: 'app-dispense-preview-panel',
@@ -15,7 +16,7 @@ export class DispensePreviewPanelComponent {
     @Input() prescription: MixedPrescription | null = null;
 
     isAndes(item: MixedPrescription | null): item is AndesPrescriptions {
-        return !!item && 'estadoActual' in item;
+        return !!item && isAndesPrescription(item);
     }
 
     get local(): Prescriptions | null {
@@ -33,10 +34,6 @@ export class DispensePreviewPanelComponent {
         if (this.andes) { return this.andes.idAndes || this.andes._id || ''; }
         return (this.local as Prescriptions).prescriptionId || this.prescription._id || '';
     }
-
-    getStatusVariant = getStatusVariant;
-
-    getStatusLabel = getStatusLabel;
 
     getPatientName(): string {
         const andes = this.andes;
@@ -126,6 +123,12 @@ export class DispensePreviewPanelComponent {
         if (supplies.some((s) => s.triplicate)) { return 'triplicado'; }
         if (supplies.some((s) => s.duplicate)) { return 'duplicado'; }
         return null;
+    }
+
+    getPublicationWarning(): string {
+        return this.local && needsPublicationWarning(this.local.estadoPublicacion)
+            ? PUBLICATION_WARNING
+            : '';
     }
 
     getUnits(): string {

@@ -24,7 +24,7 @@
 
     &:focus-within
         border-color: var(--secondary)
-        box-shadow: 0 0 0 3px rgba(79, 70, 229, .1)
+        box-shadow: var(--focus-ring)
 
     &.disabled
         background: var(--primary-50)
@@ -108,6 +108,50 @@
     border-top: 5px solid var(--text-secondary)
     pointer-events: none
 
+.input-wrap.has-suffix
+    input,
+    select,
+    textarea
+        padding-right: var(--space-10)
+
+    select
+        padding-right: 64px
+
+.select-wrap.has-suffix::after
+    right: 44px
+
+.field-suffix
+    position: absolute
+    right: var(--space-3)
+    top: 0
+    bottom: 0
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+    pointer-events: none
+    
+    &:empty
+        display: none
+
+.input-wrap.has-prefix
+    input,
+    select,
+    textarea
+        padding-left: var(--space-10)
+
+.field-prefix
+    position: absolute
+    left: var(--space-3)
+    display: flex
+    align-items: center
+    justify-content: center
+    color: var(--text-secondary)
+    font-size: 20px
+    width: 20px
+    height: 20px
+    line-height: 20px
+    pointer-events: none
+
 .field-error
     display: block
     font-size: 0.8125rem
@@ -116,3 +160,4 @@
 
     @media (min-width: $small-devices + 1px)
         font-size: 0.75rem
+

@@ -12,7 +12,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatTabsModule } from '@angular/material/tabs';
 import { UiSelectComponent } from '@shared/ui/select.component';
 import { EditPatientComponent } from '@shared/components/edit-patient/edit-patient.component';
 import { FormFieldComponent } from '@shared/components/form-field/form-field.component';
@@ -20,11 +19,15 @@ import { PatientItemComponent } from './components/patient-item/patient-item.com
 import { MedicationItemComponent } from '@shared/ui/medication-item.component';
 import { MedicationSearchComponent } from '@shared/components/medication-search/medication-search.component';
 import { UiAlertComponent } from '@shared/ui/alert.component';
+import { UiBadgeChipComponent } from '@shared/ui/badge-chip.component';
+import { UiPatientAvatarComponent } from '@shared/ui/patient-avatar.component';
+import { UiMedAvatarComponent } from '@shared/ui/med-avatar.component';
 import { DocumentTabsComponent } from './pages/new-prescription/document-tabs/document-tabs.component';
 import { CertificateFormComponent } from './pages/new-prescription/certificate-form/certificate-form.component';
 import { PracticeFormComponent } from './pages/new-prescription/practice-form/practice-form.component';
 import { OsSearchComponent } from '@shared/components/os-search/os-search.component';
 import { UiDateFieldComponent } from '@shared/ui/date-field.component';
+import { UiTabsComponent } from '@shared/ui/tabs.component';
 
 @NgModule({
     declarations: [
@@ -48,7 +51,6 @@ import { UiDateFieldComponent } from '@shared/ui/date-field.component';
         MatChipsModule,
         MatBadgeModule,
         MatPaginatorModule,
-        MatTabsModule,
         UiSelectComponent,
         EditPatientComponent,
         FormFieldComponent,
@@ -56,8 +58,12 @@ import { UiDateFieldComponent } from '@shared/ui/date-field.component';
         MedicationItemComponent,
         MedicationSearchComponent,
         UiAlertComponent,
+        UiBadgeChipComponent,
+        UiPatientAvatarComponent,
+        UiMedAvatarComponent,
         OsSearchComponent,
         UiDateFieldComponent,
+        UiTabsComponent,
     ]
 })
 export class PrescriptionCreateModule { }

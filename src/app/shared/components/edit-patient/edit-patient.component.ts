@@ -7,15 +7,17 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatChipsModule } from '@angular/material/chips';
 import { Subject } from 'rxjs';
 import { takeUntil, skip } from 'rxjs/operators';
 import { PatientsService } from '@services/patients.service';
 import { Patient } from '@interfaces/patients';
 import { NotificationService } from '@shared/services/notification.service';
 import { FormFieldComponent } from '@shared/components/form-field/form-field.component';
+import { UiToggleComponent, ToggleOption } from '@shared/ui/toggle.component';
+import { UiBadgeChipComponent } from '@shared/ui/badge-chip.component';
 import { PatientPayload, toPatientPayload } from '@models/dto/patients.dto';
 import { ConfirmDialogComponent } from '@documents/components/confirm-dialog/confirm-dialog.component';
+import { cuilValidator } from '@utils/custome-validators/cuil.validator';
 
 function validDateValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
@@ -57,8 +59,9 @@ function validDateValidator(): ValidatorFn {
         MatDialogModule,
         MatProgressSpinnerModule,
         MatTooltipModule,
-        MatChipsModule,
-        FormFieldComponent
+        FormFieldComponent,
+        UiToggleComponent,
+        UiBadgeChipComponent
     ]
 })
 export class EditPatientComponent implements OnInit, OnDestroy {
@@ -75,6 +78,16 @@ export class EditPatientComponent implements OnInit, OnDestroy {
     submitted = false;
     validationStatus: 'validado' | 'temporal' | '' = '';
     isValidating = false;
+    dniMode: 'con-dni' | 'sin-dni' = 'con-dni';
+    readonly dniModeOptions: ToggleOption[] = [
+        { value: 'con-dni', label: 'Con DNI', icon: 'badge' },
+        { value: 'sin-dni', label: 'Sin DNI', icon: 'person_off' },
+    ];
+    nameMode: 'real' | 'autopercibido' = 'real';
+    readonly nameModeOptions: ToggleOption[] = [
+        { value: 'real', label: 'Nombre real', icon: 'person' },
+        { value: 'autopercibido', label: 'Autopercibido', icon: 'record_voice_over' },
+    ];
     private destroy$ = new Subject<void>();
 
     constructor(
@@ -84,13 +97,15 @@ export class EditPatientComponent implements OnInit, OnDestroy {
         private dialog: MatDialog
     ) {
         this.editForm = this.fb.group({
-            dni: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(8), Validators.pattern('^[0-9]*$')]],
+            dni: ['', [Validators.minLength(6), Validators.maxLength(8), Validators.pattern('^[0-9]*$')]],
             lastName: ['', Validators.required],
             firstName: ['', Validators.required],
             nombreAutopercibido: [''],
             sex: ['', Validators.required],
-            fechaNac: ['', [Validators.required, validDateValidator()]]
+            fechaNac: ['', [validDateValidator()]],
+            cuil: ['', [cuilValidator]]
         });
+        this.applyDniMode('con-dni');
     }
 
     ngOnInit(): void {
@@ -101,10 +116,12 @@ export class EditPatientComponent implements OnInit, OnDestroy {
                 firstName: this.patient.firstName || '',
                 nombreAutopercibido: this.patient.nombreAutopercibido || '',
                 sex: this.patient.sex || '',
-                fechaNac: this.patient.fechaNac ? this.toDateInputValue(this.patient.fechaNac) : ''
+                fechaNac: this.patient.fechaNac ? this.toDateInputValue(this.patient.fechaNac) : '',
+                cuil: this.patient.cuil || ''
             });
             const estado = this.patient.status || this.patient.estado || '';
             this.validationStatus = estado.toLowerCase() === 'validado' ? 'validado' : estado.toLowerCase() === 'temporal' ? 'temporal' : '';
+            this.applyDniMode(this.patient.dni ? 'con-dni' : 'sin-dni');
         } else if (this.mode === 'create' && this.prefillDni) {
             this.editForm.patchValue({ dni: this.prefillDni });
         }
@@ -115,6 +132,58 @@ export class EditPatientComponent implements OnInit, OnDestroy {
         ).subscribe(() => {
             this.validationStatus = '';
         });
+
+        this.editForm.get('cuil')?.valueChanges.pipe(
+            takeUntil(this.destroy$)
+        ).subscribe((value) => {
+            const digits = (value || '').replace(/\D/g, '').slice(0, 11);
+            if (digits !== value) {
+                this.editForm.get('cuil')?.setValue(digits, { emitEvent: false });
+            }
+        });
+    }
+
+    get hasRealName(): boolean {
+        return !!((this.editForm.get('firstName')?.value || '') as string).trim();
+    }
+
+    onNameModeChange(mode: string): void {
+        if (mode === 'autopercibido' && !this.hasRealName) {
+            return;
+        }
+        this.nameMode = mode === 'autopercibido' ? 'autopercibido' : 'real';
+    }
+
+    onDniModeChange(mode: string): void {
+        if (this.validationStatus === 'validado') { return; }
+        this.applyDniMode(mode === 'sin-dni' ? 'sin-dni' : 'con-dni');
+    }
+
+    private applyDniMode(mode: 'con-dni' | 'sin-dni'): void {
+        this.dniMode = mode;
+        const dniControl = this.editForm.get('dni');
+        if (!dniControl) { return; }
+        if (mode === 'sin-dni') {
+            dniControl.setValue('', { emitEvent: false });
+            dniControl.clearValidators();
+            dniControl.disable({ emitEvent: false });
+            if (this.validationStatus !== 'validado') {
+                this.validationStatus = 'temporal';
+            }
+        } else {
+            dniControl.enable({ emitEvent: false });
+            dniControl.setValidators([Validators.required, Validators.minLength(6), Validators.maxLength(8), Validators.pattern('^[0-9]*$')]);
+            if (this.validationStatus === 'validado') {
+                dniControl.disable({ emitEvent: false });
+            } else {
+                this.validationStatus = '';
+            }
+        }
+        dniControl.updateValueAndValidity({ emitEvent: false });
+    }
+
+    get sinDni(): boolean {
+        return this.dniMode === 'sin-dni';
     }
 
     ngOnDestroy(): void {
@@ -146,46 +215,46 @@ export class EditPatientComponent implements OnInit, OnDestroy {
 
         if (this.mode === 'create') {
             const dni = formValue.dni || '';
-            if (dni) {
-                this.patientsService.getPatientByDni(dni).subscribe({
-                    next: (existing) => {
-                        if (existing.length > 0 && existing[0]._id) {
-                            this.dialog.open(ConfirmDialogComponent, {
-                                panelClass: ['confirm-dialog-panel', 'dialog-md'],
-                                data: {
-                                    title: 'Paciente existente',
-                                    message: `Ya existe un paciente registrado con el DNI ${dni}. ¿Desea reemplazar los datos actuales con los nuevos?`
-                                }
-                            }).afterClosed().subscribe((result) => {
-                                if (result) {
-                                    this.patientsService.updatePatient(existing[0]._id, payload).subscribe({
-                                        next: (updatedPatient) => {
-                                            this.isSubmit = false;
-                                            const estado = updatedPatient.status || updatedPatient.estado || '';
-                                            this.validationStatus = estado.toLowerCase() === 'validado' ? 'validado' : estado.toLowerCase() === 'temporal' ? 'temporal' : '';
-                                            this.notification.success('Paciente actualizado correctamente');
-                                            this.saved.emit(updatedPatient);
-                                        },
-                                        error: (err) => {
-                                            this.isSubmit = false;
-                                            this.notification.error('No fue posible actualizar el paciente');
-                                        }
-                                    });
-                                } else {
-                                    this.isSubmit = false;
-                                }
-                            });
-                        } else {
-                            this.createPatient(payload);
-                        }
-                    },
-                    error: () => {
+            if (!dni) {
+                this.createPatient(payload);
+                return;
+            }
+            this.patientsService.getPatientByDni(dni).subscribe({
+                next: (existing) => {
+                    if (existing.length > 0 && existing[0]._id) {
+                        this.dialog.open(ConfirmDialogComponent, {
+                            panelClass: ['confirm-dialog-panel', 'dialog-md'],
+                            data: {
+                                title: 'Paciente existente',
+                                message: `Ya existe un paciente registrado con el DNI ${dni}. ¿Desea reemplazar los datos actuales con los nuevos?`
+                            }
+                        }).afterClosed().subscribe((result) => {
+                            if (result) {
+                                this.patientsService.updatePatient(existing[0]._id, payload).subscribe({
+                                    next: (updatedPatient) => {
+                                        this.isSubmit = false;
+                                        const estado = updatedPatient.status || updatedPatient.estado || '';
+                                        this.validationStatus = estado.toLowerCase() === 'validado' ? 'validado' : estado.toLowerCase() === 'temporal' ? 'temporal' : '';
+                                        this.notification.success('Paciente actualizado correctamente');
+                                        this.saved.emit(updatedPatient);
+                                    },
+                                    error: (err) => {
+                                        this.isSubmit = false;
+                                        this.notification.error('No fue posible actualizar el paciente');
+                                    }
+                                });
+                            } else {
+                                this.isSubmit = false;
+                            }
+                        });
+                    } else {
                         this.createPatient(payload);
                     }
-                });
-            } else {
-                this.isSubmit = false;
-            }
+                },
+                error: () => {
+                    this.createPatient(payload);
+                }
+            });
             return;
         }
 
@@ -244,7 +313,7 @@ export class EditPatientComponent implements OnInit, OnDestroy {
     onValidate(): void {
         const dni = this.editForm.get('dni')?.value;
         const sexo = this.editForm.get('sex')?.value;
-        if (!dni || !sexo) {
+        if (this.sinDni || !dni || !sexo) {
             this.notification.warning('Debe ingresar DNI y Sexo para validar');
             return;
         }
@@ -259,6 +328,7 @@ export class EditPatientComponent implements OnInit, OnDestroy {
                     firstName: validatedPatient.firstName || '',
                     sex: validatedPatient.sex || sexo,
                     fechaNac: validatedPatient.fechaNac ? this.toDateInputValue(validatedPatient.fechaNac) : '',
+                    cuil: validatedPatient.cuil || this.editForm.get('cuil')?.value || ''
                 });
                 this.notification.success('Paciente validado correctamente');
             },
