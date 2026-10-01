@@ -36,9 +36,12 @@ export class DocumentHistoryService {
         private practiceAdapter: PracticeAdapter,
     ) {}
 
-    getRecentDocuments(professionalId: string, patientDni: string, limit = 10): Observable<RecentDocumentsResponse> {
+    getRecentDocuments(professionalId: string, patientDni: string, limit = 10, patientIdMPI?: string): Observable<RecentDocumentsResponse> {
+        const params = patientIdMPI
+            ? `limit=${limit}&patientIdMPI=${encodeURIComponent(patientIdMPI)}`
+            : `limit=${limit}`;
         return this.http.get<{ prescriptions: unknown[]; certificates: unknown[]; practices: unknown[] }>(
-            `${environment.API_END_POINT}/professionals/${professionalId}/patients/${patientDni}/recent-documents?limit=${limit}`
+            `${environment.API_END_POINT}/professionals/${professionalId}/patients/${patientDni || 'sin-dni'}/recent-documents?${params}`
         ).pipe(
             map((response) => ({
                 prescriptions: safeMap(response?.prescriptions || [], this.prescriptionsAdapter),

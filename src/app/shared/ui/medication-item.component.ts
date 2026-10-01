@@ -1,21 +1,19 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
 import { PrescriptionItemResult, FrequentMedication } from '@shared/models/medication.types';
 import { VademecumEntry } from '@interfaces/vademecum';
 import { CapitalizePipe } from '../pipes/capitalize.pipe';
+import { UiMedAvatarComponent } from './med-avatar.component';
 
 @Component({
     standalone: true,
     selector: 'app-medication-item',
-    imports: [CommonModule, MatIconModule, CapitalizePipe],
+    imports: [CommonModule, CapitalizePipe, UiMedAvatarComponent],
     host: {
         '[class.variant-search]': 'variant === \'search\'',
     },
     template: `
-        <div class="med-avatar" [class.generic]="medKind === 'generic'">
-            <mat-icon>science</mat-icon>
-        </div>
+        <ui-med-avatar />
         <div class="med-info">
             <div class="med-name">{{ medName | titlecase }}</div>
             <div class="med-detail">
@@ -33,29 +31,6 @@ import { CapitalizePipe } from '../pipes/capitalize.pipe';
             align-items: center;
             gap: var(--space-3);
             min-width: 0;
-        }
-
-        .med-avatar {
-            width: 36px;
-            height: 36px;
-            flex-shrink: 0;
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--med-commercial-bg);
-            color: var(--med-commercial-icon);
-        }
-
-        .med-avatar.generic {
-            background: var(--med-generic-bg);
-            color: var(--med-generic-icon);
-        }
-
-        .med-avatar .mat-icon {
-            font-size: 18px;
-            width: 18px;
-            height: 18px;
         }
 
         .med-info {
@@ -84,11 +59,6 @@ import { CapitalizePipe } from '../pipes/capitalize.pipe';
 export class MedicationItemComponent {
     @Input({ required: true }) medication!: VademecumEntry | PrescriptionItemResult | FrequentMedication;
     @Input() variant: 'search' | 'frequent' = 'frequent';
-
-    get medKind(): string {
-        if ('nombre' in this.medication) { return 'commercial'; }
-        return this.medication.kind;
-    }
 
     get medName(): string {
         if ('entry' in this.medication) { return this.medication.entry.nombre; }

@@ -1,10 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import { SidebarItem } from '@shared/components/layout/sidebar/sidebar.component';
 import { SidebarService } from '@shared/services/sidebar.service';
+import { NotificationService } from '@shared/services/notification.service';
 import { getHttpErrorMessage } from '@shared/utils/http-error.util';
 import { ProfileService } from '../../services/profile.service';
 import { AuthService } from '@auth/services/auth.service';
@@ -39,7 +39,7 @@ export class ProfileHomeComponent implements OnInit, OnDestroy {
 
     constructor(
         private route: ActivatedRoute,
-        private snackBar: MatSnackBar,
+        private notification: NotificationService,
         private profileService: ProfileService,
         private sidebarService: SidebarService,
         private authService: AuthService,
@@ -110,10 +110,7 @@ onAccountSaved(): void {
                 },
                 error: (error) => {
                     const msg = getHttpErrorMessage(error, 'Error al cargar los datos del usuario');
-                    this.snackBar.open(msg, 'Cerrar', {
-                        duration: 5000,
-                        panelClass: ['error-snackbar']
-                    });
+                    this.notification.error(msg);
                 }
             });
     }
@@ -183,31 +180,31 @@ formatVencimiento(value: string | Date): string {
         return months > 0 && months < 12;
     }
 
-    estadoMatricula(estado?: 'vigente' | 'vencida' | 'suspendida' | 'inhabilitada' | 'baja'): { label: string; badgeClass: string } {
+    estadoMatricula(estado?: 'vigente' | 'vencida' | 'suspendida' | 'inhabilitada' | 'baja'): { label: string; variant: 'success' | 'warning' | 'error' } {
         switch (estado) {
             case 'vencida':
-                return { label: 'Vencida', badgeClass: 'badge-error' };
+                return { label: 'Vencida', variant: 'error' };
             case 'suspendida':
-                return { label: 'Suspendida', badgeClass: 'badge-warning' };
+                return { label: 'Suspendida', variant: 'warning' };
             case 'inhabilitada':
-                return { label: 'Inhabilitada', badgeClass: 'badge-warning' };
+                return { label: 'Inhabilitada', variant: 'warning' };
             case 'baja':
-                return { label: 'Dada de baja', badgeClass: 'badge-error' };
+                return { label: 'Dada de baja', variant: 'error' };
             case 'vigente':
             default:
-                return { label: 'Vigente', badgeClass: 'badge-success' };
+                return { label: 'Vigente', variant: 'success' };
         }
     }
 
-    estadoHabilitacion(expiration?: string | Date): { label: string; badgeClass: string } {
+    estadoHabilitacion(expiration?: string | Date): { label: string; variant: 'success' | 'error' } {
         if (!expiration) {
-            return { label: 'Vigente', badgeClass: 'badge-success' };
+            return { label: 'Vigente', variant: 'success' };
         }
         const end = expiration instanceof Date ? expiration : new Date(expiration);
         if (isNaN(end.getTime()) || end.getTime() >= Date.now()) {
-            return { label: 'Vigente', badgeClass: 'badge-success' };
+            return { label: 'Vigente', variant: 'success' };
         }
-        return { label: 'Vencida', badgeClass: 'badge-error' };
+        return { label: 'Vencida', variant: 'error' };
     }
 
     private monthsUntil(value: string | Date): number {

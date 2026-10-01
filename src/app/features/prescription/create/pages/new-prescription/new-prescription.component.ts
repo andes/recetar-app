@@ -14,7 +14,7 @@ import { SidebarItem } from '@shared/components/layout/sidebar/sidebar.component
 import { SidebarService } from '@shared/services/sidebar.service';
 import { NotificationService } from '@shared/services/notification.service';
 import { Subject, of } from 'rxjs';
-import { debounceTime, distinctUntilChanged, catchError, takeUntil, finalize } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, catchError, takeUntil, finalize, map } from 'rxjs/operators';
 import { PrescriptionDraftService } from '../../services/prescription-draft.service';
 import { FrequencyTrackerService } from '@shared/services/frequency-tracker.service';
 import { AuthService } from '@auth/services/auth.service';
@@ -166,16 +166,19 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
 
         if (payload.patient) {
             const p = payload.patient;
-            this.draftService.setPatient(new Patient(
+            const patient = new Patient(
                 p.lastName || '',
                 p.firstName || '',
                 p.sex || '',
                 p.status || p.estado || '',
                 p.dni || '',
                 undefined,
-                p.idMPI || '',
+                undefined,
                 p.fechaNac || null,
-            ));
+            );
+            patient.idMPI = p.idMPI || p._id || '';
+            patient.estado = p.estado || p.status || '';
+            this.draftService.setPatient(patient);
         }
 
         if (payload.supplies && Array.isArray(payload.supplies)) {
@@ -463,10 +466,12 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
             this.loadPatientObrasSociales(p.dni || '', p.sex || '');
         } else {
             const fp = patient as FrequentPatient;
-            this.patientsService.getPatientByDni(fp.dni).subscribe({
-                next: (patients) => {
-                    if (patients.length > 0) {
-                        const p = patients[0];
+            const patientRequest = fp.dni
+                ? this.patientsService.getPatientByDni(fp.dni).pipe(map((patients) => patients[0] || null))
+                : this.patientsService.getPatientById(fp.id).pipe(catchError(() => of(null)));
+            patientRequest.subscribe({
+                next: (p) => {
+                    if (p) {
                         p.nombreAutopercibido = p.nombreAutopercibido || fp.nombreAutopercibido;
                         this.draftService.setPatient(p);
                         this.recordPatientFrequency(p);
@@ -475,6 +480,7 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
                         const p = new Patient(fp.lastName, '', fp.sex, '', fp.dni);
                         p.firstName = fp.firstName;
                         p.nombreAutopercibido = fp.nombreAutopercibido;
+                        p.idMPI = fp.id;
                         if (fp.fechaNac) { p.fechaNac = new Date(fp.fechaNac); }
                         p.obraSocial = { nombre: fp.insurance };
                         this.draftService.setPatient(p);
@@ -543,7 +549,7 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
             case 'prescription': {
                 const prescription = event.document as Prescriptions;
                 this.draftService.setPatient(patient);
-                const items = prescription.supplies.map(s => this.supplyToMedicationItem(s));
+                const items = prescription.supplies.map(s => this.supplyToMedicationItem(s, prescription.tratamientoProlongado));
                 const currentCount = this.draft.medications.length;
                 const available = this.MAX_MEDICATIONS - currentCount;
                 if (available <= 0) {
@@ -584,7 +590,7 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
         }
     }
 
-    private supplyToMedicationItem(s: Prescriptions['supplies'][0]): MedicationItem {
+    private supplyToMedicationItem(s: Prescriptions['supplies'][0], tratamientoProlongado?: number): MedicationItem {
         const sup = s.supply as unknown as Record<string, unknown> | undefined;
 
         if (sup?.type === 'magistral') {
@@ -601,6 +607,7 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
                 indication: s.indication || '',
                 duplicate: s.duplicate || false,
                 triplicate: s.triplicate || false,
+                tratamientoProlongado,
                 serie: s.triplicateData?.serie || '',
                 numero: s.triplicateData?.numero?.toString() || '',
                 obraSocial: s.obraSocial as MedicationItem['obraSocial'],
@@ -633,6 +640,7 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
             indication: s.indication || '',
             duplicate: s.duplicate || false,
             triplicate: s.triplicate || false,
+            tratamientoProlongado,
             serie: s.triplicateData?.serie || '',
             numero: s.triplicateData?.numero?.toString() || '',
             obraSocial: s.obraSocial as MedicationItem['obraSocial'],
@@ -649,6 +657,7 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
             sex: p.sex || '',
             fechaNac: p.fechaNac ? p.fechaNac.toISOString() : '',
             nombreAutopercibido: p.nombreAutopercibido || '',
+            genero: p.genero || '',
             status: p.status || p.estado || '',
         });
     }
@@ -796,6 +805,7 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
             sex: r.data['sex'] as string || '',
             fechaNac: r.data['fechaNac'] as string || '',
             nombreAutopercibido: r.data['nombreAutopercibido'] as string || '',
+            genero: r.data['genero'] as string || '',
             status: r.data['status'] as string || '',
         }));
     }
@@ -812,23 +822,6 @@ export class NewPrescriptionComponent implements OnInit, OnDestroy {
 
     getItemObraSocialLabel(item: MedicationItem): string {
         return item.obraSocial?.nombre || this.draft.patient?.obraSocial?.nombre || '';
-    }
-
-    get patientAvatarIcon(): string {
-        if (!this.draft.patient) { return 'person'; }
-        const sex = this.draft.patient.sex || '';
-        if (/^f/i.test(sex)) { return 'female'; }
-        if (/^[fm]/i.test(sex)) { return 'male'; }
-        return 'transgender';
-    }
-
-    get isPatientFemale(): boolean {
-        return /^f/i.test(this.draft.patient?.sex || '');
-    }
-
-    get isPatientOther(): boolean {
-        const s = this.draft.patient?.sex || '';
-        return s !== '' && !/^[fm]/i.test(s);
     }
 
     get validationStatus(): string {

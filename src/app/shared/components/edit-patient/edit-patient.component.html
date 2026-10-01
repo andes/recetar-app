@@ -1,11 +1,11 @@
 <div class="edit-patient-header">
     <span>{{ isCreate ? 'Crear paciente' : 'Editar paciente' }}</span>
-    <mat-chip *ngIf="validationStatus" [class.success]="validationStatus === 'validado'"
-        [class.warning]="validationStatus === 'temporal'" class="sm">
-        <mat-icon>{{ validationStatus === 'validado' ? 'verified_user' : 'warning' }}</mat-icon>
+    <ui-badge-chip *ngIf="validationStatus"
+        [variant]="validationStatus === 'validado' ? 'success' : 'warning'"
+        [icon]="validationStatus === 'validado' ? 'verified_user' : 'warning'">
         {{ validationStatus === 'validado' ? 'Validado' : 'Sin validar' }}
-    </mat-chip>
-    <button *ngIf="!validationStatus || validationStatus === 'temporal'" matButton="tonal" color="info" type="button"
+    </ui-badge-chip>
+    <button *ngIf="(!validationStatus || validationStatus === 'temporal') && !sinDni" matButton="tonal" class="mat-info" type="button"
         class="validation-btn" (click)="onValidate()" [disabled]="isValidating" matTooltip="Validar con RENAPER">
         <mat-spinner *ngIf="isValidating" diameter="18" class="btn-spinner"></mat-spinner>
         <ng-container *ngIf="!isValidating">
@@ -16,6 +16,15 @@
 </div>
 
 <form [formGroup]="editForm" class="edit-patient-form">
+    <div class="dni-mode-row">
+        <ui-toggle [options]="dniModeOptions" [value]="dniMode" (valueChange)="onDniModeChange($event)">
+        </ui-toggle>
+    </div>
+
+    <p class="text-secondary" *ngIf="sinDni">
+        El paciente quedará como no validado. Podés agregar el DNI y validarlo más adelante.
+    </p>
+
     <div class="form-row">
         <app-form-field type="text" label="DNI" [control]="editForm.get('dni')" [submitted]="submitted" fullwidth
             suffixIcon="badge" placeholder="DNI" maxlength="8" inputmode="numeric"

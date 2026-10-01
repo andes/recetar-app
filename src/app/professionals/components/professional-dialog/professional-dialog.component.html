@@ -6,7 +6,7 @@
             <p>La receta se ha creado correctamente!</p>
         </div>
         <div mat-dialog-actions align="end">
-            <button matButton="raised" color="primary" style="background-color: green; color: white;"
+            <button matButton="filled" class="mat-success"
                 (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div> <!-- End case noPrescriptions -->
@@ -17,7 +17,7 @@
             <p>El certificado se ha creado correctamente!</p>
         </div>
         <div mat-dialog-actions align="end">
-            <button matButton="raised" color="primary" style="background-color: green; color: white;"
+            <button matButton="filled" class="mat-success"
                 (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div>
@@ -38,7 +38,7 @@
             <p>La receta se ha eliminado correctamente!</p>
         </div>
         <div mat-dialog-actions align="end">
-            <button matButton="raised" color="primary" style="background-color: green; color: white;"
+            <button matButton="filled" class="mat-success"
                 (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div> <!-- End case deleted -->
@@ -51,7 +51,7 @@
         </div>
         <div mat-dialog-actions fxLayoutAlign="space-around" align="end">
             <button matButton="tonal" (click)="onNoClick()" cdkFocusInitial>Cancelar</button>
-            <button matButton="tonal" color="warn" (click)="deletePrescription(data.item)">Confirmar</button>
+            <button matButton="filled" class="mat-error" (click)="deletePrescription(data.item)">Confirmar</button>
         </div>
     </div> <!-- End case noPrescriptions -->
 
@@ -62,7 +62,7 @@
         </div>
         <div mat-dialog-actions fxLayoutAlign="space-around" align="end">
             <button matButton="tonal" (click)="onNoClick()" cdkFocusInitial>Cancelar</button>
-            <button matButton="tonal" color="warn" mat-dialog-close="delete_insumo">Confirmar</button>
+            <button matButton="filled" class="mat-error" mat-dialog-close="delete_insumo">Confirmar</button>
         </div>
     </div> <!-- End case delete_insumo -->
 
@@ -74,7 +74,7 @@
 
         </div>
         <div mat-dialog-actions align="end">
-            <button matButton="raised" color="primary" style="background-color: green; color: white;"
+            <button matButton="filled" class="mat-success"
                 (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div>
@@ -84,7 +84,7 @@
             <p>La práctica se ha creado correctamente!</p>
         </div>
         <div mat-dialog-actions align="end">
-            <button mat-button style="background-color: green; color: white;" (click)="onNoClick()"
+            <button matButton="filled" class="mat-success" (click)="onNoClick()"
                 cdkFocusInitial>Aceptar</button>
         </div>
     </div> <!-- End case practiceSuccess -->
@@ -95,7 +95,7 @@
             <p>Hubo un error al crear la práctica. Por favor, inténtelo nuevamente.</p>
         </div>
         <div mat-dialog-actions align="end">
-            <button matButton="raised" color="primary" style="background-color: green; color: white;"
+            <button matButton="filled" class="mat-success"
                 (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div> <!-- End case practiceError -->
@@ -108,7 +108,7 @@
         </div>
         <div mat-dialog-actions fxLayoutAlign="space-around" align="end">
             <button matButton="tonal" (click)="onNoClick()" cdkFocusInitial>Cancelar</button>
-            <button matButton="tonal" color="warn" (click)="confirmSuspendAndes()">Suspender</button>
+            <button matButton="filled" class="mat-error" (click)="confirmSuspendAndes()">Suspender</button>
         </div>
     </div>
 
@@ -118,7 +118,7 @@
             <p>La receta se ha suspendido correctamente!</p>
         </div>
         <div mat-dialog-actions align="end">
-            <button matButton="raised" color="primary" style="background-color: green; color: white;"
+            <button matButton="filled" class="mat-success"
                 (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div>
@@ -129,7 +129,7 @@
             <p>Hubo un error al suspender la receta. Por favor, inténtelo nuevamente.</p>
         </div>
         <div mat-dialog-actions align="end">
-            <button matButton="raised" color="primary" style="background-color: green; color: white;"
+            <button matButton="filled" class="mat-success"
                 (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div>
@@ -141,7 +141,7 @@
                 receta no se mostrará en Andes</p>
         </div>
         <div mat-dialog-actions align="end">
-            <button matButton="raised" color="primary" style="background-color: green; color: white;"
+            <button matButton="filled" class="mat-success"
                 (click)="onNoClick()" cdkFocusInitial>Aceptar</button>
         </div>
     </div>

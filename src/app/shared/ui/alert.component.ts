@@ -29,7 +29,7 @@ import { MatIconModule } from '@angular/material/icon';
             padding: 12px 16px;
             border-radius: var(--radius-md);
             background: var(--bg-card);
-            font-size: 13px;
+            font-size: 12px;
             line-height: 1.4;
         }
         .alert.fullwidth {
@@ -90,23 +90,28 @@ import { MatIconModule } from '@angular/material/icon';
         /* Variants */
         .warning {
             background-color: var(--warning-bg);
+            color: var(--warning-text);
         }
         .warning .alert-icon {
-            color: var(--warning-fill);
+            color: var(--warning-text);
         }
         .warning .alert-body ::ng-deep b,
         .warning .alert-body ::ng-deep strong {
-            color: var(--warning-fill);
+            color: var(--warning-text);
         }
         .warning .alert-action {
-            color: var(--warning-fill);
-            border-color: var(--warning-fill);
+            color: var(--warning-text);
+            border-color: var(--warning-text);
         }
         .warning .alert-action:hover {
-            background: var(--warning-fill);
-            color: white;
+            background: var(--warning-text);
+            color: var(--text-primary-light);
         }
 
+        .success {
+            background-color: var(--success-bg);
+            color: var(--success-text);
+        }
         .success .alert-icon {
             color: var(--success-text);
         }
@@ -120,27 +125,32 @@ import { MatIconModule } from '@angular/material/icon';
         }
         .success .alert-action:hover {
             background: var(--success-text);
-            color: white;
+            color: var(--text-primary-light);
         }
 
+        .error {
+            background-color: var(--error-bg);
+            color: var(--error-text);
+        }
         .error .alert-icon {
-            color: var(--error-fill);
+            color: var(--error-text);
         }
         .error .alert-body ::ng-deep b,
         .error .alert-body ::ng-deep strong {
-            color: var(--error-fill);
+            color: var(--error-text);
         }
         .error .alert-action {
-            color: var(--error-fill);
-            border-color: var(--error-fill);
+            color: var(--error-text);
+            border-color: var(--error-text);
         }
         .error .alert-action:hover {
-            background: var(--error-fill);
-            color: white;
+            background: var(--error-text);
+            color: var(--text-primary-light);
         }
 
         .info {
             background-color: var(--info-bg);
+            color: var(--info-text);
         }
 
         .info .alert-icon {
@@ -156,22 +166,26 @@ import { MatIconModule } from '@angular/material/icon';
         }
         .info .alert-action:hover {
             background: var(--info-text);
-            color: white;
+            color: var(--text-primary-light);
         }
 
+        .neutral {
+            color: var(--neutral-text);
+        }
         .neutral .alert-icon {
-            color: var(--text-disabled);
+            color: var(--neutral-text);
         }
         .neutral .alert-body ::ng-deep b,
         .neutral .alert-body ::ng-deep strong {
-            color: var(--text-primary);
+            color: var(--neutral-text);
         }
         .neutral .alert-action {
-            color: var(--text-primary);
+            color: var(--neutral-text);
             border-color: var(--border-color);
         }
         .neutral .alert-action:hover {
-            background: var(--primary-100);
+            background: var(--neutral-text);
+            color: var(--text-primary-light);
         }
 
         .transparent {

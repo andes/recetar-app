@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, Subject, of, timer } from 'rxjs';
-import { Prescriptions, PrescriptionsAdapter, PrescriptionsResponse } from '../interfaces/prescriptions';
+import { DispenserInfo, Prescriptions, PrescriptionsAdapter, PrescriptionsResponse } from '../interfaces/prescriptions';
 import { tap, mapTo, map, switchMap, takeUntil } from 'rxjs/operators';
 import { AmbitoService } from '../auth/services/ambito.service';
 import AndesPrescriptions from '@interfaces/andesPrescriptions';
@@ -55,6 +55,24 @@ export class PrescriptionsService {
             map((response) => response.prescriptions.map((prescription) => this.prescriptionsAdapter.adapt(prescription))),
             tap((prescriptions: Prescriptions[]) => this.setPrescriptions(prescriptions)),
             map((prescriptions: Prescriptions[]) => prescriptions.length > 0)
+        );
+    }
+
+    getDispensedByCuil(cuil: string, params?: { offset?: number; limit?: number }): Observable<PrescriptionsResponse> {
+        const offset = params?.offset || 0;
+        const limit = params?.limit || 20;
+        return this.http.get<{ prescriptions: Prescriptions[]; total: number; dispenser?: DispenserInfo | null }>(
+            `${environment.API_END_POINT}/prescriptions/dispensed-by/${cuil}`,
+            { params: { skip: offset, limit } }
+        ).pipe(
+            map((response): PrescriptionsResponse => ({
+                prescriptions: this.adaptPrescriptionList(response.prescriptions) as Prescriptions[],
+                total: response.total || 0,
+                offset,
+                limit,
+                dispenser: response.dispenser || null
+            })),
+            tap((response: PrescriptionsResponse) => this.setPrescriptions(response.prescriptions as Prescriptions[]))
         );
     }
 

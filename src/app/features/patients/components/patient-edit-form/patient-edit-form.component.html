@@ -1,0 +1,115 @@
+<ui-card>
+    <form [formGroup]="form" (ngSubmit)="onSave()">
+        <section class="identity-top">
+            <div class="identity-fields">
+                <app-form-field type="text" label="DNI" [control]="form.get('dni')" [submitted]="submitted"
+                    fullwidth placeholder="Sin DNI" inputmode="numeric" maxlength="8"
+                    [errors]="{ minlength: 'El DNI debe tener al menos 6 dígitos', maxlength: 'El DNI no puede superar los 8 dígitos', pattern: 'El DNI debe contener solo números' }">
+                </app-form-field>
+
+                <app-form-field type="select" label="Sexo" [control]="form.get('sex')" [submitted]="submitted"
+                    fullwidth [options]="sexOptions" [errors]="{ required: 'Debe seleccionar el sexo' }">
+                </app-form-field>
+            </div>
+
+            <div class="identity-actions">
+                <button [matButton]="isValidated ? 'tonal' : 'tonal'" [class.mat-success]="isValidated"
+                    type="button" (click)="onValidate()" [disabled]="!canValidate">
+                    <mat-spinner *ngIf="isValidating" diameter="18" class="btn-spinner"></mat-spinner>
+                    <mat-icon *ngIf="!isValidating" [class.text-success]="isValidated">
+                        {{ isValidated ? 'done_all' : 'check' }}
+                    </mat-icon>
+                    {{ isValidated ? 'Volver a validar' : 'Validar' }}
+                </button>
+            </div>
+        </section>
+
+        <ui-tabs [items]="tabItems" [value]="activeTab" [stretch]="false"
+            (valueChange)="onTabChange($event)"></ui-tabs>
+
+        @if (activeTab === 'basic') {
+            <div class="form-grid">
+                <app-form-field type="text" label="Nombre" [control]="form.get('firstName')" [submitted]="submitted"
+                    fullwidth placeholder="Nombre" [errors]="{ required: 'Debe ingresar el nombre' }">
+                </app-form-field>
+
+                <app-form-field type="text" label="Apellido" [control]="form.get('lastName')" [submitted]="submitted"
+                    fullwidth placeholder="Apellido" [errors]="{ required: 'Debe ingresar el apellido' }">
+                </app-form-field>
+
+                <app-form-field type="text" label="Nombre autopercibido" [control]="form.get('nombreAutopercibido')"
+                    [submitted]="submitted" fullwidth placeholder="Nombre autopercibido">
+                </app-form-field>
+
+                <app-form-field type="select" label="Género autopercibido" [control]="form.get('genero')"
+                    [submitted]="submitted" fullwidth [options]="generoOptions"
+                    [suffixIcon]="hasGeneroValue ? 'close' : undefined"
+                    suffixAriaLabel="Borrar género autopercibido" (suffixClick)="clearGenero()">
+                </app-form-field>
+
+                <app-form-field type="text" label="CUIL" [control]="form.get('cuil')" [submitted]="submitted"
+                    fullwidth placeholder="CUIL" inputmode="numeric" maxlength="11"
+                    [errors]="{ invalidFormat: 'El CUIL debe tener 11 dígitos', invalidCuil: 'El CUIL no es válido' }">
+                </app-form-field>
+
+                <app-form-field type="date" label="Fecha de nacimiento" [control]="form.get('fechaNac')"
+                    [submitted]="submitted" fullwidth [min]="minDate" [max]="maxDate"
+                    [errors]="{ invalidDate: 'Fecha inválida', futureDate: 'La fecha no puede ser futura', tooOldDate: 'La fecha debe ser posterior a 1900' }">
+                </app-form-field>
+            </div>
+        } @else {
+            <div class="form-grid">
+                <app-form-field type="email" label="Email" [control]="form.get('email')" [submitted]="submitted"
+                    fullwidth placeholder="email@ejemplo.com" [errors]="{ email: 'El email no es válido' }">
+                </app-form-field>
+
+                <app-form-field type="text" label="Celular" [control]="form.get('celular')" [submitted]="submitted"
+                    fullwidth placeholder="Celular" inputmode="numeric"
+                    [errors]="{ pattern: 'El celular debe contener solo números' }">
+                </app-form-field>
+
+                <app-form-field type="text" label="Teléfono fijo" [control]="form.get('fijo')" [submitted]="submitted"
+                    fullwidth placeholder="Teléfono fijo" inputmode="numeric"
+                    [errors]="{ pattern: 'El teléfono debe contener solo números' }">
+                </app-form-field>
+
+                <app-form-field type="text" label="Calle y número" [control]="form.get('calle')"
+                    [submitted]="submitted" fullwidth placeholder="Calle y número">
+                </app-form-field>
+
+                <app-form-field type="text" label="Código postal" [control]="form.get('codigoPostal')"
+                    [submitted]="submitted" fullwidth placeholder="Código postal">
+                </app-form-field>
+
+                <app-form-field type="text" label="Barrio" [control]="form.get('barrio')" [submitted]="submitted"
+                    fullwidth placeholder="Barrio">
+                </app-form-field>
+
+                <app-form-field type="text" label="Localidad" [control]="form.get('localidad')" [submitted]="submitted"
+                    fullwidth placeholder="Localidad">
+                </app-form-field>
+
+                <app-form-field type="text" label="Provincia" [control]="form.get('provincia')" [submitted]="submitted"
+                    fullwidth placeholder="Provincia">
+                </app-form-field>
+
+                <app-form-field type="text" label="País" [control]="form.get('pais')" [submitted]="submitted"
+                    fullwidth placeholder="País">
+                </app-form-field>
+            </div>
+        }
+
+        <p class="text-error server-error" *ngIf="serverError">{{ serverError }}</p>
+
+        <div class="form-actions">
+            <button matButton="outlined" type="button" (click)="onCancel()">Cancelar</button>
+            <button matButton="filled" type="submit" [disabled]="isSaving">
+                <mat-spinner *ngIf="isSaving" diameter="18" class="btn-spinner"></mat-spinner>
+                <ng-container *ngIf="!isSaving">
+                    <mat-icon>save</mat-icon>
+                    Guardar
+                </ng-container>
+            </button>
+        </div>
+    </form>
+</ui-card>

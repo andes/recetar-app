@@ -159,12 +159,12 @@ import { PageEvent } from '@angular/material/paginator';
         }
 
         .paginator-select:hover {
-            border-color: var(--secondary-300, #8496EB);
+            border-color: var(--secondary-300, #c2b0ff);
         }
 
         .paginator-select:focus {
-            border-color: var(--secondary-300, #8496EB);
-            box-shadow: 0 0 0 2px rgba(58, 83, 222, 0.15);
+            border-color: var(--secondary-300, #c2b0ff);
+            box-shadow: var(--focus-ring);
         }
 
         @media (max-width: 768px) {
@@ -267,3 +267,4 @@ export class UiPaginatorComponent implements OnChanges {
         this.visiblePages = pages;
     }
 }
+

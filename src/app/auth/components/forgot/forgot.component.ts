@@ -5,12 +5,11 @@ import { Router, RouterModule } from '@angular/router';
 import { ThemePalette } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { getHttpErrorMessage } from '@shared/utils/http-error.util';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { FormFieldComponent } from '@shared/components/form-field/form-field.component';
+import { UiCardComponent } from '@shared/ui/card.component';
+import { UiAlertComponent } from '@shared/ui/alert.component';
 
 @Component({
     selector: 'app-forgot',
@@ -21,12 +20,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
         ReactiveFormsModule,
         FormsModule,
         RouterModule,
-        FlexLayoutModule,
-        MatCardModule,
-        MatFormFieldModule,
-        MatInputModule,
         MatButtonModule,
-        MatProgressSpinnerModule
+        MatProgressSpinnerModule,
+        FormFieldComponent,
+        UiCardComponent,
+        UiAlertComponent
     ]
 })
 export class ForgotComponent implements OnInit {

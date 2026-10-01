@@ -16,7 +16,6 @@
 
   // Secondary palette
   --secondary: #{$secondary}
-  --secondary-rgb: 103, 58, 222
   --secondary-dark: #{$secondary-dark}
   --secondary-light: #{$secondary-light}
   --secondary-50: #{$secondary-50}
@@ -34,11 +33,37 @@
   --highlight-light: #{$highlight-light}
   --highlight-dark: #{$highlight-dark}
 
+  // Highlight series (acentos de texto)
+  --highlight-1: #{$highlight-1}
+  --highlight-2: #{$highlight-2}
+  --highlight-3: #{$highlight-3}
+  --highlight-4: #{$highlight-4}
+  --highlight-5: #{$highlight-5}
+
+  // Highlight series — fondos suaves
+  --highlight-1-bg: #{$highlight-1-bg}
+  --highlight-2-bg: #{$highlight-2-bg}
+  --highlight-3-bg: #{$highlight-3-bg}
+  --highlight-4-bg: #{$highlight-4-bg}
+  --highlight-5-bg: #{$highlight-5-bg}
+
+  // Notifications (superficie oscura fija)
+  --snackbar-bg: #{rgba($primary, 0.88)}
+  --snackbar-icon-success: #{$chip-success-text-dark}
+  --snackbar-icon-error: #{$chip-error-text-dark}
+  --snackbar-icon-warning: #{$chip-warning-text-dark}
+  --snackbar-icon-info: #{$chip-info-text-dark}
+
   // Neutral surfaces & text
   --bg-body: #{$bg-body}
+  --bg-gradient: #{$bg-gradient}
   --bg-over-body: #{$bg-over-body}
   --bg-card: #{$bg-card}
   --bg-raised: #{$bg-raised}
+  --bg-header: #{$bg-header}
+  --sidebar-bg: #{$sidebar-bg}
+  --sidebar-hover-bg: #{$sidebar-hover-bg}
+  --sidebar-brand-border: #{$sidebar-brand-border}
   --text-primary: #{$text-primary}
   --text-primary-light: #{$text-primary-light}
   --text-secondary: #{$text-secondary}
@@ -48,19 +73,20 @@
   --border-strong: #{$border-strong}
   --hover-bg: #{$hover-bg}
   --footer-bg: #{$footer-bg}
-  --icon-muted: #{$icon-muted}
 
   // Status colors
   --error-bg: #{$error-bg}
   --error-fill: #{$error-fill}
-  --error-fill: #{$error-fill}
+  --error-text: #{$error-text}
   --warning-bg: #{$warning-bg}
   --warning-fill: #{$warning-fill}
-  --warning-fill: #{$warning-fill}
+  --warning-text: #{$warning-text}
   --success-bg: #{$success-bg}
   --success-text: #{$success-text}
   --info-bg: #{$info-bg}
   --info-text: #{$info-text}
+  --neutral-text: var(--text-primary)
+
 
   // Gold accent (matrículas)
   --gold-bg: #{$gold-bg}
@@ -74,6 +100,15 @@
   --chip-secondary-bg: #{$secondary-200}
   --chip-primary-bg: #{$primary-200}
 
+  // Chip (badge) text
+  --chip-neutral-text: #{$chip-neutral-text}
+  --chip-primary-text: #{$chip-primary-text}
+  --chip-success-text: #{$chip-success-text}
+  --chip-warning-text: #{$chip-warning-text}
+  --chip-error-text: #{$chip-error-text}
+  --chip-info-text: #{$chip-info-text}
+  --chip-secondary-text: #{$chip-secondary-text}
+
   // Button colors
   --btn-base-bg: #{$btn-base-bg}
   --btn-base-hover: #{$btn-base-hover}
@@ -83,24 +118,22 @@
   --icon-btn-hover: #{$icon-btn-hover}
 
   // Role identity
+  --role-admin: #{$role-admin}
+  --role-professional: #{$role-professional}
+  --role-professional-public: #{$role-professional-public}
   --role-pharmacist: #{$role-pharmacist}
   --role-pharmacist-accent: #{$role-pharmacist-accent}
   --role-auditor: #{$role-auditor}
-
-  // Medication type colors
-  --med-commercial-bg: #c3eff1
-  --med-commercial-icon: #0d6d8a
-  --med-generic-bg: #e4daff
-  --med-generic-icon: #6523b9
+  --role-app: #{$role-app}
 
   // Document type icon colors
-  --cert-bg: #effcf5
-  --cert-icon: #60be8f
-  --pract-bg: #fff6eb
-  --pract-icon: #ff9d16
-  --receta: #6366f1
-  --receta-bg: #eef0ff
-  --receta-icon: #6366f1
+  --cert-bg: #{$cert-bg}
+  --cert-icon: #{$cert-icon}
+  --pract-bg: #{$pract-bg}
+  --pract-icon: #{$pract-icon}
+  --receta: #{$receta}
+  --receta-bg: #{$receta-bg}
+  --receta-icon: #{$receta-icon}
 
   // Radius scale
   --radius-xs: #{$radius-xs}
@@ -145,7 +178,7 @@
   --font-mono: #{$font-mono}
 
   // Focus ring
-  --focus-ring: 0 0 0 3px rgba(79, 70, 229, 0.12)
+  --focus-ring: 0 0 0 3px rgba(122, 97, 254, 0.15)
 
 // ---- Form elements ----
 form
@@ -261,7 +294,7 @@ strong
   --mat-button-outlined-container-shape: var(--radius-md)
   --mat-button-outlined-label-text-weight: 400
   --mat-button-outlined-label-text-size: 0.9375rem
-  --mat-button-outlined-outline-color: var(--primary-200)
+  --mat-button-outlined-outline-color: var(--primary-400)
   --mat-button-outlined-label-text-color: var(--text-primary)
   background: var(--bg-card) !important
   transition: background .3s ease, border-color .3s ease, color .3s ease !important
@@ -306,12 +339,21 @@ strong
     &:hover
       --mat-button-outlined-outline-color: var(--error-bg)
       --mat-button-outlined-label-text-color: var(--error-fill)
-      background: #fef2f2
+      background: var(--error-bg)
+
+  &.mat-success
+    --mat-button-outlined-outline-color: var(--success-text)
+    --mat-button-outlined-label-text-color: var(--success-text)
+
+    &:hover
+      --mat-button-outlined-outline-color: var(--success-text)
+      --mat-button-outlined-label-text-color: var(--success-text)
+      background: var(--success-bg)
 
 // ---- Tonal (matButton="tonal") ----
 .mat-tonal-button
   --mat-button-tonal-container-color: var(--bg-over-body)
-  --mat-button-tonal-label-text-color: var(--primary)
+  --mat-button-tonal-label-text-color: var(--text-primary)
   --mat-button-tonal-container-shape: var(--radius-md)
   --mat-button-tonal-label-text-weight: 400
   --mat-button-tonal-label-text-size: 0.9375rem
@@ -321,18 +363,32 @@ strong
 
 .mat-tonal-button.mat-info
   &:hover
-    --mat-button-tonal-label-text-color: #3A53DE
-    --mat-button-tonal-container-color: #D8DFF9
+    --mat-button-tonal-label-text-color: var(--secondary-600)
+    --mat-button-tonal-container-color: var(--secondary-100)
 
 .mat-tonal-button.mat-warn
+  --mat-button-tonal-label-text-color: var(--warning-fill)
+  --mat-button-tonal-container-color: var(--warning-bg)
+
   &:hover
     --mat-button-tonal-label-text-color: var(--warning-fill)
     --mat-button-tonal-container-color: var(--warning-bg)
 
 .mat-tonal-button.mat-error
+  --mat-button-tonal-label-text-color: var(--error-fill)
+  --mat-button-tonal-container-color: var(--error-bg)
+
   &:hover
-    --mat-button-tonal-label-text-color: #dc2626
-    --mat-button-tonal-container-color: #ffdbdb
+    --mat-button-tonal-label-text-color: var(--error-fill)
+    --mat-button-tonal-container-color: var(--error-bg)
+
+.mat-tonal-button.mat-success
+  --mat-button-tonal-label-text-color: var(--success-text)
+  --mat-button-tonal-container-color: var(--success-bg)
+
+  &:hover
+    --mat-button-tonal-label-text-color: var(--success-text)
+    --mat-button-tonal-container-color: var(--success-bg)
 
 // ---- Info variant (blue) ----
 .mat-info
@@ -355,11 +411,12 @@ strong
   &.mat-icon-button:hover
     color: var(--error-fill)
 
-.mat-warn
-  color: var(--warning-fill)
+// ---- Success variant (green, for confirmations) ----
+.mat-success
+  color: var(--success-text)
 
   &.mat-icon-button:hover
-    color: var(--warning-fill)
+    color: var(--success-text)
 
 // ---- Filled (matButton="filled") ----
 .mat-mdc-unelevated-button
@@ -389,8 +446,8 @@ strong
       color: #fff !important
 
     &:hover
-      --mdc-filled-button-container-color: #b45309 !important
-      --mat-button-filled-container-color: #b45309 !important
+      --mdc-filled-button-container-color: color-mix(in srgb, var(--warning-fill) 85%, black) !important
+      --mat-button-filled-container-color: color-mix(in srgb, var(--warning-fill) 85%, black) !important
 
   &.mat-error
     --mdc-filled-button-container-color: var(--error-fill) !important
@@ -403,8 +460,22 @@ strong
       color: #fff !important
 
     &:hover
-      --mdc-filled-button-container-color: #991b1b !important
-      --mat-button-filled-container-color: #991b1b !important
+      --mdc-filled-button-container-color: color-mix(in srgb, var(--error-fill) 85%, black) !important
+      --mat-button-filled-container-color: color-mix(in srgb, var(--error-fill) 85%, black) !important
+
+  &.mat-success
+    --mdc-filled-button-container-color: var(--success-text) !important
+    --mat-button-filled-container-color: var(--success-text) !important
+    --mdc-filled-button-label-text-color: #fff !important
+    --mat-button-filled-label-text-color: #fff !important
+    color: #fff !important
+
+    .mdc-button__label
+      color: #fff !important
+
+    &:hover
+      --mdc-filled-button-container-color: color-mix(in srgb, var(--success-text) 85%, black) !important
+      --mat-button-filled-container-color: color-mix(in srgb, var(--success-text) 85%, black) !important
 
   &.mat-secondary
     --mdc-filled-button-container-color: var(--secondary) !important
@@ -438,6 +509,28 @@ strong
   @media (min-width: $small-devices + 1px)
     --mat-button-protected-label-text-size: 0.8125rem
 
+  &.mat-warn
+    --mat-button-protected-container-color: var(--warning-fill)
+    --mat-button-protected-label-text-color: #fff
+
+  &.mat-error
+    --mat-button-protected-container-color: var(--error-fill)
+    --mat-button-protected-label-text-color: #fff
+
+  &.mat-success
+    --mat-button-protected-container-color: var(--success-text)
+    --mat-button-protected-label-text-color: #fff
+
+// ---- Text (matButton) ----
+.mat-mdc-button.mat-warn
+  --mat-button-text-label-text-color: var(--warning-fill)
+
+.mat-mdc-button.mat-error
+  --mat-button-text-label-text-color: var(--error-fill)
+
+.mat-mdc-button.mat-success
+  --mat-button-text-label-text-color: var(--success-text)
+
 // ---- Icon button (mat-icon-button) ----
 .mat-mdc-icon-button
   --mat-icon-button-state-layer-shape: var(--radius-md)
@@ -469,6 +562,7 @@ strong
 .mat-mdc-standard-chip:not(.mdc-evolution-chip--disabled)
   pointer-events: none
   --mat-chip-elevated-container-color: var(--bg-over-body)
+  --mat-chip-label-text-color: var(--chip-neutral-text)
 
   .mat-mdc-chip-action-label
     display: flex
@@ -477,18 +571,23 @@ strong
 
   &.success
     background-color: var(--chip-success-bg)
+    --mat-chip-label-text-color: var(--chip-success-text)
 
   &.warning
     background-color: var(--chip-warning-bg)
+    --mat-chip-label-text-color: var(--chip-warning-text)
 
   &.error
     background-color: var(--chip-error-bg)
+    --mat-chip-label-text-color: var(--chip-error-text)
 
   &.info
     background-color: var(--chip-info-bg)
+    --mat-chip-label-text-color: var(--chip-info-text)
 
   &.secondary
     background-color: var(--chip-secondary-bg)
+    --mat-chip-label-text-color: var(--chip-secondary-text)
 
     &.dark
       background-color: var(--secondary-500)
@@ -500,7 +599,8 @@ strong
         color: var(--text-primary-light)
 
   &.primary
-    background-color: var(--chip-primary-bg)
+    background-color: var(--primary)
+    --mat-chip-label-text-color: var(--text-primary-light)
 
 // Small chip variant
 .mat-mdc-chip.sm
@@ -517,7 +617,7 @@ strong
     font-size: 18px
     width: 18px
     height: 18px
-    line-height: normal
+    line-height: 20px
 
 // ---- Material card global styles ----
 .mat-mdc-card.mat-mdc-card
@@ -567,8 +667,10 @@ strong
 
 .dark-mode
   --bg-body: #{$bg-body-dark}
+  --bg-over-body: #{$bg-over-body-dark}
   --bg-card: #{$bg-card-dark}
   --bg-raised: #{$bg-raised-dark}
+  --bg-header: #{$bg-header-dark}
   --text-primary: #{$text-primary-dark}
   --text-secondary: #{$text-secondary-dark}
   --text-disabled: #{$text-disabled-dark}
@@ -580,18 +682,31 @@ strong
 
   --error-bg: #{$error-bg-dark}
   --error-fill: #{$error-fill-dark}
-  --error-fill: #{$error-fill-dark}
+  --error-text: #{$error-text-dark}
   --warning-bg: #{$warning-bg-dark}
   --warning-fill: #{$warning-fill-dark}
-  --warning-fill: #{$warning-fill-dark}
+  --warning-text: #{$warning-text-dark}
   --success-bg: #{$success-bg-dark}
   --success-text: #{$success-text-dark}
-  --success-bg-dark: #{$success-bg-dark}
-  --success-text-dark: #{$success-text-dark}
   --info-bg: #{$info-bg-dark}
   --info-text: #{$info-text-dark}
   --gold-bg: #{$gold-bg-dark}
   --gold-fill: #{$gold-fill-dark}
+
+  // Tint scales (fondos sutiles)
+  --primary-50: #{$primary-50-dark}
+  --primary-100: #{$primary-100-dark}
+  --primary-200: #{$primary-200-dark}
+  --secondary-50: #{$secondary-50-dark}
+
+  // Tipo de medicamento / documento
+  --cert-bg: #{$cert-bg-dark}
+  --cert-icon: #{$cert-icon-dark}
+  --pract-bg: #{$pract-bg-dark}
+  --pract-icon: #{$pract-icon-dark}
+  --receta: #{$receta-dark}
+  --receta-bg: #{$receta-bg-dark}
+  --receta-icon: #{$receta-icon-dark}
 
   // Chip (badge) backgrounds
   --chip-success-bg: #{$chip-success-bg-dark}
@@ -600,6 +715,15 @@ strong
   --chip-info-bg: #{$chip-info-bg-dark}
   --chip-secondary-bg: #{$chip-secondary-bg-dark}
   --chip-primary-bg: #{$chip-primary-bg-dark}
+
+  // Chip (badge) text
+  --chip-neutral-text: #{$chip-neutral-text-dark}
+  --chip-primary-text: #{$chip-primary-text-dark}
+  --chip-success-text: #{$chip-success-text-dark}
+  --chip-warning-text: #{$chip-warning-text-dark}
+  --chip-error-text: #{$chip-error-text-dark}
+  --chip-info-text: #{$chip-info-text-dark}
+  --chip-secondary-text: #{$chip-secondary-text-dark}
 
   --elevation-0: #{$elevation-0-dark}
   --elevation-1: #{$elevation-1-dark}
@@ -610,9 +734,16 @@ strong
   --shadow-sm: #{$shadow-sm-dark}
   --shadow-lg: #{$shadow-lg-dark}
 
-  --secondary-100: #261560
+  --secondary-100: #291f52
 
   --highlight-light: #831843
+
+  // Highlight series — fondos suaves (dark)
+  --highlight-1-bg: #{$highlight-1-bg-dark}
+  --highlight-2-bg: #{$highlight-2-bg-dark}
+  --highlight-3-bg: #{$highlight-3-bg-dark}
+  --highlight-4-bg: #{$highlight-4-bg-dark}
+  --highlight-5-bg: #{$highlight-5-bg-dark}
 
   --btn-base-bg: #{$btn-base-bg-dark}
   --btn-base-hover: #{$btn-base-hover-dark}
@@ -620,6 +751,17 @@ strong
 
   --icon-btn-bg: #{$icon-btn-bg-dark}
   --icon-btn-hover: #{$icon-btn-hover-dark}
+
+  --focus-ring: 0 0 0 3px rgba(140, 120, 255, 0.28)
+
+  // Role identity (mismos valores que en modo claro)
+  --role-admin: #{$role-admin}
+  --role-professional: #{$role-professional}
+  --role-professional-public: #{$role-professional-public}
+  --role-pharmacist: #{$role-pharmacist}
+  --role-pharmacist-accent: #{$role-pharmacist-accent}
+  --role-auditor: #{$role-auditor}
+  --role-app: #{$role-app}
 
   input
     color: #fff
@@ -698,6 +840,7 @@ body
   margin: 0
   padding: 0
   background-color: var(--bg-body)
+  // background: var(--bg-gradient)
   &.mat-typography
     font-family: Inter, sans-serif
     font-size: 16px
@@ -710,11 +853,126 @@ body
 .mono
   font-family: var(--font-mono)
   line-height: normal
-  color: var(--text-primary)
+  font-size: inherit
 
 .form-field
   flex: 1
   min-width: 0
+
+// ---- Labeled data field (label + valor) ----
+.data-field
+  display: flex
+  flex-direction: column
+  gap: var(--space-1)
+  min-width: 0
+  padding: var(--space-2) 0
+
+// ---- Grid de datos etiquetados ----
+.field-grid
+  display: grid
+  grid-template-columns: 1fr
+  gap: var(--space-3)
+
+  @media (min-width: $small-devices + 1px)
+    grid-template-columns: repeat(2, 1fr)
+
+.field-grid-full
+  grid-column: 1 / -1
+
+// ---- Contenedor de carga de página/sección ----
+.loading-container
+  display: flex
+  flex-direction: column
+  align-items: center
+  justify-content: center
+  gap: var(--space-4)
+  padding: var(--space-12)
+
+  p
+    margin: 0
+    color: var(--text-secondary)
+
+// ---- Encabezado de formulario/panel (título + subtítulo) ----
+.form-head
+  margin-bottom: var(--space-5)
+
+  h3
+    margin: 0
+
+  p
+    margin: var(--space-1) 0 0
+    color: var(--text-secondary)
+
+// ---- Acciones de un formulario ----
+.form-actions
+  display: flex
+  flex-direction: column-reverse
+  align-items: stretch
+  gap: var(--space-2)
+  margin-top: var(--space-6)
+  padding-top: var(--space-4)
+  border-top: 1px solid var(--border-color)
+
+  button
+    width: 100%
+
+  @media (min-width: $small-devices + 1px)
+    flex-direction: row
+    justify-content: flex-end
+    align-items: center
+    gap: var(--space-4)
+
+    button
+      width: auto
+
+// ---- Selectable item surface (borde activo/hover sobre ui-card) ----
+.selectable
+  .ui-card.ui-card
+    transition: border-color .12s, background-color .12s, box-shadow .12s
+
+  &:hover .ui-card.ui-card,
+  &.selected .ui-card.ui-card
+    border-color: var(--secondary)
+
+// ---- Chip row (fila de chips/badges de un item) ----
+.chip-row
+  display: flex
+  align-items: center
+  gap: var(--space-2)
+  flex-wrap: wrap
+
+// ---- Truncado de texto en una línea ----
+.truncate
+  min-width: 0
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
+
+// ---- Tipo de medicamento (duplicado / triplicado / anulado) ----
+.med-type
+  font-size: 0.75rem
+  font-weight: 600
+  line-height: 1.3
+
+  &.duplicado
+    color: var(--warning-fill)
+
+  &.triplicado
+    color: var(--error-fill)
+
+  &.anulado
+    color: var(--error-fill)
+
+// ---- Acciones del footer de un drawer ----
+.drawer-actions
+  display: flex
+  flex-wrap: wrap
+  gap: var(--space-2)
+  width: 100%
+
+  > *
+    flex: 1 1 120px
+    min-width: 0
 
 .wrapper
   width: 80%
@@ -766,6 +1024,24 @@ body.mat-typography
   .text-base
     font-size: 0.875rem
 
+  // Nombre de entidad (paciente, medicamento, profesional): negrita y algo
+  // más grande que el texto de body. Regla global única.
+  .text-subtitle
+    font-size: 0.9375rem
+    font-weight: 600
+    line-height: 1.3
+
+  // Valor de un dato etiquetado (par de text-label).
+  .text-value
+    font-size: 0.8125rem
+    line-height: 1.4
+
+  // Etiqueta de un dato (par de text-value).
+  .text-label
+    font-size: 0.75rem
+    line-height: 1.4
+    color: var(--text-secondary)
+
   .text-lg
     font-size: 1.2rem
     font-weight: 700
@@ -783,7 +1059,49 @@ body.mat-typography
     line-height: 1
 
   .text-info
-    color: var(--info-text)
+    color: var(--text-info)
+
+  .text-error
+    color: var(--error-text)
+
+  .text-success
+    color: var(--success-text)
+
+  .text-warning
+    color: var(--warning-text)
+
+  .text-highlight
+    color: var(--secondary)
+
+  .text-highlight-1
+    color: var(--highlight-1)
+
+  .text-highlight-2
+    color: var(--highlight-2)
+
+  .text-highlight-3
+    color: var(--highlight-3)
+
+  .text-highlight-4
+    color: var(--highlight-4)
+
+  .text-highlight-5
+    color: var(--highlight-5)
+
+  .bg-highlight-1
+    background: var(--highlight-1-bg)
+
+  .bg-highlight-2
+    background: var(--highlight-2-bg)
+
+  .bg-highlight-3
+    background: var(--highlight-3-bg)
+
+  .bg-highlight-4
+    background: var(--highlight-4-bg)
+
+  .bg-highlight-5
+    background: var(--highlight-5-bg)
 
   .text-secondary
     color: var(--text-secondary)
@@ -834,6 +1152,10 @@ body.mat-typography
 .mat-dialog-container
   max-height: 90vh
 
+// ---- Overlay (dialogs/menus/selects) por encima del drawer (1300) ----
+.cdk-overlay-container
+  z-index: 1400
+
 // ---- Dialog size variants ----
 .dialog-sm
   max-width: 400px !important
@@ -880,55 +1202,56 @@ body.mat-typography
   font-size: 12px
   font-weight: 500
   line-height: 1.4
+  color: var(--chip-neutral-text)
 
 .badge-primary
   background: var(--primary-50)
-  color: var(--primary-500)
+  color: var(--chip-primary-text)
 
 .badge-info
   background: var(--info-bg)
-  color: var(--info-text)
+  color: var(--chip-info-text)
 
 .badge-success
   background: var(--success-bg)
-  color: var(--success-text)
+  color: var(--chip-success-text)
 
 .badge-warning
   background: var(--warning-bg)
-  color: var(--warning-fill)
+  color: var(--chip-warning-text)
 
 .badge-error
   background: var(--error-bg)
-  color: var(--error-fill)
+  color: var(--chip-error-text)
 
 // ---- Semantic status classes (for pills/badges) ----
 .status-vigente
   background: var(--primary-50)
-  color: var(--primary-500)
+  color: var(--chip-primary-text)
 
 .status-pendiente
   background: var(--warning-bg)
-  color: var(--warning-fill)
+  color: var(--chip-warning-text)
 
 .status-dispensada
   background: var(--success-bg)
-  color: var(--success-text)
+  color: var(--chip-success-text)
 
 .status-vencida
   background: var(--error-bg)
-  color: var(--error-fill)
+  color: var(--chip-error-text)
 
 .status-rechazada
   background: var(--error-bg)
-  color: var(--error-fill)
+  color: var(--chip-error-text)
 
 .status-suspendida
   background: var(--error-bg)
-  color: var(--error-fill)
+  color: var(--chip-error-text)
 
 .status-finalizada
   background: var(--success-bg)
-  color: var(--success-text)
+  color: var(--chip-success-text)
 
 // Material Symbols font family override
 mat-icon,
@@ -942,6 +1265,7 @@ mat-icon,
   line-height: normal
   letter-spacing: normal
   text-transform: none
+  text-align: center
   display: inline-block
   white-space: nowrap
   word-wrap: normal

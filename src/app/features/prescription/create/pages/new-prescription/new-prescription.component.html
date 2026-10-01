@@ -6,7 +6,7 @@
         <!-- Mobile sidebar modal -->
         <div class="sidebar-modal-overlay hide-on-desktop" *ngIf="sidebarOpen" (click)="sidebarOpen = false"></div>
         <div class="sidebar-modal hide-on-desktop" *ngIf="sidebarOpen">
-            <div class="sidebar-modal-header">
+            <div class="sidebar-modal-header text-sm">
                 <mat-icon>list_alt</mat-icon>
                 EN LA RECETA
                 <button matIconButton class="sidebar-modal-close" (click)="sidebarOpen = false">
@@ -16,19 +16,18 @@
             <div class="sidebar-modal-scroll">
                 <ng-container *ngTemplateOutlet="sidebarContent"></ng-container>
                 <div class="sidebar-organizacion" *ngIf="draft.type === 'prescription'">
-                    <div class="sidebar-org-label">Organizaci&oacute;n</div>
+                    <div class="sidebar-org-label text-xs">Organizaci&oacute;n</div>
                     @if (organizationsLoading) {
-                    <div class="sidebar-org-loading">
+                    <div class="sidebar-org-loading text-xs">
                         <mat-spinner diameter="16"></mat-spinner>
                         <span>Cargando...</span>
                     </div>
                     } @else if (userOrganizations.length === 0) {
-                    <div class="sidebar-org-empty">
-                        <mat-icon>info</mat-icon>
+                    <ui-empty-state icon="business">
                         <span>No ten&eacute;s organizaciones asociadas.</span>
-                        <a [routerLink]="['/perfil']" [queryParams]="{ seccion: 'organizaciones' }">Agregar
-                            organizaci&oacute;n</a>
-                    </div>
+                        <a class="org-add-link" [routerLink]="['/perfil']"
+                            [queryParams]="{ seccion: 'organizaciones' }">Agregar organizaci&oacute;n</a>
+                    </ui-empty-state>
                     } @else {
                     <ui-select [items]="userOrganizations" [selected]="draft.organizacion || null"
                         placeholder="Seleccion&aacute; una organizaci&oacute;n" icon="corporate_fare"
@@ -54,8 +53,8 @@
                 <strong>Tenés una receta pendiente de enviar</strong><br>
                 Se guardó un borrador que no llegó a enviarse. ¿Querés continuar?
                 <div alertActions fxLayout="row" fxLayoutGap="8px">
-                    <button matButton="outlined" color="warn" (click)="discardPendingPrescription()">Descartar</button>
-                    <button matButton="filled" color="warn" (click)="resumePendingPrescription()">Continuar</button>
+                    <button matButton="outlined" class="mat-error" (click)="discardPendingPrescription()">Descartar</button>
+                    <button matButton="filled" (click)="resumePendingPrescription()">Continuar</button>
                 </div>
             </ui-alert>
 
@@ -63,7 +62,7 @@
             <ui-card [title]="'Paso 1: Paciente'"
                 [subtitle]="draft.patient ? 'Paciente seleccionado' : 'Buscar o crear un paciente'"
                 [dashed]="!draft.patient" class="step-card">
-                <span cardIcon class="step-card-icon" [class.completed]="draft.patient">
+                <span cardIcon class="step-card-icon text-base" [class.completed]="draft.patient">
                     <mat-icon *ngIf="draft.patient; else step1num" class="sm">check</mat-icon>
                     <ng-template #step1num>1</ng-template>
                 </span>
@@ -73,7 +72,7 @@
                         <button matButton="tonal" class="btn-icon" matTooltip="Editar paciente" (click)="editPatient()">
                             <mat-icon>edit</mat-icon>
                         </button>
-                        <button matButton="tonal" color="error" class="btn-icon" matTooltip="Quitar paciente"
+                        <button matButton="tonal" class="btn-icon mat-error" matTooltip="Quitar paciente"
                             (click)="removePatient()">
                             <mat-icon>person_off</mat-icon>
                         </button>
@@ -143,10 +142,10 @@
                 <ng-container *ngIf="draft.patient && !editingPatient">
                     <div class="patient-selected-inner">
                         <div class="patient-selected-body">
-                            <div mat-card-avatar class="patient-avatar desktop-flex" [class.female]="isPatientFemale"
-                                [class.other]="isPatientOther">
-                                <mat-icon>{{ patientAvatarIcon }}</mat-icon>
-                            </div>
+                            <span class="desktop-flex">
+                                <ui-patient-avatar [sex]="draft.patient.sex"
+                                    [genero]="draft.patient.genero || ''" />
+                            </span>
                             <div class="info">
                                 <div class="name">
                                     <span class="name-text">
@@ -158,21 +157,25 @@
                                     <mat-icon *ngIf="validationStatus === 'validado'" class="validated-icon verified"
                                         matTooltip="Validado RENAPER">verified_user</mat-icon>
                                     <mat-icon *ngIf="validationStatus === 'temporal'" class="validated-icon temporal"
-                                        matTooltip="Paciente temporal">warning</mat-icon>
+                                        matTooltip="Paciente temporal">verified_user</mat-icon>
                                 </div>
-                                <div class="detail">
+                                <div class="detail text-base">
                                     <span class="patient-meta-item" *ngIf="draft.patient.dni">
-                                        <mat-icon>badge</mat-icon>
+                                        <mat-icon class="xs">badge</mat-icon>
                                         <span class="mono">
                                             {{ formatDni(draft.patient.dni)}}
                                         </span>
                                     </span>
+                                    <span class="patient-meta-item" *ngIf="!draft.patient.dni">
+                                        <mat-icon class="xs">badge</mat-icon>
+                                        <span class="mono">Sin DNI</span>
+                                    </span>
                                     <span class="patient-meta-item" *ngIf="draft.patient.sex">
-                                        <mat-icon>wc</mat-icon>
+                                        <mat-icon class="xs">wc</mat-icon>
                                         <span class="mono">{{ draft.patient.sex }}</span>
                                     </span>
                                     <span class="patient-meta-item" *ngIf="getAge(draft.patient.fechaNac) != null">
-                                        <mat-icon>cake</mat-icon>
+                                        <mat-icon class="xs">cake</mat-icon>
                                         <span class="mono">{{ getAge(draft.patient.fechaNac) }} años</span>
                                     </span>
                                 </div>
@@ -185,14 +188,15 @@
             <!-- ==================== CARD PASO 2 — DOCUMENTOS ==================== -->
             <ui-card title="Paso 2: Documento"
                 [subtitle]="draft.patient ? 'Armá los medicamentos y completá los datos antes de emitir la receta.' : 'Requiere paciente seleccionado'"
-                [dashed]="!draft.patient" [disabled]="!draft.patient" class="step-card">
+                [dashed]="!draft.patient" [disabled]="!draft.patient" [accent]="creatingDocument === 'prescription'"
+                class="step-card">
                 <span cardAction *ngIf="creatingDocument">
                     <button matButton="tonal" class="btn-icon btn-info" matTooltip="Volver a documentos"
                         (click)="backToDocuments()">
                         <mat-icon>arrow_back</mat-icon>
                     </button>
                 </span>
-                <span cardIcon class="step-card-icon" [class.completed]="canFinalize">
+                <span cardIcon class="step-card-icon text-base" [class.completed]="canFinalize">
                     <mat-icon *ngIf="canFinalize; else step2num" class="sm">check</mat-icon>
                     <ng-template #step2num>2</ng-template>
                 </span>
@@ -202,9 +206,9 @@
                     <!-- PRESCRIPTION -->
                     <ng-container *ngIf="creatingDocument === 'prescription'">
                         <div class="section-heading">
-                            <h3>{{ editingMedicationIndex !== null ? 'Editar medicamento' : 'Agregar medicamento' }}
+                            <h3 class="text-base">{{ editingMedicationIndex !== null ? 'Editar medicamento' : 'Agregar medicamento' }}
                             </h3>
-                            <p>Buscá el medicamento por nombre comercial y completá los datos de la receta.</p>
+                            <p class="text-xs">Buscá el medicamento por nombre comercial y completá los datos de la receta.</p>
                         </div>
                         <ng-container *ngIf="editingMedicationIndex === null">
                             <app-medication-search (medicationAdded)="addMedicationToDraft($event)"
@@ -229,8 +233,8 @@
                     <!-- CERTIFICATE -->
                     <ng-container *ngIf="creatingDocument === 'certificate'">
                         <div class="section-heading">
-                            <h3>{{ editingCertificate ? 'Editar certificado' : 'Nuevo certificado' }}</h3>
-                            <p>Completá los datos del certificado antes de agregarlo.</p>
+                            <h3 class="text-base">{{ editingCertificate ? 'Editar certificado' : 'Nuevo certificado' }}</h3>
+                            <p class="text-xs">Completá los datos del certificado antes de agregarlo.</p>
                         </div>
                         <app-certificate-form [data]="editingCertificate ? draft.certificateData : null"
                             (saved)="onCertificateSaved($event)" (cancelled)="cancelCertificateEdit()">
@@ -240,8 +244,8 @@
                     <!-- PRACTICE -->
                     <ng-container *ngIf="creatingDocument === 'practice'">
                         <div class="section-heading">
-                            <h3>{{ editingPractice ? 'Editar práctica' : 'Nueva práctica' }}</h3>
-                            <p>Completá los datos de la práctica antes de agregarla.</p>
+                            <h3 class="text-base">{{ editingPractice ? 'Editar práctica' : 'Nueva práctica' }}</h3>
+                            <p class="text-xs">Completá los datos de la práctica antes de agregarla.</p>
                         </div>
                         <app-practice-form [data]="editingPractice ? draft.practiceData : null"
                             (saved)="onPracticeSaved($event)" (cancelled)="cancelPracticeEdit()">
@@ -267,19 +271,18 @@
             <div class="sidebar-card">
                 <ng-container *ngTemplateOutlet="sidebarContent"></ng-container>
                 <div class="sidebar-organizacion" *ngIf="draft.type === 'prescription'">
-                    <div class="sidebar-org-label">Organizaci&oacute;n</div>
+                    <div class="sidebar-org-label text-xs">Organizaci&oacute;n</div>
                     @if (organizationsLoading) {
-                    <div class="sidebar-org-loading">
+                    <div class="sidebar-org-loading text-xs">
                         <mat-spinner diameter="16"></mat-spinner>
                         <span>Cargando...</span>
                     </div>
                     } @else if (userOrganizations.length === 0) {
-                    <div class="sidebar-org-empty">
-                        <mat-icon>info</mat-icon>
+                    <ui-empty-state icon="business">
                         <span>No ten&eacute;s organizaciones asociadas.</span>
-                        <a [routerLink]="['/perfil']" [queryParams]="{ seccion: 'organizaciones' }">Agregar
-                            organizaci&oacute;n</a>
-                    </div>
+                        <a class="org-add-link" [routerLink]="['/perfil']"
+                            [queryParams]="{ seccion: 'organizaciones' }">Agregar organizaci&oacute;n</a>
+                    </ui-empty-state>
                     } @else {
                     <ui-select [items]="userOrganizations" [selected]="draft.organizacion || null"
                         placeholder="Seleccion&aacute; una organizaci&oacute;n" icon="corporate_fare"
@@ -302,13 +305,13 @@
     <ng-template #sidebarContent>
         <div class="sidebar-header">
             <ui-icon size="sm" variant="neutral" icon="fact_check_outlined" />
-            <span class="sidebar-title">{{ draft.type === 'prescription' ? 'Receta' : draft.type === 'certificate' ?
+            <span class="sidebar-title text-sm">{{ draft.type === 'prescription' ? 'Receta' : draft.type === 'certificate' ?
                 'Certificado' : 'Práctica' }} actual</span>
-            <mat-chip disableRipple class="secondary sm dark">{{ draft.type === 'prescription' ?
+            <ui-badge-chip variant="primary">{{ draft.type === 'prescription' ?
                 draft.medications.length
                 :
                 draft.type ===
-                'certificate' ? (draft.certificateData ? 1 : 0) : (draft.practiceData ? 1 : 0) }}</mat-chip>
+                'certificate' ? (draft.certificateData ? 1 : 0) : (draft.practiceData ? 1 : 0) }}</ui-badge-chip>
         </div>
 
         <!-- Prescription summary -->
@@ -321,36 +324,35 @@
                 <div class="sidebar-item" *ngFor="let item of draft.medications; let i = index">
                     <div class="sidebar-item-body">
                         <div class="sidebar-item-head">
-                            <div class="sidebar-item-name">{{ (item.supply?.nombre || item.magistral?.nombre ||
+                            <div class="sidebar-item-name text-sm">{{ (item.supply?.nombre || item.magistral?.nombre ||
                                 'Medicamento') | titlecase }}</div>
-                            <mat-chip disableRipple *ngIf="item.supply?.precio != null"
-                                class="info sm sidebar-item-price">
+                            <ui-badge-chip variant="success" *ngIf="item.supply?.precio != null">
                                 <strong class="mono">${{ item.supply.precio.toFixed(2) }}</strong>
-                            </mat-chip>
-                            <mat-chip disableRipple *ngIf="item.type === 'magistral'"
-                                class="secondary sm sidebar-item-magistral">
+                            </ui-badge-chip>
+                            <ui-badge-chip variant="secondary" class="sidebar-item-magistral" *ngIf="item.type === 'magistral'">
                                 Magistral
-                            </mat-chip>
+                            </ui-badge-chip>
                         </div>
-                        <div class="sidebar-item-detail">
-                            <small *ngIf="item.supply?.presentacion">{{ item.supply.presentacion }} · </small>
-                            <small>{{ item.quantity }} unid.</small>
-                            <small *ngIf="item.supply?.accion_descrip"> · {{ item.supply.accion_descrip }}</small>
-                            <small *ngIf="item.diagnostic" class="sidebar-magistral-diagnostic">
-                                · {{ item.diagnostic | titlecase }}
-                            </small>
+                        <div class="sidebar-item-detail text-secondary">
+                            <span *ngIf="item.supply?.presentacion" class="text-caption">{{ item.supply.presentacion }} | </span>
+                            <span class="text-caption">{{ item.quantity }} unid.</span>
+                            <span *ngIf="item.supply?.accion_descrip" class="text-caption">
+                                | {{ item.supply.accion_descrip }}
+                            </span>
+                            <span *ngIf="item.diagnostic" class="sidebar-magistral-diagnostic text-caption">
+                                | {{ item.diagnostic | titlecase }}
+                            </span>
                             <small *ngIf="hasDifferentObraSocial(item)" class="sidebar-os-badge">
-                                · {{ item.obraSocial?.nombre }}
+                                | {{ item.obraSocial?.nombre }}
                             </small>
                         </div>
-                        <div class="medication-type-indicator duplicado" *ngIf="item.duplicate">
-                            <small class="type-bar"></small>
-                            <small class="type-label">Duplicado</small>
+                        <div class="sidebar-item-detail end">
+                            <span *ngIf="item.duplicate" class="text-caption">Duplicado</span>
+                            <span *ngIf="item.triplicate" class="text-caption">Triplicado</span>
+                            <span *ngIf="(item.duplicate || item.triplicate) && item.tratamientoProlongado" class="text-caption">•</span>
+                            <span *ngIf="item.tratamientoProlongado" class="text-caption">{{ item.tratamientoProlongado }} meses</span>
                         </div>
-                        <div class="medication-type-indicator triplicado" *ngIf="item.triplicate">
-                            <small class="type-bar"></small>
-                            <small class="type-label">Triplicado</small>
-                        </div>
+
                         <ui-alert *ngIf="magistralOrgChanged(item)" variant="warning" [fullwidth]="true"
                             class="sidebar-magistral-org-warning">
                             <span class="text-caption">Registrado originalmente para {{ item.magistralOrg?.nombre
@@ -361,16 +363,16 @@
 
                 <div class="sidebar-summary">
                     <div class="summary-cell">
-                        <span class="summary-label">Ítems</span>
-                        <span class="summary-value">{{ draft.medications.length }}</span>
+                        <span class="summary-label text-xs">Ítems</span>
+                        <span class="mono text-subtitle">{{ draft.medications.length }}</span>
                     </div>
                     <div class="summary-cell" style="text-align: right;">
-                        <span class="summary-label">Unidades</span>
-                        <span class="summary-value">{{ getTotalQuantity() }}</span>
+                        <span class="summary-label text-xs">Unidades</span>
+                        <span class="mono text-subtitle">{{ getTotalQuantity() }}</span>
                     </div>
                     <div class="summary-cell total-cell">
-                        <span class="summary-label">Total estimado</span>
-                        <span class="summary-value">${{ getTotalPrice().toFixed(2) }}</span>
+                        <span class="summary-label text-xs">Total estimado</span>
+                        <span class="mono text-subtitle">${{ getTotalPrice().toFixed(2) }}</span>
                     </div>
                 </div>
             </div>
@@ -385,7 +387,7 @@
                 <mat-icon class="sm">verified</mat-icon>
             </div>
             <div class="sidebar-item-body">
-                <div class="sidebar-item-name">{{ draft.certificateData.certificate | titlecase }}</div>
+                <div class="sidebar-item-name text-sm">{{ draft.certificateData.certificate | titlecase }}</div>
                 <div class="sidebar-item-detail">
                     <small>
                         Desde {{ draft.certificateData.startDate | date:'dd/MM/yyyy' }} · {{
@@ -404,7 +406,7 @@
                 <mat-icon class="sm">stethoscope</mat-icon>
             </div>
             <div class="sidebar-item-body">
-                <div class="sidebar-item-name">{{ draft.practiceData.practice | titlecase }}</div>
+                <div class="sidebar-item-name text-sm">{{ draft.practiceData.practice | titlecase }}</div>
                 <div class="sidebar-item-detail" *ngIf="draft.practiceData.diagnostic">
                     {{ draft.practiceData.diagnostic }}
                 </div>

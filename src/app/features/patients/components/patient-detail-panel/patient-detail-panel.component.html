@@ -1,0 +1,74 @@
+<ui-detail-panel>
+    <ui-entity detailHeader>
+        <ui-patient-avatar entityIcon [sex]="patient.sex" [genero]="patient.genero"></ui-patient-avatar>
+        <span entityName class="text-subtitle">{{ displayName }}</span>
+        <span entityMeta>{{ dniHeaderLabel }}</span>
+    </ui-entity>
+    <ui-badge-chip detailHeader *ngIf="statusKey" [status]="statusKey" icon="verified_user"></ui-badge-chip>
+
+    <ui-detail-section label="Identidad">
+        <div class="field-grid">
+            <div class="data-field">
+                <span class="text-label">Fecha de nacimiento</span>
+                <span class="text-value">{{ patient.fechaNac ? (patient.fechaNac | date:'dd/MM/yyyy') : '—' }}</span>
+            </div>
+            <div class="data-field">
+                <span class="text-label">Edad</span>
+                <span class="text-value">{{ age !== null ? age + ' años' : '—' }}</span>
+            </div>
+            <div class="data-field">
+                <span class="text-label">Sexo</span>
+                <span class="text-value">{{ patient.sex || '—' }}</span>
+            </div>
+            <div class="data-field">
+                <span class="text-label">CUIL</span>
+                <span class="text-value">{{ patient.cuil || '—' }}</span>
+            </div>
+        </div>
+        <ui-alert *ngIf="!patient.dni" variant="info" [fullwidth]="true">
+            Este paciente no tiene DNI. Agregalo desde Editar para poder validarlo.
+        </ui-alert>
+    </ui-detail-section>
+
+    <ui-detail-section label="Datos autopercibidos" variant="warning">
+        <div class="field-grid">
+            <div class="data-field">
+                <span class="text-label">Nombre autopercibido</span>
+                <span class="text-value">{{ nombreAutopercibido || '—' }}</span>
+            </div>
+            <div class="data-field">
+                <span class="text-label">Nombre real</span>
+                <span class="text-value">{{ realName }}</span>
+            </div>
+            <div class="data-field">
+                <span class="text-label">Género autopercibido</span>
+                <span class="text-value">{{ generoAutopercibido }}</span>
+            </div>
+        </div>
+    </ui-detail-section>
+
+    <ui-detail-section label="Contacto" variant="info">
+        <div class="field-grid">
+            <div class="data-field">
+                <span class="text-label">Email</span>
+                <span class="text-value">{{ email || '—' }}</span>
+            </div>
+            <div class="data-field">
+                <span class="text-label">Celular</span>
+                <span class="text-value">{{ celular || '—' }}</span>
+            </div>
+            <div class="data-field">
+                <span class="text-label">Teléfono fijo</span>
+                <span class="text-value">{{ fijo || '—' }}</span>
+            </div>
+            <div class="data-field">
+                <span class="text-label">Código postal</span>
+                <span class="text-value">{{ codigoPostal || '—' }}</span>
+            </div>
+        </div>
+    </ui-detail-section>
+
+    <ui-detail-section label="Dirección">
+        <span class="text-value">{{ direccion }}</span>
+    </ui-detail-section>
+</ui-detail-panel>

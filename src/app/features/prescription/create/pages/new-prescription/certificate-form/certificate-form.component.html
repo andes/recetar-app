@@ -4,7 +4,7 @@
 
 <div class="form-row">
     <div class="form-field-wrap">
-        <label class="form-label">Fecha de inicio</label>
+        <label>Fecha de inicio</label>
         <ui-date-field [control]="startDateControl" placeholder="DD/MM/AAAA"></ui-date-field>
         <small class="form-error" *ngIf="startDateControl.touched && startDateControl.hasError('required')">
             Debe seleccionar una fecha
@@ -15,10 +15,10 @@
     </app-form-field>
 </div>
 
-<div class="detail-actions">
+<div class="form-actions">
+    <button matButton="tonal" (click)="cancel()">{{ data ? 'Cancelar edición' : 'Cancelar' }}</button>
     <button matButton="filled" (click)="save()">
         <mat-icon>{{ data ? 'save' : 'add_circle' }}</mat-icon>
         {{ data ? 'Guardar cambios' : 'Agregar certificado' }}
     </button>
-    <button matButton="tonal" (click)="cancel()">{{ data ? 'Cancelar edición' : 'Cancelar' }}</button>
 </div>

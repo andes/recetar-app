@@ -14,16 +14,19 @@
 - El nombre del proyecto Angular y la ruta de salida de la build son `preinscriptions-control`; los assets de producción quedan en `dist/preinscriptions-control`.
 - El arranque de la app depende de `APP_INITIALIZER` en `src/app/app.module.ts`, que llama a `servicesOnRun()` en `src/app/auth/token-initializer.ts` para ejecutar `AuthService.load()` antes de que la app esté lista.
 - El comportamiento HTTP autenticado está centralizado en `src/app/auth/token-interceptor.service.ts` mediante `httpInterceptorProvider`; preferí cambiar ahí el comportamiento de auth/request en lugar de parchear servicio por servicio.
-- Los límites principales de features son módulos por rol bajo `src/app/`: `auth`, `professionals`, `pharmacists`, `audit`, además de código reutilizable en `shared`, servicios de dominio en `services` y DTO/interfaces en `interfaces`.
+- La app tiene módulos legacy bajo `src/app/` (`auth`, `professionals`, `pharmacists`) y features nuevas bajo `src/app/features/` (`audit`, `dashboard`, `prescription`, `profile`, `documents`, `pharmacists`). Todos se importan eagerly en `AppModule`.
+- Cuando un feature module coexiste con su contraparte legacy, el nuevo usa sufijo `Feature` (ej: `AuditFeatureModule`, `PharmacistsFeatureModule`) para evitar colisión de nombres.
 - Las rutas públicas viven en `src/app/app-routing.module.ts`; los flujos específicos por rol están montados bajo `/auth`, `/profesionales`, `/farmacias` y `/audit` en el routing module de cada feature.
 
 ## Convenciones
 
-- Preferí los aliases de path de TS definidos en `tsconfig.json`, como `@auth/*`, `@services/*`, `@shared/*`, `@interfaces/*`, `@professionals/*`, `@pharmacists/*` y `@audit/*`.
+- Preferí los aliases de path de TS definidos en `tsconfig.json`, como `@auth/*`, `@services/*`, `@shared/*`, `@interfaces/*`, `@professionals/*` y `@pharmacists/*`.
+- El legacy `src/app/audit/` fue eliminado. La auditoría vive en `src/app/features/audit/` y usa imports relativos (no hay alias `@audit/*`).
 - La carpeta de validadores custom está escrita con un typo a propósito: `src/app/utils/custome-validators/`. Respetá el path existente en lugar de renombrar imports oportunistamente.
 - Los estilos de componentes usan `.sass`, no `.scss`. Los schematics de Angular están configurados para generar componentes con `style: sass`.
 - Los include paths de SASS compartidos están configurados en `angular.json` (`src/app/shared/` y `src` para tests), así que preferí esos imports antes que paths relativos largos.
 - La app depende mucho de reactive forms y de piezas de formulario compartidas como `PatientFormComponent`; reutilizá validadores y controles compartidos existentes antes de agregar lógica puntual de formularios.
+- **UI nueva:** los features bajo `src/app/features/` usan componentes de `shared/ui/` (`ui-card`, `ui-table`, `ui-paginator`, `ui-search-bar`, `ui-icon`, etc.) e inputs nativos HTML con tokens CSS en lugar de `mat-form-field`/`mat-input`. Ver skill `recetar-app-ui-ux` en `.opencode/skills/`.
 
 ## Entorno Y Secretos
 
@@ -47,6 +50,14 @@
 - Activala para migraciones de Angular de módulos a standalone, limpieza de servicios y RxJS, reorganización de adapters/models y manejo centralizado de errores HTTP.
 - Mantené los refactors incrementales y no mezcles refactors de frontend y backend en el mismo cambio salvo que se pida explícitamente.
 
+## Specs (OpenSpec)
+
+- Los specs del frontend viven en este repo, en `openspec/` (changes en `openspec/changes/`, specs fuente de verdad en `openspec/specs/`, histórico en `openspec/changes/archive/`).
+- `recetar-app` es la casa de los specs del frontend. `recetar-api` es el hogar de los specs del circuito de recetas y de los contratos REST; usalo como referencia/dependencia. `api` (ANDES) no usa OpenSpec, por lo que el trabajo allí queda documentado como dependencia/contrato.
+- Flujo de trabajo: `/opsx-propose`, `/opsx-explore`, `/opsx-apply`, `/opsx-update`, `/opsx-sync` y `/opsx-archive`.
+- Escribir los artefactos en español. Ver `openspec/config.yaml`.
+- No mezclar refactors de frontend y backend en el mismo change.
+
 ## Features Migration Tracker
 
 - Al crear, modificar o eliminar cualquier cosa en `src/app/features/`, actualizá `docs/features-migration-tracker.md`.
@@ -64,5 +75,6 @@
 - **Antes de cualquier tarea**, leer los skills del proyecto en `.opencode/skills/`. Los skills definen reglas de diseño, arquitectura y convenciones que tienen precedencia.
 - **Cómo leerlos:** cada skill vive en `.opencode/skills/{skill}/SKILL.md`. Leerlo con la herramienta `Read` (o `bash`) sobre el path literal. **No buscar skills con `glob` ni `grep`**: esas herramientas ignoran los directorios ocultos (`.opencode/`) y devuelven vacío, lo que lleva a concluir erróneamente que no existen.
 - Skills vigentes de la app: `recetar-app-ui-ux`, `recetar-app-architecture`, `recetar-app-refactor` (además del contrato en `docs/refactor/recetar-app-refactor-contract.md`).
+- Skills de OpenSpec: `openspec-propose`, `openspec-explore`, `openspec-apply-change`, `openspec-update-change`, `openspec-sync-specs` y `openspec-archive-change`.
 - **Si una instrucción del usuario contradice un skill**, preguntar antes de escribir o modificar código. No asumir que la instrucción del usuario reemplaza automáticamente lo que dice el skill.
 - **Después de leer un skill nuevo**, revisar el código existente en el área de trabajo para detectar violaciones que deban corregirse.

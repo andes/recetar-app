@@ -4,6 +4,11 @@ import AndesPrescriptions from '@interfaces/andesPrescriptions';
 import { Certificate } from '@interfaces/certificate';
 import { Practice } from '@interfaces/practices';
 import { getStatusVariant, getStatusLabel } from '@shared/utils/status.utils';
+import {
+    getCertificateStatus,
+    getCertificateStatusLabel,
+    getCertificateStatusVariant,
+} from '@shared/utils/document-status.util';
 import type { DocumentItemType, DocumentItemData } from '../document-item/document-item.component';
 
 @Component({
@@ -249,36 +254,18 @@ export class DocumentDetailPanelComponent {
         const andes = this.andes;
         if (andes) { return andes.estadoActual?.tipo || ''; }
         if (this.local) { return this.local.status || ''; }
-        if (this.certificate) {
-            if (this.certificate.anulateDate) { return 'anulada'; }
-            const now = new Date();
-            if (this.certificate.endDate && this.certificate.endDate < now) { return 'vencida'; }
-            if (this.certificate.startDate && this.certificate.startDate > now) { return 'pendiente'; }
-            return 'vigente';
-        }
+        if (this.certificate) { return getCertificateStatus(this.certificate); }
         if (this.practice) { return this.practice.status || ''; }
         return '';
     }
 
     get statusLabel(): string {
-        if (this.certificate) {
-            if (this.certificate.anulateDate) { return 'Anulado'; }
-            const now = new Date();
-            if (this.certificate.endDate && this.certificate.endDate < now) { return 'Vencido'; }
-            if (this.certificate.startDate && this.certificate.startDate > now) { return 'Pendiente'; }
-            return 'Vigente';
-        }
+        if (this.certificate) { return getCertificateStatusLabel(this.certificate); }
         return getStatusLabel(this.status);
     }
 
     get statusVariant(): string {
-        if (this.certificate) {
-            if (this.certificate.anulateDate) { return 'error'; }
-            const now = new Date();
-            if (this.certificate.endDate && this.certificate.endDate < now) { return 'error'; }
-            if (this.certificate.startDate && this.certificate.startDate > now) { return 'warning'; }
-            return 'success';
-        }
+        if (this.certificate) { return getCertificateStatusVariant(this.certificate); }
         return getStatusVariant(this.status);
     }
 }

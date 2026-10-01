@@ -1,0 +1,51 @@
+:host
+    display: block
+
+form
+    display: flex
+    flex-direction: column
+    gap: var(--space-4)
+
+.identity-top
+    display: flex
+    flex-direction: column
+    gap: var(--space-3)
+    padding-bottom: var(--space-4)
+    border-bottom: 1px solid var(--border-color)
+
+    @media (min-width: 769px)
+        flex-direction: row
+        align-items: flex-end
+        justify-content: space-between
+
+.identity-fields
+    display: grid
+    grid-template-columns: 1fr
+    gap: var(--space-3)
+    flex: 1
+    min-width: 0
+
+    @media (min-width: 769px)
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+        max-width: 520px
+
+.identity-actions
+    display: flex
+    align-items: center
+    gap: var(--space-2)
+    flex-wrap: wrap
+
+.form-grid
+    display: grid
+    grid-template-columns: 1fr
+    gap: var(--space-3)
+    padding: var(--space-4) 0
+
+    @media (min-width: 769px)
+        grid-template-columns: repeat(2, 1fr)
+
+.server-error
+    margin: 0
+
+.btn-spinner
+    margin-right: var(--space-1)

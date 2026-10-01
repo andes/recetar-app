@@ -19,7 +19,6 @@
 .header-toolbar
     background: var(--bg-card)
     color: var(--text-primary)
-    box-shadow: var(--elevation-3)
     height: 52px
     min-height: 52px
     padding: 0 !important
@@ -98,8 +97,7 @@
         height: 26px
         border-radius: 50%
         background: var(--primary)
-        color: #ffffff
-        font-size: 0.6875rem
+        color: var(--text-primary-light)
         flex-shrink: 0
 
     .user-info
@@ -112,13 +110,11 @@
             line-height: 1.2
 
         .user-info-name
-            font-size: 0.75rem
             color: var(--text-primary)
             white-space: nowrap
             font-weight: 500
 
         .user-info-role
-            font-size: 0.625rem
             color: var(--text-secondary)
             margin-top: 0
             white-space: nowrap
@@ -143,9 +139,9 @@
 :host-context(.dark-mode)
     .menu-button:hover
         background: var(--primary-700) !important
-        color: #ffffff !important
+        color: var(--text-primary-light) !important
 
     .user-trigger:hover
         background: var(--primary-700) !important
         border-color: var(--primary-700) !important
-        color: #ffffff !important
+        color: var(--text-primary-light) !important

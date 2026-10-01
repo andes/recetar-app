@@ -9,8 +9,16 @@ import { DocumentHistoryService, RecentDocumentsResponse } from '@services/docum
 import { PrescriptionDraftService } from '../../../services/prescription-draft.service';
 import { DocumentType, MedicationItem, CertificateFormData, PracticeFormData } from '../../../models/prescription-draft';
 import { AuthService } from '@auth/services/auth.service';
-import { getStatusVariant as sharedGetStatusVariant, getStatusLabel as sharedGetStatusLabel } from '@shared/utils/status.utils';
 import type { StatusVariant } from '@shared/utils/status.utils';
+import type { UiTabItem } from '@shared/ui';
+
+export interface PrescriptionEntry {
+    key: string;
+    isGroup: boolean;
+    base: Prescriptions;
+    recetas: Prescriptions[];
+    sortTime: number;
+}
 
 @Component({
     selector: 'app-document-tabs',
@@ -38,12 +46,13 @@ export class DocumentTabsComponent implements OnChanges, OnInit, OnDestroy {
     activeType: DocumentType = 'prescription';
 
     prescriptions: Prescriptions[] = [];
+    prescriptionEntries: PrescriptionEntry[] = [];
     certificates: Certificate[] = [];
     practices: Practice[] = [];
 
     isLoading = false;
 
-    expandedPrescription: Prescriptions | null = null;
+    expandedEntryKey: string | null = null;
     expandedCertificate: Certificate | null = null;
     expandedPractice: Practice | null = null;
 
@@ -61,7 +70,7 @@ export class DocumentTabsComponent implements OnChanges, OnInit, OnDestroy {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes['patient'] && this.patient?.dni) {
+        if (changes['patient'] && (this.patient?.dni || this.patient?.idMPI)) {
             this.resetData();
             this.loadRecentDocuments();
         }
@@ -75,9 +84,36 @@ export class DocumentTabsComponent implements OnChanges, OnInit, OnDestroy {
         this.destroy$.complete();
     }
 
+    get typeTabs(): UiTabItem[] {
+        return [
+            {
+                value: 'prescription',
+                label: 'Recetas',
+                icon: 'pill',
+                count: this.prescriptions.length + this.draftMedications.length,
+            },
+            {
+                value: 'certificate',
+                label: 'Certificados',
+                icon: 'verified',
+                count: this.certificates.length + (this.draftCertificate ? 1 : 0),
+            },
+            {
+                value: 'practice',
+                label: 'Prácticas',
+                icon: 'stethoscope',
+                count: this.practices.length + (this.draftPractice ? 1 : 0),
+            },
+        ];
+    }
+
     selectType(type: DocumentType): void {
         this.activeType = type;
         this.draftService.setType(type);
+    }
+
+    onTypeChange(type: string): void {
+        this.selectType(type as DocumentType);
     }
 
     changeQuantity(index: number, delta: number): void {
@@ -182,14 +218,17 @@ export class DocumentTabsComponent implements OnChanges, OnInit, OnDestroy {
 
     private resetData(): void {
         this.prescriptions = [];
+        this.prescriptionEntries = [];
         this.certificates = [];
         this.practices = [];
         this.isLoading = false;
+        this.expandedEntryKey = null;
     }
 
     private loadRecentDocuments(): void {
-        const dni = this.patient?.dni;
-        if (!dni) { return; }
+        const dni = this.patient?.dni || '';
+        const idMPI = this.patient?.idMPI || '';
+        if (!dni && !idMPI) { return; }
 
         const userId = this.authService.getLoggedUserId();
         if (!userId) {
@@ -203,11 +242,12 @@ export class DocumentTabsComponent implements OnChanges, OnInit, OnDestroy {
 
         this.destroy$.next();
 
-        this.documentHistoryService.getRecentDocuments(userId, dni).pipe(
+        this.documentHistoryService.getRecentDocuments(userId, dni, 50, idMPI).pipe(
             takeUntil(this.destroy$)
         ).subscribe({
             next: (data: RecentDocumentsResponse) => {
                 this.prescriptions = data.prescriptions;
+                this.prescriptionEntries = this.buildEntries(data.prescriptions);
                 this.certificates = data.certificates;
                 this.practices = data.practices;
                 this.draftService.setRecentDocuments(data);
@@ -216,6 +256,7 @@ export class DocumentTabsComponent implements OnChanges, OnInit, OnDestroy {
             },
             error: () => {
                 this.prescriptions = [];
+                this.prescriptionEntries = [];
                 this.certificates = [];
                 this.practices = [];
                 this.isLoading = false;
@@ -224,12 +265,85 @@ export class DocumentTabsComponent implements OnChanges, OnInit, OnDestroy {
         });
     }
 
-    getStatusVariant(status?: string): StatusVariant {
-        return sharedGetStatusVariant(status);
+    getTreatmentMonths(entry: PrescriptionEntry): number {
+        return entry.base.tratamientoProlongado || 0;
     }
 
-    getStatusLabel(status?: string): string {
-        return sharedGetStatusLabel(status);
+    getDispensedCount(entry: PrescriptionEntry): number {
+        return entry.recetas.filter((r) => r.status === 'Dispensada').length;
+    }
+
+    getGroupStatusLabel(entry: PrescriptionEntry): string {
+        return `${this.getDispensedCount(entry)}/${entry.recetas.length} dispensadas`;
+    }
+
+    getGroupStatusVariant(entry: PrescriptionEntry): StatusVariant {
+        const dispensed = this.getDispensedCount(entry);
+        if (dispensed === 0) { return 'warning'; }
+        if (dispensed === entry.recetas.length) { return 'success'; }
+        return 'info';
+    }
+
+    private buildEntries(list: Prescriptions[]): PrescriptionEntry[] {
+        const groups = new Map<string, Prescriptions[]>();
+        const singles: Prescriptions[] = [];
+
+        for (const p of list) {
+            const key = this.treatmentKey(p);
+            if (key) {
+                const arr = groups.get(key) ?? [];
+                arr.push(p);
+                groups.set(key, arr);
+            } else {
+                singles.push(p);
+            }
+        }
+
+        const entries: PrescriptionEntry[] = singles.map((p) => this.singleEntry(p));
+
+        for (const [key, recetas] of groups) {
+            if (recetas.length === 1) {
+                entries.push(this.singleEntry(recetas[0]));
+                continue;
+            }
+            const sorted = [...recetas].sort(
+                (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+            );
+            entries.push({
+                key,
+                isGroup: true,
+                base: sorted[0],
+                recetas: sorted,
+                sortTime: this.entryTime(sorted),
+            });
+        }
+
+        entries.sort((a, b) => b.sortTime - a.sortTime);
+        return entries;
+    }
+
+    private singleEntry(p: Prescriptions): PrescriptionEntry {
+        return {
+            key: `rx:${p._id}`,
+            isGroup: false,
+            base: p,
+            recetas: [p],
+            sortTime: this.entryTime([p]),
+        };
+    }
+
+    private entryTime(recetas: Prescriptions[]): number {
+        return Math.max(...recetas.map((r) => new Date(r.createdAt || r.date).getTime()));
+    }
+
+    private treatmentKey(p: Prescriptions): string | null {
+        if (!p.tratamientoProlongado) { return null; }
+        if (p.treatmentGroupId) { return `grp:${p.treatmentGroupId}`; }
+
+        const supply = p.supplies?.[0]?.supply as { code?: { value?: string }; name?: string } | undefined;
+        const supplyKey = supply?.code?.value || supply?.name || '';
+        const created = p.createdAt ? Math.floor(new Date(p.createdAt).getTime() / 1000) : 0;
+        return `legacy:${p.patient?.dni}|${p.professional?.userId}|${supplyKey}|${p.tratamientoProlongado}|${created}`;
     }
 
     getDraftCertEndDate(data: CertificateFormData): Date {

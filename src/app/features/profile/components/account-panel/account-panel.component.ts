@@ -4,11 +4,11 @@ import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validator
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Subject } from 'rxjs';
 import { finalize, takeUntil } from 'rxjs/operators';
 import { FormFieldComponent } from '@shared/components/form-field/form-field.component';
 import { UiAlertComponent } from '@shared/ui';
+import { NotificationService } from '@shared/services/notification.service';
 import { getHttpErrorMessage } from '@shared/utils/http-error.util';
 import { ProfileService } from '../../services/profile.service';
 
@@ -23,7 +23,6 @@ import { ProfileService } from '../../services/profile.service';
         MatButtonModule,
         MatIconModule,
         MatProgressSpinnerModule,
-        MatSnackBarModule,
         FormFieldComponent,
         UiAlertComponent,
     ]
@@ -43,7 +42,7 @@ export class AccountPanelComponent implements OnInit, OnDestroy {
 
     constructor(
         private fb: FormBuilder,
-        private snackBar: MatSnackBar,
+        private notification: NotificationService,
         private profileService: ProfileService,
     ) {
         this.accountForm = this.fb.group({
@@ -86,10 +85,7 @@ export class AccountPanelComponent implements OnInit, OnDestroy {
                 error: (error) => {
                     const msg = getHttpErrorMessage(error, 'Error al cargar los datos del usuario');
                     this.updateError = msg;
-                    this.snackBar.open(msg, 'Cerrar', {
-                        duration: 5000,
-                        panelClass: ['error-snackbar']
-                    });
+                    this.notification.error(msg);
                 }
             });
     }
@@ -114,16 +110,13 @@ export class AccountPanelComponent implements OnInit, OnDestroy {
                 )
                 .subscribe({
                     next: () => {
-                        this.snackBar.open('Se ha enviado un correo para confirmar los cambios', 'Cerrar', { duration: 5000 });
+                        this.notification.success('Se ha enviado un correo para confirmar los cambios');
                         this.saved.emit();
                     },
                     error: (error) => {
                         const msg = getHttpErrorMessage(error, 'Error al actualizar el perfil');
                         this.updateError = msg;
-                        this.snackBar.open(msg, 'Cerrar', {
-                            duration: 5000,
-                            panelClass: ['error-snackbar']
-                        });
+                        this.notification.error(msg);
                     }
                 });
         } else {
@@ -138,16 +131,13 @@ export class AccountPanelComponent implements OnInit, OnDestroy {
                 )
                 .subscribe({
                     next: () => {
-                        this.snackBar.open('Datos de cuenta actualizados', 'Cerrar', { duration: 5000 });
+                        this.notification.success('Datos de cuenta actualizados');
                         this.saved.emit();
                     },
                     error: (error) => {
                         const msg = getHttpErrorMessage(error, 'Error al actualizar el perfil');
                         this.updateError = msg;
-                        this.snackBar.open(msg, 'Cerrar', {
-                            duration: 5000,
-                            panelClass: ['error-snackbar']
-                        });
+                        this.notification.error(msg);
                     }
                 });
         }

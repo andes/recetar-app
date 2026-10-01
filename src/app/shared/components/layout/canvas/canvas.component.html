@@ -13,7 +13,7 @@
             <div class="page-header" *ngIf="pageTitle">
                 <div class="page-header-content">
                     <h1>{{ pageTitle }}</h1>
-                    <p *ngIf="pageSubtitle">{{ pageSubtitle }}</p>
+                    <p *ngIf="pageSubtitle" class="text-sm">{{ pageSubtitle }}</p>
                 </div>
                 <div class="page-header-actions">
                     <ng-content select="[pageActions]"></ng-content>

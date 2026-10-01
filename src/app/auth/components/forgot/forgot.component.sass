@@ -1,66 +1,29 @@
-// component selector
 @use 'styles/variables' as *
-
-$panels-height: 294px
-$panels-height-xl: 325px
 
 :host
     display: block
     width: 100%
-    height: 100%
 
-.cards-container
-    margin-bottom: 4em
-  
-
-    .form-panel
-        width: calc(100% / 3)
-        mat-card
-            box-sizing: content-box!important
-            height: 18.21rem
-            height: calc(#{$panels-height} - 32px)
-            // @media (min-width: $larger-devices) and (max-width: $x-larger-devices)
-            //     height: calc(#{$panels-height-xl} - 32px)
-
-            @media (min-width: $x-small-devices) and (max-width: $larger-devices)
-                height: auto
-            mat-card-title, mat-card-content
-                margin: 0!important
-                .login-action
-                    margin-top: 20px
-                    @media (min-width: $larger-devices) and (max-width: $x-larger-devices)
-                        margin-top: 40px
-
-                @media (min-width: $larger-devices) and (max-width: $xx-larger-devices)
-                    .login-error
-                        margin-bottom: -15px!important
-
-            mat-card-actions
-                padding: 0!important
-                margin: 0!important
-                @media (min-width: $x-small-devices) and (max-width: $larger-devices)
-                    flex-direction: column!important
-                    a.btn-link
-                        max-width: 100%!important
-                        margin: 10px 0!important
-
-        @media (min-width: $medium-devices) and (max-width: $larger-devices)
-            width: 310px
-        @media (min-width: $small-devices) and (max-width: $medium-devices)
-            width: 310px
-        @media (min-width: $x-small-devices) and (max-width: $small-devices)
-            width: 480px
-            max-width: calc(100% - 10px)
-            margin: 10px auto!important
-
+.auth-shell
+    display: flex
+    flex-direction: column
+    align-items: center
+    width: 100%
+    padding: var(--space-8) var(--space-4)
 
 .logo
-    margin-bottom: 2em
-    @media (min-width: $x-small-devices) and (max-width: $small-devices)
-        margin-bottom: 1em
+    display: flex
+    flex-direction: column
+    align-items: center
+    margin-bottom: var(--space-6)
+
     .icon-login
         width: 100px
         height: 100px
+
     .title-login
-        color: white
-        font-family: roboto
+        color: var(--text-primary)
+
+.auth-card
+    width: 100%
+    max-width: 420px

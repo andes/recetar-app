@@ -4,11 +4,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Subject } from 'rxjs';
 import { finalize, take, takeUntil } from 'rxjs/operators';
+import { NotificationService } from '@shared/services/notification.service';
 import { getHttpErrorMessage } from '@shared/utils/http-error.util';
 import { UiEmptyStateComponent } from '@shared/ui/empty-state.component';
+import { UiBadgeChipComponent } from '@shared/ui/badge-chip.component';
 import { SubOrganization } from '@interfaces/organizations';
 import { OrganizationsService } from '../../services/organizations.service';
 import { OrganizationsSisaService } from '@services/organizations-sisa.service';
@@ -25,8 +26,8 @@ import { OrganizationsDialogComponent } from '../organizations-dialog/organizati
         MatDialogModule,
         MatIconModule,
         MatProgressSpinnerModule,
-        MatSnackBarModule,
         UiEmptyStateComponent,
+        UiBadgeChipComponent,
     ]
 })
 export class OrganizationsPanelComponent implements OnInit, OnDestroy {
@@ -41,7 +42,7 @@ export class OrganizationsPanelComponent implements OnInit, OnDestroy {
 
     constructor(
         private dialog: MatDialog,
-        private snackBar: MatSnackBar,
+        private notification: NotificationService,
         private organizationsService: OrganizationsService,
         private organizationsSisaService: OrganizationsSisaService,
     ) { }
@@ -68,7 +69,7 @@ export class OrganizationsPanelComponent implements OnInit, OnDestroy {
                 },
                 error: (error) => {
                     const msg = getHttpErrorMessage(error, 'Error al cargar las organizaciones');
-                    this.snackBar.open(msg, 'Cerrar', { duration: 5000 });
+                    this.notification.error(msg);
                 }
             });
     }
@@ -89,12 +90,12 @@ export class OrganizationsPanelComponent implements OnInit, OnDestroy {
                 finalize(() => this.isLoading = false)
             ).subscribe({
                 next: () => {
-                    this.snackBar.open('Organización agregada correctamente', 'Cerrar', { duration: 3000 });
+                    this.notification.success('Organización agregada correctamente');
                     this.loadOrganizations();
                     this.changed.emit();
                 },
                 error: () => {
-                    this.snackBar.open('Error al agregar la organización', 'Cerrar', { duration: 5000 });
+                    this.notification.error('Error al agregar la organización');
                 }
             });
         });
@@ -123,12 +124,12 @@ export class OrganizationsPanelComponent implements OnInit, OnDestroy {
             .subscribe({
                 next: (saved) => {
                     this.organizaciones = saved;
-                    this.snackBar.open('Organizaciones actualizadas', 'Cerrar', { duration: 3000 });
+                    this.notification.success('Organizaciones actualizadas');
                     this.changed.emit();
                 },
                 error: (error) => {
                     const msg = getHttpErrorMessage(error, 'Error al guardar las organizaciones');
-                    this.snackBar.open(msg, 'Cerrar', { duration: 5000 });
+                    this.notification.error(msg);
                     this.loadOrganizations();
                 }
             });

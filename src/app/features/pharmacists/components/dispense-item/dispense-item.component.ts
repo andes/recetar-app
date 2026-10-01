@@ -1,13 +1,13 @@
-import { Component, Input, Output, EventEmitter } from "@angular/core";
-import { MixedPrescription } from "../../services/dispense.service";
-import { Prescriptions } from "@interfaces/prescriptions";
-import AndesPrescriptions from "@interfaces/andesPrescriptions";
-import { getStatusVariant, getStatusLabel } from "@shared/utils/status.utils";
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { MixedPrescription } from '../../services/dispense.service';
+import { isAndesPrescription } from '../../services/prescription-source.util';
+import { Prescriptions } from '@interfaces/prescriptions';
+import AndesPrescriptions from '@interfaces/andesPrescriptions';
 
 @Component({
-    selector: "app-dispense-item",
-    templateUrl: "./dispense-item.component.html",
-    styleUrls: ["./dispense-item.component.sass"],
+    selector: 'app-dispense-item',
+    templateUrl: './dispense-item.component.html',
+    styleUrls: ['./dispense-item.component.sass'],
     standalone: false,
 })
 export class DispenseItemComponent {
@@ -19,11 +19,8 @@ export class DispenseItemComponent {
     @Output() print = new EventEmitter<MixedPrescription>();
     @Output() cancelDispense = new EventEmitter<MixedPrescription>();
 
-    getStatusVariant = getStatusVariant;
-    getStatusLabel = getStatusLabel;
-
     private get isAndesItem(): boolean {
-        return "estadoActual" in this.prescription;
+        return isAndesPrescription(this.prescription);
     }
 
     private get andes(): AndesPrescriptions | null {
@@ -37,27 +34,27 @@ export class DispenseItemComponent {
     }
 
     get sourceLabel(): string {
-        return this.isAndesItem ? "Andes" : "RecetAR";
+        return this.isAndesItem ? 'Andes' : 'RecetAR';
     }
 
     get medicineName(): string {
         const andes = this.andes;
         if (andes) {
-            return andes.medicamento?.concepto?.term || "";
+            return andes.medicamento?.concepto?.term || '';
         }
-        return this.local?.supplies?.[0]?.supply?.name || "";
+        return this.local?.supplies?.[0]?.supply?.name || '';
     }
 
-    get medicineType(): "duplicado" | "triplicado" | null {
+    get medicineType(): 'duplicado' | 'triplicado' | null {
         const supplies = this.local?.supplies;
         if (!supplies) {
             return null;
         }
         if (supplies.some((s) => s.triplicate)) {
-            return "triplicado";
+            return 'triplicado';
         }
         if (supplies.some((s) => s.duplicate)) {
-            return "duplicado";
+            return 'duplicado';
         }
         return null;
     }
@@ -65,22 +62,22 @@ export class DispenseItemComponent {
     get patientFullName(): string {
         const andes = this.andes;
         if (andes) {
-            return `${andes.paciente?.apellido || ""}, ${andes.paciente?.nombre || ""}`.replace(
+            return `${andes.paciente?.apellido || ''}, ${andes.paciente?.nombre || ''}`.replace(
                 /^,\s*/,
-                "",
+                '',
             );
         }
-        return `${this.local?.patient?.lastName || ""}, ${this.local?.patient?.firstName || ""}`.replace(
+        return `${this.local?.patient?.lastName || ''}, ${this.local?.patient?.firstName || ''}`.replace(
             /^,\s*/,
-            "",
+            '',
         );
     }
 
     get patientDni(): string {
         const andes = this.andes;
         return andes
-            ? andes.paciente?.documento || ""
-            : this.local?.patient?.dni || "";
+            ? andes.paciente?.documento || ''
+            : this.local?.patient?.dni || '';
     }
 
     get professionalName(): string {
@@ -88,10 +85,10 @@ export class DispenseItemComponent {
         if (andes) {
             return (
                 (andes.profesional as unknown as { nombre?: string })?.nombre ||
-                ""
+                ''
             );
         }
-        return this.local?.professional?.businessName || "";
+        return this.local?.professional?.businessName || '';
     }
 
     get quantity(): number {
@@ -110,22 +107,22 @@ export class DispenseItemComponent {
     get status(): string {
         const andes = this.andes;
         return andes
-            ? andes.estadoActual?.tipo || ""
-            : this.local?.status || "";
+            ? andes.estadoActual?.tipo || ''
+            : this.local?.status || '';
     }
 
     get date(): string | Date {
         const andes = this.andes;
         return andes
-            ? andes.fechaPrestacion || andes.fechaRegistro || ""
-            : this.local?.date || "";
+            ? andes.fechaPrestacion || andes.fechaRegistro || ''
+            : this.local?.date || '';
     }
 
     get creationDate(): Date | null {
         const andes = this.andes;
         const raw = andes
-            ? andes.fechaRegistro || andes.fechaPrestacion || ""
-            : this.local?.date || "";
+            ? andes.fechaRegistro || andes.fechaPrestacion || ''
+            : this.local?.date || '';
         if (!raw) {
             return null;
         }
@@ -157,17 +154,17 @@ export class DispenseItemComponent {
     }
 
     get isExpired(): boolean {
-        return this.status.toLowerCase() === "vencida";
+        return this.status.toLowerCase() === 'vencida';
     }
 
     get isPending(): boolean {
         const s = this.status.toLowerCase();
-        return s === "pendiente" || s === "vigente";
+        return s === 'pendiente' || s === 'vigente';
     }
 
     get isDispensed(): boolean {
         const s = this.status.toLowerCase();
-        return s === "dispensada" || s === "dispensado" || s === "finalizada";
+        return s === 'dispensada' || s === 'dispensado' || s === 'finalizada';
     }
 
     get canCancelDispense(): boolean {
@@ -189,8 +186,8 @@ export class DispenseItemComponent {
     get dispensedAt(): string {
         const andes = this.andes;
         return andes
-            ? String(andes.estadoDispensaActual?.fecha || "")
-            : String(this.local?.dispensedAt || "");
+            ? String(andes.estadoDispensaActual?.fecha || '')
+            : String(this.local?.dispensedAt || '');
     }
 
     get undoDisabled(): boolean {

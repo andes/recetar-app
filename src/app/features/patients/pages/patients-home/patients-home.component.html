@@ -1,0 +1,67 @@
+<app-canvas [showSidebar]="true" [sidebarItems]="sidebarItems" [noCard]="true" pageTitle="Pacientes"
+    pageSubtitle="Buscá, editá y gestioná los pacientes de ANDES">
+
+    <div pageActions>
+        <button matButton="filled" type="button" (click)="createPatient()">
+            <mat-icon>person_add</mat-icon>
+            Nuevo paciente
+        </button>
+    </div>
+
+    <ui-drawer [open]="drawerOpen" title="Detalle del paciente" (closed)="closeDrawer()">
+        <app-patient-detail-panel *ngIf="selectedPatient" drawerContent [patient]="selectedPatient">
+        </app-patient-detail-panel>
+
+        <div class="drawer-actions" drawerFooter *ngIf="selectedPatient">
+            <button matButton="filled" class="block" type="button" (click)="editSelected()">
+                <mat-icon>edit</mat-icon>
+                Editar
+            </button>
+            <button matButton="outlined" class="block mat-error" type="button" (click)="deleteSelected()">
+                <mat-icon>delete</mat-icon>
+                Eliminar
+            </button>
+        </div>
+
+        <div class="patients-content">
+            <ui-results-toolbar [control]="searchControl"
+                placeholder="Buscar por nombre, DNI, email o teléfono..." [isLoading]="loading" [showFilters]="true"
+                [showRefresh]="false" [filterCount]="activeFilterCount" [hasActiveFilters]="hasActiveFilters"
+                (clearSearch)="search(true)" (clearFilters)="clearFilters()">
+                <div class="filter-group" filters>
+                    <label>Estado</label>
+                    <ui-field-input type="select" [control]="estadoControl">
+                        <option value="">Todos</option>
+                        <option value="validado">Validado</option>
+                        <option value="temporal">Temporal</option>
+                    </ui-field-input>
+                </div>
+                <div class="filter-group" filters>
+                    <label>Sexo</label>
+                    <ui-field-input type="select" [control]="sexoControl">
+                        <option value="">Todos</option>
+                        <option value="femenino">Femenino</option>
+                        <option value="masculino">Masculino</option>
+                        <option value="otro">Otro</option>
+                    </ui-field-input>
+                </div>
+                <div class="filter-group" filters>
+                    <label>Email</label>
+                    <ui-field-input type="text" [control]="emailControl" placeholder="Email"></ui-field-input>
+                </div>
+                <div class="filter-group" filters>
+                    <label>Teléfono</label>
+                    <ui-field-input type="text" [control]="telefonoControl" placeholder="Celular"></ui-field-input>
+                </div>
+            </ui-results-toolbar>
+
+            <ui-results-list [loading]="loading" [total]="patients.length" label="Pacientes" emptyIcon="groups"
+                countMode="loaded" [emptyMessage]="emptyMessage" [showPaginator]="false" [hasMore]="hasMore"
+                (loadMore)="loadMore()">
+                <app-patient-list-item *ngFor="let patient of patients; trackBy: trackByPatient" [patient]="patient"
+                    [selected]="isSelected(patient)" (select)="openDetail(patient)" (edit)="editPatient(patient)">
+                </app-patient-list-item>
+            </ui-results-list>
+        </div>
+    </ui-drawer>
+</app-canvas>
