@@ -6,7 +6,7 @@ export class DispensePage {
 
     async goto(): Promise<void> {
         await this.page.goto('/dispensar-nuevo');
-        await expect(this.page.getByRole('heading', { name: 'Dispensar' })).toBeVisible();
+        await expect(this.page.getByRole('heading', { name: 'Dispensar', exact: true })).toBeVisible();
     }
 
     async search(term: string): Promise<void> {

@@ -72,6 +72,14 @@ export default defineConfig({
                 ...devices['Desktop Chrome']
             },
             dependencies: ['setup']
+        },
+        {
+            name: 'firefox',
+            testIgnore: /setup[\\/]/,
+            use: {
+                ...devices['Desktop Firefox']
+            },
+            dependencies: ['setup']
         }
     ],
     metadata: {

@@ -15,7 +15,7 @@
     "e2e:ui": "playwright test --config=e2e/playwright.config.ts --ui",
     "e2e:headed": "playwright test --config=e2e/playwright.config.ts --headed",
     "e2e:report": "playwright show-report e2e/playwright-report",
-    "e2e:install": "playwright install chromium",
+    "e2e:install": "playwright install chromium firefox",
     "e2e:typecheck": "tsc -p e2e/tsconfig.json",
     "lint": "eslint -c .eslintrc.js --ext .ts .",
     "lint:fix": "eslint -c .eslintrc.js --ext .ts . --fix",

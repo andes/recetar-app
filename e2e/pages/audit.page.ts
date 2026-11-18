@@ -14,7 +14,10 @@ export class AuditPage {
     }
 
     async searchCuit(cuit: string): Promise<void> {
-        await this.page.locator('input[placeholder="Ingrese el CUIT de la farmacia"]').first().fill(cuit);
+        const input = this.page.locator('input[placeholder="Ingrese el CUIT de la farmacia"]').first();
+        await input.fill(cuit);
+        // El mensaje de validación sólo se muestra cuando el control queda tocado.
+        await input.blur();
     }
 
     async expectCuitError(message: string | RegExp): Promise<void> {

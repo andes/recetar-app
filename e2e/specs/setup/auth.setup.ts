@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { test as setup, request } from '@playwright/test';
+import { runPreflight } from '../../support/preflight';
+import { ApiClient } from '../../fixtures/api-client';
 import { unwrapApiResponse } from '../../fixtures/api-response';
 import {
     E2E_ROLES,
@@ -40,6 +42,31 @@ function writeStorageState(role: E2ERole, jwt?: string, refreshToken?: string): 
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
     fs.writeFileSync(filePath, JSON.stringify({ cookies: [], origins: [{ origin: baseOrigin, localStorage }] }, null, 2));
 }
+
+setup('preflight de ambiente', async ({ request: apiRequest }) => {
+    await runPreflight(apiRequest);
+});
+
+setup('smoke de fixtures descartables', async ({ request: apiRequest }) => {
+    setup.skip(process.env.E2E_SMOKE !== '1', 'Definir E2E_SMOKE=1');
+
+    const api = new ApiClient(apiRequest);
+    try {
+        const user = await api.createDisposableUser();
+        const id = String(user._id || user.id || '');
+        if (!id) {
+            throw new Error('[E2E] El smoke de fixtures no pudo crear un usuario descartable');
+        }
+
+        const fetched = await api.getUser(id);
+        const fetchedId = String(fetched?._id || fetched?.id || '');
+        if (fetchedId !== id) {
+            throw new Error('[E2E] El smoke de fixtures no pudo leer el usuario creado');
+        }
+    } finally {
+        await api.cleanup();
+    }
+});
 
 setup.describe('Autenticación E2E', () => {
     for (const role of E2E_ROLES) {

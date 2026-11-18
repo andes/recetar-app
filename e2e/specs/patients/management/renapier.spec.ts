@@ -13,9 +13,9 @@ import { expectSnackbar } from '../../../support/ui';
 test.describe('RENAPER en la pantalla de pacientes', () => {
     test.use({ storageState: statePath('professional') });
     test.skip(!hasCredentials('professional'), 'Falta configurar usuario profesional');
-    test.skip(!renaperEnabled, 'Definir E2E_RENAPER_ENABLED=1 para ejecutar RENAPER');
 
-    test('valida un paciente existente @PAT-012 @renaper', async ({ page, api }) => {
+    test('valida un paciente existente @PAT-012 @env:renaper', async ({ page, api }) => {
+        test.skip(!renaperEnabled, 'Definir E2E_RENAPER_ENABLED=1 para ejecutar RENAPER');
         const patients = await api.getPatientByDni(testData.renaper.positiveDni);
         const patient = patients[0];
         test.skip(!patient, 'No existe en el ambiente un paciente con el DNI positivo de RENAPER');
@@ -27,7 +27,7 @@ test.describe('RENAPER en la pantalla de pacientes', () => {
         await expectSnackbar(page, 'Paciente validado correctamente', 30_000);
     });
 
-    test('RENAPER no encuentra a la persona @PAT-013 @renaper', async ({ page, api }) => {
+    test('RENAPER no encuentra a la persona @PAT-013', async ({ page, api }) => {
         await page.route('**/api/patients/validate', async (route) => {
             await route.fulfill({
                 status: 422,

@@ -5,6 +5,7 @@ import {
     credentialsFor,
     testData,
     uniqueLabel,
+    uniqueSuffix,
     type E2ERole
 } from './test-data';
 
@@ -82,6 +83,74 @@ export class ApiClient {
         const payload = token.split('.')[1];
         const decoded = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as { bsname?: string };
         return decoded.bsname || 'E2E';
+    }
+
+    async listRoleTypes(): Promise<Array<{ _id: string; role: string }>> {
+        return this.getJson<Array<{ _id: string; role: string }>>('/auth/role-types', 'admin');
+    }
+
+    async getRoleId(roleName: string): Promise<string> {
+        const roles = await this.listRoleTypes();
+        const role = roles.find((item) => item.role === roleName);
+        if (!role) {
+            throw new Error(`No se encontró el rol ${roleName}`);
+        }
+        return role._id;
+    }
+
+    async listUsers(searchTerm = ''): Promise<{ items: Array<Record<string, unknown>>; total: number }> {
+        const query = new URLSearchParams({ offset: '0', limit: '50' });
+        if (searchTerm) {
+            query.set('searchTerm', searchTerm);
+        }
+        return this.getJson<{ items: Array<Record<string, unknown>>; total: number }>(
+            `/users?${query.toString()}`,
+            'admin'
+        );
+    }
+
+    async getUser(id: string): Promise<Record<string, unknown>> {
+        return this.getJson<Record<string, unknown>>(`/users/${id}`, 'admin');
+    }
+
+    async createDisposableUser(options?: {
+        roles?: string[];
+        businessName?: string;
+        email?: string;
+        username?: string;
+        password?: string;
+    }): Promise<Record<string, unknown>> {
+        const suffix = uniqueSuffix();
+        const roleNames = options?.roles?.length ? options.roles : ['auditor'];
+        const roles = await Promise.all(roleNames.map((roleName) => this.getRoleId(roleName)));
+        const payload = {
+            username: options?.username || `e2e-user-${suffix}`,
+            email: options?.email || `e2e-user-${suffix}@e2e.local`,
+            businessName: options?.businessName || `Usuario E2E ${suffix}`,
+            password: options?.password || 'E2e!Passw0rd',
+            roles,
+        };
+
+        const user = await this.postJson<Record<string, unknown>>('/users', payload, 'admin');
+        const id = String(user._id || user.id || '');
+        if (id) {
+            this.track(`user ${id}`, async () => this.delete(`/users/${id}`, 'admin'));
+        }
+        return user;
+    }
+
+    async updateUser(id: string, payload: Record<string, unknown>): Promise<Record<string, unknown>> {
+        await this.loginAs('admin');
+        const response = await this.request.patch(`${apiURL}/users/${id}`, {
+            headers: this.headers('admin'),
+            data: payload
+        });
+        await this.assertOk(response, `admin PATCH /users/${id}`);
+        return unwrapApiResponse<Record<string, unknown>>(await response.json());
+    }
+
+    async deleteUser(id: string): Promise<void> {
+        await this.delete(`/users/${id}`, 'admin');
     }
 
     async getPatientByDni(dni: string): Promise<Record<string, unknown>[]> {
@@ -295,6 +364,30 @@ export class ApiClient {
         await this.delete(`/certificates/${id}`, 'professional');
     }
 
+    async annulCertificate(id: string, reason = 'Anulación E2E'): Promise<void> {
+        await this.patch(`/certificates/${id}`, {
+            status: 'anulado',
+            anulateReason: reason,
+            anulateDate: new Date().toISOString(),
+        }, 'professional');
+    }
+
+    async createDisposableCertificate(overrides: Record<string, unknown> = {}): Promise<Record<string, unknown>> {
+        await this.loginAs('professional');
+        const patient = await this.getPatientSnapshot();
+        return this.createCertificate({
+            patient,
+            professional: {
+                userId: this.getUserIdFromToken('professional'),
+                businessName: this.getBusinessNameFromToken('professional'),
+            },
+            certificate: uniqueLabel('Certificado E2E'),
+            startDate: new Date().toISOString(),
+            cantDias: 2,
+            ...overrides,
+        });
+    }
+
     async listPractices(): Promise<Record<string, unknown>[]> {
         await this.loginAs('professional');
         const userId = this.getUserIdFromToken('professional');
@@ -325,6 +418,27 @@ export class ApiClient {
 
     async deletePractice(id: string): Promise<void> {
         await this.delete(`/practices/${id}`, 'professional');
+    }
+
+    async updatePractice(id: string, payload: Record<string, unknown>): Promise<void> {
+        await this.patch(`/practices/${id}`, payload, 'professional');
+    }
+
+    async createDisposablePractice(overrides: Record<string, unknown> = {}): Promise<Record<string, unknown>> {
+        await this.loginAs('professional');
+        const patient = await this.getPatientSnapshot();
+        return this.createPractice({
+            patient,
+            professional: {
+                userId: this.getUserIdFromToken('professional'),
+                businessName: this.getBusinessNameFromToken('professional'),
+            },
+            date: new Date().toISOString(),
+            practice: uniqueLabel('Práctica E2E'),
+            diagnostic: testData.diagnostic,
+            indications: testData.indication,
+            ...overrides,
+        });
     }
 
     async getDispensedByCuil(cuil: string): Promise<{ prescriptions: PrescriptionRecord[]; total: number }> {

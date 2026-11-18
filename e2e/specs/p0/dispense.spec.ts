@@ -24,7 +24,7 @@ test.describe('Dispensación', () => {
 
         await dispense.dispenseFromItem(medication);
         await dispense.expectToast('Dispensa realizada correctamente');
-        await expect(page.locator('app-dispense-item').filter({ hasText: medication }).getByRole('button', { name: 'Deshacer' })).toBeVisible();
+        await expect(page.locator('app-dispense-item').filter({ hasText: medication }).getByRole('button', { name: 'Deshacer', exact: true })).toBeVisible();
 
         await dispense.undoFromItem(medication);
         await dispense.expectToast('Dispensa deshecha correctamente');

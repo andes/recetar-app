@@ -64,7 +64,7 @@ test.describe('Medicamento magistral', () => {
     test.use({ storageState: statePath('professional') });
     test.skip(!hasCredentials('professional'), 'Falta configurar usuario profesional');
 
-    test('en organización privada permite carga manual @MED-010', async ({ page }) => {
+    test('en organización privada permite carga manual @MED-010 @env:org', async ({ page }) => {
         test.skip(!testData.organizationPrivateName, 'Definir E2E_ORG_PRIVATE_NAME');
 
         const prescription = new NewPrescriptionPage(page);
@@ -81,7 +81,7 @@ test.describe('Medicamento magistral', () => {
         await prescription.expectDraftContains('Magistral manual E2E');
     });
 
-    test('en organización pública busca magistrales en ANDES @MED-011', async ({ page }) => {
+    test('en organización pública busca magistrales en ANDES @MED-011 @env:org', async ({ page }) => {
         test.skip(!testData.organizationPublicName, 'Definir E2E_ORG_PUBLIC_NAME');
 
         const prescription = new NewPrescriptionPage(page);

@@ -108,7 +108,7 @@ test.describe('PIN de seguridad', () => {
     test.use({ storageState: statePath('pin') });
     test.skip(process.env.E2E_PIN_REQUIRED !== '1', 'Definir E2E_PIN_REQUIRED=1 y un usuario con PIN activo');
 
-    test('PIN incorrecto reabre el diálogo con error @REC-020', async ({ page }) => {
+    test('PIN incorrecto reabre el diálogo con error @REC-020 @env:pin', async ({ page }) => {
         const prescription = new NewPrescriptionPage(page);
         await prescription.goto();
         await prescription.selectPatientByDni(testData.patient.dni);

@@ -12,9 +12,9 @@ import { expectSnackbar } from '../../../support/ui';
 test.describe('RENAPER dentro de Nueva prescripción', () => {
     test.use({ storageState: statePath('professional') });
     test.skip(!hasCredentials('professional'), 'Falta configurar usuario profesional');
-    test.skip(!renaperEnabled, 'Definir E2E_RENAPER_ENABLED=1 para ejecutar RENAPER');
 
-    test('valida una persona existente en RENAPER @PAC-010 @renaper', async ({ page }) => {
+    test('valida una persona existente en RENAPER @PAC-010 @env:renaper', async ({ page }) => {
+        test.skip(!renaperEnabled, 'Definir E2E_RENAPER_ENABLED=1 para ejecutar RENAPER');
         const prescription = new NewPrescriptionPage(page);
         const form = new PatientFormPage(page);
 
@@ -30,7 +30,7 @@ test.describe('RENAPER dentro de Nueva prescripción', () => {
         await form.cancel();
     });
 
-    test('valida sin DNI ni sexo muestra aviso @PAC-011 @renaper', async ({ page }) => {
+    test('valida sin DNI ni sexo muestra aviso @PAC-011', async ({ page }) => {
         const prescription = new NewPrescriptionPage(page);
         const form = new PatientFormPage(page);
 
@@ -42,7 +42,7 @@ test.describe('RENAPER dentro de Nueva prescripción', () => {
         await form.cancel();
     });
 
-    test('RENAPER no encuentra a la persona @PAC-012 @renaper', async ({ page }) => {
+    test('RENAPER no encuentra a la persona @PAC-012', async ({ page }) => {
         await page.route('**/api/patients/validate', async (route) => {
             await route.fulfill({
                 status: 422,
