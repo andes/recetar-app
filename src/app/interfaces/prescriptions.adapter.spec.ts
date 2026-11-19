@@ -41,11 +41,11 @@ describe('PrescriptionsAdapter', () => {
         expect(result.status).toBe('Pendiente');
     });
 
-    it('no expone campos de integración (Praxis) en el modelo de app', () => {
+    it('no expone campos de integración (Praxys) en el modelo de app', () => {
         const result = adapter.adapt({
             ...baseRecord,
-            syncExterno: { praxis: { estado: 'ok', intentos: 0 } },
-            identificadoresExternos: [{ entidad: 'praxis', valor: 'PRAX-1' }],
+            syncExterno: { praxys: { estado: 'ok', intentos: 0 } },
+            identificadoresExternos: [{ entidad: 'praxys', valor: 'PRAX-1' }],
         }) as unknown as Record<string, unknown>;
 
         expect(result['syncExterno']).toBeUndefined();

@@ -2,7 +2,7 @@
 
 ## 1. Adapter y contrato
 
-- [x] 1.1 Adaptar `Prescriptions`/`PrescriptionsAdapter` al nuevo contrato (incluye `estadoPublicacion`) sin exponer campos de Praxis
+- [x] 1.1 Adaptar `Prescriptions`/`PrescriptionsAdapter` al nuevo contrato (incluye `estadoPublicacion`) sin exponer campos de Praxys
 - [x] 1.2 Tolerar tanto documentos por insumo como recetas legacy con múltiples `supplies`
 
 ## 2. Emisión

@@ -12,14 +12,14 @@
 
 **Goals:**
 
-- Mantener a Praxis invisible: la app solo usa `estadoPublicacion`.
+- Mantener a Praxys invisible: la app solo usa `estadoPublicacion`.
 - Adaptar listado/detalle al modelo por insumo/mes y a los estados vigentes.
 - Avisar y bloquear la dispensa privada de recetas no publicadas.
 - Aplicar las reglas de ámbito (magistral / sin DNI).
 
 **Non-Goals:**
 
-- Consumir el PDF de Praxis ni reformatear PDFs (follow-up).
+- Consumir el PDF de Praxys ni reformatear PDFs (follow-up).
 - Modelar `tipoPrescripcion = G`.
 
 ## Decisions
@@ -34,7 +34,7 @@
 
 - [Modelo por insumo cambia la cantidad de ítems] → agrupar por tratamiento y por insumo para no confundir.
 - [Recetas antiguas con múltiples `supplies`] → el adapter tolera ambos shapes.
-- [La impresión local no coincide con Praxis] → follow-up de formato.
+- [La impresión local no coincide con Praxys] → follow-up de formato.
 
 ## Open Questions
 

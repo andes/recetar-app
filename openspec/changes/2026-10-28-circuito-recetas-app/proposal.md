@@ -2,7 +2,7 @@
 
 ## Why
 
-La API pasó a ser la fuente de recetas con un nuevo modelo (un documento por insumo y por mes en tratamiento prolongado, estados ampliados) e integra la prescripción electrónica de forma interna. La app debe adaptarse a ese contrato y modelo, reflejar la suspensión/anulación de recetas y **avisar** cuando una receta no se publicó electrónicamente, además de aplicar las reglas de ámbito (magistrales y pacientes sin DNI solo en público). Praxis no se conoce en la app: la API expone un estado neutral `estadoPublicacion`.
+La API pasó a ser la fuente de recetas con un nuevo modelo (un documento por insumo y por mes en tratamiento prolongado, estados ampliados) e integra la prescripción electrónica de forma interna. La app debe adaptarse a ese contrato y modelo, reflejar la suspensión/anulación de recetas y **avisar** cuando una receta no se publicó electrónicamente, además de aplicar las reglas de ámbito (magistrales y pacientes sin DNI solo en público). Praxys no se conoce en la app: la API expone un estado neutral `estadoPublicacion`.
 
 ## What Changes
 
@@ -28,5 +28,5 @@ La API pasó a ser la fuente de recetas con un nuevo modelo (un documento por in
 ## Impact
 
 - **recetar-app**: `interfaces/prescriptions.ts`, `shared/utils/publication.util.ts`, `features/documents`, `features/prescription/create`, `features/pharmacists`.
-- **recetar-api**: endpoints neutrales y `estadoPublicacion` (change `2026-10-28-anulacion-pdf-praxis`).
+- **recetar-api**: endpoints neutrales y `estadoPublicacion` (change `2026-10-28-anulacion-pdf-praxys`).
 - Superficies de lista afectadas por el modelo por insumo/mes: `documents`, `dispensing`, listado legacy de profesionales y auditoría.
