@@ -151,6 +151,18 @@ export async function runPreflight(request: APIRequestContext): Promise<void> {
         `[E2E] Tests env-gated: renaper=${gates.renaper}, pin=${gates.pin}, org=${gates.org}\n`,
     );
 
+    const servicesDown = rows
+        .filter((row) => (row.item === 'App' || row.item === 'API') && row.status === 'FALTA')
+        .map((row) => row.item);
+
+    if (servicesDown.length) {
+        throw new Error(
+            `[E2E] App/API no disponibles (${servicesDown.join(', ')}). ` +
+            'Levantá la app con `npx ng serve` y la API en 4000, o usá E2E_START_APP=1. ' +
+            'Sin servicios la suite no puede ejecutarse.',
+        );
+    }
+
     if (process.env.E2E_STRICT_ENV === '1' && failures.length) {
         throw new Error(`[E2E] Preflight estricto falló: ${failures.join('; ')}`);
     }

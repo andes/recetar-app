@@ -81,7 +81,7 @@ El preflight imprime qué falta y cuántos tests quedan salteados:
 - **PIN:** 1 test (`REC-020`), requiere `E2E_USER_PIN`/`E2E_PASS_PIN` y `E2E_PIN_REQUIRED=1`.
 - **Organizaciones:** 2 tests (`MED-010`, `MED-011`), requieren una organización privada y una pública asociadas al profesional.
 
-Con `E2E_STRICT_ENV=1` el preflight falla si falta un rol base (professional/pharmacist/auditor/admin) o si la app/API no responden. RENAPER, PIN y organizaciones siguen siendo opcionales y visibles.
+Si la app o la API no responden, el preflight **falla siempre** y la suite no se ejecuta. Con `E2E_STRICT_ENV=1` además falla si falta un rol base (professional/pharmacist/auditor/admin). RENAPER, PIN y organizaciones siguen siendo opcionales y visibles.
 
 ## Datos y limpieza
 

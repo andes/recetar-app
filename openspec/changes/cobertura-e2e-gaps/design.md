@@ -70,7 +70,8 @@ Se agrega un project `mobile-chrome` con `devices['Pixel 7']` y `grep: /@mobile/
 
 - Los tests dependientes de ambiente se etiquetan: `@env:renaper`, `@env:pin`, `@env:org`.
 - Se agrega un preflight (`e2e/support/preflight.ts` o script) que valida roles, servicios y flags, e imprime una tabla de faltantes, incluyendo cuántos tests quedan `env-gated`.
-- `E2E_STRICT_ENV=1` hace fallar el preflight si falta configuración requerida (roles base y servicios); los externos opcionales siguen siendo skip visible.
+- Los servicios base (app y API) son siempre bloqueantes: si no responden, el preflight falla aunque `E2E_STRICT_ENV` no esté en `1`.
+- `E2E_STRICT_ENV=1` además hace fallar el preflight si falta un rol base; los externos opcionales siguen siendo skip visible.
 - El reporte final lista los tests skipped con su motivo.
 
 **RENAPER sin infraestructura nueva:** sólo `PAT-012` y `PAC-010` dependen del servicio real. `PAT-013` y `PAC-012` ya mockean `/api/patients/validate` con `page.route`, y `PAC-011` valida el aviso local de DNI/sexo faltante. Esos tres se destapan y corren siempre; quedan **2 RENAPER reales** como `@env:renaper`. PIN y organizaciones siguen `env-gated` porque requieren datos que hoy no están garantizados.
