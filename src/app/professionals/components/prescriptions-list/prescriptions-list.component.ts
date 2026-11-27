@@ -21,6 +21,7 @@ import { PrescriptionsService } from '@services/prescriptions.service';
 import { formatTipoInsumo } from '@services/stock.service';
 import { UnifiedPrinterComponent } from '@shared/components/unified-printer/unified-printer.component';
 import { PatientNamePipe } from '@shared/pipes/patient-name.pipe';
+import { getPrescriptionStatus } from '@shared/utils/prescription-status';
 import { forkJoin, of, Subject } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
 
@@ -387,39 +388,7 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     }
 
     getPrescriptionStatus(item: MixedPrescription): string {
-        if (!item) return '';
-        if (this.isAndesPrescription(item)) {
-            // Manejar tanto formato viejo de Andes como nuevo (status a nivel raiz)
-            const currentStatus = item.estadoActual?.tipo || (item as any).status;
-            return this.normalizeStatus(currentStatus);
-        } else {
-            return this.normalizeStatus(item.status);
-        }
-    }
-
-    // Método para normalizar los estados y mostrarlos en mayúsculas con equivalencias de Andes
-    private normalizeStatus(status: string): string {
-        if (!status) {
-            return '';
-        }
-
-        const statusLower = status.toLowerCase();
-
-        // Mapeo de estados: Todo se normaliza a la nomenclatura de Andes en mayúsculas
-        const statusMap: { [key: string]: string } = {
-            // Estados de Andes (ya normalizados)
-            'vigente': 'VIGENTE',
-            'finalizada': 'FINALIZADA',
-            'vencida': 'VENCIDA',
-            'suspendida': 'SUSPENDIDA',
-            'rechazada': 'RECHAZADA',
-
-            // Estados locales mapear a equivalentes de Andes
-            'pendiente': 'VIGENTE',
-            'dispensada': 'FINALIZADA'
-        };
-
-        return statusMap[statusLower] || status.toUpperCase();
+        return getPrescriptionStatus(item);
     }
 
     getPrescriptionId(item: MixedPrescription): string {
@@ -457,10 +426,9 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
         if (!prescription) return false;
         if (this.isAndesPrescription(prescription)) {
             // Las prescripciones de ANDES se pueden imprimir si no están vencidas
-            const status = prescription.estadoActual?.tipo || (prescription as any).status;
-            return !['VENCIDA', 'SUSPENDIDA', 'FINALIZADA'].includes(this.normalizeStatus(status));
+            return !['VENCIDA', 'SUSPENDIDA', 'DISPENSADA'].includes(getPrescriptionStatus(prescription));
         } else {
-            return (prescription.professional.userId === this.authService.getLoggedUserId()) && this.normalizeStatus(prescription.status) !== 'VENCIDA' && this.normalizeStatus(prescription.status) !== 'SUSPENDIDA';
+            return (prescription.professional.userId === this.authService.getLoggedUserId()) && getPrescriptionStatus(prescription) !== 'VENCIDA' && getPrescriptionStatus(prescription) !== 'SUSPENDIDA';
         }
     }
     canDelete(prescription: MixedPrescription): boolean {
@@ -468,13 +436,13 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
             // Las prescripciones de ANDES se pueden suspender si están vigentes y el profesional es el autor
             return this.canSuspendAndesPrescription(prescription);
         } else {
-            return (prescription.professional.userId === this.authService.getLoggedUserId() && this.normalizeStatus(prescription.status) === 'VIGENTE');
+            return (prescription.professional.userId === this.authService.getLoggedUserId() && getPrescriptionStatus(prescription) === 'VIGENTE');
         }
     }
 
     canSuspendAndesPrescription(prescription: AndesPrescriptions): boolean {
         // Solo verificar si el estado actual es vigente
-        const isVigente = this.normalizeStatus(prescription.estadoActual?.tipo) === 'VIGENTE';
+        const isVigente = getPrescriptionStatus(prescription) === 'VIGENTE';
 
         return isVigente;
     }
@@ -603,27 +571,6 @@ export class PrescriptionsListComponent implements OnInit, AfterContentInit, OnD
     ngOnDestroy() {
         this.destroy$.next();
         this.destroy$.complete();
-    }
-
-    getStatus(prescription: Prescriptions): string {
-        if (!prescription) {
-            return '';
-        }
-
-        const status = (prescription.status || '').toLowerCase();
-
-        switch (status) {
-            case 'pendiente':
-                return 'Vigente';
-            case 'finalizada':
-                return 'Dispensada';
-            default:
-                if (prescription.dispensedBy || prescription.dispensedAt) {
-                    return 'Dispensada';
-                }
-
-                return prescription.status || '';
-        }
     }
 
     getStatusColor(prescription: MixedPrescription): string {
